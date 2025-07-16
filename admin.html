@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>きゃたん管理者ページ</title>
+  <title>きゃたん 管理者ページ</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -50,27 +50,26 @@
   <p id="status"></p>
 
   <script>
-    // ページ読み込み時に保存済みを読み込み
     window.onload = () => {
-      const savedCode = localStorage.getItem("kyatan_participant_code") || "";
-      const savedUrl = localStorage.getItem("kyatan_stream_url") || "";
-      document.getElementById("participantCode").value = savedCode;
-      document.getElementById("streamUrl").value = savedUrl;
+      document.getElementById("participantCode").value =
+        localStorage.getItem("cattan_participant_code") || "";
+      document.getElementById("streamUrl").value =
+        localStorage.getItem("cattan_stream_url") || "";
     };
 
     function saveData() {
-      const participantCode = document.getElementById("participantCode").value.trim();
-      const streamUrl = document.getElementById("streamUrl").value.trim();
+      const code = document.getElementById("participantCode").value.trim();
+      const url = document.getElementById("streamUrl").value.trim();
 
-      if (!participantCode || !streamUrl) {
+      if (!code || !url) {
         document.getElementById("status").textContent = "両方入力してください。";
         return;
       }
 
-      localStorage.setItem("kyatan_participant_code", participantCode);
-      localStorage.setItem("kyatan_stream_url", streamUrl);
+      localStorage.setItem("cattan_participant_code", code);
+      localStorage.setItem("cattan_stream_url", url);
 
-      document.getElementById("status").textContent = "保存しました！index.html に反映されます。";
+      document.getElementById("status").textContent = "保存しました！";
     }
   </script>
 </body>

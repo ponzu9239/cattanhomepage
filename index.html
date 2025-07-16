@@ -11,30 +11,25 @@
       background: #e6f9fd;
       color: #333;
     }
-
     header {
       background-color: #97EADB;
       padding: 1rem;
       text-align: center;
     }
-
     header h1 {
       margin: 0;
       font-size: 2rem;
       color: #fff;
     }
-
     nav {
       margin-top: 0.5rem;
     }
-
     nav a {
       margin: 0 1rem;
       text-decoration: none;
       color: #fff;
       font-weight: bold;
     }
-
     .hero {
       background: url('https://placekitten.com/1200/400') center/cover no-repeat;
       height: 300px;
@@ -44,32 +39,22 @@
       color: white;
       text-shadow: 1px 1px 4px #444;
     }
-
     .hero h2 {
       font-size: 2rem;
       background: rgba(0,0,0,0.4);
       padding: 0.5rem 1rem;
       border-radius: 1rem;
     }
-
     section {
       padding: 2rem;
       max-width: 800px;
       margin: auto;
     }
-
     section h3 {
       color: #5aa2aa;
       border-bottom: 2px solid #97EADB;
       padding-bottom: 0.3rem;
     }
-
-    .video iframe {
-      width: 100%;
-      height: 315px;
-      border-radius: 1rem;
-    }
-
     .sns a {
       display: inline-block;
       margin: 0.5rem;
@@ -80,7 +65,6 @@
       border-radius: 999px;
       color: white;
     }
-
     footer {
       background: #97EADB;
       text-align: center;
@@ -88,24 +72,20 @@
       padding: 1rem;
       margin-top: 2rem;
     }
+    iframe {
+      width: 100%;
+      height: 315px;
+      border-radius: 1rem;
+      border: none;
+    }
   </style>
 </head>
-
-<script>
-  const code = localStorage.getItem("cattan_participant_code");
-  if (code) {
-    document.getElementById("participantCodeDisplay").textContent = code;
-  } else {
-    document.getElementById("participantCodeDisplay").textContent = "まだコードが設定されていません。";
-  }
-</script>
-
 <body>
   <header>
     <h1>ド天然のきゃたん</h1>
     <nav>
       <a href="#profile">プロフィール</a>
-      <a href="#video">最新動画</a>
+      <a href="#code">参加型</a>
       <a href="#rules">参加方法</a>
       <a href="#sns">SNS</a>
     </nav>
@@ -117,20 +97,18 @@
 
   <section id="profile">
     <h3>🐱 プロフィール(仮)</h3>
-    <p>猫botです。(ストリーマー)APEXカスタムのオーガナイザー🐾参加型を中心にYouTubeで配信中│最高同時視聴915人│配信総視聴者数80万人OVER|TOP配信者になる│game￤│APEX│Minecraft│原神│プロセカ│第五人格│雀魂│PUBG│フォールガイズ│スマブラ│ディスコサーバー開設🐾</p>
+    <p>猫botです。(ストリーマー)APEXカスタムのオーガナイザー🐾参加型を中心にYouTubeで配信中│最高同時視聴915人│配信総視聴者数80万人OVER│TOP配信者になる│game￤│APEX│Minecraft│原神│プロセカ│第五人格│雀魂│PUBG│フォールガイズ│スマブラ│ディスコサーバー開設🐾</p>
   </section>
 
-<section id="code">
-  <h3>🆔 参加型コード</h3>
-  <p id="participantCodeDisplay">読み込み中...</p>
-</section>
+  <section id="code">
+    <h3>🆔 参加型コード</h3>
+    <p id="participantCodeDisplay">読み込み中...</p>
+  </section>
 
-<section id="liveVideo" style="max-width: 800px; margin: auto;">
-  <h3>🔴 配信中の動画</h3>
-  <div id="videoContainer">
-    読み込み中...
-  </div>
-</section>
+  <section id="liveVideo">
+    <h3>🔴 配信中の動画</h3>
+    <div id="videoContainer">読み込み中...</div>
+  </section>
 
   <section id="rules">
     <h3>🎮 参加型配信のルール</h3>
@@ -154,5 +132,28 @@
   <footer>
     <p>ド天然のきゃたん</p>
   </footer>
+
+  <script>
+    // 参加型コードを表示
+    const code = localStorage.getItem("cattan_participant_code");
+    const codeDisplay = document.getElementById("participantCodeDisplay");
+    codeDisplay.textContent = code || "まだコードが設定されていません。";
+
+    // 配信中のURLから動画IDを抽出して表示
+    const url = localStorage.getItem("cattan_stream_url");
+    const container = document.getElementById("videoContainer");
+
+    if (url && url.includes("youtube.com")) {
+      const match = url.match(/(?:\/live\/|v=)([a-zA-Z0-9_-]{11})/);
+      const videoId = match ? match[1] : null;
+      if (videoId) {
+        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allowfullscreen allow="autoplay"></iframe>`;
+      } else {
+        container.textContent = "URLから動画IDを取得できませんでした。";
+      }
+    } else {
+      container.textContent = "配信URLが設定されていません。";
+    }
+  </script>
 </body>
 </html>
