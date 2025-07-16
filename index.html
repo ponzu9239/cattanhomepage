@@ -79,7 +79,6 @@
       border: none;
     }
   </style>
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
@@ -144,15 +143,13 @@
       authDomain: "catiffanygame.firebaseapp.com",
       databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
       projectId: "catiffanygame",
-      storageBucket: "catiffanygame.firebasestorage.app",
+      storageBucket: "catiffanygame.appspot.com",
       messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // データ取得
     db.ref("/cattan").on("value", (snapshot) => {
       const data = snapshot.val() || {};
       const code = data.code || "現在、参加型カスタムは行われておりません。";
@@ -167,7 +164,7 @@
         if (videoId) {
           container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allowfullscreen allow="autoplay"></iframe>`;
         } else {
-          container.textContent = "現在、配信は行われていません。";
+          container.textContent = "URLから動画IDを取得できませんでした。";
         }
       } else {
         container.textContent = "現在、配信は行われていません。";
