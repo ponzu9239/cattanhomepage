@@ -137,7 +137,7 @@
 
   <section id="winners">
     <h3>🎁 本日の当選者</h3>
-    <div id="rouletteWinners">読み込み中...</div>
+    <div id="rouletteWinners">まだ抽選が行われていません。</div>
   </section>
 
   <section id="sns" class="sns">
@@ -188,7 +188,7 @@
 
     db.ref("/roulette/winner").limitToLast(1).on("child_added", (snapshot) => {
       const name = snapshot.val();
-      document.getElementById("rouletteWinners").textContent = `🎉 ${name}`;
+      document.getElementById("rouletteWinners").textContent = name ? `🎉 ${name}` : "まだ抽選が行われていません。";
     });
   </script>
 </body>
