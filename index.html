@@ -90,6 +90,16 @@
     }
   </style>
 </head>
+
+<script>
+  const code = localStorage.getItem("cattan_participant_code");
+  if (code) {
+    document.getElementById("participantCodeDisplay").textContent = code;
+  } else {
+    document.getElementById("participantCodeDisplay").textContent = "まだコードが設定されていません。";
+  }
+</script>
+
 <body>
   <header>
     <h1>ド天然のきゃたん</h1>
@@ -110,9 +120,9 @@
     <p>猫botです。(ストリーマー)APEXカスタムのオーガナイザー🐾参加型を中心にYouTubeで配信中│最高同時視聴915人│配信総視聴者数80万人OVER|TOP配信者になる│game￤│APEX│Minecraft│原神│プロセカ│第五人格│雀魂│PUBG│フォールガイズ│スマブラ│ディスコサーバー開設🐾</p>
   </section>
 
-  <section id="video" class="video">
-    <h3>▶ 最新の動画</h3>
-    <iframe src="https://www.youtube.com/embed/動画IDをここに" frameborder="0" allowfullscreen></iframe>
+  <section id="code">
+    <h3>🆔 参加型コード</h3>
+    <p id="participantCodeDisplay">読み込み中...</p>
   </section>
 
   <section id="rules">
@@ -135,7 +145,7 @@
   </section>
 
   <footer>
-    <p>© 2025 ど天然のきゃたん</p>
+    <p>ド天然のきゃたん</p>
   </footer>
 </body>
 </html>
