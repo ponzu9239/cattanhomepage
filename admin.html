@@ -54,8 +54,8 @@
 
   <section id="rouletteAdmin">
     <h2>🎰 ルーレット管理</h2>
-    <label for="participantsInput">参加者一覧（カンマ区切り）:</label>
-    <textarea id="participantsInput" rows="3" placeholder="例：Aさん,Bさん,Cさん"></textarea>
+    <label for="participantsInput">参加者一覧（1行に1人ずつ）:</label>
+    <textarea id="participantsInput" rows="5" placeholder="例：\nAさん\nBさん\nCさん"></textarea>
 
     <button onclick="saveParticipants()">参加者を保存</button>
     <button onclick="spinRoulette()">ルーレットを回す</button>
@@ -109,7 +109,7 @@
         return;
       }
 
-      const names = input.split(",").map(name => name.trim()).filter(name => name);
+      const names = input.split("\n").map(name => name.trim()).filter(name => name);
       const updates = {};
       names.forEach((name, index) => {
         updates[index] = name;
