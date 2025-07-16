@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>きゃたん 管理者ページ</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #fffafc;
+      background: #fff9f9;
       padding: 2rem;
-      max-width: 400px;
+      max-width: 600px;
       margin: auto;
       color: #333;
     }
@@ -17,22 +19,22 @@
       text-align: center;
       color: #97EADB;
     }
-    label, input, button {
+    label, input, button, textarea {
       display: block;
-      margin: 1rem 0;
       width: 100%;
+      margin: 1rem 0;
       font-size: 1rem;
     }
-    input {
-      padding: 0.5rem;
-      border: 1px solid #ccc;
+    input, textarea {
+      padding: 0.6rem;
       border-radius: 0.5rem;
+      border: 2px solid #97EADB;
     }
     button {
       background-color: #97EADB;
       color: white;
       border: none;
-      padding: 0.5rem;
+      padding: 0.6rem;
       border-radius: 0.5rem;
       cursor: pointer;
     }
@@ -41,25 +43,26 @@
     }
     #status {
       text-align: center;
-      font-weight: bold;
       margin-top: 1rem;
-      color: #5aa2aa;
     }
   </style>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <h1>きゃたん 管理者ページ</h1>
 
   <label for="participantCode">参加型コード：</label>
-  <input type="text" id="participantCode" placeholder="c1234abc" />
+  <input type="text" id="participantCode" placeholder="コードを入力してください">
 
   <label for="streamUrl">配信中のURL：</label>
-  <input type="text" id="streamUrl" placeholder="例：https://www.youtube.com/live/..." />
+  <input type="text" id="streamUrl" placeholder="https://www.youtube.com/live/...">
 
-  <button onclick="saveData()">保存</button>
+  <button onclick="saveMainData()">保存</button>
+
+  <h2>🎯 ルーレット参加者</h2>
+  <label for="participantsInput">1行に1人ずつ名前を入力してください：</label>
+  <textarea id="participantsInput" placeholder="ぽんず\nたろう\nみけ"></textarea>
+  <button onclick="saveParticipants()">保存する</button>
+  <button onclick="resetParticipants()" style="background:#f66; margin-left: 0;">全リセット</button>
 
   <p id="status"></p>
 
@@ -69,44 +72,54 @@
       authDomain: "catiffanygame.firebaseapp.com",
       databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
       projectId: "catiffanygame",
-      storageBucket: "catiffanygame.firebasestorage.app",
+      storageBucket: "catiffanygame.appspot.com",
       messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 保存ボタンの処理
-    function saveData() {
-      const code = document.getElementById("participantCode").value.trim();
-      const stream = document.getElementById("streamUrl").value.trim();
-
-      const updates = {
-        code: code || "現在、参加型カスタムは行われておりません。",
-        stream: stream || ""
-      };
-
-      db.ref("/cattan").set(updates, (error) => {
-        const status = document.getElementById("status");
-        if (error) {
-          status.textContent = "保存に失敗しました。";
-          status.style.color = "red";
-        } else {
-          status.textContent = "保存しました！";
-          status.style.color = "#5aa2aa";
-        }
-      });
-    }
-
-    // 初期読み込み（編集のため）
+    // 初期読み込み
     window.onload = () => {
-      db.ref("/cattan").once("value").then((snapshot) => {
+      db.ref("/cattan").once("value").then(snapshot => {
         const data = snapshot.val() || {};
         document.getElementById("participantCode").value = data.code || "";
         document.getElementById("streamUrl").value = data.stream || "";
       });
     };
+
+    function saveMainData() {
+      const code = document.getElementById("participantCode").value.trim();
+      const url = document.getElementById("streamUrl").value.trim();
+
+      db.ref("/cattan").set({
+        code: code || "現在、参加型カスタムは行われておりません。",
+        stream: url || ""
+      }, () => {
+        document.getElementById("status").textContent = "メイン情報を保存しました✅";
+      });
+    }
+
+    function saveParticipants() {
+      const rawText = document.getElementById("participantsInput").value.trim();
+      const names = rawText.split("\n").map(name => name.trim()).filter(name => name);
+      const updates = {};
+      names.forEach((name, index) => {
+        updates[`/roulette/participants/${index}`] = name;
+      });
+      db.ref("/roulette/participants").remove().then(() => {
+        db.ref().update(updates, () => {
+          document.getElementById("status").textContent = "ルーレット参加者を保存しました✅";
+        });
+      });
+    }
+
+    function resetParticipants() {
+      db.ref("/roulette/participants").remove(() => {
+        document.getElementById("participantsInput").value = "";
+        document.getElementById("status").textContent = "ルーレット参加者を削除しました❌";
+      });
+    }
   </script>
 </body>
 </html>
