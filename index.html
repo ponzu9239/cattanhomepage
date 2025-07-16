@@ -78,19 +78,6 @@
       border-radius: 1rem;
       border: none;
     }
-    #rouletteContainer {
-      text-align: center;
-      margin-top: 2rem;
-    }
-    #rouletteList {
-      margin: 1rem 0;
-    }
-    #winnerDisplay {
-      margin-top: 1rem;
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: #d33;
-    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -180,15 +167,6 @@
         }
       } else {
         container.textContent = "現在、配信は行われていません。";
-      }
-    });
-
-    db.ref("/roulette/participants").on("value", (snapshot) => {
-      const list = snapshot.val() || {};
-      const container = document.getElementById("rouletteList");
-      if (container) {
-        const names = Object.values(list);
-        container.innerHTML = names.length ? `参加者：${names.join(" / ")}` : "現在、参加者はいません。";
       }
     });
   </script>
