@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>きゃたん管理者ページ</title>
   <style>
     body {
@@ -13,15 +13,19 @@
       margin: auto;
       color: #333;
     }
-    h1, h2 {
+    h1 {
       text-align: center;
       color: #97EADB;
     }
-    label, input, button {
+    label, input, textarea, button {
       display: block;
       margin: 1rem 0;
       width: 100%;
       font-size: 1rem;
+    }
+    textarea {
+      height: 100px;
+      resize: vertical;
     }
     button {
       background-color: #97EADB;
@@ -36,9 +40,9 @@
     }
     #winnerDisplay {
       margin-top: 1rem;
-      text-align: center;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: bold;
+      text-align: center;
       color: #d33;
     }
   </style>
@@ -54,15 +58,16 @@
   <label for="streamUrl">配信中のURL：</label>
   <input type="text" id="streamUrl" placeholder="https://www.youtube.com/live/..." />
 
-  <button onclick="saveData()">保存</button>
-  <p id="status"></p>
+  <label for="participants">ルーレット対象者（改行で複数）：</label>
+  <textarea id="participants" placeholder="例：\nユーザー1\nユーザー2\nユーザー3"></textarea>
 
-  <h2>🎯 リポスト抽選</h2>
+  <button onclick="saveData()">保存</button>
   <button onclick="spinRoulette()">ルーレットを回す</button>
-  <p id="winnerDisplay">抽選待ち...</p>
+
+  <p id="status"></p>
+  <div id="winnerDisplay"></div>
 
   <script>
-    // Firebase設定
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
       authDomain: "catiffanygame.firebaseapp.com",
@@ -72,52 +77,46 @@
       messagingSenderId: "166871605809",
       appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 保存済みを読み込み
+    // 初期読み込み
     window.onload = () => {
-      const ref = db.ref("/cattan");
-      ref.once("value").then((snapshot) => {
+      db.ref("/cattan").once("value").then((snapshot) => {
         const data = snapshot.val() || {};
         document.getElementById("participantCode").value = data.code || "";
         document.getElementById("streamUrl").value = data.stream || "";
       });
+
+      db.ref("/roulette/participants").once("value").then(snapshot => {
+        const list = snapshot.val() || {};
+        const text = Object.values(list).join("\n");
+        document.getElementById("participants").value = text;
+      });
     };
 
-    // データ保存
     function saveData() {
       const code = document.getElementById("participantCode").value.trim();
       const stream = document.getElementById("streamUrl").value.trim();
+      const participants = document.getElementById("participants").value.trim().split("\n").filter(x => x);
 
-      db.ref("/cattan").set({
-        code: code || "現在、参加型カスタムは行われておりません。",
-        stream: stream || ""
-      });
+      db.ref("/cattan").set({ code, stream });
+      db.ref("/roulette/participants").set(participants.map(name => name));
 
       document.getElementById("status").textContent = "保存しました！";
+      document.getElementById("winnerDisplay").textContent = "";
     }
 
-    // ルーレット実行
     function spinRoulette() {
-      db.ref("/roulette/participants").once("value").then((snapshot) => {
-        const participants = Object.values(snapshot.val() || {});
-        if (participants.length === 0) {
+      db.ref("/roulette/participants").once("value").then(snapshot => {
+        const list = Object.values(snapshot.val() || {});
+        if (list.length === 0) {
           document.getElementById("winnerDisplay").textContent = "参加者がいません。";
           return;
         }
-
-        const winner = participants[Math.floor(Math.random() * participants.length)];
-        document.getElementById("winnerDisplay").textContent = `🎉 当選者: ${winner} 🎉`;
-
-        // 結果を保存
-        const time = new Date();
-        const timestamp = time.toISOString();
-        db.ref(`/roulette/results/${timestamp}`).set({
-          name: winner,
-          time: `${time.getFullYear()}/${time.getMonth() + 1}/${time.getDate()} ${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}:${String(time.getSeconds()).padStart(2, '0')}`
-        });
+        const winner = list[Math.floor(Math.random() * list.length)];
+        db.ref("/roulette/winner").push(winner);
+        document.getElementById("winnerDisplay").textContent = `🎉 当選者：${winner}`;
       });
     }
   </script>
