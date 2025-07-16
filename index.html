@@ -79,6 +79,9 @@
       border: none;
     }
   </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <header>
@@ -136,26 +139,40 @@
   </footer>
 
   <script>
-    // 参加型コードを表示
-    const code = localStorage.getItem("cattan_participant_code");
-    const codeDisplay = document.getElementById("participantCodeDisplay");
-    codeDisplay.textContent = code.trim() ? code : "現在、参加型カスタムは行われておりません。";
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.firebasestorage.app",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+      measurementId: "G-ZNGEZZWMTP"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // 配信中のURLから動画IDを抽出して表示
-    const url = localStorage.getItem("cattan_stream_url");
-    const container = document.getElementById("videoContainer");
+    // データ取得
+    db.ref("/cattan").on("value", (snapshot) => {
+      const data = snapshot.val() || {};
+      const code = data.code || "現在、参加型カスタムは行われておりません。";
+      const url = data.stream || "";
 
-    if (url && url.includes("youtube.com")) {
-      const match = url.match(/(?:\/live\/|v=)([a-zA-Z0-9_-]{11})/);
-      const videoId = match ? match[1] : null;
-      if (videoId) {
-        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allowfullscreen allow="autoplay"></iframe>`;
+      document.getElementById("participantCodeDisplay").textContent = code;
+
+      const container = document.getElementById("videoContainer");
+      if (url.includes("youtube.com")) {
+        const match = url.match(/(?:\/live\/|v=)([a-zA-Z0-9_-]{11})/);
+        const videoId = match ? match[1] : null;
+        if (videoId) {
+          container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allowfullscreen allow="autoplay"></iframe>`;
+        } else {
+          container.textContent = "URLから動画IDを取得できませんでした。";
+        }
       } else {
-        container.textContent = "URLから動画IDを取得できませんでした。";
+        container.textContent = "現在、配信は行われていません。";
       }
-    } else {
-      container.textContent = "現在、配信は行われていません。";
-    }
+    });
   </script>
 </body>
 </html>

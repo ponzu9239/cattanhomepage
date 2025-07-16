@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #fff9f9;
+      background-color: #fffafc;
       padding: 2rem;
       max-width: 400px;
       margin: auto;
@@ -23,6 +23,11 @@
       width: 100%;
       font-size: 1rem;
     }
+    input {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+    }
     button {
       background-color: #97EADB;
       color: white;
@@ -34,13 +39,22 @@
     button:hover {
       background-color: #7fcbd5;
     }
+    #status {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 1rem;
+      color: #5aa2aa;
+    }
   </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <h1>きゃたん 管理者ページ</h1>
 
   <label for="participantCode">参加型コード：</label>
-  <input type="text" id="participantCode" placeholder="コードを入力してください" />
+  <input type="text" id="participantCode" placeholder="例：1234-ABCD" />
 
   <label for="streamUrl">配信中のURL：</label>
   <input type="text" id="streamUrl" placeholder="https://www.youtube.com/live/..." />
@@ -50,22 +64,49 @@
   <p id="status"></p>
 
   <script>
-    window.onload = () => {
-      document.getElementById("participantCode").value =
-        localStorage.getItem("cattan_participant_code") || "";
-      document.getElementById("streamUrl").value =
-        localStorage.getItem("cattan_stream_url") || "";
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.firebasestorage.app",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+      measurementId: "G-ZNGEZZWMTP"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
+    // 保存ボタンの処理
     function saveData() {
       const code = document.getElementById("participantCode").value.trim();
-      const url = document.getElementById("streamUrl").value.trim();
+      const stream = document.getElementById("streamUrl").value.trim();
 
-      localStorage.setItem("cattan_participant_code", code);
-      localStorage.setItem("cattan_stream_url", url);
+      const updates = {
+        code: code || "現在、参加型カスタムは行われておりません。",
+        stream: stream || ""
+      };
 
-      document.getElementById("status").textContent = "保存しました！";
+      db.ref("/cattan").set(updates, (error) => {
+        const status = document.getElementById("status");
+        if (error) {
+          status.textContent = "保存に失敗しました。";
+          status.style.color = "red";
+        } else {
+          status.textContent = "保存しました！";
+          status.style.color = "#5aa2aa";
+        }
+      });
     }
+
+    // 初期読み込み（編集のため）
+    window.onload = () => {
+      db.ref("/cattan").once("value").then((snapshot) => {
+        const data = snapshot.val() || {};
+        document.getElementById("participantCode").value = data.code || "";
+        document.getElementById("streamUrl").value = data.stream || "";
+      });
+    };
   </script>
 </body>
 </html>
