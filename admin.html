@@ -1,72 +1,68 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>きゃたん 管理者ページ</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>きゃたん管理者ページ</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background: #fff9f9;
+      background-color: #fff9f9;
       padding: 2rem;
-      max-width: 600px;
+      max-width: 500px;
       margin: auto;
       color: #333;
     }
-    h1 {
+    h1, h2 {
       text-align: center;
       color: #97EADB;
     }
-    label, input, button, textarea {
+    label, input, button {
       display: block;
-      width: 100%;
       margin: 1rem 0;
+      width: 100%;
       font-size: 1rem;
-    }
-    input, textarea {
-      padding: 0.6rem;
-      border-radius: 0.5rem;
-      border: 2px solid #97EADB;
     }
     button {
       background-color: #97EADB;
       color: white;
       border: none;
-      padding: 0.6rem;
+      padding: 0.5rem;
       border-radius: 0.5rem;
       cursor: pointer;
     }
     button:hover {
       background-color: #7fcbd5;
     }
-    #status {
-      text-align: center;
+    #winnerDisplay {
       margin-top: 1rem;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #d33;
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <h1>きゃたん 管理者ページ</h1>
 
   <label for="participantCode">参加型コード：</label>
-  <input type="text" id="participantCode" placeholder="コードを入力してください">
+  <input type="text" id="participantCode" placeholder="コードを入力してください" />
 
   <label for="streamUrl">配信中のURL：</label>
-  <input type="text" id="streamUrl" placeholder="https://www.youtube.com/live/...">
+  <input type="text" id="streamUrl" placeholder="https://www.youtube.com/live/..." />
 
-  <button onclick="saveMainData()">保存</button>
-
-  <h2>🎯 ルーレット参加者</h2>
-  <label for="participantsInput">1行に1人ずつ名前を入力してください：</label>
-  <textarea id="participantsInput" placeholder="ぽんず\nたろう\nみけ"></textarea>
-  <button onclick="saveParticipants()">保存する</button>
-  <button onclick="resetParticipants()" style="background:#f66; margin-left: 0;">全リセット</button>
-
+  <button onclick="saveData()">保存</button>
   <p id="status"></p>
 
+  <h2>🎯 リポスト抽選</h2>
+  <button onclick="spinRoulette()">ルーレットを回す</button>
+  <p id="winnerDisplay">抽選待ち...</p>
+
   <script>
+    // Firebase設定
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
       authDomain: "catiffanygame.firebaseapp.com",
@@ -76,48 +72,52 @@
       messagingSenderId: "166871605809",
       appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 初期読み込み
+    // 保存済みを読み込み
     window.onload = () => {
-      db.ref("/cattan").once("value").then(snapshot => {
+      const ref = db.ref("/cattan");
+      ref.once("value").then((snapshot) => {
         const data = snapshot.val() || {};
         document.getElementById("participantCode").value = data.code || "";
         document.getElementById("streamUrl").value = data.stream || "";
       });
     };
 
-    function saveMainData() {
+    // データ保存
+    function saveData() {
       const code = document.getElementById("participantCode").value.trim();
-      const url = document.getElementById("streamUrl").value.trim();
+      const stream = document.getElementById("streamUrl").value.trim();
 
       db.ref("/cattan").set({
         code: code || "現在、参加型カスタムは行われておりません。",
-        stream: url || ""
-      }, () => {
-        document.getElementById("status").textContent = "メイン情報を保存しました✅";
+        stream: stream || ""
       });
+
+      document.getElementById("status").textContent = "保存しました！";
     }
 
-    function saveParticipants() {
-      const rawText = document.getElementById("participantsInput").value.trim();
-      const names = rawText.split("\n").map(name => name.trim()).filter(name => name);
-      const updates = {};
-      names.forEach((name, index) => {
-        updates[`/roulette/participants/${index}`] = name;
-      });
-      db.ref("/roulette/participants").remove().then(() => {
-        db.ref().update(updates, () => {
-          document.getElementById("status").textContent = "ルーレット参加者を保存しました✅";
+    // ルーレット実行
+    function spinRoulette() {
+      db.ref("/roulette/participants").once("value").then((snapshot) => {
+        const participants = Object.values(snapshot.val() || {});
+        if (participants.length === 0) {
+          document.getElementById("winnerDisplay").textContent = "参加者がいません。";
+          return;
+        }
+
+        const winner = participants[Math.floor(Math.random() * participants.length)];
+        document.getElementById("winnerDisplay").textContent = `🎉 当選者: ${winner} 🎉`;
+
+        // 結果を保存
+        const time = new Date();
+        const timestamp = time.toISOString();
+        db.ref(`/roulette/results/${timestamp}`).set({
+          name: winner,
+          time: `${time.getFullYear()}/${time.getMonth() + 1}/${time.getDate()} ${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}:${String(time.getSeconds()).padStart(2, '0')}`
         });
-      });
-    }
-
-    function resetParticipants() {
-      db.ref("/roulette/participants").remove(() => {
-        document.getElementById("participantsInput").value = "";
-        document.getElementById("status").textContent = "ルーレット参加者を削除しました❌";
       });
     }
   </script>
