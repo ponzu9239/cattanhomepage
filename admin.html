@@ -2,14 +2,14 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>きゃたん管理ページ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>きゃたん管理者ページ</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
       background-color: #fff9f9;
       padding: 2rem;
-      max-width: 600px;
+      max-width: 400px;
       margin: auto;
       color: #333;
     }
@@ -17,14 +17,11 @@
       text-align: center;
       color: #97EADB;
     }
-    label, input, textarea, button {
+    label, input, button {
       display: block;
       margin: 1rem 0;
       width: 100%;
       font-size: 1rem;
-    }
-    textarea {
-      height: 100px;
     }
     button {
       background-color: #97EADB;
@@ -43,22 +40,30 @@
   <h1>きゃたん 管理者ページ</h1>
 
   <label for="participantCode">参加型コード：</label>
-  <textarea id="participantCode" placeholder="参加型のコードを入力してください"></textarea>
+  <input type="text" id="participantCode" placeholder="コードを入力してください" />
 
   <label for="streamUrl">配信中のURL：</label>
-  <input type="text" id="streamUrl" placeholder="https://www.youtube.com/live/...">
+  <input type="text" id="streamUrl" placeholder="https://www.youtube.com/live/..." />
 
   <button onclick="saveData()">保存</button>
 
   <p id="status"></p>
 
   <script>
+    // ページ読み込み時に保存済みを読み込み
+    window.onload = () => {
+      const savedCode = localStorage.getItem("kyatan_participant_code") || "";
+      const savedUrl = localStorage.getItem("kyatan_stream_url") || "";
+      document.getElementById("participantCode").value = savedCode;
+      document.getElementById("streamUrl").value = savedUrl;
+    };
+
     function saveData() {
       const participantCode = document.getElementById("participantCode").value.trim();
       const streamUrl = document.getElementById("streamUrl").value.trim();
 
       if (!participantCode || !streamUrl) {
-        document.getElementById("status").textContent = "すべての項目を入力してください。";
+        document.getElementById("status").textContent = "両方入力してください。";
         return;
       }
 
