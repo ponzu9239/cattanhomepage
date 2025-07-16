@@ -78,6 +78,17 @@
       border-radius: 1rem;
       border: none;
     }
+    #rouletteWinners {
+      background: #fff;
+      border: 2px dashed #97EADB;
+      padding: 1.2rem;
+      border-radius: 1rem;
+      text-align: center;
+      font-size: 1.2rem;
+      color: #d33;
+      margin-top: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -124,6 +135,11 @@
     </ul>
   </section>
 
+  <section id="winners">
+    <h3>🎁 本日の当選者</h3>
+    <div id="rouletteWinners">読み込み中...</div>
+  </section>
+
   <section id="sns" class="sns">
     <h3>🐾 SNSリンク</h3>
     <a href="https://www.youtube.com/@catiffanygame">YouTube</a>
@@ -168,6 +184,11 @@
       } else {
         container.textContent = "現在、配信は行われていません。";
       }
+    });
+
+    db.ref("/roulette/winner").limitToLast(1).on("child_added", (snapshot) => {
+      const name = snapshot.val();
+      document.getElementById("rouletteWinners").textContent = `🎉 ${name}`;
     });
   </script>
 </body>
