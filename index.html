@@ -78,6 +78,31 @@
       border-radius: 1rem;
       border: none;
     }
+    #rouletteContainer {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    #rouletteList {
+      margin: 1rem 0;
+    }
+    #winnerDisplay {
+      margin-top: 1rem;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #d33;
+    }
+    button {
+      background-color: #97EADB;
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #7fcbd5;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -133,6 +158,13 @@
     <a href="https://www.tiktok.com/@catiffanygame?_t=ZS-8xKiPhVrRxq&_r=1">TikTok</a>
   </section>
 
+  <section id="rouletteContainer">
+    <h3>🎯 今日のリポスト抽選</h3>
+    <div id="rouletteList">読み込み中...</div>
+    <button onclick="spinRoulette()">ルーレットを回す</button>
+    <div id="winnerDisplay"></div>
+  </section>
+
   <footer>
     <p>ド天然のきゃたん</p>
   </footer>
@@ -154,7 +186,6 @@
       const data = snapshot.val() || {};
       const code = data.code || "現在、参加型カスタムは行われておりません。";
       const url = data.stream || "";
-
       document.getElementById("participantCodeDisplay").textContent = code;
 
       const container = document.getElementById("videoContainer");
@@ -170,6 +201,33 @@
         container.textContent = "現在、配信は行われていません。";
       }
     });
+
+    db.ref("/roulette/participants").on("value", (snapshot) => {
+      const list = snapshot.val() || {};
+      const container = document.getElementById("rouletteList");
+      const names = Object.values(list);
+      container.innerHTML = names.length ? `参加者：${names.join(" / ")}` : "現在、参加者はいません。";
+    });
+
+    function spinRoulette() {
+      db.ref("/roulette/participants").once("value").then((snapshot) => {
+        const participants = Object.values(snapshot.val() || {});
+        if (participants.length === 0) {
+          document.getElementById("winnerDisplay").textContent = "参加者がいません。";
+          return;
+        }
+        const winner = participants[Math.floor(Math.random() * participants.length)];
+        document.getElementById("winnerDisplay").textContent = `🎉 当選者: ${winner} 🎉`;
+
+        // 結果を Firebase に保存（日時付き）
+        const now = new Date();
+        const timestamp = now.toISOString();
+        db.ref(`/roulette/results/${timestamp}`).set({
+          name: winner,
+          time: now.toLocaleString("ja-JP")
+        });
+      });
+    }
   </script>
 </body>
 </html>
