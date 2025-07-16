@@ -61,11 +61,6 @@
       const code = document.getElementById("participantCode").value.trim();
       const url = document.getElementById("streamUrl").value.trim();
 
-      if (!code || !url) {
-        document.getElementById("status").textContent = "両方入力してください。";
-        return;
-      }
-
       localStorage.setItem("cattan_participant_code", code);
       localStorage.setItem("cattan_stream_url", url);
 
