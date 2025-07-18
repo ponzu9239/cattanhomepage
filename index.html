@@ -208,14 +208,19 @@
   const winnerEl = document.getElementById("winnerName");
   const winnerRef = firebase.database().ref("/roulette/winner");
 
-  winnerRef.on("value", (snapshot) => {
-    const winner = snapshot.val();
-    if (winner && winner !== "") {
-      winnerEl.textContent = `🎊 ${winner} さん 🎊`;
-    } else {
-      winnerEl.textContent = "まだ抽選が行われていません。";
+winnerRef.on("value", (snapshot) => {
+  const winners = snapshot.val();
+  if (winners) {
+    const keys = Object.keys(winners);
+    if (keys.length > 0) {
+      keys.sort(); // 昇順ソートなので最後が最新
+      const latestWinner = winners[keys[keys.length - 1]];
+      winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
+      return;
     }
-  });
+  }
+  winnerEl.textContent = "まだ抽選が行われていません。";
+});
 
   // 🔽 これはそのままでOK
   dbRef.on("value", (snapshot) => {
