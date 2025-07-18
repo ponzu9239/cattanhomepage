@@ -171,7 +171,7 @@
   <p id="winnerName">まだ抽選が行われていません。</p>
 </section>
   <section id="sns" class="sns">
-    
+
     <h3>🐾 SNSリンク</h3>
     <a href="https://www.youtube.com/@catiffanygame">YouTube</a>
     <a href="https://x.com/catiffanygame">X（旧Twitter）</a>
@@ -208,6 +208,19 @@
 
     dbRef.on("value", (snapshot) => {
       const data = snapshot.val() || {};
+
+        // 🎉 当選者の名前を読み込んで表示
+  const winnerEl = document.getElementById("winnerName");
+  const winnerRef = firebase.database().ref("/cattan/winner");
+
+  winnerRef.on("value", (snapshot) => {
+    const winner = snapshot.val();
+    if (winner && winner !== "") {
+      winnerEl.textContent = `🎊 ${winner} さん 🎊`;
+    } else {
+      winnerEl.textContent = "まだ抽選が行われていません。";
+    }
+  });
 
       // 参加コード表示
       const code = data.code || "現在、参加型カスタムは行われておりません。";
