@@ -222,8 +222,8 @@ function spinRoulette() {
 
     // 2. 擬似ルーレット演出用の高速切り替え
     let count = 0;
-    const maxCount = 20; // 20回くらい名前を切り替える
-    const interval = 100; // 100msごとに切り替え
+    const maxCount = 30; // 20回くらい名前を切り替える
+    const interval = 50; // 100msごとに切り替え
     const intervalId = setInterval(() => {
       const randomName = weightedList[Math.floor(Math.random() * weightedList.length)];
       statusEl.textContent = `🎲 ${randomName} ...`;
