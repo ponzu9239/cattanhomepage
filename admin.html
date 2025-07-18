@@ -305,6 +305,18 @@ function spinStopToggle() {
     alert("保存に失敗しました: " + error.message);
   });
 }
+// ✅ キーワードの初期表示（差し替え）
+db.ref("/roulette/keywords").once("value").then(snapshot => {
+  const keywords = snapshot.val();
+  if (keywords) {
+    if (keywords.youtube) {
+      document.getElementById("keywordYoutube").value = keywords.youtube;
+    }
+    if (keywords.twitch) {
+      document.getElementById("keywordTwitch").value = keywords.twitch;
+    }
+  }
+});
 </script>
 </body>
 </html>
