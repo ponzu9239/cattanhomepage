@@ -206,7 +206,7 @@
 
   // 🎉 当選者の名前を読み込んで表示（← ここを外に出す）
   const winnerEl = document.getElementById("winnerName");
-  const winnerRef = firebase.database().ref("/cattan/winner");
+  const winnerRef = firebase.database().ref("/roulette/winner");
 
   winnerRef.on("value", (snapshot) => {
     const winner = snapshot.val();
