@@ -114,6 +114,11 @@
     <button onclick="resetRoulette()" class="danger">リセット</button>
 
     <p id="rouletteStatus"></p>
+    
+    <h3>🔑 当選キーワードの設定</h3>
+<input type="text" id="keywordInput" placeholder="キーワードを入力">
+<button onclick="saveKeyword()">保存</button>
+<p id="keywordSavedMessage" style="color: green;"></p>
   </section>
 
   <p id="status"></p>
@@ -272,6 +277,50 @@ function spinStopToggle() {
       addParticipantRow();
     });
   }
+  
+  function saveKeyword() {
+  const keyword = document.getElementById("keywordInput").value.trim();
+  if (!keyword) {
+    alert("キーワードを入力してください。");
+    return;
+  }
+
+  db.ref("/roulette/keyword").set(keyword).then(() => {
+    document.getElementById("keywordSavedMessage").textContent = "✅ キーワードを保存しました";
+    setTimeout(() => {
+      document.getElementById("keywordSavedMessage").textContent = "";
+    }, 3000);
+  }).catch(error => {
+    alert("保存に失敗しました: " + error.message);
+  });
+}
+
+// 初期表示時にキーワードを読み込み
+window.onload = () => {
+  // 既存のコード...
+  db.ref("/cattan").once("value").then(snapshot => {
+    const data = snapshot.val() || {};
+    document.getElementById("participantCode").value = data.code || "";
+    document.getElementById("streamUrl").value = data.stream || "";
+  });
+
+  db.ref("/roulette/participants").once("value").then(snapshot => {
+    const data = snapshot.val() || [];
+    if (data.length === 0) {
+      addParticipantRow();
+      return;
+    }
+    data.forEach(p => addParticipantRow(p.name, p.multiplier));
+  });
+
+  // ✅ キーワードの初期表示もここに追加
+  db.ref("/roulette/keyword").once("value").then(snapshot => {
+    const keyword = snapshot.val();
+    if (keyword) {
+      document.getElementById("keywordInput").value = keyword;
+    }
+  });
+};
 </script>
 </body>
 </html>
