@@ -227,11 +227,11 @@ function spinStopToggle() {
         }
       });
 
-      // 1秒ごとくらいにくるくる表示する（速さは調整OK）
+      // 0.1秒ごとくらいにくるくる表示する（速さは調整OK）
       intervalId = setInterval(() => {
         const randomName = weightedList[Math.floor(Math.random() * weightedList.length)];
         statusEl.textContent = `🎲 抽選中: ${randomName}`;
-      }, 100);
+      }, 10);
     });
 
   } else {
