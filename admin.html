@@ -198,7 +198,7 @@
     });
   }
 
-  function spinRoulette() {
+function spinRoulette() {
   db.ref("/roulette/participants").once("value", snapshot => {
     const participants = snapshot.val();
     if(!participants || participants.length === 0){
@@ -206,7 +206,7 @@
       return;
     }
 
-    // 倍率を考慮した重み付きリスト作成
+    // 重み付きリスト作成
     let weightedList = [];
     participants.forEach(p => {
       for(let i = 0; i < p.multiplier; i++) {
@@ -214,18 +214,37 @@
       }
     });
 
-    const winner = weightedList[Math.floor(Math.random() * weightedList.length)];
-    const timestamp = Date.now();
+    const statusEl = document.getElementById("rouletteStatus");
 
-    db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
-      const statusEl = document.getElementById("rouletteStatus");
-      statusEl.textContent = `🎉 当選者: ${winner}`;
+    // 1. 抽選開始の表示
+    statusEl.textContent = "ルーレット回転中…";
+    statusEl.classList.remove("winner-animated");
 
-      // 🎈 アニメーションクラスの追加（再実行も可能にする）
-      statusEl.classList.remove("winner-animated");
-      void statusEl.offsetWidth; // 強制再描画（これで毎回動く）
-      statusEl.classList.add("winner-animated");
-    });
+    // 2. 擬似ルーレット演出用の高速切り替え
+    let count = 0;
+    const maxCount = 20; // 20回くらい名前を切り替える
+    const interval = 100; // 100msごとに切り替え
+    const intervalId = setInterval(() => {
+      const randomName = weightedList[Math.floor(Math.random() * weightedList.length)];
+      statusEl.textContent = `🎲 ${randomName} ...`;
+      count++;
+      if(count >= maxCount){
+        clearInterval(intervalId);
+
+        // 3. 本当の当選者を決める
+        const winner = weightedList[Math.floor(Math.random() * weightedList.length)];
+        const timestamp = Date.now();
+
+        db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
+          statusEl.textContent = `🎉 当選者: ${winner}`;
+
+          // アニメーションを付ける
+          statusEl.classList.remove("winner-animated");
+          void statusEl.offsetWidth; // 強制再描画
+          statusEl.classList.add("winner-animated");
+        });
+      }
+    }, interval);
   });
 }
 
