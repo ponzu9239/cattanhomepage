@@ -143,53 +143,68 @@
 }
 
 #lotteryRules {
-  background: linear-gradient(135deg, #fefcea, #f1daff);
-  border-radius: 15px;
-  padding: 20px;
+  background: linear-gradient(135deg, #d6faff, #ffffff);
+  border-radius: 16px;
+  padding: 24px;
   margin: 30px 10px;
-  box-shadow: 0 4px 10px rgba(255, 192, 203, 0.4);
-  font-family: "Yu Gothic", sans-serif;
-  color: #444;
+  box-shadow: 0 4px 15px rgba(0, 191, 255, 0.2);
+  font-family: "Rounded Mplus 1c", "Yu Gothic", sans-serif;
+  color: #333;
+  border: 2px solid #97EADB;
+  position: relative;
+  overflow: hidden;
+}
+
+#lotteryRules::before {
+  content: "🌴🍧🌞";
+  font-size: 3rem;
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  opacity: 0.1;
 }
 
 #lotteryRules h2 {
   font-size: 1.4em;
   text-align: center;
-  color: #ff69b4;
-  margin-bottom: 15px;
-  text-shadow: 1px 1px 0 white;
+  color: #00bcd4;
+  margin-bottom: 16px;
+  text-shadow: 1px 1px 0 #fff;
+  background: linear-gradient(90deg, #97EADB, #c4fff9);
+  border-radius: 12px;
+  padding: 8px;
 }
 
 .lottery-description {
-  background: #ffffffbb;
-  padding: 15px;
-  border: 2px dashed #ffa7b5;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  line-height: 1.6;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 16px;
+  border: 2px dashed #97EADB;
+  border-radius: 12px;
+  margin-bottom: 24px;
   font-size: 0.95em;
+  line-height: 1.7;
+  color: #444;
 }
 
 .lottery-description ul {
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin: 12px 0;
   padding-left: 20px;
 }
 
 .lottery-description li {
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .winner-area {
-  background: #fff9e5;
-  padding: 15px;
-  border: 2px dotted #ffd700;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 16px;
+  border: 2px dotted #00bcd4;
+  border-radius: 12px;
   text-align: center;
 }
 
 .winner-area h3 {
-  color: #ff8c00;
+  color: #0099cc;
   font-size: 1.2em;
   margin-bottom: 10px;
 }
@@ -197,10 +212,9 @@
 #winners {
   font-size: 1.1em;
   font-weight: bold;
-  color: #ff4500;
+  color: #0077aa;
 }
-
-  </style>
+ </style>
 </head>
 
 <body>
