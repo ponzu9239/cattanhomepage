@@ -231,7 +231,7 @@ function spinStopToggle() {
       intervalId = setInterval(() => {
         const randomName = weightedList[Math.floor(Math.random() * weightedList.length)];
         statusEl.textContent = `🎲 抽選中: ${randomName}`;
-      }, 10);
+      }, 1);
     });
 
   } else {
