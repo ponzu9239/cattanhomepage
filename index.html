@@ -188,28 +188,23 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
-  <script>
-    // Firebase初期化設定（自分の設定に変えてね）
-    const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
-    };
-    // Firebase初期化
-    firebase.initializeApp(firebaseConfig);
+ <script>
+  // Firebase初期化設定
+  const firebaseConfig = {
+    apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+    authDomain: "catiffanygame.firebaseapp.com",
+    databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+    projectId: "catiffanygame",
+    storageBucket: "catiffanygame.appspot.com",
+    messagingSenderId: "166871605809",
+    appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+    measurementId: "G-ZNGEZZWMTP"
+  };
+  firebase.initializeApp(firebaseConfig);
 
-    // 配信中動画URL＆参加コードをRealtime Databaseから読み込み＆表示
-    const dbRef = firebase.database().ref("/cattan");
+  const dbRef = firebase.database().ref("/cattan");
 
-    dbRef.on("value", (snapshot) => {
-      const data = snapshot.val() || {};
-
-        // 🎉 当選者の名前を読み込んで表示
+  // 🎉 当選者の名前を読み込んで表示（← ここを外に出す）
   const winnerEl = document.getElementById("winnerName");
   const winnerRef = firebase.database().ref("/cattan/winner");
 
@@ -222,55 +217,54 @@
     }
   });
 
-      // 参加コード表示
-      const code = data.code || "現在、参加型カスタムは行われておりません。";
-      const codeEl = document.getElementById("participantCodeDisplay");
-      codeEl.textContent = code;
+  // 🔽 これはそのままでOK
+  dbRef.on("value", (snapshot) => {
+    const data = snapshot.val() || {};
 
-      // 配信動画表示
-      const url = data.stream || "現在、配信は行われていません。";
-      const container = document.getElementById("videoContainer");
+    // 参加コード表示
+    const code = data.code || "現在、参加型カスタムは行われておりません。";
+    const codeEl = document.getElementById("participantCodeDisplay");
+    codeEl.textContent = code;
 
-      if (!url || url === "現在、配信は行われていません。") {
-        container.textContent = "現在、配信は行われていません。";
-        return;
-      }
+    // 配信動画表示
+    const url = data.stream || "現在、配信は行われていません。";
+    const container = document.getElementById("videoContainer");
 
-      let iframeSrc = "";
-      if (url.includes("youtube.com") || url.includes("youtu.be")) {
-        // YouTube動画IDを抽出
-        let videoId = "";
-        const ytMatch = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
-        if (ytMatch) {
-          videoId = ytMatch[1];
-        } else {
-          // live URLのIDを取得する簡易版
-          const liveMatch = url.match(/live\/([a-zA-Z0-9_-]+)/);
-          if (liveMatch) videoId = liveMatch[1];
-        }
-        if (videoId) {
-          iframeSrc = `https://www.youtube.com/embed/${videoId}`;
-        } else {
-          iframeSrc = url;
-        }
-      } else if (url.includes("twitch.tv")) {
-        // Twitchのチャンネル名を抽出
-        const twitchMatch = url.match(/twitch.tv\/([^\/]+)/);
-        const channelName = twitchMatch ? twitchMatch[1] : null;
-        if (channelName) {
-          // 親ドメインを自動取得（例 localhost など）
-          const parentDomain = location.hostname;
-          iframeSrc = `https://player.twitch.tv/?channel=${channelName}&parent=${parentDomain}`;
-        } else {
-          iframeSrc = url;
-        }
+    if (!url || url === "現在、配信は行われていません。") {
+      container.textContent = "現在、配信は行われていません。";
+      return;
+    }
+
+    let iframeSrc = "";
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      let videoId = "";
+      const ytMatch = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
+      if (ytMatch) {
+        videoId = ytMatch[1];
       } else {
-        // その他URLはそのまま埋め込み
+        const liveMatch = url.match(/live\/([a-zA-Z0-9_-]+)/);
+        if (liveMatch) videoId = liveMatch[1];
+      }
+      if (videoId) {
+        iframeSrc = `https://www.youtube.com/embed/${videoId}`;
+      } else {
         iframeSrc = url;
       }
+    } else if (url.includes("twitch.tv")) {
+      const twitchMatch = url.match(/twitch.tv\/([^\/]+)/);
+      const channelName = twitchMatch ? twitchMatch[1] : null;
+      if (channelName) {
+        const parentDomain = location.hostname;
+        iframeSrc = `https://player.twitch.tv/?channel=${channelName}&parent=${parentDomain}`;
+      } else {
+        iframeSrc = url;
+      }
+    } else {
+      iframeSrc = url;
+    }
 
-      container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
-    });
-  </script>
+    container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
+  });
+</script>
 </body>
 </html>
