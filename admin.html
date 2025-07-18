@@ -110,7 +110,7 @@
 
     <button onclick="addParticipantRow()">参加者を追加</button>
     <button onclick="saveParticipants()">参加者を保存</button>
-    <button onclick="spinRoulette()">ルーレットを回す</button>
+    <button id="spinStopButton" onclick="spinStopToggle()">ルーレットを回す</button>
     <button onclick="resetRoulette()" class="danger">リセット</button>
 
     <p id="rouletteStatus"></p>
@@ -198,55 +198,79 @@
     });
   }
 
-function spinRoulette() {
-  db.ref("/roulette/participants").once("value", snapshot => {
-    const participants = snapshot.val();
-    if(!participants || participants.length === 0){
-      document.getElementById("rouletteStatus").textContent = "参加者がいません。";
-      return;
-    }
+let spinning = false;  // 抽選中かどうかの状態
+let intervalId = null;
 
-    // 重み付きリスト作成
-    let weightedList = [];
-    participants.forEach(p => {
-      for(let i = 0; i < p.multiplier; i++) {
-        weightedList.push(p.name);
+function spinStopToggle() {
+  const button = document.getElementById("spinStopButton");
+  const statusEl = document.getElementById("rouletteStatus");
+
+  if (!spinning) {
+    // 抽選開始
+    spinning = true;
+    button.textContent = "停止";
+
+    db.ref("/roulette/participants").once("value").then(snapshot => {
+      const participants = snapshot.val();
+      if(!participants || participants.length === 0){
+        statusEl.textContent = "参加者がいません。";
+        spinning = false;
+        button.textContent = "ルーレットを回す";
+        return;
       }
+
+      // 倍率考慮のリスト作成
+      let weightedList = [];
+      participants.forEach(p => {
+        for(let i=0; i<p.multiplier; i++){
+          weightedList.push(p.name);
+        }
+      });
+
+      // 1秒ごとくらいにくるくる表示する（速さは調整OK）
+      intervalId = setInterval(() => {
+        const randomName = weightedList[Math.floor(Math.random() * weightedList.length)];
+        statusEl.textContent = `🎲 抽選中: ${randomName}`;
+      }, 100);
     });
 
-    const statusEl = document.getElementById("rouletteStatus");
+  } else {
+    // 抽選停止
+    spinning = false;
+    button.textContent = "ルーレットを回す";
 
-    // 1. 抽選開始の表示
-    statusEl.textContent = "ルーレット回転中…";
-    statusEl.classList.remove("winner-animated");
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
 
-    // 2. 擬似ルーレット演出用の高速切り替え
-    let count = 0;
-    const maxCount = 30; // 20回くらい名前を切り替える
-    const interval = 50; // 100msごとに切り替え
-    const intervalId = setInterval(() => {
-      const randomName = weightedList[Math.floor(Math.random() * weightedList.length)];
-      statusEl.textContent = `🎲 ${randomName} ...`;
-      count++;
-      if(count >= maxCount){
-        clearInterval(intervalId);
-
-        // 3. 本当の当選者を決める
-        const winner = weightedList[Math.floor(Math.random() * weightedList.length)];
-        const timestamp = Date.now();
-
-        db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
-          statusEl.textContent = `🎉 当選者: ${winner}`;
-
-          // アニメーションを付ける
-          statusEl.classList.remove("winner-animated");
-          void statusEl.offsetWidth; // 強制再描画
-          statusEl.classList.add("winner-animated");
-        });
+    // 最終結果を決めて表示・DB保存
+    db.ref("/roulette/participants").once("value").then(snapshot => {
+      const participants = snapshot.val();
+      if(!participants || participants.length === 0){
+        statusEl.textContent = "参加者がいません。";
+        return;
       }
-    }, interval);
-  });
+      let weightedList = [];
+      participants.forEach(p => {
+        for(let i=0; i<p.multiplier; i++){
+          weightedList.push(p.name);
+        }
+      });
+      const winner = weightedList[Math.floor(Math.random() * weightedList.length)];
+      const timestamp = Date.now();
+      db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
+        statusEl.textContent = `🎉 当選者: ${winner}`;
+
+        // アニメーションを付けるならここで
+        statusEl.classList.remove("winner-animated");
+        void statusEl.offsetWidth;
+        statusEl.classList.add("winner-animated");
+      });
+    });
+  }
 }
+
 
   function resetRoulette() {
     db.ref("/roulette/participants").remove();
