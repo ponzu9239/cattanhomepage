@@ -51,6 +51,31 @@
       width: 90%;
       padding: 0.2rem;
     }
+
+@keyframes winnerPop {
+  0% {
+    transform: scale(1);
+    color: #333; /* 初期色：黒に近い */
+    text-shadow: 0 0 0 transparent;
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.4);
+    color: #ffea00;
+    text-shadow: 0 0 10px #ffea00;
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    color: #333; /* 終了時も黒っぽく */
+    text-shadow: 0 0 0 transparent;
+    opacity: 1;
+  }
+}
+
+  .winner-animated {
+    animation: winnerPop 1.2s ease-out;
+  }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -173,29 +198,35 @@
   }
 
   function spinRoulette() {
-    db.ref("/roulette/participants").once("value", snapshot => {
-      const participants = snapshot.val();
-      if(!participants || participants.length === 0){
-        document.getElementById("rouletteStatus").textContent = "参加者がいません。";
-        return;
+  db.ref("/roulette/participants").once("value", snapshot => {
+    const participants = snapshot.val();
+    if(!participants || participants.length === 0){
+      document.getElementById("rouletteStatus").textContent = "参加者がいません。";
+      return;
+    }
+
+    // 倍率を考慮した重み付きリスト作成
+    let weightedList = [];
+    participants.forEach(p => {
+      for(let i = 0; i < p.multiplier; i++) {
+        weightedList.push(p.name);
       }
-
-      // 倍率を考慮した重み付きリスト作成
-      let weightedList = [];
-      participants.forEach(p => {
-        for(let i=0; i<p.multiplier; i++){
-          weightedList.push(p.name);
-        }
-      });
-
-      const winner = weightedList[Math.floor(Math.random() * weightedList.length)];
-      const timestamp = Date.now();
-
-      db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
-        document.getElementById("rouletteStatus").textContent = `🎉 当選者: ${winner}`;
-      });
     });
-  }
+
+    const winner = weightedList[Math.floor(Math.random() * weightedList.length)];
+    const timestamp = Date.now();
+
+    db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
+      const statusEl = document.getElementById("rouletteStatus");
+      statusEl.textContent = `🎉 当選者: ${winner}`;
+
+      // 🎈 アニメーションクラスの追加（再実行も可能にする）
+      statusEl.classList.remove("winner-animated");
+      void statusEl.offsetWidth; // 強制再描画（これで毎回動く）
+      statusEl.classList.add("winner-animated");
+    });
+  });
+}
 
   function resetRoulette() {
     db.ref("/roulette/participants").remove();
