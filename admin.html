@@ -198,8 +198,9 @@
     });
   }
 
-let spinning = false;  // 抽選中かどうかの状態
+let spinning = false;
 let intervalId = null;
+let currentName = ""; // 今ルーレットで表示中の名前を保存
 
 function spinStopToggle() {
   const button = document.getElementById("spinStopButton");
@@ -219,7 +220,6 @@ function spinStopToggle() {
         return;
       }
 
-      // 倍率考慮のリスト作成
       let weightedList = [];
       participants.forEach(p => {
         for(let i=0; i<p.multiplier; i++){
@@ -227,11 +227,10 @@ function spinStopToggle() {
         }
       });
 
-      // 0.1秒ごとくらいにくるくる表示する（速さは調整OK）
       intervalId = setInterval(() => {
-        const randomName = weightedList[Math.floor(Math.random() * weightedList.length)];
-        statusEl.textContent = `🎲 抽選中: ${randomName}`;
-      }, 1);
+        currentName = weightedList[Math.floor(Math.random() * weightedList.length)];
+        statusEl.textContent = `🎲 抽選中: ${currentName}`;
+      }, 1); // 1msごと切り替え
     });
 
   } else {
@@ -239,37 +238,29 @@ function spinStopToggle() {
     spinning = false;
     button.textContent = "ルーレットを回す";
 
-    if (intervalId) {
+    if(intervalId){
       clearInterval(intervalId);
       intervalId = null;
     }
 
-    // 最終結果を決めて表示・DB保存
-    db.ref("/roulette/participants").once("value").then(snapshot => {
-      const participants = snapshot.val();
-      if(!participants || participants.length === 0){
-        statusEl.textContent = "参加者がいません。";
-        return;
-      }
-      let weightedList = [];
-      participants.forEach(p => {
-        for(let i=0; i<p.multiplier; i++){
-          weightedList.push(p.name);
-        }
-      });
-      const winner = weightedList[Math.floor(Math.random() * weightedList.length)];
-      const timestamp = Date.now();
-      db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
-        statusEl.textContent = `🎉 当選者: ${winner}`;
+    if(currentName === ""){
+      statusEl.textContent = "当選者が決まりませんでした。";
+      return;
+    }
 
-        // アニメーションを付けるならここで
-        statusEl.classList.remove("winner-animated");
-        void statusEl.offsetWidth;
-        statusEl.classList.add("winner-animated");
-      });
+    const winner = currentName;
+    const timestamp = Date.now();
+
+    db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
+      statusEl.textContent = `🎉 当選者: ${winner}`;
+
+      statusEl.classList.remove("winner-animated");
+      void statusEl.offsetWidth;
+      statusEl.classList.add("winner-animated");
     });
   }
 }
+
 
 
   function resetRoulette() {
