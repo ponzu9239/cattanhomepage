@@ -199,18 +199,24 @@ function spinStopToggle() {
     spinning = true;
     button.textContent = "停止";
 
+    // 🔽 状態を Firebase に送信（spinning）
+    db.ref("/roulette/status").set("spinning");
+
     db.ref("/roulette/participants").once("value").then(snapshot => {
       const participants = snapshot.val();
-      if(!participants || participants.length === 0){
+      if (!participants || participants.length === 0) {
         statusEl.textContent = "参加者がいません。";
         spinning = false;
         button.textContent = "ルーレットを回す";
+
+        // 🔽 状態を「停止」に戻す
+        db.ref("/roulette/status").set("stopped");
         return;
       }
 
       let weightedList = [];
       participants.forEach(p => {
-        for(let i=0; i<p.multiplier; i++){
+        for (let i = 0; i < p.multiplier; i++) {
           weightedList.push(p.name);
         }
       });
@@ -218,7 +224,7 @@ function spinStopToggle() {
       intervalId = setInterval(() => {
         currentName = weightedList[Math.floor(Math.random() * weightedList.length)];
         statusEl.textContent = `🎲 抽選中: ${currentName}`;
-      }, 1); // 1msごと切り替え
+      }, 1);
     });
 
   } else {
@@ -226,21 +232,28 @@ function spinStopToggle() {
     spinning = false;
     button.textContent = "ルーレットを回す";
 
-    if(intervalId){
+    if (intervalId) {
       clearInterval(intervalId);
       intervalId = null;
     }
 
-    if(currentName === ""){
+    if (currentName === "") {
       statusEl.textContent = "当選者が決まりませんでした。";
+
+      // 🔽 状態を「停止」に戻す
+      db.ref("/roulette/status").set("stopped");
       return;
     }
 
     const winner = currentName;
     const timestamp = Date.now();
 
+    // 🔽 Firebase に winner 書き込み
     db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
       statusEl.textContent = `🎉 当選者: ${winner}`;
+
+      // 🔽 状態を「停止」に変更
+      db.ref("/roulette/status").set("stopped");
 
       statusEl.classList.remove("winner-animated");
       void statusEl.offsetWidth;
