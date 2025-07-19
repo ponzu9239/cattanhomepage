@@ -215,17 +215,6 @@
   color: #0077aa;
 }
 
-#rouletteName {
-  display: inline-block;
-  width: 10em;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  font-weight: bold;
-  color: #007ACC;
-  font-family: 'Rounded Mplus 1c', sans-serif;
-}
-
  </style>
 </head>
 
@@ -417,6 +406,12 @@ winnerRef.on("value", (snapshot) => {
   rouletteDisplayEl.style.textAlign = "center";
   rouletteDisplayEl.style.fontSize = "1.4em";
   rouletteDisplayEl.style.marginTop = "1em";
+  rouletteDisplayEl.style.display = "inline-block";
+rouletteDisplayEl.style.width = "200px"; // 好きな幅に調整可
+rouletteDisplayEl.style.whiteSpace = "nowrap";
+rouletteDisplayEl.style.overflow = "hidden";
+rouletteDisplayEl.style.textOverflow = "ellipsis";
+rouletteDisplayEl.style.textAlign = "center";
   document.getElementById("winner").insertAdjacentElement("beforebegin", rouletteDisplayEl);
 
   let spinInterval;
