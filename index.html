@@ -351,6 +351,18 @@
   firebase.initializeApp(firebaseConfig);
 
   const dbRef = firebase.database().ref("/cattan");
+  // ① 参加者リスト取得（Firebase Realtime Database から）
+let participantNames = [];
+
+const participantsRef = firebase.database().ref("/participants");
+participantsRef.on("value", (snapshot) => {
+  const participants = snapshot.val();
+  if (participants) {
+    participantNames = Object.values(participants).map((p) =>
+      typeof p === "object" ? p.name : p
+    );
+  }
+});
 
   // 🎉 当選者の名前を読み込んで表示（← ここを外に出す）
   const winnerEl = document.getElementById("winnerName");
@@ -363,22 +375,22 @@ winnerRef.on("value", (snapshot) => {
     if (keys.length > 0) {
       keys.sort();
       const latestWinner = winners[keys[keys.length - 1]];
-      winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
 
-      // ⛔ 抽選中の表示は非表示にする
+      stopRouletteAnimation(); // ⛔ 抽選終了→ぐるぐる止める
+      winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
       document.getElementById("rouletteDisplay").style.display = "none";
 
-      // アニメーション付けたいならここでクラス再追加
       winnerEl.classList.remove("animate-winner");
-      void winnerEl.offsetWidth; // 再描画トリガー
+      void winnerEl.offsetWidth;
       winnerEl.classList.add("animate-winner");
       return;
     }
   }
 
-  // 🎲 まだ当選者いなければ「抽選中…」を表示
-  winnerEl.textContent = "まだ抽選が行われていません。";
+  // 🎲 抽選中のとき
+  winnerEl.textContent = "";
   document.getElementById("rouletteDisplay").style.display = "block";
+  startRouletteAnimation(); // 🔄 抽選中→ぐるぐる開始
 });
 
   // 🔽 これはそのままでOK
