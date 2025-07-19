@@ -339,7 +339,7 @@ winnerRef.on("value", (snapshot) => {
     if (keys.length > 0) {
       keys.sort();
       const latestWinner = winners[keys[keys.length - 1]];
-      winnerEl.textContent = `🎊 ${latestWinner} さん 🎊`;
+      winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
 
       // アニメーション付与
       winnerEl.classList.remove("animate-winner"); // 一旦リセット
@@ -440,7 +440,7 @@ rouletteDisplayEl.style.margin = "1em auto";      // 中央寄せ（要素自体
   spinInterval = setInterval(() => {
     const participant = participantNames[i % participantNames.length];
     const name = participant.name;
-    rouletteDisplayEl.textContent = `抽選中... ${name} さん`;
+    rouletteDisplayEl.textContent = `抽選中... ${name} `;
     i++;
   }, 1);
 }
