@@ -365,15 +365,20 @@ winnerRef.on("value", (snapshot) => {
       const latestWinner = winners[keys[keys.length - 1]];
       winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
 
-      // アニメーション付与
-      winnerEl.classList.remove("animate-winner"); // 一旦リセット
-      void winnerEl.offsetWidth; // リセット用の強制再描画トリガー
-      winnerEl.classList.add("animate-winner");
+      // ⛔ 抽選中の表示は非表示にする
+      document.getElementById("rouletteDisplay").style.display = "none";
 
+      // アニメーション付けたいならここでクラス再追加
+      winnerEl.classList.remove("animate-winner");
+      void winnerEl.offsetWidth; // 再描画トリガー
+      winnerEl.classList.add("animate-winner");
       return;
     }
   }
+
+  // 🎲 まだ当選者いなければ「抽選中…」を表示
   winnerEl.textContent = "まだ抽選が行われていません。";
+  document.getElementById("rouletteDisplay").style.display = "block";
 });
 
   // 🔽 これはそのままでOK
