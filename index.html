@@ -433,7 +433,7 @@ winnerRef.on("value", (snapshot) => {
 
     let i = 0;
     spinInterval = setInterval(() => {
-      rouletteDisplayEl.textContent = `抽選中... ${participantNames[i % participantNames.length]} さん`;
+      rouletteDisplayEl.textContent = `抽選中... `;
       i++;
     }, 100); // 表示スピード
   }
