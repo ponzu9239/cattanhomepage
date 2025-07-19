@@ -403,15 +403,13 @@ winnerRef.on("value", (snapshot) => {
   
   const rouletteDisplayEl = document.createElement("div");
   rouletteDisplayEl.id = "rouletteDisplay";
-  rouletteDisplayEl.style.textAlign = "center";
-  rouletteDisplayEl.style.fontSize = "1.4em";
-  rouletteDisplayEl.style.marginTop = "1em";
-  rouletteDisplayEl.style.display = "inline-block";
-rouletteDisplayEl.style.width = "400px"; // 好きな幅に調整可
+  rouletteDisplayEl.style.display = "block";
+rouletteDisplayEl.style.width = "300px";          // お好みで調整OK
+rouletteDisplayEl.style.textAlign = "left";       // 左詰め！
 rouletteDisplayEl.style.whiteSpace = "nowrap";
 rouletteDisplayEl.style.overflow = "hidden";
-rouletteDisplayEl.style.textOverflow = "ellipsis";
-rouletteDisplayEl.style.textAlign = "center";
+rouletteDisplayEl.style.fontSize = "1.4em";
+rouletteDisplayEl.style.margin = "1em auto";      // 中央寄せ（要素自体は中央に置く）
   document.getElementById("winner").insertAdjacentElement("beforebegin", rouletteDisplayEl);
 
   let spinInterval;
