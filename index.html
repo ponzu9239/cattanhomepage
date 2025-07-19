@@ -433,10 +433,11 @@ winnerRef.on("value", (snapshot) => {
 
   let i = 0;
   spinInterval = setInterval(() => {
-    const name = participantNames[i % participantNames.length];
+    const participant = participantNames[i % participantNames.length];
+    const name = participant.name;
     rouletteDisplayEl.textContent = `抽選中... ${name} さん`;
     i++;
-  }, 1); // 表示スピード（ms）
+  }, 1);
 }
 
   function stopRouletteAnimation() {
