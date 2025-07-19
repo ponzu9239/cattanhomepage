@@ -413,55 +413,61 @@ winnerRef.on("value", (snapshot) => {
     container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
   });
   
-  const rouletteDisplayEl = document.createElement("div");
-  rouletteDisplayEl.id = "rouletteDisplay";
-  rrouletteDisplayEl.style.display = "block";
-rouletteDisplayEl.style.width = "300px";          // お好みで調整OK
-rouletteDisplayEl.style.textAlign = "left";       // 左詰め！
+// 🎉 ルーレットの名前表示エリア（当選者の上に表示）
+const rouletteDisplayEl = document.createElement("div");
+rouletteDisplayEl.id = "rouletteDisplay";
+rouletteDisplayEl.style.display = "block";
+rouletteDisplayEl.style.width = "10em"; // 固定幅にしてブレ防止
+rouletteDisplayEl.style.textAlign = "center";
 rouletteDisplayEl.style.whiteSpace = "nowrap";
 rouletteDisplayEl.style.overflow = "hidden";
-rouletteDisplayEl.style.fontSize = "1.4em";
-rouletteDisplayEl.style.margin = "1em auto";      // 中央寄せ（要素自体は中央に置く）
-  document.getElementById("winner").insertAdjacentElement("beforebegin", rouletteDisplayEl);
+rouletteDisplayEl.style.fontSize = "1.3em";
+rouletteDisplayEl.style.margin = "0 auto";
+rouletteDisplayEl.style.fontWeight = "bold";
+rouletteDisplayEl.style.color = "#007ACC";
 
-  let spinInterval;
+// 挿入先：#winnerName の前
+const winnerNameEl = document.getElementById("winnerName");
+winnerNameEl.insertAdjacentElement("beforebegin", rouletteDisplayEl);
 
-  // 参加者取得
-  let participantNames = [];
-  const participantsRef = firebase.database().ref("/roulette/participants");
-  participantsRef.on("value", (snapshot) => {
-    const data = snapshot.val() || {};
-    participantNames = Object.values(data);
-  });
+let spinInterval;
 
-  // ステータス監視してアニメーション開始/停止
-  const statusRef = firebase.database().ref("/roulette/status");
-  statusRef.on("value", (snapshot) => {
-    const status = snapshot.val();
-    if (status === "spinning") {
-      startRouletteAnimation();
-    } else {
-      stopRouletteAnimation();
-    }
-  });
+// 参加者取得
+let participantNames = [];
+const participantsRef = firebase.database().ref("/roulette/participants");
+participantsRef.on("value", (snapshot) => {
+  const data = snapshot.val() || {};
+  participantNames = Object.values(data);
+});
 
-  function startRouletteAnimation() {
+// ステータス監視
+const statusRef = firebase.database().ref("/roulette/status");
+statusRef.on("value", (snapshot) => {
+  const status = snapshot.val();
+  if (status === "spinning") {
+    startRouletteAnimation();
+  } else {
+    stopRouletteAnimation();
+  }
+});
+
+function startRouletteAnimation() {
   if (spinInterval || participantNames.length === 0) return;
 
   let i = 0;
   spinInterval = setInterval(() => {
     const participant = participantNames[i % participantNames.length];
-    const name = participant.name;
-    rouletteDisplayEl.textContent = `抽選中... ${name}`;
+    const name = typeof participant === 'object' ? participant.name : participant;
+    rouletteDisplayEl.textContent = `抽選中... ${name} さん`;
     i++;
-  }, 1);
+  }, 50); // ← アニメ速度はここで調整
 }
 
-  function stopRouletteAnimation() {
-    clearInterval(spinInterval);
-    spinInterval = null;
-    rouletteDisplayEl.textContent = ""; // 消すか、そのままでもOK
-  }
+function stopRouletteAnimation() {
+  clearInterval(spinInterval);
+  spinInterval = null;
+  rouletteDisplayEl.textContent = ""; // アニメ停止時に非表示
+}
   
 </script>
 </body>
