@@ -429,14 +429,15 @@ winnerRef.on("value", (snapshot) => {
   });
 
   function startRouletteAnimation() {
-    if (spinInterval || participantNames.length === 0) return;
+  if (spinInterval || participantNames.length === 0) return;
 
-    let i = 0;
-    spinInterval = setInterval(() => {
-      rouletteDisplayEl.textContent = `抽選中... `;
-      i++;
-    }, 100); // 表示スピード
-  }
+  let i = 0;
+  spinInterval = setInterval(() => {
+    const name = participantNames[i % participantNames.length];
+    rouletteDisplayEl.textContent = `抽選中... ${name} さん`;
+    i++;
+  }, 1); // 表示スピード（ms）
+}
 
   function stopRouletteAnimation() {
     clearInterval(spinInterval);
