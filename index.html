@@ -458,9 +458,9 @@ function startRouletteAnimation() {
   spinInterval = setInterval(() => {
     const participant = participantNames[i % participantNames.length];
     const name = typeof participant === 'object' ? participant.name : participant;
-    rouletteDisplayEl.textContent = `抽選中... ${name} さん`;
+    rouletteDisplayEl.textContent = `抽選中... ${name}`;
     i++;
-  }, 50); // ← アニメ速度はここで調整
+  }, 1); // ← アニメ速度はここで調整
 }
 
 function stopRouletteAnimation() {
