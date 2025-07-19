@@ -109,7 +109,6 @@
     </table>
 
     <button onclick="addParticipantRow()">参加者を追加</button>
-    <button onclick="saveParticipants()">参加者を保存</button>
     <button id="spinStopButton" onclick="spinStopToggle()">ルーレットを回す</button>
     <button onclick="resetRoulette()" class="danger">リセット</button>
 
@@ -186,28 +185,6 @@
   tbody.appendChild(tr);
 }
 
-  function saveParticipants() {
-    const tbody = document.getElementById("participantsTbody");
-    const rows = tbody.querySelectorAll("tr");
-    const participants = [];
-
-    for(const row of rows){
-      const name = row.cells[0].querySelector("input").value.trim();
-      let multiplier = parseInt(row.cells[1].querySelector("input").value);
-      if(!name) continue;
-      if(isNaN(multiplier) || multiplier < 1) multiplier = 1;
-      participants.push({name, multiplier});
-    }
-
-    if(participants.length === 0){
-      document.getElementById("rouletteStatus").textContent = "参加者を1人以上入力してください。";
-      return;
-    }
-
-    db.ref("/roulette/participants").set(participants).then(() => {
-      document.getElementById("rouletteStatus").textContent = "参加者を保存しました！";
-    });
-  }
 
 let spinning = false;
 let intervalId = null;
