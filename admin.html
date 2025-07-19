@@ -265,11 +265,6 @@ function spinStopToggle() {
   const ytKeyword = document.getElementById("keywordYoutube").value.trim();
   const twitchKeyword = document.getElementById("keywordTwitch").value.trim();
 
-  if (!ytKeyword && !twitchKeyword) {
-    alert("どちらかのキーワードを入力してください。");
-    return;
-  }
-
   db.ref("/roulette/keywords").set({
     youtube: ytKeyword,
     twitch: twitchKeyword
