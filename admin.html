@@ -114,16 +114,6 @@
 
     <p id="rouletteStatus"></p>
     
-<h3>🔑 当選キーワードの設定</h3>
-
-<label for="keywordYoutube">🔴 YouTube用キーワード</label>
-<input type="text" id="keywordYoutube" placeholder="YouTubeキーワードを入力">
-
-<label for="keywordTwitch">🟣 Twitch用キーワード</label>
-<input type="text" id="keywordTwitch" placeholder="Twitchキーワードを入力">
-
-<button onclick="saveKeywords()">保存</button>
-<p id="keywordSavedMessage" style="color: green;"></p>
   </section>
 
   <p id="status"></p>
@@ -274,34 +264,6 @@ function spinStopToggle() {
     });
   }
   
-  function saveKeywords() {
-  const ytKeyword = document.getElementById("keywordYoutube").value.trim();
-  const twitchKeyword = document.getElementById("keywordTwitch").value.trim();
-
-  db.ref("/roulette/keywords").set({
-    youtube: ytKeyword,
-    twitch: twitchKeyword
-  }).then(() => {
-    document.getElementById("keywordSavedMessage").textContent = "✅ キーワードを保存しました";
-    setTimeout(() => {
-      document.getElementById("keywordSavedMessage").textContent = "";
-    }, 3000);
-  }).catch(error => {
-    alert("保存に失敗しました: " + error.message);
-  });
-}
-// ✅ キーワードの初期表示（差し替え）
-db.ref("/roulette/keywords").once("value").then(snapshot => {
-  const keywords = snapshot.val();
-  if (keywords) {
-    if (keywords.youtube) {
-      document.getElementById("keywordYoutube").value = keywords.youtube;
-    }
-    if (keywords.twitch) {
-      document.getElementById("keywordTwitch").value = keywords.twitch;
-    }
-  }
-});
 
 function saveParticipantsAuto() {
   const tbody = document.getElementById("participantsTbody");
