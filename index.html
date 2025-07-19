@@ -1,3 +1,5 @@
+抽選中のところの文字が高速で変わるところが人によって名前の長さが違うから読みにくい
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -215,26 +217,15 @@
   color: #0077aa;
 }
 
-#rouletteDisplay {
-  margin: 1em auto;
-  font-size: 1.2em;
-  font-weight: bold;
-  color: #007acc;
-  text-align: center;
-  animation: blink 1s infinite;
-}
-
 #rouletteName {
   display: inline-block;
-  width: 8em;  /* 👈 名前が短くても長くても文字位置がズレない */
+  width: 10em;
   text-align: center;
-  overflow: hidden;
   white-space: nowrap;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  overflow: hidden;
+  font-weight: bold;
+  color: #007ACC;
+  font-family: 'Rounded Mplus 1c', sans-serif;
 }
 
  </style>
@@ -301,23 +292,21 @@
     <li>（最大5倍）</li>
   </ul>
 
+  <p style="margin-top: 1em;">
+    ※当選者には配信中に発表されるキーワードを答えてもらいます<br>
+    ※抽選時に当選者が不在やキーワードが答えられなかった場合は再抽選となります
+  </p>
+
 </section>
 
   <!-- 🎉 当選者表示エリア（ルール枠の中に入れた） -->
 <section id="rouletteSection">
   <div id="winner">
     <h2>🎉本日の当選者🎉</h2>
-
-    <!-- 抽選中の表示をここに追加 -->
-    <div id="rouletteDisplay">
-      抽選中… <span id="rouletteName">？？？さん</span>
-    </div>
-
-    <!-- 当選者の名前がここに出る -->
     <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
   </div>
 </section>
-</section>
+</section>>
   <section id="sns" class="sns">
 
     <h3>🐾 SNSリンク</h3>
@@ -351,18 +340,6 @@
   firebase.initializeApp(firebaseConfig);
 
   const dbRef = firebase.database().ref("/cattan");
-  // ① 参加者リスト取得（Firebase Realtime Database から）
-let participantNames = [];
-
-const participantsRef = firebase.database().ref("/participants");
-participantsRef.on("value", (snapshot) => {
-  const participants = snapshot.val();
-  if (participants) {
-    participantNames = Object.values(participants).map((p) =>
-      typeof p === "object" ? p.name : p
-    );
-  }
-});
 
   // 🎉 当選者の名前を読み込んで表示（← ここを外に出す）
   const winnerEl = document.getElementById("winnerName");
@@ -375,22 +352,17 @@ winnerRef.on("value", (snapshot) => {
     if (keys.length > 0) {
       keys.sort();
       const latestWinner = winners[keys[keys.length - 1]];
+      winnerEl.textContent = `🎊 ${latestWinner} さん 🎊`;
 
-      stopRouletteAnimation(); // ⛔ 抽選終了→ぐるぐる止める
-      winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
-      document.getElementById("rouletteDisplay").style.display = "none";
-
-      winnerEl.classList.remove("animate-winner");
-      void winnerEl.offsetWidth;
+      // アニメーション付与
+      winnerEl.classList.remove("animate-winner"); // 一旦リセット
+      void winnerEl.offsetWidth; // リセット用の強制再描画トリガー
       winnerEl.classList.add("animate-winner");
+
       return;
     }
   }
-
-  // 🎲 抽選中のとき
-  winnerEl.textContent = "";
-  document.getElementById("rouletteDisplay").style.display = "block";
-  startRouletteAnimation(); // 🔄 抽選中→ぐるぐる開始
+  winnerEl.textContent = "まだ抽選が行われていません。";
 });
 
   // 🔽 これはそのままでOK
@@ -442,28 +414,55 @@ winnerRef.on("value", (snapshot) => {
     container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
   });
   
+  const rouletteDisplayEl = document.createElement("div");
+  rouletteDisplayEl.id = "rouletteDisplay";
+  rrouletteDisplayEl.style.display = "block";
+rouletteDisplayEl.style.width = "300px";          // お好みで調整OK
+rouletteDisplayEl.style.textAlign = "left";       // 左詰め！
+rouletteDisplayEl.style.whiteSpace = "nowrap";
+rouletteDisplayEl.style.overflow = "hidden";
+rouletteDisplayEl.style.fontSize = "1.4em";
+rouletteDisplayEl.style.margin = "1em auto";      // 中央寄せ（要素自体は中央に置く）
+  document.getElementById("winner").insertAdjacentElement("beforebegin", rouletteDisplayEl);
 
-let spinInterval;
-const rouletteNameEl = document.getElementById("rouletteName");
+  let spinInterval;
 
-// 管理画面から受け取った参加者名を使ってぐるぐる回す
-function startRouletteAnimation() {
+  // 参加者取得
+  let participantNames = [];
+  const participantsRef = firebase.database().ref("/roulette/participants");
+  participantsRef.on("value", (snapshot) => {
+    const data = snapshot.val() || {};
+    participantNames = Object.values(data);
+  });
+
+  // ステータス監視してアニメーション開始/停止
+  const statusRef = firebase.database().ref("/roulette/status");
+  statusRef.on("value", (snapshot) => {
+    const status = snapshot.val();
+    if (status === "spinning") {
+      startRouletteAnimation();
+    } else {
+      stopRouletteAnimation();
+    }
+  });
+
+  function startRouletteAnimation() {
   if (spinInterval || participantNames.length === 0) return;
 
   let i = 0;
   spinInterval = setInterval(() => {
     const participant = participantNames[i % participantNames.length];
-    const name = typeof participant === 'object' ? participant.name : participant;
-    rouletteNameEl.textContent = `${name}さん`;
+    const name = participant.name;
+    rouletteDisplayEl.textContent = `抽選中... ${name} さん`;
     i++;
-  }, 1); // 50ミリ秒で切り替え（ちょうどいい速さ）
+  }, 1);
 }
 
-function stopRouletteAnimation() {
-  clearInterval(spinInterval);
-  spinInterval = null;
-  rouletteNameEl.textContent = "？？？さん";
-}
+  function stopRouletteAnimation() {
+    clearInterval(spinInterval);
+    spinInterval = null;
+    rouletteDisplayEl.textContent = ""; // 消すか、そのままでもOK
+  }
   
 </script>
 </body>
