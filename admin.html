@@ -176,15 +176,15 @@
   }
 
   function addParticipantRow(name = "", multiplier = 1) {
-    const tbody = document.getElementById("participantsTbody");
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><input type="text" value="${name}" placeholder="名前" /></td>
-      <td><input type="number" min="1" value="${multiplier}" /></td>
-      <td><button onclick="this.closest('tr').remove()">削除</button></td>
-    `;
-    tbody.appendChild(tr);
-  }
+  const tbody = document.getElementById("participantsTbody");
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td><input type="text" value="${name}" placeholder="名前" oninput="saveParticipantsAuto()" /></td>
+    <td><input type="number" min="1" value="${multiplier}" oninput="saveParticipantsAuto()" /></td>
+    <td><button onclick="this.closest('tr').remove(); saveParticipantsAuto()">削除</button></td>
+  `;
+  tbody.appendChild(tr);
+}
 
   function saveParticipants() {
     const tbody = document.getElementById("participantsTbody");
@@ -317,6 +317,22 @@ db.ref("/roulette/keywords").once("value").then(snapshot => {
     }
   }
 });
+
+function saveParticipantsAuto() {
+  const tbody = document.getElementById("participantsTbody");
+  const rows = tbody.querySelectorAll("tr");
+  const participants = [];
+
+  for (const row of rows) {
+    const name = row.cells[0].querySelector("input").value.trim();
+    let multiplier = parseInt(row.cells[1].querySelector("input").value);
+    if (!name) continue;
+    if (isNaN(multiplier) || multiplier < 1) multiplier = 1;
+    participants.push({ name, multiplier });
+  }
+
+  db.ref("/roulette/participants").set(participants);
+}
 </script>
 </body>
 </html>
