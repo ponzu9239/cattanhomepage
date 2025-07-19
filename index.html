@@ -215,6 +215,28 @@
   color: #0077aa;
 }
 
+#rouletteDisplay {
+  margin: 1em auto;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #007acc;
+  text-align: center;
+  animation: blink 1s infinite;
+}
+
+#rouletteName {
+  display: inline-block;
+  width: 8em;  /* 👈 名前が短くても長くても文字位置がズレない */
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
  </style>
 </head>
 
@@ -285,6 +307,13 @@
 <section id="rouletteSection">
   <div id="winner">
     <h2>🎉本日の当選者🎉</h2>
+
+    <!-- 抽選中の表示をここに追加 -->
+    <div id="rouletteDisplay">
+      抽選中… <span id="rouletteName">？？？さん</span>
+    </div>
+
+    <!-- 当選者の名前がここに出る -->
     <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
   </div>
 </section>
@@ -396,55 +425,28 @@ winnerRef.on("value", (snapshot) => {
     container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
   });
   
-  const rouletteDisplayEl = document.createElement("div");
-  rouletteDisplayEl.id = "rouletteDisplay";
-  rouletteDisplayEl.style.display = "block";
-rouletteDisplayEl.style.width = "300px";          // お好みで調整OK
-rouletteDisplayEl.style.textAlign = "left";       // 左詰め！
-rouletteDisplayEl.style.whiteSpace = "nowrap";
-rouletteDisplayEl.style.overflow = "hidden";
-rouletteDisplayEl.style.fontSize = "1.4em";
-rouletteDisplayEl.style.margin = "1em auto";      // 中央寄せ（要素自体は中央に置く）
-  document.getElementById("winner").insertAdjacentElement("beforebegin", rouletteDisplayEl);
 
-  let spinInterval;
+let spinInterval;
+const rouletteNameEl = document.getElementById("rouletteName");
 
-  // 参加者取得
-  let participantNames = [];
-  const participantsRef = firebase.database().ref("/roulette/participants");
-  participantsRef.on("value", (snapshot) => {
-    const data = snapshot.val() || {};
-    participantNames = Object.values(data);
-  });
-
-  // ステータス監視してアニメーション開始/停止
-  const statusRef = firebase.database().ref("/roulette/status");
-  statusRef.on("value", (snapshot) => {
-    const status = snapshot.val();
-    if (status === "spinning") {
-      startRouletteAnimation();
-    } else {
-      stopRouletteAnimation();
-    }
-  });
-
-  function startRouletteAnimation() {
+// 管理画面から受け取った参加者名を使ってぐるぐる回す
+function startRouletteAnimation() {
   if (spinInterval || participantNames.length === 0) return;
 
   let i = 0;
   spinInterval = setInterval(() => {
     const participant = participantNames[i % participantNames.length];
-    const name = participant.name;
-    rouletteDisplayEl.textContent = `抽選中... ${name} `;
+    const name = typeof participant === 'object' ? participant.name : participant;
+    rouletteNameEl.textContent = `${name}さん`;
     i++;
-  }, 1);
+  }, 50); // 50ミリ秒で切り替え（ちょうどいい速さ）
 }
 
-  function stopRouletteAnimation() {
-    clearInterval(spinInterval);
-    spinInterval = null;
-    rouletteDisplayEl.textContent = ""; // 消すか、そのままでもOK
-  }
+function stopRouletteAnimation() {
+  clearInterval(spinInterval);
+  spinInterval = null;
+  rouletteNameEl.textContent = "？？？さん";
+}
   
 </script>
 </body>
