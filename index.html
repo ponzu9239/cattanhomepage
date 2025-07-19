@@ -456,7 +456,7 @@ function startRouletteAnimation() {
     const name = typeof participant === 'object' ? participant.name : participant;
     rouletteNameEl.textContent = `${name}さん`;
     i++;
-  }, 50); // 50ミリ秒で切り替え（ちょうどいい速さ）
+  }, 1); // 50ミリ秒で切り替え（ちょうどいい速さ）
 }
 
 function stopRouletteAnimation() {
