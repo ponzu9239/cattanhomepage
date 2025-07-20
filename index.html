@@ -298,9 +298,19 @@
   <div id="winner">
     <h2>🎉本日の当選者🎉</h2>
     <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
+    <!-- 当選確率バー -->
+<div id="probabilityBarContainer" style="margin-top: 1em;">
+  <div id="probabilityBarBackground" style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
+    <div id="probabilityBar" style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;"></div>
   </div>
+  <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">当選確率: 0%</div>
+</div>
+
+  </div>
+  <div style="max-width: 400px; margin: 2rem auto;">
+  <canvas id="probabilityChart"></canvas>
+</div>
 </section>
-</section>>
   <section id="sns" class="sns">
 
     <h3>🐾 SNSリンク</h3>
@@ -318,6 +328,9 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
  <script>
   // Firebase初期化設定
@@ -347,6 +360,8 @@ winnerRef.on("value", (snapshot) => {
       keys.sort();
       const latestWinner = winners[keys[keys.length - 1]];
       winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
+      updateProbabilityBar(latestWinner);
+
 
       // アニメーション付与
       winnerEl.classList.remove("animate-winner"); // 一旦リセット
@@ -458,11 +473,86 @@ function startRouletteAnimation() {
   }, 1); // ← アニメ速度はここで調整
 }
 
+  const db = firebase.firestore();
+  const chartCtx = document.getElementById('probabilityChart').getContext('2d');
+  let chart; // グラフインスタンス保持用
+
+  async function drawProbabilityChart() {
+    const snapshot = await db.collection("participants").get();
+    const data = {};
+    snapshot.forEach(doc => {
+      const { name, multiplier } = doc.data();
+      data[name] = (data[name] || 0) + (multiplier || 1);
+    });
+
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+
+    // すでにグラフがあれば破棄
+    if (chart) chart.destroy();
+
+    chart = new Chart(chartCtx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: '当選確率',
+          data: values,
+          backgroundColor: labels.map((_, i) =>
+            `hsl(${(i * 360 / labels.length)}, 80%, 70%)`
+          ),
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const val = context.raw;
+                const percent = ((val / total) * 100).toFixed(1);
+                return `${context.label}: ${val}票（${percent}%）`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 初回読み込み＆更新検知
+  drawProbabilityChart();
+  db.collection("participants").onSnapshot(drawProbabilityChart);
+
+
 function stopRouletteAnimation() {
   clearInterval(spinInterval);
   spinInterval = null;
   rouletteDisplayEl.textContent = ""; // アニメ停止時に非表示
 }
+
+function updateProbabilityBar(winnerName) {
+  firebase.database().ref("/roulette/participants").once("value").then(snapshot => {
+    const participants = snapshot.val() || [];
+
+    const winner = participants.find(p => p.name === winnerName);
+    if (!winner || !winner.multiplier) return;
+
+    const total = participants.reduce((sum, user) => sum + (user.multiplier || 1), 0);
+    const percent = (winner.multiplier / total) * 100;
+
+    const bar = document.getElementById("probabilityBar");
+    const text = document.getElementById("probabilityPercent");
+
+    bar.style.width = `${percent}%`;
+    text.textContent = `当選確率: ${percent.toFixed(1)}%`;
+  });
+}
+
   
 </script>
 </body>
