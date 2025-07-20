@@ -463,16 +463,21 @@ firebase.database().ref("/roulette/participants").on("value", (snapshot) => {
 });
 
 
-// ステータス監視
+// ステータス監視（ルーレットの状態を監視）
 const statusRef = firebase.database().ref("/roulette/status");
 statusRef.on("value", (snapshot) => {
   const status = snapshot.val();
+
   if (status === "spinning") {
     startRouletteAnimation();
+  } else if (status === "stopped") {
+    stopRouletteAnimation(); // ← 視聴者側でもちゃんと止める！
   } else {
+    // 何か他の値だったら安全のため止めておく
     stopRouletteAnimation();
   }
 });
+
 
 function startRouletteAnimation() {
   if (spinInterval || participantNames.length === 0) return;
@@ -485,6 +490,13 @@ function startRouletteAnimation() {
     i++;
   }, 1); // ← アニメ速度はここで調整
 }
+
+function stopRouletteAnimation() {
+  clearInterval(spinInterval);
+  spinInterval = null;
+  rouletteDisplayEl.textContent = ""; // ← これが表示を消す
+}
+
 
   const db = firebase.firestore();
   const chartCtx = document.getElementById('probabilityChart').getContext('2d');
@@ -528,7 +540,7 @@ function startRouletteAnimation() {
                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                 const val = context.raw;
                 const percent = ((val / total) * 100).toFixed(1);
-                return `${context.label}: ${val}票（${percent}%）`;
+                return `${context.label}: ${val}倍（${percent}%）`;
               }
             }
           }
