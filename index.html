@@ -227,6 +227,25 @@
   font-family: 'Rounded Mplus 1c', sans-serif;
 }
 
+#probabilityBarContainer {
+  width: 80%;
+  height: 18px;
+  background-color: #e0e0e0;
+  border-radius: 9px;
+  margin: 10px auto;
+  overflow: hidden;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.15);
+}
+
+#probabilityBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #97EADB, #5AC8FA);
+  transition: width 0.4s ease-in-out;
+  border-radius: 9px 0 0 9px;
+}
+
+
  </style>
 </head>
 
@@ -298,14 +317,24 @@
 
 </section>
 
-  <!-- 🎉 当選者表示エリア（ルール枠の中に入れた） -->
+<!-- 🎉 当選者表示エリア（ルーレット枠の中） -->
 <section id="rouletteSection">
   <div id="winner">
     <h2>🎉本日の当選者🎉</h2>
     <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
+
+    <!-- 当選確率バー -->
+    <div id="probabilityBarContainer" style="margin-top: 1em;">
+      <div id="probabilityBarBackground" style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
+        <div id="probabilityBar" style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;"></div>
+      </div>
+      <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">当選確率: 0%</div>
+    </div>
+
+
   </div>
 </section>
-</section>>
+</section>
   <section id="sns" class="sns">
 
     <h3>🐾 SNSリンク</h3>
@@ -351,18 +380,27 @@ winnerRef.on("value", (snapshot) => {
     if (keys.length > 0) {
       keys.sort();
       const latestWinner = winners[keys[keys.length - 1]];
-      winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
+      winnerEl.textContent = `🎊 ${latestWinner.name || latestWinner} 🎊`;
 
       // アニメーション付与
-      winnerEl.classList.remove("animate-winner"); // 一旦リセット
-      void winnerEl.offsetWidth; // リセット用の強制再描画トリガー
+      winnerEl.classList.remove("animate-winner");
+      void winnerEl.offsetWidth;
       winnerEl.classList.add("animate-winner");
+
+      // 🎯 当選確率バー更新（ここが重要！）
+      participantsRef.once("value", (snap) => {
+        const allUsers = Object.values(snap.val() || {});
+        updateProbabilityBar(latestWinner, allUsers);
+      });
 
       return;
     }
   }
+
   winnerEl.textContent = "まだ抽選が行われていません。";
+  document.getElementById("probabilityBar").style.width = "0%"; // バーリセット
 });
+
 
   // 🔽 これはそのままでOK
   dbRef.on("value", (snapshot) => {
@@ -468,7 +506,17 @@ function stopRouletteAnimation() {
   spinInterval = null;
   rouletteDisplayEl.textContent = ""; // アニメ停止時に非表示
 }
-  
+
+function updateProbabilityBar(winner, allUsers) {
+  if (!winner || !winner.name || !winner.multiplier) return;
+
+  const total = allUsers.reduce((sum, user) => sum + (user.multiplier || 1), 0);
+  const percent = (winner.multiplier / total) * 100;
+
+  document.getElementById("probabilityBar").style.width = `${percent.toFixed(1)}%`;
+}
+
+
 </script>
 </body>
 </html>
