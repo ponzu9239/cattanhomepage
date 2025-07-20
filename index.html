@@ -502,22 +502,24 @@ function startRouletteAnimation() {
 function updateProbabilityBar(winner, allUsers) {
   if (!winner || !winner.name) return;
 
-  // winnerの倍率をallUsersの中から探す
   const matching = allUsers.find((u) => {
     if (typeof u === "string") return u === winner.name;
     return u.name === winner.name;
   });
 
-  if (!matching) return;
+  // 倍率が見つからなくても1倍として処理を続ける
+  const winnerMultiplier = (typeof matching === 'object' ? matching?.multiplier : 1) || 1;
+  const total = allUsers.reduce((sum, user) => {
+    if (typeof user === "string") return sum + 1;
+    return sum + (user.multiplier || 1);
+  }, 0);
 
-  const winnerMultiplier = matching.multiplier || 1;
-  const total = allUsers.reduce((sum, user) => sum + (user.multiplier || 1), 0);
   const percent = (winnerMultiplier / total) * 100;
 
-  // バーとパーセンテージを更新
   document.getElementById("probabilityBar").style.width = `${percent.toFixed(1)}%`;
   document.getElementById("probabilityPercent").textContent = `当選確率: ${percent.toFixed(1)}%`;
 }
+
 
 
 
