@@ -228,6 +228,9 @@
 }
 
  </style>
+
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
@@ -298,19 +301,22 @@
   <div id="winner">
     <h2>🎉本日の当選者🎉</h2>
     <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
+
     <!-- 当選確率バー -->
-<div id="probabilityBarContainer" style="margin-top: 1em;">
-  <div id="probabilityBarBackground" style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
-    <div id="probabilityBar" style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;"></div>
+    <div id="probabilityBarContainer" style="margin-top: 1em;">
+      <div id="probabilityBarBackground" style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
+        <div id="probabilityBar" style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;"></div>
+      </div>
+      <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">当選確率: ??%</div>
+    </div>
   </div>
-  <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">当選確率: 0%</div>
+</section>
+
+<!-- 🎯 倍率ごとの当選確率円グラフ（当選者表示とは分けて外に出す） -->
+<div style="max-width: 400px; margin: 2rem auto;">
+  <canvas id="probabilityPieChart" width="300" height="300" style="margin-top: 1em;"></canvas>
 </div>
 
-  </div>
-  <div style="max-width: 400px; margin: 2rem auto;">
-  <canvas id="probabilityChart"></canvas>
-</div>
-</section>
   <section id="sns" class="sns">
 
     <h3>🐾 SNSリンク</h3>
@@ -450,6 +456,13 @@ participantsRef.on("value", (snapshot) => {
   participantNames = Object.values(data);
 });
 
+// 🎨 全体円グラフを描画（倍率別確率）
+firebase.database().ref("/roulette/participants").on("value", (snapshot) => {
+  const participants = Object.values(snapshot.val() || {});
+  drawProbabilityPieChart(participants); // ← 上で定義した関数を使うよ！
+});
+
+
 // ステータス監視
 const statusRef = firebase.database().ref("/roulette/status");
 statusRef.on("value", (snapshot) => {
@@ -529,21 +542,24 @@ function startRouletteAnimation() {
   db.collection("participants").onSnapshot(drawProbabilityChart);
 
 
-function stopRouletteAnimation() {
-  clearInterval(spinInterval);
-  spinInterval = null;
-  rouletteDisplayEl.textContent = ""; // アニメ停止時に非表示
-}
-
 function updateProbabilityBar(winnerName) {
   firebase.database().ref("/roulette/participants").once("value").then(snapshot => {
-    const participants = snapshot.val() || [];
+    const participantsObj = snapshot.val() || {};
+    const participants = Object.values(participantsObj);
 
-    const winner = participants.find(p => p.name === winnerName);
-    if (!winner || !winner.multiplier) return;
+    const winner = participants.find(p => {
+      if (typeof p === "object") return p.name === winnerName;
+      return p === winnerName;
+    });
 
-    const total = participants.reduce((sum, user) => sum + (user.multiplier || 1), 0);
-    const percent = (winner.multiplier / total) * 100;
+    if (!winner) return;
+
+    const winnerMultiplier = winner.multiplier || 1;
+    const total = participants.reduce((sum, u) => {
+      return sum + (typeof u === "object" ? (u.multiplier || 1) : 1);
+    }, 0);
+
+    const percent = (winnerMultiplier / total) * 100;
 
     const bar = document.getElementById("probabilityBar");
     const text = document.getElementById("probabilityPercent");
@@ -552,6 +568,51 @@ function updateProbabilityBar(winnerName) {
     text.textContent = `当選確率: ${percent.toFixed(1)}%`;
   });
 }
+
+function drawProbabilityPieChart(participants) {
+  const ctx = document.getElementById("probabilityPieChart").getContext("2d");
+
+  // 可愛い系ランダム色生成（パステル調）
+  const getRandomCuteColor = () => {
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 80%, 80%)`;
+  };
+
+  const labels = participants.map(p => p.name);
+  const values = participants.map(p => p.multiplier || 1);
+  const total = values.reduce((a, b) => a + b, 0);
+  const backgroundColors = labels.map(() => getRandomCuteColor());
+
+  if (window.pieChart) window.pieChart.destroy(); // 前のグラフ削除
+
+  window.pieChart = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: backgroundColors
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: "bottom" },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const name = context.label;
+              const val = context.raw;
+              const percent = ((val / total) * 100).toFixed(1);
+              return `${name}: ${val}倍（${percent}%）`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+
 
   
 </script>
