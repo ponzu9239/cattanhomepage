@@ -330,11 +330,9 @@
       </div>
       <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">当選確率: 0%</div>
     </div>
-
-
   </div>
-</section>
-</section>
+</section> <!-- ←これ1つでOK！ -->
+
   <section id="sns" class="sns">
 
     <h3>🐾 SNSリンク</h3>
@@ -501,20 +499,26 @@ function startRouletteAnimation() {
   }, 1); // ← アニメ速度はここで調整
 }
 
-function stopRouletteAnimation() {
-  clearInterval(spinInterval);
-  spinInterval = null;
-  rouletteDisplayEl.textContent = ""; // アニメ停止時に非表示
-}
-
 function updateProbabilityBar(winner, allUsers) {
-  if (!winner || !winner.name || !winner.multiplier) return;
+  if (!winner || !winner.name) return;
 
+  // winnerの倍率をallUsersの中から探す
+  const matching = allUsers.find((u) => {
+    if (typeof u === "string") return u === winner.name;
+    return u.name === winner.name;
+  });
+
+  if (!matching) return;
+
+  const winnerMultiplier = matching.multiplier || 1;
   const total = allUsers.reduce((sum, user) => sum + (user.multiplier || 1), 0);
-  const percent = (winner.multiplier / total) * 100;
+  const percent = (winnerMultiplier / total) * 100;
 
+  // バーとパーセンテージを更新
   document.getElementById("probabilityBar").style.width = `${percent.toFixed(1)}%`;
+  document.getElementById("probabilityPercent").textContent = `当選確率: ${percent.toFixed(1)}%`;
 }
+
 
 
 </script>
