@@ -569,20 +569,20 @@
       }
     });
 
-
 function startRouletteAnimation() {
-  if (spinInterval) return; // すでに監視中なら何もしない
+  if (spinInterval || participantNames.length === 0) return;
 
-  const currentNameRef = firebase.database().ref("/roulette/currentName");
+  let i = 0;
+  spinInterval = setInterval(() => {
+    const participant = participantNames[i % participantNames.length];
+    const name = typeof participant === 'object' ? participant.name : participant;
+    rouletteDisplayEl.textContent = `抽選中... ${name}`;
 
-  currentNameRef.on("value", (snapshot) => {
-    const name = snapshot.val();
-    if (name) {
-      rouletteDisplayEl.textContent = `抽選中... ${name}`;
-    } else {
-      rouletteDisplayEl.textContent = "抽選中...";
-    }
-  });
+    // 🔽 Firebaseに現在の名前を送信
+    set(ref(db, "/roulette/currentName"), name);
+
+    i++;
+  }, 1); // ← アニメ速度はここで調整
 }
 
     function stopRouletteAnimation() {
