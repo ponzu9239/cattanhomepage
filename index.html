@@ -570,22 +570,20 @@
     });
 
 
-視聴者側のコードです。書き換えてください
-
 function startRouletteAnimation() {
-  if (spinInterval || participantNames.length === 0) return;
+  if (spinInterval) return;  // すでに監視中なら何もしない
 
-  let i = 0;
-  spinInterval = setInterval(() => {
-    const participant = participantNames[i % participantNames.length];
-    const name = typeof participant === 'object' ? participant.name : participant;
-    rouletteDisplayEl.textContent = `抽選中... ${name}`;
+  const currentNameRef = ref(db, "/roulette/currentName");
 
-    // 🔽 Firebaseに現在の名前を送信
-    set(ref(db, "/roulette/currentName"), name);
-
-    i++;
-  }, 1); // ← アニメ速度はここで調整
+  // Firebaseの値の変化を監視して、名前が変わったら表示を更新する
+  onValue(currentNameRef, (snapshot) => {
+    const name = snapshot.val();
+    if (name) {
+      rouletteDisplayEl.textContent = `抽選中... ${name}`;
+    } else {
+      rouletteDisplayEl.textContent = "抽選中...";
+    }
+  });
 }
 
     function stopRouletteAnimation() {
