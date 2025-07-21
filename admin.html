@@ -230,9 +230,12 @@ function spinStopToggle() {
       });
 
       intervalId = setInterval(() => {
-        currentName = weightedList[Math.floor(Math.random() * weightedList.length)];
-        statusEl.textContent = `🎲 抽選中: ${currentName}`;
-      }, 1);
+  currentName = weightedList[Math.floor(Math.random() * weightedList.length)];
+  statusEl.textContent = `🎲 抽選中: ${currentName}`;
+  
+  // 🔽 Firebase に現在の表示名を保存
+  db.ref("/roulette/currentName").set(currentName);
+}, 1);
     });
 
   } else {
