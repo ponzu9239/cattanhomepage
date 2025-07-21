@@ -571,12 +571,11 @@
 
 
 function startRouletteAnimation() {
-  if (spinInterval) return;  // すでに監視中なら何もしない
+  if (spinInterval) return; // すでに監視中なら何もしない
 
-  const currentNameRef = ref(db, "/roulette/currentName");
+  const currentNameRef = firebase.database().ref("/roulette/currentName");
 
-  // Firebaseの値の変化を監視して、名前が変わったら表示を更新する
-  onValue(currentNameRef, (snapshot) => {
+  currentNameRef.on("value", (snapshot) => {
     const name = snapshot.val();
     if (name) {
       rouletteDisplayEl.textContent = `抽選中... ${name}`;
