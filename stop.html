@@ -117,18 +117,21 @@
 
 // ルーレット停止ボタン押下時
 stopBtn.addEventListener("click", () => {
-  // まず現在の名前を取得
-  db.ref("/roulette/currentName").once("value")
-    .then(snapshot => {
-      const currentName = snapshot.val();
+  // 画面に表示されている名前を取得
+  const currentNameEl = document.getElementById("currentName");
+  const currentName = currentNameEl ? currentNameEl.textContent.trim() : "";
 
-      // currentName を winner に保存し、その後 status を stopped に
-      const updates = {
-        "/roulette/status": "stopped",
-        "/roulette/winner": currentName || "未取得"
-      };
-      return db.ref().update(updates);
-    })
+  if (!currentName) {
+    message.textContent = "名前が取得できませんでした";
+    return;
+  }
+
+  const updates = {
+    "/roulette/status": "stopped",
+    "/roulette/winner": currentName
+  };
+
+  db.ref().update(updates)
     .then(() => {
       message.style.color = "green";
       message.textContent = "ルーレットを停止し、当選者を保存しました！";
