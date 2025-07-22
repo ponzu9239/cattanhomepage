@@ -115,20 +115,30 @@
       }
     });
 
-    // ルーレット停止ボタン押下時
-    stopBtn.addEventListener("click", () => {
-      // ルーレット停止状態をFirebaseにセット
-      db.ref("/roulette/status").set("stopped")
-        .then(() => {
-          message.style.color = "green";
-          message.textContent = "ルーレットを停止しました！ページを閉じてください。";
-          stopBtn.disabled = true;
-        })
-        .catch(() => {
-          message.style.color = "red";
-          message.textContent = "停止処理でエラーが発生しました。";
-        });
+// ルーレット停止ボタン押下時
+stopBtn.addEventListener("click", () => {
+  // まず現在の名前を取得
+  db.ref("/roulette/currentName").once("value")
+    .then(snapshot => {
+      const currentName = snapshot.val();
+
+      // currentName を winner に保存し、その後 status を stopped に
+      const updates = {
+        "/roulette/status": "stopped",
+        "/roulette/winner": currentName || "未取得"
+      };
+      return db.ref().update(updates);
+    })
+    .then(() => {
+      message.style.color = "green";
+      message.textContent = "ルーレットを停止し、当選者を保存しました！";
+      stopBtn.disabled = true;
+    })
+    .catch(() => {
+      message.style.color = "red";
+      message.textContent = "停止処理または保存でエラーが発生しました。";
     });
+});
   </script>
 </body>
 </html>
