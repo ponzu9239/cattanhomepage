@@ -285,6 +285,36 @@ function spinStopToggle() {
     });
   }
   
+  // Firebaseからのステータス変更を監視し、"stopped" になったらルーレットを強制停止
+db.ref("/roulette/status").on("value", (snapshot) => {
+  const status = snapshot.val();
+  if (status === "stopped" && spinning) {
+    // ルーレットを強制停止
+    spinning = false;
+    clearInterval(intervalId);
+    intervalId = null;
+
+    const button = document.getElementById("spinStopButton");
+    const statusEl = document.getElementById("rouletteStatus");
+
+    button.textContent = "ルーレットを回す";
+
+    if (currentName) {
+      statusEl.textContent = `🎉 当選者: ${currentName}`;
+
+      // 当選者を記録
+      const timestamp = Date.now();
+      db.ref(`/roulette/winner/${timestamp}`).set(currentName);
+
+      // アニメーション付け直し
+      statusEl.classList.remove("winner-animated");
+      void statusEl.offsetWidth;
+      statusEl.classList.add("winner-animated");
+    } else {
+      statusEl.textContent = "当選者が決まりませんでした。";
+    }
+  }
+});
 
 function saveParticipantsAuto() {
   const tbody = document.getElementById("participantsTbody");
