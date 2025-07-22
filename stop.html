@@ -1,134 +1,65 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ルーレット停止ページ</title>
-  <style>
-    body {
-      font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #f0f8ff;
-      padding: 2rem;
-      max-width: 400px;
-      margin: auto;
-      color: #333;
-      text-align: center;
-    }
-    input, button {
-      font-size: 1rem;
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #97EADB;
-      border: none;
-      border-radius: 5px;
-      color: white;
-      cursor: pointer;
-    }
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    #message {
-      margin-top: 1rem;
-      color: red;
-    }
-  </style>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-</head>
-<body>
-  <h1>ルーレットを止める</h1>
-
-  <p id="statusMsg">読み込み中...</p>
-
-  <div id="inputSection" style="display:none;">
-    <label for="passInput">合言葉を入力してください：</label>
-    <input type="password" id="passInput" placeholder="合言葉" />
-    <button id="verifyBtn" disabled>合言葉を確認</button>
-  </div>
-
-  <button id="stopBtn" style="display:none;">ルーレットを止める</button>
-
-  <p id="message"></p>
-
+  <meta charset="UTF-8">
+  <title>ルーレットを止める</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script>
-    // Firebase初期化（index.htmlのと同じ設定にしてください）
+    // Firebase 初期化（すでに使っている設定に置き換えて）
     const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  </script>
+</head>
+<body>
+  <h1>ルーレットを止めるページ</h1>
 
-    const statusMsg = document.getElementById("statusMsg");
-    const inputSection = document.getElementById("inputSection");
-    const passInput = document.getElementById("passInput");
-    const verifyBtn = document.getElementById("verifyBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const message = document.getElementById("message");
+  <div id="content" style="display: none;">
+    <label>あいことばを入力してください：</label><br>
+    <input type="text" id="keyword" />
+    <button onclick="checkKeyword()">送信</button>
+    <p id="error" style="color: red;"></p>
+    <div id="stopSection" style="display: none; margin-top: 1em;">
+      <button onclick="stopRoulette()" style="font-size: 1.2em;">🛑 ルーレットを止める</button>
+    </div>
+  </div>
 
-    const PASSWORD = "秘密の合言葉"; // 合言葉をここに設定してください（管理者が決める）
+  <script>
+    const correctKeyword = "ねこ"; // ← 合言葉（自由に変えてOK）
 
-    // ルーレットの状態を監視
-    db.ref("/roulette/status").on("value", snapshot => {
-      const status = snapshot.val();
-      if(status === "spinning"){
-        statusMsg.textContent = "ルーレットは現在回っています。合言葉を入力して停止できます。";
-        inputSection.style.display = "block";
-        stopBtn.style.display = "none";
+    // spinningの状態を確認して、回ってるときだけフォーム表示
+    firebase.database().ref("roulette/spinning").on("value", (snapshot) => {
+      if (snapshot.val() === true) {
+        document.getElementById("content").style.display = "block";
       } else {
-        statusMsg.textContent = "ルーレットは現在停止中です。";
-        inputSection.style.display = "none";
-        stopBtn.style.display = "none";
-      }
-      message.textContent = "";
-      passInput.value = "";
-      verifyBtn.disabled = true;
-    });
-
-    // 合言葉入力時にボタンの活性化制御
-    passInput.addEventListener("input", () => {
-      verifyBtn.disabled = passInput.value.trim() === "";
-      message.textContent = "";
-    });
-
-    // 合言葉確認ボタン
-    verifyBtn.addEventListener("click", () => {
-      if(passInput.value === PASSWORD){
-        message.style.color = "green";
-        message.textContent = "合言葉が正しいです！「ルーレットを止める」ボタンが表示されます。";
-        stopBtn.style.display = "block";
-        verifyBtn.disabled = true;
-        passInput.disabled = true;
-      } else {
-        message.style.color = "red";
-        message.textContent = "合言葉が違います。もう一度入力してください。";
+        document.body.innerHTML = "<h2>現在ルーレットは回っていません。</h2>";
       }
     });
 
-    // ルーレット停止ボタン押下時
-    stopBtn.addEventListener("click", () => {
-      // ルーレット停止状態をFirebaseにセット
-      db.ref("/roulette/status").set("stopped")
-        .then(() => {
-          message.style.color = "green";
-          message.textContent = "ルーレットを停止しました！ページを閉じてください。";
-          stopBtn.disabled = true;
-        })
-        .catch(() => {
-          message.style.color = "red";
-          message.textContent = "停止処理でエラーが発生しました。";
-        });
-    });
+    function checkKeyword() {
+      const input = document.getElementById("keyword").value.trim();
+      if (input === correctKeyword) {
+        document.getElementById("stopSection").style.display = "block";
+        document.getElementById("error").textContent = "";
+      } else {
+        document.getElementById("error").textContent = "合言葉が違います。";
+      }
+    }
+
+    function stopRoulette() {
+      firebase.database().ref("roulette/spinning").set(false).then(() => {
+        alert("ルーレットを停止しました！");
+        window.location.href = "index.html";
+      });
+    }
   </script>
 </body>
 </html>
