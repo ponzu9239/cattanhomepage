@@ -252,7 +252,7 @@
     }
 
     .winner-area {
-　
+      background: rgba(255, 255, 255, 0.85);
       padding: 16px;
       border: 2px dotted #00bcd4;
       border-radius: 12px;
@@ -387,27 +387,26 @@
 
   <!-- 🎉 当選者表示エリア（ルール枠の中に入れた） -->
   <section id="rouletteSection">
-  <div id="winner">
-    <h2>🎉本日の当選者🎉</h2>
-    <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
+    <div id="winner">
+      <h2>🎉本日の当選者🎉</h2>
+      <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
 
-    <!-- 当選確率バー -->
-    <div id="probabilityBarContainer" style="margin-top: 1em;">
-      <div id="probabilityBarBackground"
-        style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
-        <div id="probabilityBar" style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;"></div>
-      </div>
-      <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">
-        当選確率: ??%
+      <!-- 当選確率バー -->
+      <div id="probabilityBarContainer" style="margin-top: 1em;">
+        <div id="probabilityBarBackground"
+          style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
+          <div id="probabilityBar" style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;">
+          </div>
+        </div>
+        <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">当選確率: ??%</div>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- 🎯 倍率ごとの当選確率円グラフ（当選者表示とは分けて外に出す） -->
   <div style="max-width: 400px; margin: 2rem auto;">
     <canvas id="probabilityPieChart" width="300" height="300" style="margin-top: 1em;"></canvas>
   </div>
-  </section>
 
   <section id="sns" class="sns">
 
