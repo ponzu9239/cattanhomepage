@@ -51,6 +51,9 @@
     <button id="verifyBtn" disabled>合言葉を確認</button>
   </div>
 
+<!-- currentNameを表示して取得するための要素 -->
+<div id="currentName" style="font-size: 1.2em; margin-top: 1em; color: #000;"></div>
+
   <button id="stopBtn" style="display:none;">ルーレットを止める</button>
 
   <p id="message"></p>
@@ -141,6 +144,12 @@ stopBtn.addEventListener("click", () => {
       message.style.color = "red";
       message.textContent = "停止処理または保存でエラーが発生しました。";
     });
+});
+
+// currentNameをリアルタイムで取得して表示
+db.ref("/roulette/currentName").on("value", snapshot => {
+  const name = snapshot.val();
+  document.getElementById("currentName").textContent = name || "";
 });
   </script>
 </body>
