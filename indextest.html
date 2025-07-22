@@ -408,6 +408,10 @@
     <canvas id="probabilityPieChart" width="300" height="300" style="margin-top: 1em;"></canvas>
   </div>
 
+<div style="text-align:center; margin-top: 1rem;">
+  <button id="goStopPageBtn" style="display:none;" onclick="goStopPage()">ルーレットを止めに行く</button>
+</div>
+
   <section id="sns" class="sns">
 
     <h3>🐾 SNSリンク</h3>
@@ -729,6 +733,22 @@ function startRouletteAnimation() {
       localStorage.setItem("mode", isDark ? "dark" : "light");
     }
 
+const goStopPageBtn = document.getElementById("goStopPageBtn");
+  const statusRef = firebase.database().ref("/roulette/status");
+
+  statusRef.on("value", (snapshot) => {
+    const status = snapshot.val();
+    if(status === "spinning"){
+      goStopPageBtn.style.display = "inline-block";
+    } else {
+      goStopPageBtn.style.display = "none";
+    }
+  });
+
+  function goStopPage(){
+    // stop.html に遷移（同じディレクトリに作成予定）
+    location.href = "stop.html";
+  }
 
 
 
