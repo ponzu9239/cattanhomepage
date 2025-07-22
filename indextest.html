@@ -401,13 +401,29 @@
         当選確率: ??%
       </div>
     </div>
+    <!-- index.html の <section id="rouletteSection"> の中など適切な位置に -->
+<div style="text-align:center; margin-top: 1rem;">
+  <button id="goStopPageBtn" style="display:none;" onclick="goStopPage()">ルーレットを止めに行く</button>
+</div>
 
-    <!-- ①視聴者がルーレットを止めに行くボタン -->
-    <div id="stopRouletteButtonContainer" style="text-align: center; margin-top: 1.5em;">
-      <button id="goToStopPageButton" style="padding: 0.5em 1em; font-size: 1em; display: none;">
-        ルーレットを止めに行く
-      </button>
-    </div>
+<script>
+  const goStopPageBtn = document.getElementById("goStopPageBtn");
+  const statusRef = firebase.database().ref("/roulette/status");
+
+  statusRef.on("value", (snapshot) => {
+    const status = snapshot.val();
+    if(status === "spinning"){
+      goStopPageBtn.style.display = "inline-block";
+    } else {
+      goStopPageBtn.style.display = "none";
+    }
+  });
+
+  function goStopPage(){
+    // stop.html に遷移（同じディレクトリに作成予定）
+    location.href = "stop.html";
+  }
+</script>
   </div>
 
   <!-- 🎯 倍率ごとの当選確率円グラフ（当選者表示とは分けて外に出す） -->
