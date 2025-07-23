@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,16 +14,22 @@
       margin: auto;
       color: #333;
     }
+
     h1 {
       text-align: center;
       color: #97EADB;
     }
-    label, input, textarea, button {
+
+    label,
+    input,
+    textarea,
+    button {
       display: block;
       margin: 1rem 0;
       width: 100%;
       font-size: 1rem;
     }
+
     button {
       background-color: #97EADB;
       color: white;
@@ -31,74 +38,86 @@
       border-radius: 0.5rem;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #7fcbd5;
     }
+
     button.danger {
       background-color: #f66;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 1rem;
     }
-    th, td {
+
+    th,
+    td {
       border: 1px solid #97EADB;
       padding: 0.5rem;
       text-align: center;
     }
-    input[type="text"], input[type="number"] {
+
+    input[type="text"],
+    input[type="number"] {
       width: 90%;
       padding: 0.2rem;
     }
 
-@keyframes winnerPop {
-  0% {
-    transform: scale(1);
-    opacity: 0.2;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
-}
+    @keyframes winnerPop {
+      0% {
+        transform: scale(1);
+        opacity: 0.2;
+      }
 
-.winner-animated {
-  animation: winnerPop 0.6s ease;
-  display: inline-block;
-  transform-origin: center;           /* ← 拡大中心を中央に設定 */
-  font-weight: bold;
-  color: #FFD700;                     /* 明るい金色 */
-  text-shadow: 2px 2px 4px #000000;   /* 黒い縁取りでくっきり */
-  background-color: rgba(0, 0, 0, 0.6); /* 半透明黒で背景 */
-  padding: 8px 16px;
-  border-radius: 10px;
-}
+      50% {
+        transform: scale(1.3);
+        opacity: 1;
+      }
 
-#participantsTable td button {
-  white-space: nowrap;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  line-height: 1.2;
-  max-width: 100%;
-  display: inline-block;
-  word-break: keep-all;
-}
+      100% {
+        transform: scale(1);
+      }
+    }
 
-#participantsTable td {
-  padding: 0px 6px;
-  font-size: 0.75rem;
-  line-height: 1;
-}
+    .winner-animated {
+      animation: winnerPop 0.6s ease;
+      display: inline-block;
+      transform-origin: center;
+      /* ← 拡大中心を中央に設定 */
+      font-weight: bold;
+      color: #FFD700;
+      /* 明るい金色 */
+      text-shadow: 2px 2px 4px #000000;
+      /* 黒い縁取りでくっきり */
+      background-color: rgba(0, 0, 0, 0.6);
+      /* 半透明黒で背景 */
+      padding: 8px 16px;
+      border-radius: 10px;
+    }
 
+    #participantsTable td button {
+      white-space: nowrap;
+      font-size: 0.9rem;
+      padding: 4px 8px;
+      line-height: 1.2;
+      max-width: 100%;
+      display: inline-block;
+      word-break: keep-all;
+    }
 
+    #participantsTable td {
+      padding: 0px 6px;
+      font-size: 0.75rem;
+      line-height: 1;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
+
 <body>
   <h1>きゃたん 管理者ページ</h1>
 
@@ -131,173 +150,175 @@
     <button onclick="resetRoulette()" class="danger">リセット</button>
 
     <p id="rouletteStatus"></p>
-    
+
   </section>
 
   <p id="status"></p>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-    authDomain: "catiffanygame.firebaseapp.com",
-    databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-    projectId: "catiffanygame",
-    storageBucket: "catiffanygame.appspot.com",
-    messagingSenderId: "166871605809",
-    appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.appspot.com",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  window.onload = () => {
-    // 参加型コード＆配信URLの読み込み
-    db.ref("/cattan").once("value").then(snapshot => {
-      const data = snapshot.val() || {};
-      document.getElementById("participantCode").value = data.code || "";
-      document.getElementById("streamUrl").value = data.stream || "";
-    });
+    window.onload = () => {
+      // 参加型コード＆配信URLの読み込み
+      db.ref("/cattan").once("value").then(snapshot => {
+        const data = snapshot.val() || {};
+        document.getElementById("participantCode").value = data.code || "";
+        document.getElementById("streamUrl").value = data.stream || "";
+      });
 
-    // 参加者リストの読み込み
-    db.ref("/roulette/participants").once("value").then(snapshot => {
-      const data = snapshot.val() || [];
-      if(data.length === 0){
-        addParticipantRow();
-        return;
-      }
-      data.forEach(p => addParticipantRow(p.name, p.multiplier));
-    });
-  };
-
-  function saveData() {
-    const participantCode = document.getElementById("participantCode").value.trim();
-    const streamUrl = document.getElementById("streamUrl").value.trim();
-
-    const updates = {
-      code: participantCode || "現在、参加型カスタムは行われておりません。",
-      stream: streamUrl || "現在、配信は行われていません。"
+      // 参加者リストの読み込み
+      db.ref("/roulette/participants").once("value").then(snapshot => {
+        const data = snapshot.val() || [];
+        if (data.length === 0) {
+          addParticipantRow();
+          return;
+        }
+        data.forEach(p => addParticipantRow(p.name, p.multiplier));
+      });
     };
 
-    db.ref("/cattan").set(updates).then(() => {
-      document.getElementById("status").textContent = "保存しました！";
-    });
-  }
+    function saveData() {
+      const participantCode = document.getElementById("participantCode").value.trim();
+      const streamUrl = document.getElementById("streamUrl").value.trim();
 
-  function addParticipantRow(name = "", multiplier = 1) {
-  const tbody = document.getElementById("participantsTbody");
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
+      const updates = {
+        code: participantCode || "現在、参加型カスタムは行われておりません。",
+        stream: streamUrl || "現在、配信は行われていません。"
+      };
+
+      db.ref("/cattan").set(updates).then(() => {
+        document.getElementById("status").textContent = "保存しました！";
+      });
+    }
+
+    function addParticipantRow(name = "", multiplier = 1) {
+      const tbody = document.getElementById("participantsTbody");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
     <td><input type="text" value="${name}" placeholder="名前" oninput="saveParticipantsAuto()" /></td>
     <td><input type="number" min="1" value="${multiplier}" oninput="saveParticipantsAuto()" /></td>
     <td><button onclick="this.closest('tr').remove(); saveParticipantsAuto()">削除</button></td>
   `;
-  tbody.appendChild(tr);
-}
+      tbody.appendChild(tr);
+    }
 
 
-let spinning = false;
-let intervalId = null;
-let currentName = ""; // 今ルーレットで表示中の名前を保存
+    let spinning = false;
+    let intervalId = null;
+    let currentName = ""; // 今ルーレットで表示中の名前を保存
 
-function spinStopToggle() {
-  const button = document.getElementById("spinStopButton");
-  const statusEl = document.getElementById("rouletteStatus");
+    function spinStopToggle() {
+      const button = document.getElementById("spinStopButton");
+      const statusEl = document.getElementById("rouletteStatus");
 
-  if (!spinning) {
-    // 抽選開始
-    spinning = true;
-    button.textContent = "停止";
+      if (!spinning) {
+        // 抽選開始
+        spinning = true;
+        button.textContent = "停止";
 
-    // 🔽 状態を Firebase に送信（spinning）
-    db.ref("/roulette/status").set("spinning");
+        // 🔽 状態を Firebase に送信（spinning）
+        db.ref("/roulette/status").set("spinning");
 
-    db.ref("/roulette/participants").once("value").then(snapshot => {
-      const participants = snapshot.val();
-      if (!participants || participants.length === 0) {
-        statusEl.textContent = "参加者がいません。";
+        db.ref("/roulette/participants").once("value").then(snapshot => {
+          const participants = snapshot.val();
+          if (!participants || participants.length === 0) {
+            statusEl.textContent = "参加者がいません。";
+            spinning = false;
+            button.textContent = "ルーレットを回す";
+
+            // 🔽 状態を「停止」に戻す
+            db.ref("/roulette/status").set("stopped");
+            return;
+          }
+
+          let weightedList = [];
+          participants.forEach(p => {
+            for (let i = 0; i < p.multiplier; i++) {
+              weightedList.push(p.name);
+            }
+          });
+
+          intervalId = setInterval(() => {
+            currentName = weightedList[Math.floor(Math.random() * weightedList.length)];
+            statusEl.textContent = `🎲 抽選中: ${currentName}`;
+            db.ref("/roulette/currentName").set(currentName);
+          }, 1);
+        });
+
+      } else {
+        // 抽選停止
         spinning = false;
         button.textContent = "ルーレットを回す";
 
-        // 🔽 状態を「停止」に戻す
-        db.ref("/roulette/status").set("stopped");
-        return;
-      }
-
-      let weightedList = [];
-      participants.forEach(p => {
-        for (let i = 0; i < p.multiplier; i++) {
-          weightedList.push(p.name);
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
         }
-      });
 
-      intervalId = setInterval(() => {
-        currentName = weightedList[Math.floor(Math.random() * weightedList.length)];
-        statusEl.textContent = `🎲 抽選中: ${currentName}`;
-      }, 1);
-    });
+        if (currentName === "") {
+          statusEl.textContent = "当選者が決まりませんでした。";
 
-  } else {
-    // 抽選停止
-    spinning = false;
-    button.textContent = "ルーレットを回す";
+          // 🔽 状態を「停止」に戻す
+          db.ref("/roulette/status").set("stopped");
+          return;
+        }
 
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
+        const winner = currentName;
+        const timestamp = Date.now();
+
+        // 🔽 Firebase に winner 書き込み
+        db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
+          statusEl.textContent = `🎉 当選者: ${winner}`;
+
+          // 🔽 状態を「停止」に変更
+          db.ref("/roulette/status").set("stopped");
+
+          statusEl.classList.remove("winner-animated");
+          void statusEl.offsetWidth;
+          statusEl.classList.add("winner-animated");
+        });
+      }
     }
 
-    if (currentName === "") {
-      statusEl.textContent = "当選者が決まりませんでした。";
-
-      // 🔽 状態を「停止」に戻す
-      db.ref("/roulette/status").set("stopped");
-      return;
-    }
-
-    const winner = currentName;
-    const timestamp = Date.now();
-
-    // 🔽 Firebase に winner 書き込み
-    db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
-      statusEl.textContent = `🎉 当選者: ${winner}`;
-
-      // 🔽 状態を「停止」に変更
-      db.ref("/roulette/status").set("stopped");
-
-      statusEl.classList.remove("winner-animated");
-      void statusEl.offsetWidth;
-      statusEl.classList.add("winner-animated");
-    });
-  }
-}
 
 
-
-  function resetRoulette() {
-    db.ref("/roulette/participants").remove();
-    db.ref("/roulette/winner").remove();
-    db.ref("/roulette/currentName").remove();
+    function resetRoulette() {
+      db.ref("/roulette/participants").remove();
+      db.ref("/roulette/winner").remove();
+      db.ref("/roulette/currentName").remove();
       document.getElementById("rouletteStatus").textContent = "ルーレットをリセットしました。";
       const tbody = document.getElementById("participantsTbody");
       tbody.innerHTML = "";
       addParticipantRow();
     }
-  
 
-function saveParticipantsAuto() {
-  const tbody = document.getElementById("participantsTbody");
-  const rows = tbody.querySelectorAll("tr");
-  const participants = [];
 
-  for (const row of rows) {
-    const name = row.cells[0].querySelector("input").value.trim();
-    let multiplier = parseInt(row.cells[1].querySelector("input").value);
-    if (!name) continue;
-    if (isNaN(multiplier) || multiplier < 1) multiplier = 1;
-    participants.push({ name, multiplier });
-  }
+    function saveParticipantsAuto() {
+      const tbody = document.getElementById("participantsTbody");
+      const rows = tbody.querySelectorAll("tr");
+      const participants = [];
 
-  db.ref("/roulette/participants").set(participants);
-}
-</script>
+      for (const row of rows) {
+        const name = row.cells[0].querySelector("input").value.trim();
+        let multiplier = parseInt(row.cells[1].querySelector("input").value);
+        if (!name) continue;
+        if (isNaN(multiplier) || multiplier < 1) multiplier = 1;
+        participants.push({ name, multiplier });
+      }
+
+      db.ref("/roulette/participants").set(participants);
+    }
+  </script>
 </body>
+
 </html>
