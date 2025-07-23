@@ -294,23 +294,34 @@
             }
         });
 
-        function startRouletteAnimation() {
-            if (spinInterval || participantNames.length === 0) return;
 
-            let i = 0;
-            spinInterval = setInterval(() => {
-                const participant = participantNames[i % participantNames.length];
-                const name = typeof participant === 'object' ? participant.name : participant;
-                rouletteDisplayEl.textContent = `抽選中... ${name}`;
-                i++;
-            }, 1); // ← アニメ速度はここで調整
+        let currentName = "";
+
+        function watchCurrentName() {
+            const currentNameRef = firebase.database().ref("/roulette/currentName");
+            currentNameRef.on("value", (snapshot) => {
+                currentName = snapshot.val();
+                console.log("受け取った名前:", currentName);
+                rouletteDisplayEl.textContent = `抽選中... ${currentName}`;
+            });
         }
 
-        function stopRouletteAnimation() {
-            clearInterval(spinInterval);
-            spinInterval = null;
-            rouletteDisplayEl.textContent = ""; // ← これが表示を消す
+        // ページ読み込み後などに呼ぶ
+        watchCurrentName();
+
+        function watchRouletteStatus() {
+            const statusRef = firebase.database().ref("/roulette/status");
+            statusRef.on("value", (snapshot) => {
+                const status = snapshot.val();
+                if (status === "stopped") {
+                    rouletteDisplayEl.textContent = "";  // 抽選中の文字を消す
+                } else if (status === "spinning") {
+                    // 抽選中の場合の処理（必要なら）
+                }
+            });
         }
+
+        watchRouletteStatus();
 
 
         const db = firebase.firestore();
