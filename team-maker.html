@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>チーム分け</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #eaf9f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      margin: 0;
+    }
+    h2 {
+      font-size: 2.2em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .team-container {
+      display: flex;
+      gap: 50px;
+      margin-top: 20px;
+    }
+    .team-box {
+      background: white;
+      border: 4px solid #97EADB;
+      border-radius: 20px;
+      padding: 20px 30px;
+      width: 250px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+    .team-box h3 {
+      text-align: center;
+      font-size: 1.6em;
+      margin-bottom: 10px;
+    }
+    .player {
+      font-size: 1.1em;
+      padding: 8px;
+      margin: 6px 0;
+      background: #f7ffff;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid #97EADB;
+    }
+    button {
+      margin-top: 20px;
+      padding: 14px 24px;
+      font-size: 1.2em;
+      background: #97EADB;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #6fd6cc;
+    }
+  </style>
+</head>
+<body>
+  <h2>チーム分け結果</h2>
+  <button onclick="loadTeams()">チームを分ける</button>
+  <div class="team-container">
+    <div class="team-box">
+      <h3>チームA</h3>
+      <div id="teamA"></div>
+    </div>
+    <div class="team-box">
+      <h3>チームB</h3>
+      <div id="teamB"></div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      // 🔹Firebaseの設定を入れる
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // 🔹 合計スコア差が最小になるようにチーム分け
+    function balanceTeams(players) {
+      players.sort((a,b) => b.score - a.score); // スコア順に並べる
+      const teamA = [], teamB = [];
+      let sumA = 0, sumB = 0;
+
+      players.forEach(p => {
+        if (sumA <= sumB) {
+          teamA.push(p);
+          sumA += p.score;
+        } else {
+          teamB.push(p);
+          sumB += p.score;
+        }
+      });
+
+      return { teamA, teamB };
+    }
+
+    function loadTeams() {
+      db.collection("playerScores").get().then(snapshot => {
+        const players = [];
+        snapshot.forEach(doc => {
+          players.push({ name: doc.id, score: doc.data().score });
+        });
+
+        const { teamA, teamB } = balanceTeams(players);
+
+        document.getElementById("teamA").innerHTML =
+          teamA.map(p => `<div class="player">${p.name} (${p.score.toFixed(1)})</div>`).join("");
+        document.getElementById("teamB").innerHTML =
+          teamB.map(p => `<div class="player">${p.name} (${p.score.toFixed(1)})</div>`).join("");
+      });
+    }
+  </script>
+</body>
+</html>
