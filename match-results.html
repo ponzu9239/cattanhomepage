@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>試合結果入力</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+</head>
+<body>
+  <h2>試合結果入力</h2>
+  <form id="matchForm">
+    <label>チームAメンバー（カンマ区切り）:</label><br>
+    <input id="teamA"><br>
+    <label>チームBメンバー（カンマ区切り）:</label><br>
+    <input id="teamB"><br>
+    <label>チームAキル数:</label><br>
+    <input id="killsA" type="number"><br>
+    <label>チームBキル数:</label><br>
+    <input id="killsB" type="number"><br>
+    <button type="button" onclick="saveMatch()">保存</button>
+  </form>
+
+  <script>
+    const firebaseConfig = {
+      // 🔹ここにFirebaseの設定を書いてね
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function saveMatch() {
+      const teamA = document.getElementById("teamA").value.split(",");
+      const teamB = document.getElementById("teamB").value.split(",");
+      const killsA = parseInt(document.getElementById("killsA").value);
+      const killsB = parseInt(document.getElementById("killsB").value);
+
+      db.collection("matches").add({
+        teamA, teamB, killsA, killsB, timestamp: new Date()
+      }).then(() => alert("保存しました！"));
+    }
+  </script>
+</body>
+</html>
