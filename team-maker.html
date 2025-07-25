@@ -1,122 +1,159 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>チーム分け</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>APEX 自動チーム分け</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background: #eaf9f8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px;
-      margin: 0;
+      background-color: #f6ffff;
+      text-align: center;
+      padding: 20px;
     }
-    h2 {
-      font-size: 2.2em;
-      color: #333;
-      margin-bottom: 20px;
+    h1 {
+      color: #4aa4a1;
     }
-    .team-container {
-      display: flex;
-      gap: 50px;
-      margin-top: 20px;
-    }
-    .team-box {
+    .card {
       background: white;
-      border: 4px solid #97EADB;
-      border-radius: 20px;
-      padding: 20px 30px;
-      width: 250px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
-    }
-    .team-box h3 {
-      text-align: center;
-      font-size: 1.6em;
-      margin-bottom: 10px;
-    }
-    .player {
-      font-size: 1.1em;
-      padding: 8px;
-      margin: 6px 0;
-      background: #f7ffff;
-      border-radius: 10px;
-      text-align: center;
-      border: 1px solid #97EADB;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
     }
     button {
-      margin-top: 20px;
-      padding: 14px 24px;
-      font-size: 1.2em;
-      background: #97EADB;
+      background-color: #97eadb;
       border: none;
+      padding: 12px 20px;
       border-radius: 10px;
-      cursor: pointer;
       font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
     }
     button:hover {
-      background: #6fd6cc;
+      background-color: #7fd2c7;
+    }
+    table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #97eadb;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #97eadb;
+      color: #333;
     }
   </style>
 </head>
 <body>
-  <h2>チーム分け結果</h2>
-  <button onclick="loadTeams()">チームを分ける</button>
-  <div class="team-container">
-    <div class="team-box">
-      <h3>チームA</h3>
-      <div id="teamA"></div>
-    </div>
-    <div class="team-box">
-      <h3>チームB</h3>
-      <div id="teamB"></div>
-    </div>
+  <h1>🤖 自動チーム分け（平均キル数ベース）</h1>
+
+  <div class="card">
+    <button id="divideBtn">チーム分け開始</button>
+
+    <table id="teamTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>チームA</th>
+          <th>合計スコア</th>
+          <th>チームB</th>
+          <th>合計スコア</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="teamAPlayers"></td>
+          <td id="teamAScore"></td>
+          <td id="teamBPlayers"></td>
+          <td id="teamBScore"></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <script>
+    // Firebase設定（自分の設定に置き換えて）
     const firebaseConfig = {
-      // 🔹Firebaseの設定を入れる
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
     };
+
     const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const db = firebase.firestore(app);
 
-    // 🔹 合計スコア差が最小になるようにチーム分け
-    function balanceTeams(players) {
-      players.sort((a,b) => b.score - a.score); // スコア順に並べる
-      const teamA = [], teamB = [];
-      let sumA = 0, sumB = 0;
+    async function getPlayerScores() {
+      const snapshot = await db.collection("matches").get();
+      const playerStats = {};
 
-      players.forEach(p => {
-        if (sumA <= sumB) {
-          teamA.push(p);
-          sumA += p.score;
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        data.teamA.players.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+          playerStats[p].total += data.teamA.kills;
+          playerStats[p].count += 1;
+        });
+        data.teamB.players.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+          playerStats[p].total += data.teamB.kills;
+          playerStats[p].count += 1;
+        });
+      });
+
+      // 平均を計算
+      const playerScores = [];
+      for (const [name, stats] of Object.entries(playerStats)) {
+        playerScores.push({ name, score: stats.total / stats.count });
+      }
+      return playerScores;
+    }
+
+    // 貪欲法によるチーム分け
+    function greedyDivide(players) {
+      // スコア降順でソート
+      players.sort((a,b) => b.score - a.score);
+
+      const teamA = [];
+      const teamB = [];
+      let scoreA = 0;
+      let scoreB = 0;
+
+      players.forEach(player => {
+        if (scoreA <= scoreB) {
+          teamA.push(player);
+          scoreA += player.score;
         } else {
-          teamB.push(p);
-          sumB += p.score;
+          teamB.push(player);
+          scoreB += player.score;
         }
       });
 
-      return { teamA, teamB };
+      return { teamA, teamB, scoreA, scoreB };
     }
 
-    function loadTeams() {
-      db.collection("playerScores").get().then(snapshot => {
-        const players = [];
-        snapshot.forEach(doc => {
-          players.push({ name: doc.id, score: doc.data().score });
-        });
+    document.getElementById("divideBtn").addEventListener("click", async () => {
+      const players = await getPlayerScores();
+      if(players.length < 2){
+        alert("プレイヤーが足りません");
+        return;
+      }
 
-        const { teamA, teamB } = balanceTeams(players);
+      const {teamA, teamB, scoreA, scoreB} = greedyDivide(players);
 
-        document.getElementById("teamA").innerHTML =
-          teamA.map(p => `<div class="player">${p.name} (${p.score.toFixed(1)})</div>`).join("");
-        document.getElementById("teamB").innerHTML =
-          teamB.map(p => `<div class="player">${p.name} (${p.score.toFixed(1)})</div>`).join("");
-      });
-    }
+      document.getElementById("teamAPlayers").textContent = teamA.map(p => p.name).join(", ");
+      document.getElementById("teamAScore").textContent = scoreA.toFixed(1);
+      document.getElementById("teamBPlayers").textContent = teamB.map(p => p.name).join(", ");
+      document.getElementById("teamBScore").textContent = scoreB.toFixed(1);
+
+      document.getElementById("teamTable").style.display = "table";
+    });
   </script>
 </body>
 </html>
