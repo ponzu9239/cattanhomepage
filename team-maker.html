@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>APEX 自動チーム分け</title>
+  <title>APEX 自動チーム分け（入力メンバー限定）</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
   <style>
@@ -24,6 +24,15 @@
       margin: 20px auto;
       padding: 20px;
     }
+    textarea {
+      width: 90%;
+      height: 60px;
+      padding: 8px;
+      border: 2px solid #97eadb;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: vertical;
+    }
     button {
       background-color: #97eadb;
       border: none;
@@ -31,6 +40,7 @@
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
+      margin-top: 15px;
       transition: 0.3s;
     }
     button:hover {
@@ -38,7 +48,7 @@
     }
     table {
       width: 100%;
-      margin-top: 15px;
+      margin-top: 20px;
       border-collapse: collapse;
     }
     th, td {
@@ -50,12 +60,20 @@
       background-color: #97eadb;
       color: #333;
     }
+    .label {
+      font-weight: bold;
+      color: #4aa4a1;
+      margin-top: 10px;
+      display: block;
+    }
   </style>
 </head>
 <body>
-  <h1>🤖 自動チーム分け（平均キル数ベース）</h1>
+  <h1>🤖 APEX 自動チーム分け（入力メンバー限定）</h1>
 
   <div class="card">
+    <label for="playerInput" class="label">メンバー名をカンマ区切りで入力してください</label>
+    <textarea id="playerInput" placeholder="もねこ, きゃたん, りったん, ぽんず"></textarea>
     <button id="divideBtn">チーム分け開始</button>
 
     <table id="teamTable" style="display:none;">
@@ -79,22 +97,18 @@
   </div>
 
   <script>
-    // Firebase設定（自分の設定に置き換えて）
+    // Firebase設定（自分の設定に置き換えてください）
     const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
     };
 
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore(app);
 
-    async function getPlayerScores() {
+    // 過去データから全プレイヤーの平均キル数を取得
+    async function getAllPlayerScores() {
       const snapshot = await db.collection("matches").get();
       const playerStats = {};
 
@@ -112,17 +126,15 @@
         });
       });
 
-      // 平均を計算
-      const playerScores = [];
+      const playerScores = {};
       for (const [name, stats] of Object.entries(playerStats)) {
-        playerScores.push({ name, score: stats.total / stats.count });
+        playerScores[name] = stats.total / stats.count;
       }
       return playerScores;
     }
 
     // 貪欲法によるチーム分け
     function greedyDivide(players) {
-      // スコア降順でソート
       players.sort((a,b) => b.score - a.score);
 
       const teamA = [];
@@ -144,13 +156,27 @@
     }
 
     document.getElementById("divideBtn").addEventListener("click", async () => {
-      const players = await getPlayerScores();
+      const input = document.getElementById("playerInput").value.trim();
+      if (!input) {
+        alert("メンバーを入力してください");
+        return;
+      }
+      const inputNames = input.split(",").map(s => s.trim()).filter(s => s.length > 0);
+
+      const allScores = await getAllPlayerScores();
+
+      // 入力メンバーのスコアリストを作成
+      const players = inputNames.map(name => ({
+        name,
+        score: allScores[name] ?? 10 // データがなければデフォルト10（調整可）
+      }));
+
       if(players.length < 2){
-        alert("プレイヤーが足りません");
+        alert("メンバーは2人以上入力してください");
         return;
       }
 
-      const {teamA, teamB, scoreA, scoreB} = greedyDivide(players);
+      const { teamA, teamB, scoreA, scoreB } = greedyDivide(players);
 
       document.getElementById("teamAPlayers").textContent = teamA.map(p => p.name).join(", ");
       document.getElementById("teamAScore").textContent = scoreA.toFixed(1);
