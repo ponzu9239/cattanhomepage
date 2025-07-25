@@ -22,7 +22,19 @@
 
   <script>
     const firebaseConfig = {
-      // 🔹ここにFirebaseの設定を書いてね
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.appspot.com",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+      measurementId: "G-ZNGEZZWMTP"
+  };
+
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore(); // Firestoreを使う場合
+</script>
     };
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
