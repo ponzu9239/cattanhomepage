@@ -5,23 +5,77 @@
   <title>試合結果入力</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f8fb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .form-container {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+    .form-container h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 10px;
+      background: #4CAF50;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+  </style>
 </head>
 <body>
-  <h2>試合結果入力</h2>
-  <form id="matchForm">
-    <label>チームAメンバー（カンマ区切り）:</label><br>
-    <input id="teamA"><br>
-    <label>チームBメンバー（カンマ区切り）:</label><br>
-    <input id="teamB"><br>
-    <label>チームAキル数:</label><br>
-    <input id="killsA" type="number"><br>
-    <label>チームBキル数:</label><br>
-    <input id="killsB" type="number"><br>
-    <button type="button" onclick="saveMatch()">保存</button>
-  </form>
+  <div class="form-container">
+    <h2>試合結果入力</h2>
+    <form id="matchForm">
+      <label>チームAメンバー（カンマ区切り）:</label>
+      <input id="teamA">
+
+      <label>チームBメンバー（カンマ区切り）:</label>
+      <input id="teamB">
+
+      <label>チームAキル数:</label>
+      <input id="killsA" type="number">
+
+      <label>チームBキル数:</label>
+      <input id="killsB" type="number">
+
+      <button type="button" onclick="saveMatch()">保存</button>
+    </form>
+  </div>
 
   <script>
-    const firebaseConfig = {      
+    const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
       authDomain: "catiffanygame.firebaseapp.com",
       databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
