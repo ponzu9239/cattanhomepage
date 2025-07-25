@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>平均チームキル数</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background-color: #f6ffff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #4aa4a1;
+    }
+    .card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #97eadb;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #97eadb;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 プレイヤー平均チームキル数</h1>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>プレイヤー名</th>
+          <th>平均チームキル数</th>
+        </tr>
+      </thead>
+      <tbody id="playerTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Firebase設定（自分の情報に置き換える）
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
+    async function loadData() {
+      const snapshot = await db.collection("matches").get();
+
+      const playerStats = {};
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        // チームA
+        data.teamA.players.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+          playerStats[p].total += data.teamA.kills;
+          playerStats[p].count += 1;
+        });
+
+        // チームB
+        data.teamB.players.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+          playerStats[p].total += data.teamB.kills;
+          playerStats[p].count += 1;
+        });
+      });
+
+      // 平均を計算して表示
+      const tbody = document.getElementById("playerTable");
+      tbody.innerHTML = "";
+
+      Object.entries(playerStats).forEach(([name, stats]) => {
+        const avg = (stats.total / stats.count).toFixed(1);
+        const row = `<tr><td>${name}</td><td>${avg}</td></tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
