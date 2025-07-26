@@ -58,7 +58,6 @@
 <body>
   <h1>バランスよくチーム分け</h1>
   <div id="playerList" class="player-list"></div>
-  <button onclick="makeTeams()">チーム分けする</button>
 
   <div class="teams">
     <div class="team-box">
@@ -126,8 +125,10 @@ function renderPlayers() {
       div.classList.add("selected");
     }
 
-    div.onclick = () => div.classList.toggle("selected");
-    container.appendChild(div);
+div.onclick = () => {
+  div.classList.toggle("selected");
+  makeTeams(); // ✅ クリックするたびにチーム分けを実行
+};
   });
 }
 
