@@ -110,17 +110,26 @@
       renderPlayers();
     });
 
-    function renderPlayers() {
-      const container = document.getElementById("playerList");
-      container.innerHTML = "";
-      Object.keys(playerAverages).forEach(name => {
-        const div = document.createElement("div");
-        div.className = "player";
-        div.textContent = name;
-        div.onclick = () => div.classList.toggle("selected");
-        container.appendChild(div);
-      });
+function renderPlayers() {
+  const container = document.getElementById("playerList");
+  const selectedNames = Array.from(document.querySelectorAll(".player.selected"))
+    .map(d => d.textContent); // すでに選択されてる名前を保存
+
+  container.innerHTML = "";
+  Object.keys(playerAverages).forEach(name => {
+    const div = document.createElement("div");
+    div.className = "player";
+    div.textContent = name;
+
+    // 🔹 すでに選択されていた人は selected を付ける
+    if (selectedNames.includes(name)) {
+      div.classList.add("selected");
     }
+
+    div.onclick = () => div.classList.toggle("selected");
+    container.appendChild(div);
+  });
+}
 
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected"))
