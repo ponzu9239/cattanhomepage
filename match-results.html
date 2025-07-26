@@ -34,9 +34,9 @@
     #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
   </style>
 
-  <!-- ✅ Firebase SDK v8 をCDNで読み込み -->
+  <!-- ✅ Firebase Realtime Database SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
   <div class="container">
@@ -44,16 +44,16 @@
     <label>試合番号：</label>
     <input type="number" id="matchNumber" />
 
-    <label>チーム1のメンバー（1行ごとに入力）：</label>
-    <textarea id="teamA" rows="4" placeholder="名前を入力"></textarea>
+    <label>チームAのメンバー（1行ごとに入力）：</label>
+    <textarea id="teamA" rows="4" placeholder="もねこ&#10;きゃたん&#10;りったん"></textarea>
 
-    <label>チーム1のキル数：</label>
+    <label>チームAのキル数：</label>
     <input type="number" id="teamAKills" />
 
-    <label>チーム2のメンバー（1行ごとに入力）：</label>
-    <textarea id="teamB" rows="4" placeholder="名前を入力"></textarea>
+    <label>チームBのメンバー（1行ごとに入力）：</label>
+    <textarea id="teamB" rows="4" placeholder="ぽんず&#10;ゆめち&#10;あおい"></textarea>
 
-    <label>チーム2のキル数：</label>
+    <label>チームBのキル数：</label>
     <input type="number" id="teamBKills" />
 
     <button onclick="saveResult()">保存する</button>
@@ -73,9 +73,9 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const db = firebase.database();
 
-    async function saveResult() {
+    function saveResult() {
       const matchNumber = document.getElementById("matchNumber").value;
       const teamA = document.getElementById("teamA").value.split("\n").map(s => s.trim()).filter(s => s !== "");
       const teamAKills = Number(document.getElementById("teamAKills").value);
@@ -87,18 +87,20 @@
         return;
       }
 
-      try {
-        await db.collection("apex_results").add({
-          matchNumber: Number(matchNumber),
-          teamA, teamAKills,
-          teamB, teamBKills,
-          createdAt: new Date()
-        });
+      const newRef = db.ref("apex_results").push();
+      newRef.set({
+        matchNumber: Number(matchNumber),
+        teamA, teamAKills,
+        teamB, teamBKills,
+        createdAt: new Date().toISOString()
+      })
+      .then(() => {
         document.getElementById("status").innerText = "✅ 保存しました！";
-      } catch (e) {
-        console.error(e);
+      })
+      .catch((error) => {
+        console.error(error);
         document.getElementById("status").innerText = "❌ エラーが発生しました";
-      }
+      });
     }
   </script>
 </body>
