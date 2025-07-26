@@ -115,7 +115,9 @@ function renderPlayers() {
     .map(d => d.textContent); // すでに選択されてる名前を保存
 
   container.innerHTML = "";
-  Object.keys(playerAverages).forEach(name => {
+  Object.keys(playerAverages)
+  .sort((a, b) => a.localeCompare(b, "ja"))
+  .forEach(name => {
     const div = document.createElement("div");
     div.className = "player";
     div.textContent = name;
