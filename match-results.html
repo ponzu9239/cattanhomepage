@@ -3,141 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>APEX 試合結果送信</title>
-
-  <!-- Firebase compat版 -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
+  <title>APEX 試合結果入力</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #f6ffff;
-      color: #333;
-      text-align: center;
+      background-color: #f7fcfc;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 400px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 12px;
       padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     h1 {
-      color: #4aa4a1;
+      text-align: center;
+      color: #47b6a2;
     }
-    .card {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      margin: 20px auto;
-      padding: 20px;
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+      color: #444;
     }
-    textarea, input {
-      width: 90%;
+    input {
+      width: 100%;
       padding: 8px;
-      margin-top: 5px;
-      border: 2px solid #97eadb;
-      border-radius: 8px;
-      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #97eadb;
+      margin-top: 4px;
     }
     button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
       background-color: #97eadb;
-      color: #333;
-      font-weight: bold;
       border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      margin-top: 15px;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: 0.2s;
     }
     button:hover {
-      background-color: #7fd2c7;
+      background-color: #7dd2c3;
     }
-    #statusMsg {
+    #status {
+      margin-top: 12px;
+      text-align: center;
       font-weight: bold;
-      margin-top: 10px;
+      color: #47b6a2;
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
 </head>
 <body>
-  <h1>🎮 APEX 試合結果入力</h1>
+  <div class="container">
+    <h1>試合結果入力</h1>
+    
+    <label>試合番号：</label>
+    <input type="number" id="matchNumber" />
 
-  <div class="card">
-    <p class="label">試合番号</p>
-    <p id="matchIdDisplay">読み込み中...</p>
+    <label>チームAのメンバー（カンマ区切り）：</label>
+    <input type="text" id="teamA" placeholder="例: もねこ,きゃたん,りったん" />
 
-    <p class="label">チーム1 メンバー</p>
-    <textarea id="teamAPlayers" placeholder="もねこ, きゃたん, りったん"></textarea>
-
-    <p class="label">チーム1 キル数</p>
+    <label>チームAのキル数：</label>
     <input type="number" id="teamAKills" />
 
-    <p class="label">チーム2 メンバー</p>
-    <textarea id="teamBPlayers" placeholder="ぽんず, ゆめち, あおい"></textarea>
+    <label>チームBのメンバー（カンマ区切り）：</label>
+    <input type="text" id="teamB" placeholder="例: ぽんず,ゆめち,あおい" />
 
-    <p class="label">チーム2 キル数</p>
+    <label>チームBのキル数：</label>
     <input type="number" id="teamBKills" />
 
-    <button id="sendData">送信</button>
-
-    <p id="statusMsg"></p>
+    <button id="saveResult">保存する</button>
+    <p id="status"></p>
   </div>
 
-  <script>
-    // ✅ Firebase設定
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    // 🔹 Firebaseの設定（自分の情報に書き換えてね）
     const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
-    // ✅ Firebase初期化
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    const statusMsg = document.getElementById("statusMsg");
-    const matchIdDisplay = document.getElementById("matchIdDisplay");
+    document.getElementById("saveResult").addEventListener("click", async () => {
+      const matchNumber = document.getElementById("matchNumber").value;
+      const teamA = document.getElementById("teamA").value.split(",").map(s => s.trim());
+      const teamAKills = Number(document.getElementById("teamAKills").value);
+      const teamB = document.getElementById("teamB").value.split(",").map(s => s.trim());
+      const teamBKills = Number(document.getElementById("teamBKills").value);
 
-    // ✅ 最新試合番号を取得
-    async function getNextMatchId() {
-      const snapshot = await db.collection("matches").get();
-      return "match" + (snapshot.size + 1);
-    }
-
-    // ✅ 初期表示
-    getNextMatchId().then((id) => {
-      matchIdDisplay.textContent = id;
-    });
-
-    // ✅ 送信処理
-    document.getElementById("sendData").addEventListener("click", async () => {
-      const teamAPlayers = document.getElementById("teamAPlayers").value.split(",").map(p => p.trim()).filter(p => p);
-      const teamAKills = parseInt(document.getElementById("teamAKills").value);
-      const teamBPlayers = document.getElementById("teamBPlayers").value.split(",").map(p => p.trim()).filter(p => p);
-      const teamBKills = parseInt(document.getElementById("teamBKills").value);
-
-      if (!teamAPlayers.length || !teamBPlayers.length || isNaN(teamAKills) || isNaN(teamBKills)) {
-        statusMsg.style.color = "red";
-        statusMsg.textContent = "❌ 入力内容を確認してください";
+      if (!matchNumber || teamA.length === 0 || teamB.length === 0) {
+        document.getElementById("status").innerText = "⚠️ 必要な情報を入力してください";
         return;
       }
 
       try {
-        const nextId = await getNextMatchId();
-        await db.collection("matches").doc(nextId).set({
-          teamA: { players: teamAPlayers, kills: teamAKills },
-          teamB: { players: teamBPlayers, kills: teamBKills },
-          timestamp: new Date()
+        await addDoc(collection(db, "apex_results"), {
+          matchNumber: Number(matchNumber),
+          teamA, teamAKills,
+          teamB, teamBKills,
+          createdAt: new Date()
         });
-
-        statusMsg.style.color = "green";
-        statusMsg.textContent = "✅ 試合結果を送信しました！";
-
-        matchIdDisplay.textContent = await getNextMatchId();
-      } catch (err) {
-        console.error(err);
-        statusMsg.style.color = "red";
-        statusMsg.textContent = "❌ 送信に失敗しました（詳細はコンソールを確認）";
+        document.getElementById("status").innerText = "✅ 保存しました！";
+      } catch (e) {
+        console.error(e);
+        document.getElementById("status").innerText = "❌ エラーが発生しました";
       }
     });
   </script>
