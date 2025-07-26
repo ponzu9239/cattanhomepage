@@ -75,57 +75,49 @@
     <button id="sendData">送信</button>
   </div>
 
-  <script>
-    // Firebaseの設定（自分の情報に置き換え）
-    const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
-    };
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+    authDomain: "catiffanygame.firebaseapp.com",
+    projectId: "catiffanygame",
+    storageBucket: "catiffanygame.appspot.com",
+    messagingSenderId: "166871605809",
+    appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
+  };
 
-    // 🔹 最新の試合番号を取得して +1 する
-    async function getNextMatchId() {
-      const snapshot = await db.collection("matches").get();
-      const matchCount = snapshot.size;
-      return "match" + (matchCount + 1);
-    }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    let currentMatchId = "";
+  async function getNextMatchId() {
+    const snapshot = await getDocs(collection(db, "matches"));
+    return "match" + (snapshot.size + 1);
+  }
 
-    getNextMatchId().then((id) => {
-      currentMatchId = id;
-      document.getElementById("matchIdDisplay").textContent = id;
-    });
+  let currentMatchId = await getNextMatchId();
+  document.getElementById("matchIdDisplay").textContent = currentMatchId;
 
-    // 🔹 送信処理
-    document.getElementById("sendData").addEventListener("click", async () => {
-      const teamAPlayers = document.getElementById("teamAPlayers").value.split(",").map(p => p.trim());
-      const teamAKills = parseInt(document.getElementById("teamAKills").value);
-      const teamBPlayers = document.getElementById("teamBPlayers").value.split(",").map(p => p.trim());
-      const teamBKills = parseInt(document.getElementById("teamBKills").value);
+  document.getElementById("sendData").addEventListener("click", async () => {
+    const teamAPlayers = document.getElementById("teamAPlayers").value.split(",").map(p => p.trim());
+    const teamAKills = parseInt(document.getElementById("teamAKills").value);
+    const teamBPlayers = document.getElementById("teamBPlayers").value.split(",").map(p => p.trim());
+    const teamBKills = parseInt(document.getElementById("teamBKills").value);
 
-      if (!teamAPlayers.length || !teamBPlayers.length) {
-        alert("メンバーを入力してください");
-        return;
-      }
-
-      await db.collection("matches").doc(currentMatchId).set({
+    try {
+      await setDoc(doc(db, "matches", currentMatchId), {
         teamA: { players: teamAPlayers, kills: teamAKills },
         teamB: { players: teamBPlayers, kills: teamBKills },
         timestamp: new Date()
       });
-
       alert("✅ 試合結果を送信しました！");
-      location.reload(); // 送信後にリロードして新しい試合番号に更新
-    });
-  </script>
+      location.reload();
+    } catch (e) {
+      console.error(e);
+      alert("❌ 送信に失敗しました");
+    }
+  });
+</script>
 </body>
 </html>
