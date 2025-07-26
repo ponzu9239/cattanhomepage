@@ -1,111 +1,103 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>平均チームキル数</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>平均チームキル計算</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #f6ffff;
-      text-align: center;
+      background-color: #f7fcfc;
       padding: 20px;
+      margin: 0;
     }
     h1 {
-      color: #4aa4a1;
-    }
-    .card {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
-      margin: 20px auto;
-      padding: 20px;
+      text-align: center;
+      color: #47b6a2;
     }
     table {
-      width: 100%;
+      width: 90%;
+      margin: 20px auto;
       border-collapse: collapse;
-      margin-top: 10px;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
     }
     th, td {
-      border: 1px solid #97eadb;
-      padding: 8px;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
       text-align: center;
     }
     th {
-      background-color: #97eadb;
-      color: #333;
+      background: #97eadb;
+      color: white;
     }
+    tr:hover { background: #f0faf9; }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>🎯 プレイヤー平均チームキル数</h1>
-
-  <div class="card">
-    <table>
-      <thead>
-        <tr>
-          <th>プレイヤー名</th>
-          <th>平均チームキル数</th>
-        </tr>
-      </thead>
-      <tbody id="playerTable"></tbody>
-    </table>
-  </div>
+  <h1>平均チームキル計算</h1>
+  <table>
+    <thead>
+      <tr><th>プレイヤー名</th><th>平均チームキル</th></tr>
+    </thead>
+    <tbody id="resultTable"></tbody>
+  </table>
 
   <script>
-    // Firebase設定（自分の情報に置き換える）
     const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
+      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+      authDomain: "match-result-ea475.firebaseapp.com",
+      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+      projectId: "match-result-ea475",
+      storageBucket: "match-result-ea475.firebasestorage.app",
+      messagingSenderId: "759877853492",
+      appId: "1:759877853492:web:a10935960bf8230af90561"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    async function loadData() {
-      const snapshot = await db.collection("matches").get();
-
+    function calculateAverages(matches) {
       const playerStats = {};
 
-      snapshot.forEach(doc => {
-        const data = doc.data();
-
-        // チームA
-        data.teamA.players.forEach(p => {
-          if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
-          playerStats[p].total += data.teamA.kills;
-          playerStats[p].count += 1;
-        });
-
-        // チームB
-        data.teamB.players.forEach(p => {
-          if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
-          playerStats[p].total += data.teamB.kills;
-          playerStats[p].count += 1;
-        });
+      matches.forEach(match => {
+        if (match.teamA && match.teamAKills !== undefined) {
+          match.teamA.forEach(player => {
+            if (!playerStats[player]) playerStats[player] = { total: 0, count: 0 };
+            playerStats[player].total += match.teamAKills;
+            playerStats[player].count += 1;
+          });
+        }
+        if (match.teamB && match.teamBKills !== undefined) {
+          match.teamB.forEach(player => {
+            if (!playerStats[player]) playerStats[player] = { total: 0, count: 0 };
+            playerStats[player].total += match.teamBKills;
+            playerStats[player].count += 1;
+          });
+        }
       });
 
-      // 平均を計算して表示
-      const tbody = document.getElementById("playerTable");
-      tbody.innerHTML = "";
-
-      Object.entries(playerStats).forEach(([name, stats]) => {
-        const avg = (stats.total / stats.count).toFixed(1);
-        const row = `<tr><td>${name}</td><td>${avg}</td></tr>`;
-        tbody.innerHTML += row;
-      });
+      return Object.keys(playerStats).map(name => ({
+        name,
+        avg: (playerStats[name].total / playerStats[name].count).toFixed(2)
+      }));
     }
 
-    loadData();
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) return;
+      const matches = Object.values(snapshot.val());
+      const averages = calculateAverages(matches);
+
+      const tbody = document.getElementById("resultTable");
+      tbody.innerHTML = "";
+      averages.sort((a,b) => b.avg - a.avg).forEach(player => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${player.name}</td><td>${player.avg}</td>`;
+        tbody.appendChild(tr);
+      });
+    });
   </script>
 </body>
 </html>
