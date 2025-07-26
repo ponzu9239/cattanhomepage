@@ -51,6 +51,10 @@
       font-weight: bold;
       color: #4aa4a1;
     }
+    #statusMsg {
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -73,44 +77,49 @@
     <input type="number" id="teamBKills" />
 
     <button id="sendData">送信</button>
+
+    <p id="statusMsg"></p>
   </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-    authDomain: "catiffanygame.firebaseapp.com",
-    projectId: "catiffanygame",
-    storageBucket: "catiffanygame.appspot.com",
-    messagingSenderId: "166871605809",
-    appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
-  };
+    // ✅ Firebase設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.appspot.com",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    // ✅ Firebase初期化
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    const statusMsg = document.createElement("p");
-    statusMsg.style.fontWeight = "bold";
-    statusMsg.style.marginTop = "10px";
-    document.querySelector(".card").appendChild(statusMsg);
+    // ✅ 状態メッセージ要素
+    const statusMsg = document.getElementById("statusMsg");
 
+    // ✅ 最新の試合番号を取得
     async function getNextMatchId() {
       const snapshot = await getDocs(collection(db, "matches"));
       return "match" + (snapshot.size + 1);
     }
 
+    // ✅ ページ読み込み時に試合番号をセット
     let currentMatchId = await getNextMatchId();
     document.getElementById("matchIdDisplay").textContent = currentMatchId;
 
+    // ✅ 送信ボタンの処理
     document.getElementById("sendData").addEventListener("click", async () => {
       const teamAPlayers = document.getElementById("teamAPlayers").value.split(",").map(p => p.trim()).filter(p => p);
       const teamAKills = parseInt(document.getElementById("teamAKills").value);
       const teamBPlayers = document.getElementById("teamBPlayers").value.split(",").map(p => p.trim()).filter(p => p);
       const teamBKills = parseInt(document.getElementById("teamBKills").value);
 
+      // ✅ 入力チェック
       if (teamAPlayers.length === 0 || teamBPlayers.length === 0 || isNaN(teamAKills) || isNaN(teamBKills)) {
         statusMsg.style.color = "red";
         statusMsg.textContent = "❌ 入力内容を確認してください。";
@@ -118,25 +127,27 @@
       }
 
       try {
+        // ✅ Firestoreに保存
         await setDoc(doc(db, "matches", currentMatchId), {
           teamA: { players: teamAPlayers, kills: teamAKills },
           teamB: { players: teamBPlayers, kills: teamBKills },
           timestamp: new Date()
         });
 
+        // ✅ 成功メッセージ
         statusMsg.style.color = "green";
         statusMsg.textContent = "✅ 試合結果を送信しました！";
 
+        // ✅ 次の試合番号に更新
         currentMatchId = await getNextMatchId();
         document.getElementById("matchIdDisplay").textContent = currentMatchId;
 
       } catch (e) {
         console.error(e);
         statusMsg.style.color = "red";
-        statusMsg.textContent = "❌ 送信に失敗しました";
+        statusMsg.textContent = "❌ 送信に失敗しました（詳細はコンソールを確認）";
       }
     });
-  });
-</script>
+  </script>
 </body>
 </html>
