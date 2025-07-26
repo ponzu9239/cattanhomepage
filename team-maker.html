@@ -1,195 +1,153 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>APEX 自動チーム分け（入力メンバー限定）</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APEX チーム分け</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #f6ffff;
-      text-align: center;
+      background: #f7fcfc;
+      margin: 0;
       padding: 20px;
     }
-    h1 {
-      color: #4aa4a1;
+    h1 { text-align: center; color: #47b6a2; }
+    .player-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
     }
-    .card {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      max-width: 500px;
-      margin: 20px auto;
-      padding: 20px;
+    .player {
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: #fff;
+      border: 1px solid #97eadb;
+      cursor: pointer;
     }
-    textarea {
-      width: 90%;
-      height: 60px;
-      padding: 8px;
-      border: 2px solid #97eadb;
-      border-radius: 8px;
-      font-size: 14px;
-      resize: vertical;
+    .player.selected {
+      background: #97eadb;
+      color: white;
     }
     button {
-      background-color: #97eadb;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 15px;
-      transition: 0.3s;
-    }
-    button:hover {
-      background-color: #7fd2c7;
-    }
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #97eadb;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #97eadb;
-      color: #333;
-    }
-    .label {
-      font-weight: bold;
-      color: #4aa4a1;
-      margin-top: 10px;
       display: block;
+      margin: 0 auto;
+      padding: 10px 20px;
+      background: #97eadb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
     }
+    .teams { display: flex; justify-content: space-around; margin-top: 20px; }
+    .team-box {
+      width: 45%;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .team-box h2 { text-align: center; color: #47b6a2; }
+    ul { list-style: none; padding: 0; }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>🤖 APEX 自動チーム分け（入力メンバー限定）</h1>
+  <h1>平均チームキルでバランス分け</h1>
+  <div id="playerList" class="player-list"></div>
+  <button onclick="makeTeams()">チーム分けする</button>
 
-  <div class="card">
-    <label for="playerInput" class="label">メンバー名をカンマ区切りで入力してください</label>
-    <textarea id="playerInput" placeholder="もねこ, きゃたん, りったん, ぽんず"></textarea>
-    <button id="divideBtn">チーム分け開始</button>
-
-    <table id="teamTable" style="display:none;">
-      <thead>
-        <tr>
-          <th>チームA</th>
-          <th>合計スコア</th>
-          <th>チームB</th>
-          <th>合計スコア</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td id="teamAPlayers"></td>
-          <td id="teamAScore"></td>
-          <td id="teamBPlayers"></td>
-          <td id="teamBScore"></td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="teams">
+    <div class="team-box">
+      <h2>チームA</h2>
+      <ul id="teamA"></ul>
+    </div>
+    <div class="team-box">
+      <h2>チームB</h2>
+      <ul id="teamB"></ul>
+    </div>
   </div>
 
   <script>
-    // Firebase設定（自分の設定に置き換えてください）
     const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
+      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+      authDomain: "match-result-ea475.firebaseapp.com",
+      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+      projectId: "match-result-ea475",
+      storageBucket: "match-result-ea475.firebasestorage.app",
+      messagingSenderId: "759877853492",
+      appId: "1:759877853492:web:a10935960bf8230af90561"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
+    let playerAverages = {};
 
-    // 過去データから全プレイヤーの平均キル数を取得
-    async function getAllPlayerScores() {
-      const snapshot = await db.collection("matches").get();
-      const playerStats = {};
-
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        data.teamA.players.forEach(p => {
-          if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
-          playerStats[p].total += data.teamA.kills;
-          playerStats[p].count += 1;
+    function calculateAverages(matches) {
+      const stats = {};
+      matches.forEach(m => {
+        m.teamA.forEach(p => {
+          if (!stats[p]) stats[p] = { total: 0, count: 0 };
+          stats[p].total += m.teamAKills;
+          stats[p].count++;
         });
-        data.teamB.players.forEach(p => {
-          if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
-          playerStats[p].total += data.teamB.kills;
-          playerStats[p].count += 1;
+        m.teamB.forEach(p => {
+          if (!stats[p]) stats[p] = { total: 0, count: 0 };
+          stats[p].total += m.teamBKills;
+          stats[p].count++;
         });
       });
-
-      const playerScores = {};
-      for (const [name, stats] of Object.entries(playerStats)) {
-        playerScores[name] = stats.total / stats.count;
-      }
-      return playerScores;
+      return Object.fromEntries(Object.entries(stats).map(([p, s]) => [p, s.total / s.count]));
     }
 
-    // 貪欲法によるチーム分け
-    function greedyDivide(players) {
-      players.sort((a,b) => b.score - a.score);
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) return;
+      const matches = Object.values(snapshot.val());
+      playerAverages = calculateAverages(matches);
+      renderPlayers();
+    });
+
+    function renderPlayers() {
+      const container = document.getElementById("playerList");
+      container.innerHTML = "";
+      Object.keys(playerAverages).forEach(name => {
+        const div = document.createElement("div");
+        div.className = "player";
+        div.textContent = `${name} (${playerAverages[name].toFixed(1)})`;
+        div.onclick = () => div.classList.toggle("selected");
+        container.appendChild(div);
+      });
+    }
+
+    function makeTeams() {
+      const selected = Array.from(document.querySelectorAll(".player.selected"))
+        .map(d => d.textContent.split(" ")[0]);
+      const players = selected.map(name => ({ name, avg: playerAverages[name] }));
+
+      // 平均値で降順ソート
+      players.sort((a,b) => b.avg - a.avg);
 
       const teamA = [];
       const teamB = [];
-      let scoreA = 0;
-      let scoreB = 0;
+      let sumA = 0, sumB = 0;
 
-      players.forEach(player => {
-        if (scoreA <= scoreB) {
-          teamA.push(player);
-          scoreA += player.score;
+      // 一人ずつ合計が小さい方のチームに入れる
+      players.forEach(p => {
+        if (sumA <= sumB) {
+          teamA.push(p);
+          sumA += p.avg;
         } else {
-          teamB.push(player);
-          scoreB += player.score;
+          teamB.push(p);
+          sumB += p.avg;
         }
       });
 
-      return { teamA, teamB, scoreA, scoreB };
+      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name} (${p.avg.toFixed(1)})</li>`).join("");
+      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name} (${p.avg.toFixed(1)})</li>`).join("");
     }
-
-    document.getElementById("divideBtn").addEventListener("click", async () => {
-      const input = document.getElementById("playerInput").value.trim();
-      if (!input) {
-        alert("メンバーを入力してください");
-        return;
-      }
-      const inputNames = input.split(",").map(s => s.trim()).filter(s => s.length > 0);
-
-      const allScores = await getAllPlayerScores();
-
-      // 入力メンバーのスコアリストを作成
-      const players = inputNames.map(name => ({
-        name,
-        score: allScores[name] ?? 10 // データがなければデフォルト10（調整可）
-      }));
-
-      if(players.length < 2){
-        alert("メンバーは2人以上入力してください");
-        return;
-      }
-
-      const { teamA, teamB, scoreA, scoreB } = greedyDivide(players);
-
-      document.getElementById("teamAPlayers").textContent = teamA.map(p => p.name).join(", ");
-      document.getElementById("teamAScore").textContent = scoreA.toFixed(1);
-      document.getElementById("teamBPlayers").textContent = teamB.map(p => p.name).join(", ");
-      document.getElementById("teamBScore").textContent = scoreB.toFixed(1);
-
-      document.getElementById("teamTable").style.display = "table";
-    });
   </script>
 </body>
 </html>
