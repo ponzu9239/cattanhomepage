@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>APEX 試合結果送信</title>
+
+  <!-- Firebase compat版 -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -93,16 +96,17 @@
     const db = firebase.firestore();
 
     const statusMsg = document.getElementById("statusMsg");
+    const matchIdDisplay = document.getElementById("matchIdDisplay");
 
-    // ✅ 最新試合番号取得
+    // ✅ 最新試合番号を取得
     async function getNextMatchId() {
       const snapshot = await db.collection("matches").get();
       return "match" + (snapshot.size + 1);
     }
 
-    // ✅ 初期化
+    // ✅ 初期表示
     getNextMatchId().then((id) => {
-      document.getElementById("matchIdDisplay").textContent = id;
+      matchIdDisplay.textContent = id;
     });
 
     // ✅ 送信処理
@@ -129,11 +133,11 @@
         statusMsg.style.color = "green";
         statusMsg.textContent = "✅ 試合結果を送信しました！";
 
-        document.getElementById("matchIdDisplay").textContent = await getNextMatchId();
+        matchIdDisplay.textContent = await getNextMatchId();
       } catch (err) {
         console.error(err);
         statusMsg.style.color = "red";
-        statusMsg.textContent = "❌ 送信に失敗しました";
+        statusMsg.textContent = "❌ 送信に失敗しました（詳細はコンソールを確認）";
       }
     });
   </script>
