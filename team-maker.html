@@ -125,10 +125,13 @@ function renderPlayers() {
       div.classList.add("selected");
     }
 
-div.onclick = () => {
-  div.classList.toggle("selected");
-  makeTeams(); // ✅ クリックするたびにチーム分けを実行
-};
+    div.onclick = () => {
+      div.classList.toggle("selected");
+      makeTeams(); // ✅ クリックするたびにチーム分けを実行
+    };
+
+    // 🔹 これを忘れると表示されない！
+    container.appendChild(div);
   });
 }
 
