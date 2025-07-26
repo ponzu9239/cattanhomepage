@@ -29,12 +29,13 @@
       font-weight: bold;
       color: #444;
     }
-    input {
+    textarea, input {
       width: 100%;
       padding: 8px;
       border-radius: 6px;
       border: 1px solid #97eadb;
       margin-top: 4px;
+      resize: vertical;
     }
     button {
       margin-top: 20px;
@@ -68,14 +69,14 @@
     <label>試合番号：</label>
     <input type="number" id="matchNumber" />
 
-    <label>チームAのメンバー（カンマ区切り）：</label>
-    <input type="text" id="teamA" placeholder="例: もねこ,きゃたん,りったん" />
+    <label>チームAのメンバー（1行ごとに入力）：</label>
+    <textarea id="teamA" rows="4" placeholder="もねこ\nきゃたん\nりったん"></textarea>
 
     <label>チームAのキル数：</label>
     <input type="number" id="teamAKills" />
 
-    <label>チームBのメンバー（カンマ区切り）：</label>
-    <input type="text" id="teamB" placeholder="例: ぽんず,ゆめち,あおい" />
+    <label>チームBのメンバー（1行ごとに入力）：</label>
+    <textarea id="teamB" rows="4" placeholder="ぽんず\nゆめち\nあおい"></textarea>
 
     <label>チームBのキル数：</label>
     <input type="number" id="teamBKills" />
@@ -88,7 +89,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-    // 🔹 Firebaseの設定（自分の情報に書き換えてね）
+    // 🔹 Firebaseの設定（自分の情報に置き換えてね）
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -103,9 +104,15 @@
 
     document.getElementById("saveResult").addEventListener("click", async () => {
       const matchNumber = document.getElementById("matchNumber").value;
-      const teamA = document.getElementById("teamA").value.split(",").map(s => s.trim());
+      const teamA = document.getElementById("teamA").value
+                      .split("\n")
+                      .map(s => s.trim())
+                      .filter(s => s !== "");
       const teamAKills = Number(document.getElementById("teamAKills").value);
-      const teamB = document.getElementById("teamB").value.split(",").map(s => s.trim());
+      const teamB = document.getElementById("teamB").value
+                      .split("\n")
+                      .map(s => s.trim())
+                      .filter(s => s !== "");
       const teamBKills = Number(document.getElementById("teamBKills").value);
 
       if (!matchNumber || teamA.length === 0 || teamB.length === 0) {
