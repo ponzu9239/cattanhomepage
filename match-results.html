@@ -41,8 +41,6 @@
 <body>
   <div class="container">
     <h1>試合結果入力</h1>
-    <label>試合番号：</label>
-    <input type="number" id="matchNumber" />
 
     <label>チームAのメンバー（1行ごとに入力）：</label>
     <textarea id="teamA" rows="4" placeholder="もねこ&#10;きゃたん&#10;りったん"></textarea>
@@ -75,27 +73,36 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function saveResult() {
-      const matchNumber = document.getElementById("matchNumber").value;
+    async function saveResult() {
       const teamA = document.getElementById("teamA").value.split("\n").map(s => s.trim()).filter(s => s !== "");
       const teamAKills = Number(document.getElementById("teamAKills").value);
       const teamB = document.getElementById("teamB").value.split("\n").map(s => s.trim()).filter(s => s !== "");
       const teamBKills = Number(document.getElementById("teamBKills").value);
 
-      if (!matchNumber || teamA.length === 0 || teamB.length === 0) {
+      if (teamA.length === 0 || teamB.length === 0) {
         document.getElementById("status").innerText = "⚠️ 必要な情報を入力してください";
         return;
       }
 
-      const newRef = db.ref("apex_results").push();
-      newRef.set({
-        matchNumber: Number(matchNumber),
-        teamA, teamAKills,
-        teamB, teamBKills,
-        createdAt: new Date().toISOString()
+      // 🔹 既存データから試合番号を決定
+      const snapshot = await db.ref("apex_results").once("value");
+      let nextMatchNumber = 1;
+      if (snapshot.exists()) {
+        const matches = Object.values(snapshot.val());
+        const maxMatch = Math.max(...matches.map(m => m.matchNumber || 0));
+        nextMatchNumber = maxMatch + 1;
+      }
+
+      // 🔹 データ保存
+      db.ref("apex_results").push({
+        matchNumber: nextMatchNumber,
+        teamA,
+        teamAKills,
+        teamB,
+        teamBKills
       })
       .then(() => {
-        document.getElementById("status").innerText = "✅ 保存しました！";
+        document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
       })
       .catch((error) => {
         console.error(error);
