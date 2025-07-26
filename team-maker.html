@@ -56,7 +56,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>平均チームキルでバランス分け</h1>
+  <h1>バランスよくチーム分け</h1>
   <div id="playerList" class="player-list"></div>
   <button onclick="makeTeams()">チーム分けする</button>
 
@@ -116,7 +116,7 @@
       Object.keys(playerAverages).forEach(name => {
         const div = document.createElement("div");
         div.className = "player";
-        div.textContent = `${name} (${playerAverages[name].toFixed(1)})`;
+        div.textContent = name;
         div.onclick = () => div.classList.toggle("selected");
         container.appendChild(div);
       });
@@ -124,17 +124,15 @@
 
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected"))
-        .map(d => d.textContent.split(" ")[0]);
+        .map(d => d.textContent);
       const players = selected.map(name => ({ name, avg: playerAverages[name] }));
 
-      // 平均値で降順ソート
       players.sort((a,b) => b.avg - a.avg);
 
       const teamA = [];
       const teamB = [];
       let sumA = 0, sumB = 0;
 
-      // 一人ずつ合計が小さい方のチームに入れる
       players.forEach(p => {
         if (sumA <= sumB) {
           teamA.push(p);
@@ -145,8 +143,8 @@
         }
       });
 
-      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name} (${p.avg.toFixed(1)})</li>`).join("");
-      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name} (${p.avg.toFixed(1)})</li>`).join("");
+      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
+      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
     }
   </script>
 </body>
