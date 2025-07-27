@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>プレイヤー試合履歴検索</title>
+  <title>プレイヤー試合履歴検索＆置換</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -12,7 +12,7 @@
       margin: 0;
     }
     h1 { text-align: center; color: #47b6a2; }
-    .search-box {
+    .box {
       text-align: center;
       margin-bottom: 20px;
     }
@@ -21,11 +21,10 @@
       border: 1px solid #97eadb;
       border-radius: 6px;
       font-size: 16px;
-      width: 200px;
+      margin: 5px;
     }
     button {
       padding: 8px 16px;
-      margin-left: 10px;
       background: #97eadb;
       color: white;
       border: none;
@@ -54,11 +53,20 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>プレイヤー試合履歴検索</h1>
+  <h1>プレイヤー試合履歴検索＆置換</h1>
 
-  <div class="search-box">
+  <!-- 🔹 検索エリア -->
+  <div class="box">
     <input type="text" id="playerName" placeholder="プレイヤー名を入力" />
     <button onclick="searchPlayer()">検索</button>
+  </div>
+
+  <!-- 🔹 名前置換エリア -->
+  <div class="box">
+    <input type="text" id="oldName" placeholder="旧プレイヤー名" />
+    →
+    <input type="text" id="newName" placeholder="新プレイヤー名" />
+    <button onclick="replacePlayer()">名前を置換</button>
   </div>
 
   <table>
@@ -86,10 +94,12 @@
     const db = firebase.database();
 
     let allMatches = [];
+    let matchKeys = [];
 
     db.ref("apex_results").on("value", snapshot => {
       if (snapshot.exists()) {
         allMatches = Object.values(snapshot.val());
+        matchKeys = Object.keys(snapshot.val());
       }
     });
 
@@ -121,6 +131,38 @@
         tr.innerHTML = `<td>${r.match}</td><td>${r.team}</td><td>${r.kills}</td>`;
         tbody.appendChild(tr);
       });
+    }
+
+    // 🔹 名前置換機能
+    async function replacePlayer() {
+      const oldName = document.getElementById("oldName").value.trim();
+      const newName = document.getElementById("newName").value.trim();
+
+      if (!oldName || !newName) {
+        alert("旧名と新名を入力してください");
+        return;
+      }
+
+      for (let i = 0; i < allMatches.length; i++) {
+        const key = matchKeys[i];
+        let updated = false;
+        const match = { ...allMatches[i] };
+
+        if (match.teamA.includes(oldName)) {
+          match.teamA = match.teamA.map(p => (p === oldName ? newName : p));
+          updated = true;
+        }
+        if (match.teamB.includes(oldName)) {
+          match.teamB = match.teamB.map(p => (p === oldName ? newName : p));
+          updated = true;
+        }
+
+        if (updated) {
+          await db.ref("apex_results/" + key).set(match);
+        }
+      }
+
+      alert("名前を置換しました！");
     }
   </script>
 </body>
