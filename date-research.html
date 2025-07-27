@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>プレイヤー試合履歴検索</title>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 { text-align: center; color: #47b6a2; }
+    .search-box {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 8px;
+      border: 1px solid #97eadb;
+      border-radius: 6px;
+      font-size: 16px;
+      width: 200px;
+    }
+    button {
+      padding: 8px 16px;
+      margin-left: 10px;
+      background: #97eadb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #97eadb;
+      color: white;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+  <h1>プレイヤー試合履歴検索</h1>
+
+  <div class="search-box">
+    <input type="text" id="playerName" placeholder="プレイヤー名を入力" />
+    <button onclick="searchPlayer()">検索</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>試合番号</th>
+        <th>チーム</th>
+        <th>チームキル数</th>
+      </tr>
+    </thead>
+    <tbody id="resultTable"></tbody>
+  </table>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+      authDomain: "match-result-ea475.firebaseapp.com",
+      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+      projectId: "match-result-ea475",
+      storageBucket: "match-result-ea475.firebasestorage.app",
+      messagingSenderId: "759877853492",
+      appId: "1:759877853492:web:a10935960bf8230af90561"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let allMatches = [];
+
+    db.ref("apex_results").on("value", snapshot => {
+      if (snapshot.exists()) {
+        allMatches = Object.values(snapshot.val());
+      }
+    });
+
+    function searchPlayer() {
+      const name = document.getElementById("playerName").value.trim();
+      const tbody = document.getElementById("resultTable");
+      tbody.innerHTML = "";
+
+      if (!name) return;
+
+      const results = [];
+
+      allMatches.forEach(m => {
+        if (m.teamA.includes(name)) {
+          results.push({ match: m.matchNumber, team: "A", kills: m.teamAKills });
+        }
+        if (m.teamB.includes(name)) {
+          results.push({ match: m.matchNumber, team: "B", kills: m.teamBKills });
+        }
+      });
+
+      if (results.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3">データがありません</td></tr>`;
+        return;
+      }
+
+      results.sort((a,b) => a.match - b.match).forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${r.match}</td><td>${r.team}</td><td>${r.kills}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
