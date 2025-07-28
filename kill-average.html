@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>プレイヤースコア（最小二乗法）</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>プレイヤースコア（最小二乗法＋類似度警告）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -33,19 +33,32 @@
       color: white;
     }
     tr:hover { background: #f0faf9; }
+    #warningBox {
+      max-width: 90%;
+      margin: 20px auto;
+      background: #fff4f4;
+      border: 2px solid #ff7b7b;
+      border-radius: 8px;
+      color: #cc0000;
+      padding: 10px;
+      font-weight: bold;
+      white-space: pre-wrap;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
-  <h1>プレイヤースコア（最小二乗法）</h1>
+  <h1>プレイヤースコア（最小二乗法＋類似度警告）</h1>
   <table>
     <thead>
       <tr><th>プレイヤー名</th><th>推定スコア</th></tr>
     </thead>
     <tbody id="resultTable"></tbody>
   </table>
+
+  <div id="warningBox" style="display:none;"></div>
 
   <script>
     const firebaseConfig = {
@@ -60,21 +73,50 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // ジャカード類似度計算
+    function jaccardSimilarity(setA, setB) {
+      const intersectionSize = new Set([...setA].filter(x => setB.has(x))).size;
+      const unionSize = new Set([...setA, ...setB]).size;
+      if (unionSize === 0) return 0;
+      return intersectionSize / unionSize;
+    }
+
     function calculateScores(matches) {
       const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
       const indexMap = Object.fromEntries(players.map((p, i) => [p, i]));
 
+      // 参加試合セット作成
+      const playerMatches = {};
+      players.forEach(p => playerMatches[p] = new Set());
+      matches.forEach((m, i) => {
+        m.teamA.forEach(p => playerMatches[p].add(i));
+        m.teamB.forEach(p => playerMatches[p].add(i));
+      });
+
+      // 類似度が高すぎるペア検出（80%以上）
+      const threshold = 0.8;
+      const warnings = [];
+      for(let i = 0; i < players.length; i++) {
+        for(let j = i + 1; j < players.length; j++) {
+          const p1 = players[i];
+          const p2 = players[j];
+          const sim = jaccardSimilarity(playerMatches[p1], playerMatches[p2]);
+          if (sim > threshold) {
+            warnings.push(`${p1} と ${p2} は参加試合の類似度が高いです（${(sim*100).toFixed(1)}%）`);
+            console.log(`⚠️ 警告: ${p1} と ${p2} は似すぎています！（${(sim*100).toFixed(1)}%）`);
+          }
+        }
+      }
+
+      // 最小二乗法計算行列準備
       const rows = [];
       const kills = [];
-
       matches.forEach(m => {
-        // チームA
         const rowA = Array(players.length).fill(0);
         m.teamA.forEach(p => rowA[indexMap[p]] = 1);
         rows.push(rowA);
         kills.push(m.teamAKills);
 
-        // チームB
         const rowB = Array(players.length).fill(0);
         m.teamB.forEach(p => rowB[indexMap[p]] = 1);
         rows.push(rowB);
@@ -96,15 +138,16 @@
         score: math.round(x.get([i]), 2)
       }));
 
-      return scores;
+      return { scores, warnings };
     }
 
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
       const matches = Object.values(snapshot.val());
 
-      const scores = calculateScores(matches);
+      const { scores, warnings } = calculateScores(matches);
 
+      // スコア表示
       const tbody = document.getElementById("resultTable");
       tbody.innerHTML = "";
       scores.sort((a,b) => b.score - a.score).forEach(player => {
@@ -112,6 +155,16 @@
         tr.innerHTML = `<td>${player.name}</td><td>${player.score}</td>`;
         tbody.appendChild(tr);
       });
+
+      // 警告表示
+      const warningBox = document.getElementById("warningBox");
+      if(warnings.length > 0){
+        warningBox.style.display = "block";
+        warningBox.textContent = "⚠️ 似すぎているプレイヤーペアがあります:\n" + warnings.join("\n");
+      } else {
+        warningBox.style.display = "none";
+        warningBox.textContent = "";
+      }
     });
   </script>
 </body>
