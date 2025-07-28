@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>プレイヤースコア（最小二乗法＋類似度警告）</title>
+  <title>プレイヤースコア計算（平均・最小二乗法）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -14,6 +14,16 @@
     h1 {
       text-align: center;
       color: #47b6a2;
+    }
+    .method-select {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    label {
+      margin: 0 12px;
+      font-weight: bold;
+      color: #47b6a2;
+      cursor: pointer;
     }
     table {
       width: 90%;
@@ -43,6 +53,7 @@
       padding: 10px;
       font-weight: bold;
       white-space: pre-wrap;
+      display: none;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -50,15 +61,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
-  <h1>プレイヤースコア（最小二乗法＋類似度警告）</h1>
+  <h1>プレイヤースコア計算</h1>
+
+  <div class="method-select">
+    <label><input type="radio" name="method" value="leastSquares" checked> 最小二乗法（推定スコア）</label>
+    <label><input type="radio" name="method" value="average"> 平均チームキル</label>
+  </div>
+
   <table>
     <thead>
-      <tr><th>プレイヤー名</th><th>推定スコア</th></tr>
+      <tr><th>プレイヤー名</th><th>スコア</th></tr>
     </thead>
     <tbody id="resultTable"></tbody>
   </table>
 
-  <div id="warningBox" style="display:none;"></div>
+  <div id="warningBox"></div>
 
   <script>
     const firebaseConfig = {
@@ -73,7 +90,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // ジャカード類似度計算
     function jaccardSimilarity(setA, setB) {
       const intersectionSize = new Set([...setA].filter(x => setB.has(x))).size;
       const unionSize = new Set([...setA, ...setB]).size;
@@ -81,11 +97,10 @@
       return intersectionSize / unionSize;
     }
 
-    function calculateScores(matches) {
+    function calculateLeastSquares(matches) {
       const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
       const indexMap = Object.fromEntries(players.map((p, i) => [p, i]));
 
-      // 参加試合セット作成
       const playerMatches = {};
       players.forEach(p => playerMatches[p] = new Set());
       matches.forEach((m, i) => {
@@ -93,7 +108,6 @@
         m.teamB.forEach(p => playerMatches[p].add(i));
       });
 
-      // 類似度が高すぎるペア検出（80%以上）
       const threshold = 0.8;
       const warnings = [];
       for(let i = 0; i < players.length; i++) {
@@ -103,12 +117,10 @@
           const sim = jaccardSimilarity(playerMatches[p1], playerMatches[p2]);
           if (sim > threshold) {
             warnings.push(`${p1} と ${p2} は参加試合の類似度が高いです（${(sim*100).toFixed(1)}%）`);
-            console.log(`⚠️ 警告: ${p1} と ${p2} は似すぎています！（${(sim*100).toFixed(1)}%）`);
           }
         }
       }
 
-      // 最小二乗法計算行列準備
       const rows = [];
       const kills = [];
       matches.forEach(m => {
@@ -126,7 +138,6 @@
       const A = math.matrix(rows);
       const b = math.matrix(kills);
 
-      // 最小二乗解 x = (A^T A)^(-1) A^T b
       const At = math.transpose(A);
       const x = math.multiply(
         math.inv(math.multiply(At, A)),
@@ -141,13 +152,34 @@
       return { scores, warnings };
     }
 
-    db.ref("apex_results").on("value", snapshot => {
-      if (!snapshot.exists()) return;
-      const matches = Object.values(snapshot.val());
+    function calculateAverage(matches) {
+      const playerStats = {};
+      matches.forEach(match => {
+        if(match.teamA && match.teamAKills !== undefined){
+          match.teamA.forEach(p => {
+            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            playerStats[p].total += match.teamAKills;
+            playerStats[p].count++;
+          });
+        }
+        if(match.teamB && match.teamBKills !== undefined){
+          match.teamB.forEach(p => {
+            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            playerStats[p].total += match.teamBKills;
+            playerStats[p].count++;
+          });
+        }
+      });
 
-      const { scores, warnings } = calculateScores(matches);
+      const scores = Object.keys(playerStats).map(name => ({
+        name,
+        score: (playerStats[name].total / playerStats[name].count).toFixed(2)
+      }));
 
-      // スコア表示
+      return { scores, warnings: [] };
+    }
+
+    function renderResults(scores, warnings) {
       const tbody = document.getElementById("resultTable");
       tbody.innerHTML = "";
       scores.sort((a,b) => b.score - a.score).forEach(player => {
@@ -156,7 +188,6 @@
         tbody.appendChild(tr);
       });
 
-      // 警告表示
       const warningBox = document.getElementById("warningBox");
       if(warnings.length > 0){
         warningBox.style.display = "block";
@@ -165,6 +196,33 @@
         warningBox.style.display = "none";
         warningBox.textContent = "";
       }
+    }
+
+    function updateResults(matches) {
+      const method = document.querySelector('input[name="method"]:checked').value;
+      if(method === "leastSquares"){
+        const { scores, warnings } = calculateLeastSquares(matches);
+        renderResults(scores, warnings);
+      } else {
+        const { scores, warnings } = calculateAverage(matches);
+        renderResults(scores, warnings);
+      }
+    }
+
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) return;
+      const matches = Object.values(snapshot.val());
+      updateResults(matches);
+    });
+
+    document.querySelectorAll('input[name="method"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        db.ref("apex_results").once("value").then(snapshot => {
+          if (!snapshot.exists()) return;
+          const matches = Object.values(snapshot.val());
+          updateResults(matches);
+        });
+      });
     });
   </script>
 </body>
