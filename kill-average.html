@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>平均チームキル計算</title>
+  <title>プレイヤースコア（最小二乗法）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -36,12 +36,13 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
-  <h1>平均チームキル計算</h1>
+  <h1>プレイヤースコア（最小二乗法）</h1>
   <table>
     <thead>
-      <tr><th>プレイヤー名</th><th>平均チームキル</th></tr>
+      <tr><th>プレイヤー名</th><th>推定スコア</th></tr>
     </thead>
     <tbody id="resultTable"></tbody>
   </table>
@@ -59,42 +60,56 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function calculateAverages(matches) {
-      const playerStats = {};
+    function calculateScores(matches) {
+      const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
+      const indexMap = Object.fromEntries(players.map((p, i) => [p, i]));
 
-      matches.forEach(match => {
-        if (match.teamA && match.teamAKills !== undefined) {
-          match.teamA.forEach(player => {
-            if (!playerStats[player]) playerStats[player] = { total: 0, count: 0 };
-            playerStats[player].total += match.teamAKills;
-            playerStats[player].count += 1;
-          });
-        }
-        if (match.teamB && match.teamBKills !== undefined) {
-          match.teamB.forEach(player => {
-            if (!playerStats[player]) playerStats[player] = { total: 0, count: 0 };
-            playerStats[player].total += match.teamBKills;
-            playerStats[player].count += 1;
-          });
-        }
+      const rows = [];
+      const kills = [];
+
+      matches.forEach(m => {
+        // チームA
+        const rowA = Array(players.length).fill(0);
+        m.teamA.forEach(p => rowA[indexMap[p]] = 1);
+        rows.push(rowA);
+        kills.push(m.teamAKills);
+
+        // チームB
+        const rowB = Array(players.length).fill(0);
+        m.teamB.forEach(p => rowB[indexMap[p]] = 1);
+        rows.push(rowB);
+        kills.push(m.teamBKills);
       });
 
-      return Object.keys(playerStats).map(name => ({
-        name,
-        avg: (playerStats[name].total / playerStats[name].count).toFixed(2)
+      const A = math.matrix(rows);
+      const b = math.matrix(kills);
+
+      // 最小二乗解 x = (A^T A)^(-1) A^T b
+      const At = math.transpose(A);
+      const x = math.multiply(
+        math.inv(math.multiply(At, A)),
+        math.multiply(At, b)
+      );
+
+      const scores = players.map((p, i) => ({
+        name: p,
+        score: math.round(x.get([i]), 2)
       }));
+
+      return scores;
     }
 
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
       const matches = Object.values(snapshot.val());
-      const averages = calculateAverages(matches);
+
+      const scores = calculateScores(matches);
 
       const tbody = document.getElementById("resultTable");
       tbody.innerHTML = "";
-      averages.sort((a,b) => b.avg - a.avg).forEach(player => {
+      scores.sort((a,b) => b.score - a.score).forEach(player => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${player.name}</td><td>${player.avg}</td>`;
+        tr.innerHTML = `<td>${player.name}</td><td>${player.score}</td>`;
         tbody.appendChild(tr);
       });
     });
