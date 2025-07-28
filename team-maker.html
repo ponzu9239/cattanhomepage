@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>APEX チーム分け</title>
+  <title>APEX チーム分け（最小二乗法）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -30,17 +30,6 @@
       background: #97eadb;
       color: white;
     }
-    button {
-      display: block;
-      margin: 0 auto;
-      padding: 10px 20px;
-      background: #97eadb;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
     .teams { display: flex; justify-content: space-around; margin-top: 20px; }
     .team-box {
       width: 45%;
@@ -54,9 +43,10 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
-  <h1>バランスよくチーム分け</h1>
+  <h1>バランスよくチーム分け（最小二乗法）</h1>
   <div id="playerList" class="player-list"></div>
 
   <div class="teams">
@@ -83,66 +73,84 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let playerAverages = {};
+    let playerScores = {};
 
-    function calculateAverages(matches) {
-      const stats = {};
+    function calculateScores(matches) {
+      const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
+      const indexMap = Object.fromEntries(players.map((p, i) => [p, i]));
+
+      const rows = [];
+      const kills = [];
+
       matches.forEach(m => {
-        m.teamA.forEach(p => {
-          if (!stats[p]) stats[p] = { total: 0, count: 0 };
-          stats[p].total += m.teamAKills;
-          stats[p].count++;
-        });
-        m.teamB.forEach(p => {
-          if (!stats[p]) stats[p] = { total: 0, count: 0 };
-          stats[p].total += m.teamBKills;
-          stats[p].count++;
-        });
+        // チームA
+        const rowA = Array(players.length).fill(0);
+        m.teamA.forEach(p => rowA[indexMap[p]] = 1);
+        rows.push(rowA);
+        kills.push(m.teamAKills);
+
+        // チームB
+        const rowB = Array(players.length).fill(0);
+        m.teamB.forEach(p => rowB[indexMap[p]] = 1);
+        rows.push(rowB);
+        kills.push(m.teamBKills);
       });
-      return Object.fromEntries(Object.entries(stats).map(([p, s]) => [p, s.total / s.count]));
+
+      const A = math.matrix(rows);
+      const b = math.matrix(kills);
+
+      const At = math.transpose(A);
+      const x = math.multiply(
+        math.inv(math.multiply(At, A)),
+        math.multiply(At, b)
+      );
+
+      const scores = {};
+      players.forEach((p, i) => {
+        scores[p] = math.round(x.get([i]), 2);
+      });
+      return scores;
     }
 
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
       const matches = Object.values(snapshot.val());
-      playerAverages = calculateAverages(matches);
+      playerScores = calculateScores(matches);
       renderPlayers();
     });
 
-function renderPlayers() {
-  const container = document.getElementById("playerList");
-  const selectedNames = Array.from(document.querySelectorAll(".player.selected"))
-    .map(d => d.textContent); // すでに選択されてる名前を保存
+    function renderPlayers() {
+      const container = document.getElementById("playerList");
+      const selectedNames = Array.from(document.querySelectorAll(".player.selected"))
+        .map(d => d.textContent);
 
-  container.innerHTML = "";
-  Object.keys(playerAverages)
-  .sort((a, b) => a.localeCompare(b, "ja"))
-  .forEach(name => {
-    const div = document.createElement("div");
-    div.className = "player";
-    div.textContent = name;
+      container.innerHTML = "";
+      Object.keys(playerScores)
+        .sort((a, b) => a.localeCompare(b, "ja"))
+        .forEach(name => {
+          const div = document.createElement("div");
+          div.className = "player";
+          div.textContent = name;
 
-    // 🔹 すでに選択されていた人は selected を付ける
-    if (selectedNames.includes(name)) {
-      div.classList.add("selected");
+          if (selectedNames.includes(name)) {
+            div.classList.add("selected");
+          }
+
+          div.onclick = () => {
+            div.classList.toggle("selected");
+            makeTeams();
+          };
+
+          container.appendChild(div);
+        });
     }
-
-    div.onclick = () => {
-      div.classList.toggle("selected");
-      makeTeams(); // ✅ クリックするたびにチーム分けを実行
-    };
-
-    // 🔹 これを忘れると表示されない！
-    container.appendChild(div);
-  });
-}
 
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected"))
         .map(d => d.textContent);
-      const players = selected.map(name => ({ name, avg: playerAverages[name] }));
+      const players = selected.map(name => ({ name, score: playerScores[name] }));
 
-      players.sort((a,b) => b.avg - a.avg);
+      players.sort((a,b) => b.score - a.score);
 
       const teamA = [];
       const teamB = [];
@@ -151,10 +159,10 @@ function renderPlayers() {
       players.forEach(p => {
         if (sumA <= sumB) {
           teamA.push(p);
-          sumA += p.avg;
+          sumA += p.score;
         } else {
           teamB.push(p);
-          sumB += p.avg;
+          sumB += p.score;
         }
       });
 
