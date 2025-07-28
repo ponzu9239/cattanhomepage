@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>APEX チーム分け（最小二乗法）</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>APEX チーム分け（平均・最小二乗法切替）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -11,7 +11,20 @@
       margin: 0;
       padding: 20px;
     }
-    h1 { text-align: center; color: #47b6a2; }
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+    }
+    .method-select {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    label {
+      margin: 0 12px;
+      font-weight: bold;
+      color: #47b6a2;
+      cursor: pointer;
+    }
     .player-list {
       display: flex;
       flex-wrap: wrap;
@@ -30,7 +43,11 @@
       background: #97eadb;
       color: white;
     }
-    .teams { display: flex; justify-content: space-around; margin-top: 20px; }
+    .teams {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
     .team-box {
       width: 45%;
       background: white;
@@ -38,15 +55,27 @@
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .team-box h2 { text-align: center; color: #47b6a2; }
-    ul { list-style: none; padding: 0; }
+    .team-box h2 {
+      text-align: center;
+      color: #47b6a2;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
-  <h1>バランスよくチーム分け（最小二乗法）</h1>
+  <h1>バランスよくチーム分け</h1>
+
+  <div class="method-select">
+    <label><input type="radio" name="method" value="leastSquares" checked> 最小二乗法スコア</label>
+    <label><input type="radio" name="method" value="average"> 平均チームキル</label>
+  </div>
+
   <div id="playerList" class="player-list"></div>
 
   <div class="teams">
@@ -73,9 +102,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let playerScores = {};
+    let matches = [];
+    let playerScoresLeastSquares = {};
+    let playerScoresAverage = {};
 
-    function calculateScores(matches) {
+    function calculateScoresLeastSquares(matches) {
       const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
       const indexMap = Object.fromEntries(players.map((p, i) => [p, i]));
 
@@ -83,13 +114,11 @@
       const kills = [];
 
       matches.forEach(m => {
-        // チームA
         const rowA = Array(players.length).fill(0);
         m.teamA.forEach(p => rowA[indexMap[p]] = 1);
         rows.push(rowA);
         kills.push(m.teamAKills);
 
-        // チームB
         const rowB = Array(players.length).fill(0);
         m.teamB.forEach(p => rowB[indexMap[p]] = 1);
         rows.push(rowB);
@@ -112,12 +141,30 @@
       return scores;
     }
 
-    db.ref("apex_results").on("value", snapshot => {
-      if (!snapshot.exists()) return;
-      const matches = Object.values(snapshot.val());
-      playerScores = calculateScores(matches);
-      renderPlayers();
-    });
+    function calculateScoresAverage(matches) {
+      const playerStats = {};
+      matches.forEach(match => {
+        if(match.teamA && match.teamAKills !== undefined){
+          match.teamA.forEach(p => {
+            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            playerStats[p].total += match.teamAKills;
+            playerStats[p].count++;
+          });
+        }
+        if(match.teamB && match.teamBKills !== undefined){
+          match.teamB.forEach(p => {
+            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            playerStats[p].total += match.teamBKills;
+            playerStats[p].count++;
+          });
+        }
+      });
+      const scores = {};
+      Object.keys(playerStats).forEach(name => {
+        scores[name] = +(playerStats[name].total / playerStats[name].count).toFixed(2);
+      });
+      return scores;
+    }
 
     function renderPlayers() {
       const container = document.getElementById("playerList");
@@ -125,7 +172,10 @@
         .map(d => d.textContent);
 
       container.innerHTML = "";
-      Object.keys(playerScores)
+      const method = document.querySelector('input[name="method"]:checked').value;
+      const scores = (method === "leastSquares") ? playerScoresLeastSquares : playerScoresAverage;
+
+      Object.keys(scores)
         .sort((a, b) => a.localeCompare(b, "ja"))
         .forEach(name => {
           const div = document.createElement("div");
@@ -148,7 +198,10 @@
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected"))
         .map(d => d.textContent);
-      const players = selected.map(name => ({ name, score: playerScores[name] }));
+      const method = document.querySelector('input[name="method"]:checked').value;
+      const scores = (method === "leastSquares") ? playerScoresLeastSquares : playerScoresAverage;
+
+      const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
 
       players.sort((a,b) => b.score - a.score);
 
@@ -169,6 +222,22 @@
       document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
       document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
     }
+
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) return;
+      matches = Object.values(snapshot.val());
+      playerScoresLeastSquares = calculateScoresLeastSquares(matches);
+      playerScoresAverage = calculateScoresAverage(matches);
+      renderPlayers();
+      makeTeams();
+    });
+
+    document.querySelectorAll('input[name="method"]').forEach(radio => {
+      radio.addEventListener("change", () => {
+        renderPlayers();
+        makeTeams();
+      });
+    });
   </script>
 </body>
 </html>
