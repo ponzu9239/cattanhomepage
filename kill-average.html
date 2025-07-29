@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+　<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>プレイヤースコア計算（平均・勝率・信頼度補正）</title>
+  <title>プレイヤースコア計算（平均キル・勝率）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -53,7 +53,6 @@
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
     <label><input type="radio" name="method" value="winRate"> 勝率</label>
-    <label><input type="radio" name="method" value="corrected"> 信頼度補正スコア</label>
   </div>
 
   <table>
@@ -76,7 +75,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 平均チームキル
+    // 平均チームキル計算
     function calculateAverage(matches) {
       const playerStats = {};
       matches.forEach(match => {
@@ -102,7 +101,7 @@
       }));
     }
 
-    // 勝率
+    // 勝率計算
     function calculateWinRate(matches) {
       const playerStats = {};
       matches.forEach(match => {
@@ -129,41 +128,10 @@
       return Object.keys(playerStats).map(name => {
         const stat = playerStats[name];
         const winRate = stat.total > 0 ? stat.wins / stat.total : 0;
-        return { name, score: (winRate * 100).toFixed(2) };
-      });
-    }
-
-    // 信頼度補正付きスコア
-    function calculateCorrectedScore(matches) {
-      const playerStats = {};
-
-      matches.forEach(match => {
-        const processTeam = (team, kills) => {
-          if (!team || team.length === 0) return;
-          const p_team = kills / team.length;
-          team.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = [];
-            playerStats[p].push(p_team);
-          });
+        return {
+          name,
+          score: (winRate * 100).toFixed(2)  // パーセント表示
         };
-        processTeam(match.teamA, match.teamAKills);
-        processTeam(match.teamB, match.teamBKills);
-      });
-
-      const avgScores = {};
-      Object.keys(playerStats).forEach(name => {
-        const scores = playerStats[name];
-        avgScores[name] = { score: scores.reduce((a,b) => a+b, 0) / scores.length, count: scores.length };
-      });
-
-      const M = Object.values(avgScores).reduce((sum, p) => sum + p.score, 0) / Object.keys(avgScores).length;
-
-      const k = 3;
-      return Object.keys(avgScores).map(name => {
-        const n = avgScores[name].count;
-        const S = avgScores[name].score;
-        const corrected = (n/(n+k))*S + (k/(n+k))*M;
-        return { name, score: corrected.toFixed(2) };
       });
     }
 
@@ -172,8 +140,7 @@
       tbody.innerHTML = "";
       scores.sort((a,b) => b.score - a.score).forEach(player => {
         const tr = document.createElement("tr");
-        const unit = method === "winRate" ? "%" : "";
-        tr.innerHTML = `<td>${player.name}</td><td>${player.score}${unit}</td>`;
+        tr.innerHTML = `<td>${player.name}</td><td>${player.score}${method === "winRate" ? "%" : ""}</td>`;
         tbody.appendChild(tr);
       });
     }
@@ -186,10 +153,7 @@
         scores = calculateAverage(matches);
       } else if (method === "winRate") {
         scores = calculateWinRate(matches);
-      } else if (method === "corrected") {
-        scores = calculateCorrectedScore(matches);
       }
-
       renderResults(scores, method);
     }
 
