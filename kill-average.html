@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>プレイヤースコア計算（平均キル・勝率・差分スコア）</title>
+  <title>プレイヤースコア計算（3つの指標）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -53,7 +53,7 @@
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
     <label><input type="radio" name="method" value="winRate"> 勝率</label>
-    <label><input type="radio" name="method" value="diffScore"> 差分スコア（人数差補正）</label>
+    <label><input type="radio" name="method" value="diffScore"> キル差スコア</label>
   </div>
 
   <table>
@@ -76,7 +76,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 平均チームキル計算
+    // ✅ 平均チームキル
     function calculateAverage(matches) {
       const playerStats = {};
       matches.forEach(match => {
@@ -102,7 +102,7 @@
       }));
     }
 
-    // 勝率計算
+    // ✅ 勝率
     function calculateWinRate(matches) {
       const playerStats = {};
       matches.forEach(match => {
@@ -131,60 +131,45 @@
         const winRate = stat.total > 0 ? stat.wins / stat.total : 0;
         return {
           name,
-          score: (winRate * 100).toFixed(2)  // パーセント表示
+          score: (winRate * 100).toFixed(2)
         };
       });
     }
 
-    // 差分スコア（人数差補正）計算
+    // ✅ 新しい「キル差スコア」
     function calculateDiffScore(matches) {
       const playerStats = {};
-
       matches.forEach(match => {
-        if (!match.teamA || !match.teamB) return;
-        if (match.teamAKills === undefined || match.teamBKills === undefined) return;
+        if(!match.teamA || !match.teamB) return;
 
-        const killsA = match.teamAKills;
-        const killsB = match.teamBKills;
-        const diff = killsA - killsB;
+        const teamAScore = match.teamAKills;
+        const teamBScore = match.teamBKills;
+        const teamASize = match.teamA.length;
+        const teamBSize = match.teamB.length;
 
-        const sizeA = match.teamA.length;
-        const sizeB = match.teamB.length;
+        // 勝ったチームと負けたチームを判定
+        const teamAWins = teamAScore > teamBScore;
+        const teamBWins = teamBScore > teamAScore;
 
-        if (diff === 0) {
-          // 引き分けはスコア変化なし
-          return;
-        }
+        // Aチーム側の倍率
+        const multiplierA = teamAWins ? (teamBSize / teamASize) : (teamASize / teamBSize);
+        const diffA = (teamAScore - teamBScore) * multiplierA;
 
-        // 大きい方のチーム人数 / 小さい方のチーム人数
-        const ratio = sizeA > sizeB ? sizeA / sizeB : sizeB / sizeA;
-        // チームAの倍率
-        const ratioA = sizeA > sizeB ? ratio : 1 / ratio;
-        // チームBの倍率
-        const ratioB = sizeB > sizeA ? ratio : 1 / ratio;
+        // Bチーム側の倍率
+        const multiplierB = teamBWins ? (teamASize / teamBSize) : (teamBSize / teamASize);
+        const diffB = (teamBScore - teamAScore) * multiplierB;
 
-        if (diff > 0) {
-          // チームAが勝ち
-          match.teamA.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = 0;
-            playerStats[p] += diff * ratioA;
-          });
-          match.teamB.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = 0;
-            playerStats[p] -= diff * ratioB;
-          });
-        } else {
-          // チームBが勝ち
-          const absDiff = Math.abs(diff);
-          match.teamB.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = 0;
-            playerStats[p] += absDiff * ratioB;
-          });
-          match.teamA.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = 0;
-            playerStats[p] -= absDiff * ratioA;
-          });
-        }
+        // Aチームの加算
+        match.teamA.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = 0;
+          playerStats[p] += diffA;
+        });
+
+        // Bチームの加算
+        match.teamB.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = 0;
+          playerStats[p] += diffB;
+        });
       });
 
       return Object.keys(playerStats).map(name => ({
@@ -214,6 +199,7 @@
       } else if (method === "diffScore") {
         scores = calculateDiffScore(matches);
       }
+
       renderResults(scores, method);
     }
 
