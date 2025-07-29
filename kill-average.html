@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>プレイヤースコア計算（平均・最小二乗法）</title>
+  <title>プレイヤースコア計算（人数補正付き平均スコア推定法）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -11,20 +11,9 @@
       padding: 20px;
       margin: 0;
     }
-    h1 {
-      text-align: center;
-      color: #47b6a2;
-    }
-    .method-select {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    label {
-      margin: 0 12px;
-      font-weight: bold;
-      color: #47b6a2;
-      cursor: pointer;
-    }
+    h1 { text-align: center; color: #47b6a2; }
+    .method-select { text-align: center; margin-bottom: 15px; }
+    label { margin: 0 12px; font-weight: bold; color: #47b6a2; cursor: pointer; }
     table {
       width: 90%;
       margin: 20px auto;
@@ -38,10 +27,7 @@
       border-bottom: 1px solid #ddd;
       text-align: center;
     }
-    th {
-      background: #97eadb;
-      color: white;
-    }
+    th { background: #97eadb; color: white; }
     tr:hover { background: #f0faf9; }
     #warningBox {
       max-width: 90%;
@@ -64,8 +50,8 @@
   <h1>プレイヤースコア計算</h1>
 
   <div class="method-select">
-    <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
-    <label><input type="radio" name="method" value="leastSquares"> 最小二乗法（推定スコア）</label>
+    <label><input type="radio" name="method" value="ridge" checked> 人数補正付き平均スコア推定法</label>
+    <label><input type="radio" name="method" value="average"> 平均チームキル</label>
   </div>
 
   <table>
@@ -91,16 +77,17 @@
     const db = firebase.database();
 
     function jaccardSimilarity(setA, setB) {
-      const intersectionSize = new Set([...setA].filter(x => setB.has(x))).size;
-      const unionSize = new Set([...setA, ...setB]).size;
-      if (unionSize === 0) return 0;
-      return intersectionSize / unionSize;
+      const intersection = new Set([...setA].filter(x => setB.has(x))).size;
+      const union = new Set([...setA, ...setB]).size;
+      return union === 0 ? 0 : intersection / union;
     }
 
-    function calculateLeastSquares(matches) {
+    // ✅ 人数補正付き平均スコア推定法（リッジ回帰）
+    function calculateRidge(matches, lambda = 0.5) {
       const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
       const indexMap = Object.fromEntries(players.map((p, i) => [p, i]));
 
+      // 類似度チェック
       const playerMatches = {};
       players.forEach(p => playerMatches[p] = new Set());
       matches.forEach((m, i) => {
@@ -108,39 +95,35 @@
         m.teamB.forEach(p => playerMatches[p].add(i));
       });
 
-      const threshold = 0.8;
       const warnings = [];
-      for(let i = 0; i < players.length; i++) {
-        for(let j = i + 1; j < players.length; j++) {
-          const p1 = players[i];
-          const p2 = players[j];
-          const sim = jaccardSimilarity(playerMatches[p1], playerMatches[p2]);
-          if (sim > threshold) {
-            warnings.push(`${p1} と ${p2} は参加試合の類似度が高いです（${(sim*100).toFixed(1)}%）`);
+      for (let i = 0; i < players.length; i++) {
+        for (let j = i + 1; j < players.length; j++) {
+          const sim = jaccardSimilarity(playerMatches[players[i]], playerMatches[players[j]]);
+          if (sim > 0.8) {
+            warnings.push(`${players[i]} と ${players[j]} は参加試合が似ています（${(sim * 100).toFixed(1)}%）`);
           }
         }
       }
 
-      const rows = [];
-      const kills = [];
+      const rows = [], kills = [];
       matches.forEach(m => {
         const rowA = Array(players.length).fill(0);
-        m.teamA.forEach(p => rowA[indexMap[p]] = 1);
+        m.teamA.forEach(p => rowA[indexMap[p]] = 1 / m.teamA.length);
         rows.push(rowA);
-        kills.push(m.teamAKills);
+        kills.push(m.teamAKills / m.teamA.length);
 
         const rowB = Array(players.length).fill(0);
-        m.teamB.forEach(p => rowB[indexMap[p]] = 1);
+        m.teamB.forEach(p => rowB[indexMap[p]] = 1 / m.teamB.length);
         rows.push(rowB);
-        kills.push(m.teamBKills);
+        kills.push(m.teamBKills / m.teamB.length);
       });
 
       const A = math.matrix(rows);
       const b = math.matrix(kills);
-
       const At = math.transpose(A);
+      const I = math.identity(players.length);
       const x = math.multiply(
-        math.inv(math.multiply(At, A)),
+        math.inv(math.add(math.multiply(At, A), math.multiply(lambda, I))),
         math.multiply(At, b)
       );
 
@@ -152,28 +135,29 @@
       return { scores, warnings };
     }
 
+    // ✅ 平均チームキル
     function calculateAverage(matches) {
-      const playerStats = {};
-      matches.forEach(match => {
-        if(match.teamA && match.teamAKills !== undefined){
-          match.teamA.forEach(p => {
-            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
-            playerStats[p].total += match.teamAKills;
-            playerStats[p].count++;
+      const stats = {};
+      matches.forEach(m => {
+        if (m.teamA) {
+          m.teamA.forEach(p => {
+            if (!stats[p]) stats[p] = { total: 0, count: 0 };
+            stats[p].total += m.teamAKills;
+            stats[p].count++;
           });
         }
-        if(match.teamB && match.teamBKills !== undefined){
-          match.teamB.forEach(p => {
-            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
-            playerStats[p].total += match.teamBKills;
-            playerStats[p].count++;
+        if (m.teamB) {
+          m.teamB.forEach(p => {
+            if (!stats[p]) stats[p] = { total: 0, count: 0 };
+            stats[p].total += m.teamBKills;
+            stats[p].count++;
           });
         }
       });
 
-      const scores = Object.keys(playerStats).map(name => ({
+      const scores = Object.keys(stats).map(name => ({
         name,
-        score: (playerStats[name].total / playerStats[name].count).toFixed(2)
+        score: +(stats[name].total / stats[name].count).toFixed(2)
       }));
 
       return { scores, warnings: [] };
@@ -182,45 +166,39 @@
     function renderResults(scores, warnings) {
       const tbody = document.getElementById("resultTable");
       tbody.innerHTML = "";
-      scores.sort((a,b) => b.score - a.score).forEach(player => {
+      scores.sort((a, b) => b.score - a.score).forEach(p => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${player.name}</td><td>${player.score}</td>`;
+        tr.innerHTML = `<td>${p.name}</td><td>${p.score}</td>`;
         tbody.appendChild(tr);
       });
 
-      const warningBox = document.getElementById("warningBox");
-      if(warnings.length > 0){
-        warningBox.style.display = "block";
-        warningBox.textContent = "⚠️ 似すぎているプレイヤーペアがあります:\n" + warnings.join("\n");
+      const box = document.getElementById("warningBox");
+      if (warnings.length > 0) {
+        box.style.display = "block";
+        box.textContent = "⚠️ 類似プレイヤーがあります:\n" + warnings.join("\n");
       } else {
-        warningBox.style.display = "none";
-        warningBox.textContent = "";
+        box.style.display = "none";
+        box.textContent = "";
       }
     }
 
     function updateResults(matches) {
       const method = document.querySelector('input[name="method"]:checked').value;
-      if(method === "leastSquares"){
-        const { scores, warnings } = calculateLeastSquares(matches);
-        renderResults(scores, warnings);
-      } else {
-        const { scores, warnings } = calculateAverage(matches);
-        renderResults(scores, warnings);
-      }
+      const { scores, warnings } =
+        method === "ridge" ? calculateRidge(matches) : calculateAverage(matches);
+      renderResults(scores, warnings);
     }
 
-    db.ref("apex_results").on("value", snapshot => {
-      if (!snapshot.exists()) return;
-      const matches = Object.values(snapshot.val());
-      updateResults(matches);
+    db.ref("apex_results").on("value", snap => {
+      if (!snap.exists()) return;
+      updateResults(Object.values(snap.val()));
     });
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        db.ref("apex_results").once("value").then(snapshot => {
-          if (!snapshot.exists()) return;
-          const matches = Object.values(snapshot.val());
-          updateResults(matches);
+      radio.addEventListener("change", () => {
+        db.ref("apex_results").once("value").then(snap => {
+          if (!snap.exists()) return;
+          updateResults(Object.values(snap.val()));
         });
       });
     });
