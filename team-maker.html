@@ -159,32 +159,63 @@
     }
 
     // ✅ プレイヤー一覧の表示
-    function renderPlayers() {
-      const container = document.getElementById("playerList");
-      const selectedNames = Array.from(document.querySelectorAll(".player.selected"))
-        .map(d => d.textContent);
+function renderPlayers() {
+  const container = document.getElementById("playerList");
+  const selectedNames = Array.from(document.querySelectorAll(".player.selected"))
+    .map(d => d.textContent);
 
-      container.innerHTML = "";
-      const method = document.querySelector('input[name="method"]:checked').value;
-      let scores = method === "average" ? playerScoresAverage : playerScoresWinRate;
+  container.innerHTML = "";
+  const method = document.querySelector('input[name="method"]:checked').value;
+  let scores = method === "average" ? playerScoresAverage : playerScoresWinRate;
 
-      Object.keys(scores)
-        .sort((a, b) => a.localeCompare(b, "ja"))
-        .forEach(name => {
-          const div = document.createElement("div");
-          div.className = "player";
-          div.textContent = name;
+  // 50音順にソート
+  const sorted = Object.keys(scores).sort((a, b) => a.localeCompare(b, "ja"));
 
-          if (selectedNames.includes(name)) div.classList.add("selected");
+  // 行ごとの見出しを追加
+  const gojuonGroups = {
+    "あ": "あいうえお",
+    "か": "かきくけこ",
+    "さ": "さしすせそ",
+    "た": "たちつてと",
+    "な": "なにぬねの",
+    "は": "はひふへほ",
+    "ま": "まみむめも",
+    "や": "やゆよ",
+    "ら": "らりるれろ",
+    "わ": "わをん"
+  };
 
-          div.onclick = () => {
-            div.classList.toggle("selected");
-            makeTeams();
-          };
+  let currentGroup = "";
 
-          container.appendChild(div);
-        });
+  sorted.forEach(name => {
+    const first = name[0]; // 名前の1文字目
+    const group = Object.keys(gojuonGroups).find(g => gojuonGroups[g].includes(first)) || "その他";
+
+    if (group !== currentGroup) {
+      currentGroup = group;
+      const heading = document.createElement("div");
+      heading.textContent = `${group}行`;
+      heading.style.width = "100%";
+      heading.style.fontWeight = "bold";
+      heading.style.marginTop = "10px";
+      heading.style.color = "#47b6a2";
+      container.appendChild(heading);
     }
+
+    const div = document.createElement("div");
+    div.className = "player";
+    div.textContent = name;
+
+    if (selectedNames.includes(name)) div.classList.add("selected");
+
+    div.onclick = () => {
+      div.classList.toggle("selected");
+      makeTeams();
+    };
+
+    container.appendChild(div);
+  });
+}
 
     // ✅ チーム分け
     function makeTeams() {
