@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>APEX チーム分け（人数補正付き平均スコア推定法）</title>
+  <title>APEX チーム分け（平均・最小二乗法切替）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -11,7 +11,10 @@
       margin: 0;
       padding: 20px;
     }
-    h1 { text-align: center; color: #47b6a2; }
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+    }
     .method-select {
       text-align: center;
       margin-bottom: 15px;
@@ -56,7 +59,10 @@
       text-align: center;
       color: #47b6a2;
     }
-    ul { list-style: none; padding: 0; }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -66,8 +72,8 @@
   <h1>バランスよくチーム分け</h1>
 
   <div class="method-select">
-    <label><input type="radio" name="method" value="ridge" checked> 人数補正付き平均スコア推定法</label>
-    <label><input type="radio" name="method" value="average"> 平均チームキル</label>
+    <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
+        <label><input type="radio" name="method" value="leastSquares"> 最小二乗法スコア</label>
   </div>
 
   <div id="playerList" class="player-list"></div>
@@ -97,11 +103,10 @@
     const db = firebase.database();
 
     let matches = [];
-    let playerScoresRidge = {};
+    let playerScoresLeastSquares = {};
     let playerScoresAverage = {};
 
-    // ✅ 人数補正付き平均スコア推定法（リッジ回帰）
-    function calculateScoresRidge(matches, lambda = 0.5) {
+    function calculateScoresLeastSquares(matches) {
       const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
       const indexMap = Object.fromEntries(players.map((p, i) => [p, i]));
 
@@ -109,27 +114,23 @@
       const kills = [];
 
       matches.forEach(m => {
-        // チームA
         const rowA = Array(players.length).fill(0);
-        m.teamA.forEach(p => rowA[indexMap[p]] = 1 / m.teamA.length);
+        m.teamA.forEach(p => rowA[indexMap[p]] = 1);
         rows.push(rowA);
-        kills.push(m.teamAKills / m.teamA.length);
+        kills.push(m.teamAKills);
 
-        // チームB
         const rowB = Array(players.length).fill(0);
-        m.teamB.forEach(p => rowB[indexMap[p]] = 1 / m.teamB.length);
+        m.teamB.forEach(p => rowB[indexMap[p]] = 1);
         rows.push(rowB);
-        kills.push(m.teamBKills / m.teamB.length);
+        kills.push(m.teamBKills);
       });
 
       const A = math.matrix(rows);
       const b = math.matrix(kills);
-      const At = math.transpose(A);
-      const I = math.identity(players.length);
-      const lambdaI = math.multiply(lambda, I);
 
+      const At = math.transpose(A);
       const x = math.multiply(
-        math.inv(math.add(math.multiply(At, A), lambdaI)),
+        math.inv(math.multiply(At, A)),
         math.multiply(At, b)
       );
 
@@ -140,82 +141,102 @@
       return scores;
     }
 
-    // ✅ 平均チームキル
     function calculateScoresAverage(matches) {
-      const stats = {};
-      matches.forEach(m => {
-        if (m.teamA) {
-          m.teamA.forEach(p => {
-            if (!stats[p]) stats[p] = { total: 0, count: 0 };
-            stats[p].total += m.teamAKills;
-            stats[p].count++;
+      const playerStats = {};
+      matches.forEach(match => {
+        if(match.teamA && match.teamAKills !== undefined){
+          match.teamA.forEach(p => {
+            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            playerStats[p].total += match.teamAKills;
+            playerStats[p].count++;
           });
         }
-        if (m.teamB) {
-          m.teamB.forEach(p => {
-            if (!stats[p]) stats[p] = { total: 0, count: 0 };
-            stats[p].total += m.teamBKills;
-            stats[p].count++;
+        if(match.teamB && match.teamBKills !== undefined){
+          match.teamB.forEach(p => {
+            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            playerStats[p].total += match.teamBKills;
+            playerStats[p].count++;
           });
         }
       });
-
       const scores = {};
-      Object.keys(stats).forEach(p => {
-        scores[p] = +(stats[p].total / stats[p].count).toFixed(2);
+      Object.keys(playerStats).forEach(name => {
+        scores[name] = +(playerStats[name].total / playerStats[name].count).toFixed(2);
       });
       return scores;
     }
 
     function renderPlayers() {
       const container = document.getElementById("playerList");
-      const selectedNames = Array.from(document.querySelectorAll(".player.selected")).map(d => d.textContent);
+      const selectedNames = Array.from(document.querySelectorAll(".player.selected"))
+        .map(d => d.textContent);
+
       container.innerHTML = "";
-
       const method = document.querySelector('input[name="method"]:checked').value;
-      const scores = (method === "ridge") ? playerScoresRidge : playerScoresAverage;
+      const scores = (method === "leastSquares") ? playerScoresLeastSquares : playerScoresAverage;
 
-      Object.keys(scores).sort((a, b) => a.localeCompare(b, "ja")).forEach(name => {
-        const div = document.createElement("div");
-        div.className = "player";
-        div.textContent = name;
-        if (selectedNames.includes(name)) div.classList.add("selected");
-        div.onclick = () => { div.classList.toggle("selected"); makeTeams(); };
-        container.appendChild(div);
-      });
+      Object.keys(scores)
+        .sort((a, b) => a.localeCompare(b, "ja"))
+        .forEach(name => {
+          const div = document.createElement("div");
+          div.className = "player";
+          div.textContent = name;
+
+          if (selectedNames.includes(name)) {
+            div.classList.add("selected");
+          }
+
+          div.onclick = () => {
+            div.classList.toggle("selected");
+            makeTeams();
+          };
+
+          container.appendChild(div);
+        });
     }
 
     function makeTeams() {
-      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.textContent);
+      const selected = Array.from(document.querySelectorAll(".player.selected"))
+        .map(d => d.textContent);
       const method = document.querySelector('input[name="method"]:checked').value;
-      const scores = (method === "ridge") ? playerScoresRidge : playerScoresAverage;
+      const scores = (method === "leastSquares") ? playerScoresLeastSquares : playerScoresAverage;
 
       const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
+
       players.sort((a,b) => b.score - a.score);
 
-      const teamA = [], teamB = [];
+      const teamA = [];
+      const teamB = [];
       let sumA = 0, sumB = 0;
 
       players.forEach(p => {
-        if (sumA <= sumB) { teamA.push(p); sumA += p.score; }
-        else { teamB.push(p); sumB += p.score; }
+        if (sumA <= sumB) {
+          teamA.push(p);
+          sumA += p.score;
+        } else {
+          teamB.push(p);
+          sumB += p.score;
+        }
       });
 
       document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
       document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
     }
 
-    db.ref("apex_results").on("value", snap => {
-      if (!snap.exists()) return;
-      matches = Object.values(snap.val());
-      playerScoresRidge = calculateScoresRidge(matches);
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) return;
+      matches = Object.values(snapshot.val());
+      playerScoresLeastSquares = calculateScoresLeastSquares(matches);
       playerScoresAverage = calculateScoresAverage(matches);
       renderPlayers();
       makeTeams();
     });
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
-      radio.addEventListener("change", () => { renderPlayers(); makeTeams(); });
+      radio.addEventListener("change", () => {
+        renderPlayers();
+        makeTeams();
+      });
     });
   </script>
 </body>
