@@ -101,7 +101,7 @@
   </div>
 
   <!-- ✅ フッター表示 -->
-  <p id="matchCount">過去0試合のデータをもとに作成されています。</p>
+  <p id="matchCount">過去 試合のデータをもとに作成されています。</p>
 
   <script>
     const firebaseConfig = {
@@ -239,7 +239,7 @@
 
       // ✅ 試合数をフッターに表示
       document.getElementById("matchCount").textContent =
-        `${matches.length}試合のデータをもとに作成されます`;
+        `過去${matches.length}試合のデータをもとに作成されています。`;
     });
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
