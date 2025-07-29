@@ -137,52 +137,64 @@
     }
 
     // キル差＋人数差補正スコア計算
-    function calculateKillDiffCorrected(matches) {
-      const playerStats = {};
-      matches.forEach(match => {
-        if (!match.teamA || !match.teamB || match.teamAKills === undefined || match.teamBKills === undefined) return;
+function calculateDiffScore(matches) {
+  const playerStats = {};
 
-        const sizeA = match.teamA.length;
-        const sizeB = match.teamB.length;
+  matches.forEach(match => {
+    if (!match.teamA || !match.teamB) return;
+    if (match.teamAKills === undefined || match.teamBKills === undefined) return;
 
-        // 6人vs3人なら ratioA = 3/6=0.5, ratioB=6/3=2 のように人数差逆数を計算
-        const ratioA = sizeB / sizeA;
-        const ratioB = sizeA / sizeB;
+    const killsA = match.teamAKills;
+    const killsB = match.teamBKills;
+    const diff = killsA - killsB;
 
-        const diff = match.teamAKills - match.teamBKills;
+    const sizeA = match.teamA.length;
+    const sizeB = match.teamB.length;
 
-        if (diff > 0) {
-          // A勝ち → Aチームに diff * ratioA 加算、Bチームに diff * ratioA 加算
-          match.teamA.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = 0;
-            playerStats[p] += diff * ratioA;
-          });
-          match.teamB.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = 0;
-            playerStats[p] += diff * ratioA;
-          });
-        } else if (diff < 0) {
-          // B勝ち → Bチームに |diff| * ratioB 加算、Aチームに |diff| * ratioB 加算
-          const absDiff = Math.abs(diff);
-          match.teamB.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = 0;
-            playerStats[p] += absDiff * ratioB;
-          });
-          match.teamA.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = 0;
-            playerStats[p] += absDiff * ratioB;
-          });
-        } else {
-          // 引き分けの場合は何もしない（もしくは0加算）
-        }
-      });
-
-      // スコアとして表示しやすいよう小数点2桁に丸めて配列に変換
-      return Object.keys(playerStats).map(name => ({
-        name,
-        score: playerStats[name].toFixed(2)
-      }));
+    if (diff === 0) {
+      // 引き分けなら差なし加算しない
+      return;
     }
+
+    // 大きい方のチーム人数 / 小さい方のチーム人数
+    const ratio = sizeA > sizeB ? sizeA / sizeB : sizeB / sizeA;
+    const ratioA = sizeA > sizeB ? ratio : 1 / ratio;
+    const ratioB = sizeB > sizeA ? ratio : 1 / ratio;
+
+    if (diff > 0) {
+      // チームAが勝ち
+      // チームAには diff * ratioA を加算
+      match.teamA.forEach(p => {
+        if (!playerStats[p]) playerStats[p] = 0;
+        playerStats[p] += diff * ratioA;
+      });
+      // チームBには diff * -ratioB を加算（負の値）
+      match.teamB.forEach(p => {
+        if (!playerStats[p]) playerStats[p] = 0;
+        playerStats[p] -= diff * ratioB;
+      });
+    } else {
+      // チームBが勝ち（diff < 0）
+      const absDiff = Math.abs(diff);
+      // チームBには absDiff * ratioB を加算
+      match.teamB.forEach(p => {
+        if (!playerStats[p]) playerStats[p] = 0;
+        playerStats[p] += absDiff * ratioB;
+      });
+      // チームAには absDiff * -ratioA を加算（負の値）
+      match.teamA.forEach(p => {
+        if (!playerStats[p]) playerStats[p] = 0;
+        playerStats[p] -= absDiff * ratioA;
+      });
+    }
+  });
+
+  // 結果を配列に変換して返す
+  return Object.keys(playerStats).map(name => ({
+    name,
+    score: playerStats[name].toFixed(2)
+  }));
+}
 
     function renderResults(scores, method) {
       const tbody = document.getElementById("resultTable");
