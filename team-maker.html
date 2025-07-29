@@ -54,12 +54,11 @@
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    /* ✅ チームごとの背景色 */
     .team-box.team1 {
-      background: #e8f4ff; /* 薄い青 */
+      background: #e8f4ff;
     }
     .team-box.team2 {
-      background: #ffeaea; /* 薄い赤 */
+      background: #ffeaea;
     }
     .team-box h2 {
       text-align: center;
@@ -68,6 +67,13 @@
     ul {
       list-style: none;
       padding: 0;
+    }
+    /* フッターのスタイル */
+    #matchCount {
+      text-align: center;
+      font-size: 12px;
+      color: gray;
+      margin-top: 20px;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -93,6 +99,9 @@
       <ul id="teamB"></ul>
     </div>
   </div>
+
+  <!-- ✅ フッター表示 -->
+  <p id="matchCount">0試合のデータをもとに作成されます</p>
 
   <script>
     const firebaseConfig = {
@@ -139,7 +148,7 @@
 
     // ✅ 勝率計算
     function calculateWinRate(matches) {
-      const stats = {}; // { name: { win: 0, total: 0 } }
+      const stats = {};
 
       matches.forEach(match => {
         const teamAWins = match.teamAKills > match.teamBKills;
@@ -227,6 +236,10 @@
       playerScoresWinRate = calculateWinRate(matches);
       renderPlayers();
       makeTeams();
+
+      // ✅ 試合数をフッターに表示
+      document.getElementById("matchCount").textContent =
+        `${matches.length}試合のデータをもとに作成されます`;
     });
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
