@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>APEX チーム分け（平均キル・勝率切替）</title>
+  <title>APEXきゃたんカスタムチーム分け（チーム平均キル・勝率）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -68,7 +68,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>バランスよくチーム分け</h1>
+  <h1>チーム分け</h1>
 
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
@@ -79,11 +79,11 @@
 
   <div class="teams">
     <div class="team-box">
-      <h2>チームA</h2>
+      <h2>チーム1</h2>
       <ul id="teamA"></ul>
     </div>
     <div class="team-box">
-      <h2>チームB</h2>
+      <h2>チーム2</h2>
       <ul id="teamB"></ul>
     </div>
   </div>
