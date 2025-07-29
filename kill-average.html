@@ -61,38 +61,42 @@
     const db = firebase.database();
 
     // 🔥 人数補正付き繰り返し調整法
-    function calculateIterativeAdjustment(matches, iterations = 50, learningRate = 0.5) {
-      const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
-      let scores = Object.fromEntries(players.map(p => [p, 1.0])); // 初期スコア = 1.0
+function calculateIterativeAdjustment(matches, iterations = 50, learningRate = 0.5) {
+  const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
+  let scores = Object.fromEntries(players.map(p => [p, 1.0])); // 初期スコア = 1.0
 
-      for (let iter = 0; iter < iterations; iter++) {
-        const newScores = { ...scores };
+  for (let iter = 0; iter < iterations; iter++) {
+    const newScores = { ...scores };
 
-        matches.forEach(m => {
-          const processTeam = (team, kills) => {
-            if (!team || team.length === 0) return;
+    matches.forEach(m => {
+      const processTeam = (team, kills) => {
+        if (!team || team.length === 0) return;
 
-            const teamScoreSum = team.reduce((sum, p) => sum + scores[p], 0);
-            const predicted = teamScoreSum / team.length || 1e-6;
-            const factor = kills / predicted;
+        const teamScoreSum = team.reduce((sum, p) => sum + scores[p], 0);
+        const predicted = teamScoreSum / team.length || 1e-6;
+        const factor = kills / predicted;
 
-            team.forEach(p => {
-              newScores[p] *= Math.pow(factor, learningRate / team.length);
-            });
-          };
-
-          processTeam(m.teamA, m.teamAKills);
-          processTeam(m.teamB, m.teamBKills);
+        team.forEach(p => {
+          // 調整値 = factor - 1（実際のキルと予測の比の差分）
+          // チーム人数で割り、学習率をかけてスコアを微調整（足し算）
+          newScores[p] += learningRate * (factor - 1) / team.length;
+          // スコアが0以下にならないように最低1e-3にクリップ
+          if (newScores[p] < 1e-3) newScores[p] = 1e-3;
         });
+      };
 
-        scores = newScores;
-      }
+      processTeam(m.teamA, m.teamAKills);
+      processTeam(m.teamB, m.teamBKills);
+    });
 
-      return Object.keys(scores).map(name => ({
-        name,
-        score: +scores[name].toFixed(2)
-      }));
-    }
+    scores = newScores;
+  }
+
+  return Object.keys(scores).map(name => ({
+    name,
+    score: +scores[name].toFixed(2)
+  }));
+}
 
     // 🔥 データを取得してスコア表示
     db.ref("apex_results").on("value", snapshot => {
