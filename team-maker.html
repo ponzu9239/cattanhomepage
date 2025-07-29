@@ -50,10 +50,16 @@
     }
     .team-box {
       width: 45%;
-      background: white;
       padding: 10px;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    /* ✅ チームごとの背景色 */
+    .team-box.team1 {
+      background: #e8f4ff; /* 薄い青 */
+    }
+    .team-box.team2 {
+      background: #ffeaea; /* 薄い赤 */
     }
     .team-box h2 {
       text-align: center;
@@ -78,11 +84,11 @@
   <div id="playerList" class="player-list"></div>
 
   <div class="teams">
-    <div class="team-box">
+    <div class="team-box team1">
       <h2>チーム1</h2>
       <ul id="teamA"></ul>
     </div>
-    <div class="team-box">
+    <div class="team-box team2">
       <h2>チーム2</h2>
       <ul id="teamB"></ul>
     </div>
