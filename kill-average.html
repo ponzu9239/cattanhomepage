@@ -1,9 +1,9 @@
-　<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>プレイヤースコア計算（平均キル・勝率）</title>
+  <title>プレイヤースコア計算（平均キル・勝率・差分スコア）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -53,6 +53,7 @@
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
     <label><input type="radio" name="method" value="winRate"> 勝率</label>
+    <label><input type="radio" name="method" value="diff"> 差分スコア</label> <!-- ✅ 追加 -->
   </div>
 
   <table>
@@ -75,20 +76,20 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 平均チームキル計算
+    // ✅ 平均チームキル計算
     function calculateAverage(matches) {
       const playerStats = {};
       matches.forEach(match => {
-        if(match.teamA && match.teamAKills !== undefined){
+        if (match.teamA && match.teamAKills !== undefined) {
           match.teamA.forEach(p => {
-            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
             playerStats[p].total += match.teamAKills;
             playerStats[p].count++;
           });
         }
-        if(match.teamB && match.teamBKills !== undefined){
+        if (match.teamB && match.teamBKills !== undefined) {
           match.teamB.forEach(p => {
-            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
             playerStats[p].total += match.teamBKills;
             playerStats[p].count++;
           });
@@ -101,7 +102,7 @@
       }));
     }
 
-    // 勝率計算
+    // ✅ 勝率計算
     function calculateWinRate(matches) {
       const playerStats = {};
       matches.forEach(match => {
@@ -115,7 +116,6 @@
             playerStats[p].total += 1;
           });
         }
-
         if (match.teamB) {
           match.teamB.forEach(p => {
             if (!playerStats[p]) playerStats[p] = { wins: 0, total: 0 };
@@ -130,21 +130,52 @@
         const winRate = stat.total > 0 ? stat.wins / stat.total : 0;
         return {
           name,
-          score: (winRate * 100).toFixed(2)  // パーセント表示
+          score: (winRate * 100).toFixed(2)
         };
       });
     }
 
+    // ✅ 差分スコア計算
+    function calculateDiffScore(matches) {
+      const playerStats = {};
+      matches.forEach(match => {
+        const diffA = match.teamAKills - match.teamBKills;
+        const diffB = match.teamBKills - match.teamAKills;
+
+        if (match.teamA) {
+          match.teamA.forEach(p => {
+            if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            playerStats[p].total += diffA;
+            playerStats[p].count++;
+          });
+        }
+        if (match.teamB) {
+          match.teamB.forEach(p => {
+            if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            playerStats[p].total += diffB;
+            playerStats[p].count++;
+          });
+        }
+      });
+
+      return Object.keys(playerStats).map(name => ({
+        name,
+        score: (playerStats[name].total / playerStats[name].count).toFixed(2)
+      }));
+    }
+
+    // ✅ 表示更新
     function renderResults(scores, method) {
       const tbody = document.getElementById("resultTable");
       tbody.innerHTML = "";
-      scores.sort((a,b) => b.score - a.score).forEach(player => {
+      scores.sort((a, b) => b.score - a.score).forEach(player => {
         const tr = document.createElement("tr");
         tr.innerHTML = `<td>${player.name}</td><td>${player.score}${method === "winRate" ? "%" : ""}</td>`;
         tbody.appendChild(tr);
       });
     }
 
+    // ✅ スコア計算の切り替え
     function updateResults(matches) {
       const method = document.querySelector('input[name="method"]:checked').value;
       let scores = [];
@@ -153,10 +184,14 @@
         scores = calculateAverage(matches);
       } else if (method === "winRate") {
         scores = calculateWinRate(matches);
+      } else if (method === "diff") { // ✅ 追加
+        scores = calculateDiffScore(matches);
       }
+
       renderResults(scores, method);
     }
 
+    // ✅ Firebaseから取得
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
       const matches = Object.values(snapshot.val());
@@ -164,7 +199,7 @@
     });
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
-      radio.addEventListener('change', () => {
+      radio.addEventListener("change", () => {
         db.ref("apex_results").once("value").then(snapshot => {
           if (!snapshot.exists()) return;
           const matches = Object.values(snapshot.val());
