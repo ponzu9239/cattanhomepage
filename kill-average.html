@@ -135,7 +135,7 @@
       });
     }
 
-    // ✅ 差分スコア計算
+    // ✅ 差分スコア計算（合計）
     function calculateDiffScore(matches) {
       const playerStats = {};
       matches.forEach(match => {
@@ -144,23 +144,21 @@
 
         if (match.teamA) {
           match.teamA.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
-            playerStats[p].total += diffA;
-            playerStats[p].count++;
+            if (!playerStats[p]) playerStats[p] = 0;
+            playerStats[p] += diffA;
           });
         }
         if (match.teamB) {
           match.teamB.forEach(p => {
-            if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
-            playerStats[p].total += diffB;
-            playerStats[p].count++;
+            if (!playerStats[p]) playerStats[p] = 0;
+            playerStats[p] += diffB;
           });
         }
       });
 
       return Object.keys(playerStats).map(name => ({
         name,
-        score: (playerStats[name].total / playerStats[name].count).toFixed(2)
+        score: playerStats[name].toFixed(2) // ✅ 合計値をそのまま表示
       }));
     }
 
@@ -184,8 +182,8 @@
         scores = calculateAverage(matches);
       } else if (method === "winRate") {
         scores = calculateWinRate(matches);
-      } else if (method === "diff") { // ✅ 追加
-        scores = calculateDiffScore(matches);
+      } else if (method === "diff") {
+        scores = calculateDiffScore(matches); // ✅ 合計バージョン
       }
 
       renderResults(scores, method);
