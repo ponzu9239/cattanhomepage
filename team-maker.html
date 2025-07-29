@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>APEX チーム分け（平均・最小二乗法切替）</title>
+  <title>APEX チーム分け（平均キル・勝率切替）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -66,14 +66,13 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
   <h1>バランスよくチーム分け</h1>
 
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
-        <label><input type="radio" name="method" value="leastSquares"> 最小二乗法スコア</label>
+    <label><input type="radio" name="method" value="winrate"> 勝率</label>
   </div>
 
   <div id="playerList" class="player-list"></div>
@@ -103,55 +102,21 @@
     const db = firebase.database();
 
     let matches = [];
-    let playerScoresLeastSquares = {};
     let playerScoresAverage = {};
+    let playerScoresWinRate = {};
 
-    function calculateScoresLeastSquares(matches) {
-      const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
-      const indexMap = Object.fromEntries(players.map((p, i) => [p, i]));
-
-      const rows = [];
-      const kills = [];
-
-      matches.forEach(m => {
-        const rowA = Array(players.length).fill(0);
-        m.teamA.forEach(p => rowA[indexMap[p]] = 1);
-        rows.push(rowA);
-        kills.push(m.teamAKills);
-
-        const rowB = Array(players.length).fill(0);
-        m.teamB.forEach(p => rowB[indexMap[p]] = 1);
-        rows.push(rowB);
-        kills.push(m.teamBKills);
-      });
-
-      const A = math.matrix(rows);
-      const b = math.matrix(kills);
-
-      const At = math.transpose(A);
-      const x = math.multiply(
-        math.inv(math.multiply(At, A)),
-        math.multiply(At, b)
-      );
-
-      const scores = {};
-      players.forEach((p, i) => {
-        scores[p] = math.round(x.get([i]), 2);
-      });
-      return scores;
-    }
-
+    // ✅ 平均チームキル計算
     function calculateScoresAverage(matches) {
       const playerStats = {};
       matches.forEach(match => {
-        if(match.teamA && match.teamAKills !== undefined){
+        if(match.teamA){
           match.teamA.forEach(p => {
             if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
             playerStats[p].total += match.teamAKills;
             playerStats[p].count++;
           });
         }
-        if(match.teamB && match.teamBKills !== undefined){
+        if(match.teamB){
           match.teamB.forEach(p => {
             if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
             playerStats[p].total += match.teamBKills;
@@ -166,6 +131,34 @@
       return scores;
     }
 
+    // ✅ 勝率計算
+    function calculateWinRate(matches) {
+      const stats = {}; // { name: { win: 0, total: 0 } }
+
+      matches.forEach(match => {
+        const teamAWins = match.teamAKills > match.teamBKills;
+
+        match.teamA.forEach(p => {
+          if (!stats[p]) stats[p] = { win: 0, total: 0 };
+          stats[p].total++;
+          if (teamAWins) stats[p].win++;
+        });
+
+        match.teamB.forEach(p => {
+          if (!stats[p]) stats[p] = { win: 0, total: 0 };
+          stats[p].total++;
+          if (!teamAWins) stats[p].win++;
+        });
+      });
+
+      const scores = {};
+      Object.keys(stats).forEach(name => {
+        scores[name] = +(stats[name].win / stats[name].total).toFixed(2);
+      });
+      return scores;
+    }
+
+    // ✅ プレイヤー一覧の表示
     function renderPlayers() {
       const container = document.getElementById("playerList");
       const selectedNames = Array.from(document.querySelectorAll(".player.selected"))
@@ -173,7 +166,7 @@
 
       container.innerHTML = "";
       const method = document.querySelector('input[name="method"]:checked').value;
-      const scores = (method === "leastSquares") ? playerScoresLeastSquares : playerScoresAverage;
+      let scores = method === "average" ? playerScoresAverage : playerScoresWinRate;
 
       Object.keys(scores)
         .sort((a, b) => a.localeCompare(b, "ja"))
@@ -182,9 +175,7 @@
           div.className = "player";
           div.textContent = name;
 
-          if (selectedNames.includes(name)) {
-            div.classList.add("selected");
-          }
+          if (selectedNames.includes(name)) div.classList.add("selected");
 
           div.onclick = () => {
             div.classList.toggle("selected");
@@ -195,18 +186,17 @@
         });
     }
 
+    // ✅ チーム分け
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected"))
         .map(d => d.textContent);
       const method = document.querySelector('input[name="method"]:checked').value;
-      const scores = (method === "leastSquares") ? playerScoresLeastSquares : playerScoresAverage;
+      let scores = method === "average" ? playerScoresAverage : playerScoresWinRate;
 
       const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
-
       players.sort((a,b) => b.score - a.score);
 
-      const teamA = [];
-      const teamB = [];
+      const teamA = [], teamB = [];
       let sumA = 0, sumB = 0;
 
       players.forEach(p => {
@@ -223,11 +213,12 @@
       document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
     }
 
+    // ✅ Firebaseからデータ取得
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
       matches = Object.values(snapshot.val());
-      playerScoresLeastSquares = calculateScoresLeastSquares(matches);
       playerScoresAverage = calculateScoresAverage(matches);
+      playerScoresWinRate = calculateWinRate(matches);
       renderPlayers();
       makeTeams();
     });
