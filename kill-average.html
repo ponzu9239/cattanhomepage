@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>プレイヤースコア計算（平均キル・勝率・キル差補正）</title>
+  <title>プレイヤースコア計算（平均キル・勝率・差分スコア）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -53,7 +53,7 @@
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
     <label><input type="radio" name="method" value="winRate"> 勝率</label>
-    <label><input type="radio" name="method" value="killDiffCorrected"> キル差補正スコア</label>
+    <label><input type="radio" name="method" value="diffScore"> 差分スコア（人数差補正）</label>
   </div>
 
   <table>
@@ -136,73 +136,69 @@
       });
     }
 
-    // キル差＋人数差補正スコア計算
-function calculateDiffScore(matches) {
-  const playerStats = {};
+    // 差分スコア（人数差補正）計算
+    function calculateDiffScore(matches) {
+      const playerStats = {};
 
-  matches.forEach(match => {
-    if (!match.teamA || !match.teamB) return;
-    if (match.teamAKills === undefined || match.teamBKills === undefined) return;
+      matches.forEach(match => {
+        if (!match.teamA || !match.teamB) return;
+        if (match.teamAKills === undefined || match.teamBKills === undefined) return;
 
-    const killsA = match.teamAKills;
-    const killsB = match.teamBKills;
-    const diff = killsA - killsB;
+        const killsA = match.teamAKills;
+        const killsB = match.teamBKills;
+        const diff = killsA - killsB;
 
-    const sizeA = match.teamA.length;
-    const sizeB = match.teamB.length;
+        const sizeA = match.teamA.length;
+        const sizeB = match.teamB.length;
 
-    if (diff === 0) {
-      // 引き分けなら差なし加算しない
-      return;
+        if (diff === 0) {
+          // 引き分けはスコア変化なし
+          return;
+        }
+
+        // 大きい方のチーム人数 / 小さい方のチーム人数
+        const ratio = sizeA > sizeB ? sizeA / sizeB : sizeB / sizeA;
+        // チームAの倍率
+        const ratioA = sizeA > sizeB ? ratio : 1 / ratio;
+        // チームBの倍率
+        const ratioB = sizeB > sizeA ? ratio : 1 / ratio;
+
+        if (diff > 0) {
+          // チームAが勝ち
+          match.teamA.forEach(p => {
+            if (!playerStats[p]) playerStats[p] = 0;
+            playerStats[p] += diff * ratioA;
+          });
+          match.teamB.forEach(p => {
+            if (!playerStats[p]) playerStats[p] = 0;
+            playerStats[p] -= diff * ratioB;
+          });
+        } else {
+          // チームBが勝ち
+          const absDiff = Math.abs(diff);
+          match.teamB.forEach(p => {
+            if (!playerStats[p]) playerStats[p] = 0;
+            playerStats[p] += absDiff * ratioB;
+          });
+          match.teamA.forEach(p => {
+            if (!playerStats[p]) playerStats[p] = 0;
+            playerStats[p] -= absDiff * ratioA;
+          });
+        }
+      });
+
+      return Object.keys(playerStats).map(name => ({
+        name,
+        score: playerStats[name].toFixed(2)
+      }));
     }
-
-    // 大きい方のチーム人数 / 小さい方のチーム人数
-    const ratio = sizeA > sizeB ? sizeA / sizeB : sizeB / sizeA;
-    const ratioA = sizeA > sizeB ? ratio : 1 / ratio;
-    const ratioB = sizeB > sizeA ? ratio : 1 / ratio;
-
-    if (diff > 0) {
-      // チームAが勝ち
-      // チームAには diff * ratioA を加算
-      match.teamA.forEach(p => {
-        if (!playerStats[p]) playerStats[p] = 0;
-        playerStats[p] += diff * ratioA;
-      });
-      // チームBには diff * -ratioB を加算（負の値）
-      match.teamB.forEach(p => {
-        if (!playerStats[p]) playerStats[p] = 0;
-        playerStats[p] -= diff * ratioB;
-      });
-    } else {
-      // チームBが勝ち（diff < 0）
-      const absDiff = Math.abs(diff);
-      // チームBには absDiff * ratioB を加算
-      match.teamB.forEach(p => {
-        if (!playerStats[p]) playerStats[p] = 0;
-        playerStats[p] += absDiff * ratioB;
-      });
-      // チームAには absDiff * -ratioA を加算（負の値）
-      match.teamA.forEach(p => {
-        if (!playerStats[p]) playerStats[p] = 0;
-        playerStats[p] -= absDiff * ratioA;
-      });
-    }
-  });
-
-  // 結果を配列に変換して返す
-  return Object.keys(playerStats).map(name => ({
-    name,
-    score: playerStats[name].toFixed(2)
-  }));
-}
 
     function renderResults(scores, method) {
       const tbody = document.getElementById("resultTable");
       tbody.innerHTML = "";
       scores.sort((a,b) => b.score - a.score).forEach(player => {
-        const suffix = method === "winRate" ? "%" : "";
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${player.name}</td><td>${player.score}${suffix}</td>`;
+        tr.innerHTML = `<td>${player.name}</td><td>${player.score}${method === "winRate" ? "%" : ""}</td>`;
         tbody.appendChild(tr);
       });
     }
@@ -215,8 +211,8 @@ function calculateDiffScore(matches) {
         scores = calculateAverage(matches);
       } else if (method === "winRate") {
         scores = calculateWinRate(matches);
-      } else if (method === "killDiffCorrected") {
-        scores = calculateKillDiffCorrected(matches);
+      } else if (method === "diffScore") {
+        scores = calculateDiffScore(matches);
       }
       renderResults(scores, method);
     }
