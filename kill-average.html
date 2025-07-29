@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>プレイヤースコア計算（人数補正付き平均スコア推定法）</title>
+  <title>プレイヤースコア計算（人数補正付き繰り返し調整法）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -11,9 +11,10 @@
       padding: 20px;
       margin: 0;
     }
-    h1 { text-align: center; color: #47b6a2; }
-    .method-select { text-align: center; margin-bottom: 15px; }
-    label { margin: 0 12px; font-weight: bold; color: #47b6a2; cursor: pointer; }
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+    }
     table {
       width: 90%;
       margin: 20px auto;
@@ -27,41 +28,24 @@
       border-bottom: 1px solid #ddd;
       text-align: center;
     }
-    th { background: #97eadb; color: white; }
-    tr:hover { background: #f0faf9; }
-    #warningBox {
-      max-width: 90%;
-      margin: 20px auto;
-      background: #fff4f4;
-      border: 2px solid #ff7b7b;
-      border-radius: 8px;
-      color: #cc0000;
-      padding: 10px;
-      font-weight: bold;
-      white-space: pre-wrap;
-      display: none;
+    th {
+      background: #97eadb;
+      color: white;
     }
+    tr:hover { background: #f0faf9; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
-  <h1>プレイヤースコア計算</h1>
-
-  <div class="method-select">
-    <label><input type="radio" name="method" value="ridge" checked> 人数補正付き平均スコア推定法</label>
-    <label><input type="radio" name="method" value="average"> 平均チームキル</label>
-  </div>
+  <h1>プレイヤースコア（人数補正付き繰り返し調整法）</h1>
 
   <table>
     <thead>
-      <tr><th>プレイヤー名</th><th>スコア</th></tr>
+      <tr><th>プレイヤー名</th><th>推定スコア</th></tr>
     </thead>
     <tbody id="resultTable"></tbody>
   </table>
-
-  <div id="warningBox"></div>
 
   <script>
     const firebaseConfig = {
@@ -76,130 +60,53 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function jaccardSimilarity(setA, setB) {
-      const intersection = new Set([...setA].filter(x => setB.has(x))).size;
-      const union = new Set([...setA, ...setB]).size;
-      return union === 0 ? 0 : intersection / union;
-    }
-
-    // ✅ 人数補正付き平均スコア推定法（リッジ回帰）
-    function calculateRidge(matches, lambda = 0.5) {
+    // 🔥 人数補正付き繰り返し調整法
+    function calculateIterativeAdjustment(matches, iterations = 50, learningRate = 0.5) {
       const players = Array.from(new Set(matches.flatMap(m => [...m.teamA, ...m.teamB])));
-      const indexMap = Object.fromEntries(players.map((p, i) => [p, i]));
+      let scores = Object.fromEntries(players.map(p => [p, 1.0])); // 初期スコア = 1.0
 
-      // 類似度チェック
-      const playerMatches = {};
-      players.forEach(p => playerMatches[p] = new Set());
-      matches.forEach((m, i) => {
-        m.teamA.forEach(p => playerMatches[p].add(i));
-        m.teamB.forEach(p => playerMatches[p].add(i));
-      });
+      for (let iter = 0; iter < iterations; iter++) {
+        const newScores = { ...scores };
 
-      const warnings = [];
-      for (let i = 0; i < players.length; i++) {
-        for (let j = i + 1; j < players.length; j++) {
-          const sim = jaccardSimilarity(playerMatches[players[i]], playerMatches[players[j]]);
-          if (sim > 0.8) {
-            warnings.push(`${players[i]} と ${players[j]} は参加試合が似ています（${(sim * 100).toFixed(1)}%）`);
-          }
-        }
+        matches.forEach(m => {
+          const processTeam = (team, kills) => {
+            if (!team || team.length === 0) return;
+
+            const teamScoreSum = team.reduce((sum, p) => sum + scores[p], 0);
+            const predicted = teamScoreSum / team.length || 1e-6;
+            const factor = kills / predicted;
+
+            team.forEach(p => {
+              newScores[p] *= Math.pow(factor, learningRate / team.length);
+            });
+          };
+
+          processTeam(m.teamA, m.teamAKills);
+          processTeam(m.teamB, m.teamBKills);
+        });
+
+        scores = newScores;
       }
 
-      const rows = [], kills = [];
-      matches.forEach(m => {
-        const rowA = Array(players.length).fill(0);
-        m.teamA.forEach(p => rowA[indexMap[p]] = 1 / m.teamA.length);
-        rows.push(rowA);
-        kills.push(m.teamAKills / m.teamA.length);
-
-        const rowB = Array(players.length).fill(0);
-        m.teamB.forEach(p => rowB[indexMap[p]] = 1 / m.teamB.length);
-        rows.push(rowB);
-        kills.push(m.teamBKills / m.teamB.length);
-      });
-
-      const A = math.matrix(rows);
-      const b = math.matrix(kills);
-      const At = math.transpose(A);
-      const I = math.identity(players.length);
-      const x = math.multiply(
-        math.inv(math.add(math.multiply(At, A), math.multiply(lambda, I))),
-        math.multiply(At, b)
-      );
-
-      const scores = players.map((p, i) => ({
-        name: p,
-        score: math.round(x.get([i]), 2)
-      }));
-
-      return { scores, warnings };
-    }
-
-    // ✅ 平均チームキル
-    function calculateAverage(matches) {
-      const stats = {};
-      matches.forEach(m => {
-        if (m.teamA) {
-          m.teamA.forEach(p => {
-            if (!stats[p]) stats[p] = { total: 0, count: 0 };
-            stats[p].total += m.teamAKills;
-            stats[p].count++;
-          });
-        }
-        if (m.teamB) {
-          m.teamB.forEach(p => {
-            if (!stats[p]) stats[p] = { total: 0, count: 0 };
-            stats[p].total += m.teamBKills;
-            stats[p].count++;
-          });
-        }
-      });
-
-      const scores = Object.keys(stats).map(name => ({
+      return Object.keys(scores).map(name => ({
         name,
-        score: +(stats[name].total / stats[name].count).toFixed(2)
+        score: +scores[name].toFixed(2)
       }));
-
-      return { scores, warnings: [] };
     }
 
-    function renderResults(scores, warnings) {
+    // 🔥 データを取得してスコア表示
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) return;
+
+      const matches = Object.values(snapshot.val());
+      const scores = calculateIterativeAdjustment(matches);
+
       const tbody = document.getElementById("resultTable");
       tbody.innerHTML = "";
-      scores.sort((a, b) => b.score - a.score).forEach(p => {
+      scores.sort((a,b) => b.score - a.score).forEach(player => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${p.name}</td><td>${p.score}</td>`;
+        tr.innerHTML = `<td>${player.name}</td><td>${player.score}</td>`;
         tbody.appendChild(tr);
-      });
-
-      const box = document.getElementById("warningBox");
-      if (warnings.length > 0) {
-        box.style.display = "block";
-        box.textContent = "⚠️ 類似プレイヤーがあります:\n" + warnings.join("\n");
-      } else {
-        box.style.display = "none";
-        box.textContent = "";
-      }
-    }
-
-    function updateResults(matches) {
-      const method = document.querySelector('input[name="method"]:checked').value;
-      const { scores, warnings } =
-        method === "ridge" ? calculateRidge(matches) : calculateAverage(matches);
-      renderResults(scores, warnings);
-    }
-
-    db.ref("apex_results").on("value", snap => {
-      if (!snap.exists()) return;
-      updateResults(Object.values(snap.val()));
-    });
-
-    document.querySelectorAll('input[name="method"]').forEach(radio => {
-      radio.addEventListener("change", () => {
-        db.ref("apex_results").once("value").then(snap => {
-          if (!snap.exists()) return;
-          updateResults(Object.values(snap.val()));
-        });
       });
     });
   </script>
