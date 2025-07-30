@@ -32,7 +32,7 @@
       cursor: pointer;
     }
     table {
-      width: 90%;
+      width: 95%;
       margin: 20px auto;
       border-collapse: collapse;
       background: white;
@@ -75,6 +75,7 @@
         <th>試合番号</th>
         <th>チーム</th>
         <th>チームキル数</th>
+        <th>キル差スコア</th>
       </tr>
     </thead>
     <tbody id="resultTable"></tbody>
@@ -103,6 +104,21 @@
       }
     });
 
+    // 🔹 キル差スコアを計算する関数
+    function calculateKillDiffScore(match, playerName) {
+      const isTeamA = match.teamA.includes(playerName);
+      const teamKills = isTeamA ? match.teamAKills : match.teamBKills;
+      const enemyKills = isTeamA ? match.teamBKills : match.teamAKills;
+
+      const myTeamSize = isTeamA ? match.teamA.length : match.teamB.length;
+      const enemySize = isTeamA ? match.teamB.length : match.teamA.length;
+
+      if (myTeamSize === 0 || enemySize === 0) return 0;
+
+      return ((teamKills - enemyKills) * (enemySize / myTeamSize)).toFixed(2);
+    }
+
+    // 🔹 検索機能
     function searchPlayer() {
       const name = document.getElementById("playerName").value.trim();
       const tbody = document.getElementById("resultTable");
@@ -113,22 +129,23 @@
       const results = [];
 
       allMatches.forEach(m => {
-        if (m.teamA.includes(name)) {
-          results.push({ match: m.matchNumber, team: "A", kills: m.teamAKills });
-        }
-        if (m.teamB.includes(name)) {
-          results.push({ match: m.matchNumber, team: "B", kills: m.teamBKills });
+        if (m.teamA.includes(name) || m.teamB.includes(name)) {
+          const isTeamA = m.teamA.includes(name);
+          const team = isTeamA ? "A" : "B";
+          const kills = isTeamA ? m.teamAKills : m.teamBKills;
+          const score = calculateKillDiffScore(m, name);
+          results.push({ match: m.matchNumber, team, kills, score });
         }
       });
 
       if (results.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3">データがありません</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4">データがありません</td></tr>`;
         return;
       }
 
       results.sort((a,b) => a.match - b.match).forEach(r => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${r.match}</td><td>${r.team}</td><td>${r.kills}</td>`;
+        tr.innerHTML = `<td>${r.match}</td><td>${r.team}</td><td>${r.kills}</td><td>${r.score}</td>`;
         tbody.appendChild(tr);
       });
     }
