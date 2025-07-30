@@ -77,7 +77,7 @@
     </div>
   </div>
 
-  <p id="matchCount">過去 試合のデータをもとに作成されています。</p>
+  <p id="matchCount">過去 試合のデータをもとに生成。</p>
 
   <script>
     const firebaseConfig = {
@@ -228,7 +228,7 @@
       playerScoresKillDiff = calculateKillDiff(matches);
       renderPlayers();
       makeTeams();
-      document.getElementById("matchCount").textContent = `過去${matches.length}試合のデータをもとに作成されています。`;
+      document.getElementById("matchCount").textContent = `過去${matches.length}試合のデータをもとに生成。`;
     });
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
