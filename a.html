@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>試合番号を1つ下げる（34〜174）</title>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      padding: 20px;
+    }
+    h1 { text-align: center; color: #47b6a2; }
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background: #97eadb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #status { text-align: center; margin-top: 15px; font-weight: bold; }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+  <h1>試合番号を1つ下げる（34〜174）</h1>
+  <button onclick="updateMatchNumbers()">更新する</button>
+  <p id="status"></p>
+
+  <script>
+    // ✅ Firebase設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+      authDomain: "match-result-ea475.firebaseapp.com",
+      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+      projectId: "match-result-ea475",
+      storageBucket: "match-result-ea475.firebasestorage.app",
+      messagingSenderId: "759877853492",
+      appId: "1:759877853492:web:a10935960bf8230af90561"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    async function updateMatchNumbers() {
+      document.getElementById("status").textContent = "⏳ 更新中...";
+
+      const snapshot = await db.ref("apex_results").once("value");
+      if (!snapshot.exists()) {
+        document.getElementById("status").textContent = "❌ データがありません";
+        return;
+      }
+
+      const updates = [];
+      snapshot.forEach(child => {
+        const key = child.key;
+        const match = child.val();
+
+        if (match.matchNumber >= 34 && match.matchNumber <= 174) {
+          const newNumber = match.matchNumber - 1;
+          updates.push(db.ref("apex_results/" + key).update({ matchNumber: newNumber }));
+        }
+      });
+
+      await Promise.all(updates);
+      document.getElementById("status").textContent = "✅ 更新が完了しました！";
+    }
+  </script>
+</body>
+</html>
