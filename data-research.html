@@ -73,7 +73,6 @@
     <thead>
       <tr>
         <th>試合番号</th>
-        <th>チーム</th>
         <th>チームキル数</th>
         <th>キル差スコア</th>
       </tr>
@@ -131,21 +130,20 @@
       allMatches.forEach(m => {
         if (m.teamA.includes(name) || m.teamB.includes(name)) {
           const isTeamA = m.teamA.includes(name);
-          const team = isTeamA ? "A" : "B";
           const kills = isTeamA ? m.teamAKills : m.teamBKills;
           const score = calculateKillDiffScore(m, name);
-          results.push({ match: m.matchNumber, team, kills, score });
+          results.push({ match: m.matchNumber, kills, score });
         }
       });
 
       if (results.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4">データがありません</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3">データがありません</td></tr>`;
         return;
       }
 
       results.sort((a,b) => a.match - b.match).forEach(r => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${r.match}</td><td>${r.team}</td><td>${r.kills}</td><td>${r.score}</td>`;
+        tr.innerHTML = `<td>${r.match}</td><td>${r.kills}</td><td>${r.score}</td>`;
         tbody.appendChild(tr);
       });
     }
