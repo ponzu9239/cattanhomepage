@@ -4,210 +4,186 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>APEXきゃたんカスタムチーム分け</title>
-<style>
-  body {
-    font-family: "Hiragino Maru Gothic ProN", sans-serif;
-    background: #f7fcfc;
-    margin: 0;
-    padding: 20px;
-  }
-
-  h1 {
-    text-align: center;
-    color: #47b6a2;
-    margin-bottom: 12px;
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: 0.03em;
-  }
-
-  .method-select {
-    text-align: center;
-    margin: 20px 0 15px 0;
-  }
-
-  label {
-    margin: 0 12px;
-    font-weight: bold;
-    color: #47b6a2;
-    cursor: pointer;
-    user-select: none;
-    background: #fff;
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1.5px solid #97eadb;
-    transition: all 0.2s;
-  }
-
-  label:hover {
-    background: #97eadb33;
-    transform: scale(1.05);
-  }
-
-  .player-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .player {
-    background: #fff;
-    border: 2px solid #97eadb;
-    border-radius: 12px;
-    padding: 12px 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
-    position: relative;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-weight: 600;
-  }
-
-  .player:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    background: #f0fffc;
-  }
-
-  .player.selected {
-    background: #97eadb;
-    color: white;
-    border-color: #6cc7bb;
-  }
-
-  .pin-btn {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 24px;
-    height: 24px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-  }
-
-  .pin-btn::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: #bbb;
-    clip-path: polygon(
-      50% 0%, 61% 35%, 98% 35%, 68% 57%,
-      79% 91%, 50% 70%, 21% 91%, 32% 57%,
-      2% 35%, 39% 35%
-    );
-    transition: background 0.3s;
-  }
-
-  .pin-btn.pinned::before {
-    background: gold;
-  }
-
-  /* チーム表示エリア */
-  .teams {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    margin-top: 10px;
-    margin-bottom: 16px;
-    flex-wrap: nowrap;
-  }
-
-  .team-box {
-    flex: 1 1 50%;
-    max-width: 45%;
-    padding: 16px;
-    border-radius: 16px;
-    background: white;
-    box-shadow: 0 4px 12px rgba(151, 234, 219, 0.25);
-    transition: transform 0.2s;
-    min-width: 280px;
-    display: flex;
-    flex-direction: column;
-    border: 2px solid #97eadb;
-  }
-
-  .team-box:hover {
-    transform: translateY(-3px);
-  }
-
-  .team-box.team1 {
-    background: #eefaff;
-    border-color: #8ed3ff;
-  }
-
-  .team-box.team2 {
-    background: #fff1f5;
-    border-color: #ffb6c1;
-  }
-
-  .team-box h2 {
-    text-align: center;
-    color: #47b6a2;
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-weight: 700;
-    font-size: 20px;
-  }
-
-  /* 1人ずつ改行で縦に表示 */
-  .team-box ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .team-box li {
-    background: white;
-    border: 1.5px solid #ddd;
-    padding: 6px 12px;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 6px;
-    text-align: center;
-    transition: transform 0.15s, background 0.15s;
-  }
-
-  .team-box li:hover {
-    background: #f9f9f9;
-    transform: scale(1.03);
-  }
-
-  #matchCount {
-    text-align: center;
-    font-size: 13px;
-    color: gray;
-    margin-top: 10px;
-    user-select: none;
-  }
-
-  @media(max-width: 600px) {
-    .teams {
-      flex-direction: column;
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      margin: 0;
+      padding: 16px;
     }
-    .team-box {
-      max-width: 100%;
+
+    h1 {
+      text-align: center;
+      color: #47b6a2;
       margin-bottom: 12px;
+      font-size: 26px;
+      font-weight: 800;
     }
-  }
-</style>
+
+    .method-select {
+      text-align: center;
+      margin: 18px 0 12px 0;
+    }
+
+    label {
+      margin: 0 8px;
+      font-weight: bold;
+      color: #47b6a2;
+      cursor: pointer;
+      user-select: none;
+      background: #fff;
+      padding: 5px 10px;
+      border-radius: 16px;
+      border: 1.5px solid #97eadb;
+      font-size: 14px;
+    }
+
+    .teams {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: nowrap; /* ✅ 結果は横並び固定 */
+    }
+
+    .team-box {
+      flex: 1 1 45%;
+      background: #eefaff;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #97eadb;
+      text-align: center;
+      min-width: 150px;
+    }
+
+    .team-box.team2 {
+      background: #fff1f5;
+      border-color: #ffb6c1;
+    }
+
+    .team-box h2 {
+      font-size: 18px;
+      margin: 0 0 8px 0;
+      color: #47b6a2;
+    }
+
+    .team-box ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .team-box li {
+      background: white;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      margin-bottom: 6px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .player-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .player {
+      background: #fff;
+      border: 2px solid #97eadb;
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+      font-size: 14px;
+    }
+
+    .player:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .player.selected {
+      background: #97eadb;
+      color: white;
+    }
+
+    .pin-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 20px;
+      height: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .pin-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #bbb;
+      clip-path: polygon(
+        50% 0%, 61% 35%, 98% 35%, 68% 57%,
+        79% 91%, 50% 70%, 21% 91%, 32% 57%,
+        2% 35%, 39% 35%
+      );
+      transition: background 0.3s;
+    }
+
+    .pin-btn.pinned::before {
+      background: gold;
+    }
+
+    #matchCount {
+      text-align: center;
+      font-size: 12px;
+      color: gray;
+      margin-top: 8px;
+      user-select: none;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 22px;
+      }
+
+      .team-box h2 {
+        font-size: 16px;
+      }
+
+      .team-box li {
+        font-size: 14px;
+        padding: 5px;
+      }
+
+      .player-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
   <h1>チーム分けしてくれるやつ</h1>
 
+  <!-- ✅ チーム結果をタイトル直下に配置 -->
   <div class="teams">
-    <div class="team-box team1"><h2>チーム1</h2><ul id="teamA"></ul></div>
-    <div class="team-box team2"><h2>チーム2</h2><ul id="teamB"></ul></div>
+    <div class="team-box team1">
+      <h2>チーム1</h2>
+      <ul id="teamA"></ul>
+    </div>
+    <div class="team-box team2">
+      <h2>チーム2</h2>
+      <ul id="teamB"></ul>
+    </div>
   </div>
 
   <div class="method-select">
@@ -240,20 +216,16 @@
     function calculateScoresAverage(matches) {
       const stats = {};
       matches.forEach(match => {
-        if (match.teamA) {
-          match.teamA.forEach(p => {
-            if (!stats[p]) stats[p] = { total: 0, count: 0 };
-            stats[p].total += match.teamAKills;
-            stats[p].count++;
-          });
-        }
-        if (match.teamB) {
-          match.teamB.forEach(p => {
-            if (!stats[p]) stats[p] = { total: 0, count: 0 };
-            stats[p].total += match.teamBKills;
-            stats[p].count++;
-          });
-        }
+        match.teamA?.forEach(p => {
+          if (!stats[p]) stats[p] = { total: 0, count: 0 };
+          stats[p].total += match.teamAKills;
+          stats[p].count++;
+        });
+        match.teamB?.forEach(p => {
+          if (!stats[p]) stats[p] = { total: 0, count: 0 };
+          stats[p].total += match.teamBKills;
+          stats[p].count++;
+        });
       });
       const scores = {};
       Object.keys(stats).forEach(name => {
@@ -292,6 +264,7 @@
         const teamBSize = match.teamB.length;
         const diffA = (match.teamAKills - match.teamBKills) * (teamBSize / teamASize);
         const diffB = (match.teamBKills - match.teamAKills) * (teamASize / teamBSize);
+
         match.teamA.forEach(p => {
           stats[p] = (stats[p] || 0) + diffA;
           counts[p] = (counts[p] || 0) + 1;
@@ -325,8 +298,9 @@
 
       container.innerHTML = "";
       let names = Object.keys(scores);
-      const pinnedPlayers = names.filter(name => pinned.includes(name)).sort((a,b) => a.localeCompare(b,"ja"));
-      const unpinnedPlayers = names.filter(name => !pinned.includes(name)).sort((a,b) => a.localeCompare(b,"ja"));
+
+      const pinnedPlayers = names.filter(name => pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
+      const unpinnedPlayers = names.filter(name => !pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
 
       pinnedPlayers.concat(unpinnedPlayers).forEach(name => {
         const div = document.createElement("div");
