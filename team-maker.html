@@ -27,14 +27,12 @@
       cursor: pointer;
       user-select: none;
     }
-    /* プレイヤーリストをカード風に整列 */
     .player-list {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 12px;
       margin-bottom: 20px;
     }
-    /* プレイヤー1人分のカード */
     .player {
       background: #fff;
       border: 1px solid #97eadb;
@@ -54,12 +52,10 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    /* 選択中のプレイヤー */
     .player.selected {
       background: #97eadb;
       color: white;
     }
-    /* 星型ピンボタン */
     .pin-btn {
       position: absolute;
       top: 6px;
@@ -89,17 +85,18 @@
     .pin-btn.pinned::before {
       background: gold;
     }
-    /* チーム表示の枠 */
+    /* ここを修正 */
     .teams {
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
+      gap: 20px;
       margin-top: 8px;
       margin-bottom: 12px;
-      gap: 16px;
-      flex-wrap: wrap;
+      /* 縦に伸びるのはflexboxのデフォルト */
+      flex-wrap: nowrap; /* 横2列に */
     }
     .team-box {
-      flex: 1 1 300px;
+      flex: 1 1 50%;
       max-width: 45%;
       padding: 10px 15px;
       border-radius: 8px;
@@ -108,6 +105,9 @@
       color: #2c3e50;
       user-select: none;
       min-width: 280px;
+      /* 高さは内容に合わせて自動 */
+      display: flex;
+      flex-direction: column;
     }
     .team-box.team2 {
       background: #ffeaea;
@@ -119,6 +119,7 @@
       margin-bottom: 8px;
       font-weight: 700;
       letter-spacing: 0.03em;
+      user-select: none;
     }
     ul {
       list-style: none;
@@ -128,8 +129,8 @@
       font-size: 16px;
       line-height: 1.5;
       user-select: text;
+      flex-grow: 1; /* チーム名以外の高さを埋める */
     }
-    /* 試合数の表示 */
     #matchCount {
       text-align: center;
       font-size: 12px;
@@ -185,7 +186,6 @@
     let playerScoresAverage = {}, playerScoresWinRate = {}, playerScoresKillDiff = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
 
-    // 平均キル計算
     function calculateScoresAverage(matches) {
       const stats = {};
       matches.forEach(match => {
@@ -210,7 +210,7 @@
       });
       return scores;
     }
-    // 勝率計算
+
     function calculateWinRate(matches) {
       const stats = {};
       matches.forEach(match => {
@@ -232,7 +232,7 @@
       });
       return scores;
     }
-    // キル差スコア計算
+
     function calculateKillDiff(matches) {
       const stats = {}, counts = {};
       matches.forEach(match => {
@@ -257,7 +257,6 @@
       return scores;
     }
 
-    // ピン留め切り替え
     function togglePin(name) {
       if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
       else pinned.push(name);
@@ -266,67 +265,6 @@
       makeTeams();
     }
 
-    // プレイヤーリスト描画
     function renderPlayers() {
       const container = document.getElementById("playerList");
-      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
-      const method = document.querySelector('input[name="method"]:checked').value;
-      let scores = method === "average" ? playerScoresAverage :
-                   method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
-
-      container.innerHTML = "";
-      let names = Object.keys(scores);
-
-      // ピン留めされた人を先頭に表示
-      const pinnedPlayers = names.filter(name => pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
-      const unpinnedPlayers = names.filter(name => !pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
-      pinnedPlayers.concat(unpinnedPlayers).forEach(name => {
-        const div = document.createElement("div");
-        div.className = "player" + (selected.includes(name) ? " selected" : "");
-        div.dataset.name = name;
-        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" aria-label="ピン留め切り替え"></button>`;
-        div.querySelector(".pin-btn").onclick = e => { e.stopPropagation(); togglePin(name); };
-        div.onclick = () => { div.classList.toggle("selected"); makeTeams(); };
-        container.appendChild(div);
-      });
-    }
-
-    // チーム分け
-    function makeTeams() {
-      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
-      const method = document.querySelector('input[name="method"]:checked').value;
-      let scores = method === "average" ? playerScoresAverage :
-                   method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
-
-      const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
-      players.sort((a, b) => b.score - a.score);
-
-      const teamA = [], teamB = [];
-      let sumA = 0, sumB = 0;
-      players.forEach(p => {
-        if (sumA <= sumB) { teamA.push(p); sumA += p.score; }
-        else { teamB.push(p); sumB += p.score; }
-      });
-
-      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
-      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
-    }
-
-    // Firebaseからデータ取得
-    db.ref("apex_results").on("value", snapshot => {
-      if (!snapshot.exists()) return;
-      matches = Object.values(snapshot.val());
-      playerScoresAverage = calculateScoresAverage(matches);
-      playerScoresWinRate = calculateWinRate(matches);
-      playerScoresKillDiff = calculateKillDiff(matches);
-      renderPlayers();
-      makeTeams();
-      document.getElementById("matchCount").textContent = `過去${matches.length}試合のデータをもとに生成。`;
-    });
-
-    document.querySelectorAll('input[name="method"]').forEach(radio => {
-      radio.addEventListener("change", () => { renderPlayers(); makeTeams(); });
-    });
-  </script>
-</body>
-</html>
+      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d
