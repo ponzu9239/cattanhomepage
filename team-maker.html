@@ -5,118 +5,147 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>APEXきゃたんカスタムチーム分け</title>
   <style>
-body {
-  font-family: "Hiragino Maru Gothic ProN", sans-serif;
-  background: #f7fcfc;
-  margin: 0;
-  padding: 20px;
-}
-
-h1 {
-  text-align: center;
-  color: #47b6a2;
-  margin-bottom: 10px;
-}
-
-/* ✅ プレイヤーリスト（タイトル直下に） */
-.player-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 12px;
-  max-width: 600px;
-  margin: 0 auto 20px;
-}
-
-/* ✅ プレイヤーカード */
-.player {
-  background: #fff;
-  border: 2px solid #97eadb;
-  border-radius: 14px;
-  padding: 12px 8px;
-  text-align: center;
-  font-size: 14px;
-  cursor: pointer;
-  position: relative;
-  transition: 0.2s;
-}
-
-.player:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.player.selected {
-  background: #97eadb;
-  color: white;
-}
-
-/* ✅ 星形ボタン */
-.pin-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 22px;
-  height: 22px;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-
-.pin-btn::before {
-  content: "";
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: #bbb;
-  clip-path: polygon(
-    50% 0%, 61% 35%, 98% 35%, 68% 57%,
-    79% 91%, 50% 70%, 21% 91%, 32% 57%,
-    2% 35%, 39% 35%
-  );
-  transition: background 0.3s;
-}
-
-.pin-btn.pinned::before {
-  background: gold;
-}
-
-.method-select {
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-label {
-  margin: 0 12px;
-  font-weight: bold;
-  color: #47b6a2;
-  cursor: pointer;
-}
-
-/* チーム表示部分 */
-.teams {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
-}
-
-.team-box {
-  width: 45%;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.team-box.team1 { background: #e8f4ff; }
-.team-box.team2 { background: #ffeaea; }
-.team-box h2 { text-align: center; color: #47b6a2; }
-ul { list-style: none; padding: 0; }
-
-#matchCount {
-  text-align: center;
-  font-size: 12px;
-  color: gray;
-  margin-top: 20px;
-}
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+      margin-bottom: 12px;
+    }
+    .method-select {
+      text-align: center;
+      margin: 20px 0 15px 0;
+    }
+    label {
+      margin: 0 12px;
+      font-weight: bold;
+      color: #47b6a2;
+      cursor: pointer;
+      user-select: none;
+    }
+    /* プレイヤーリストをカード風に整列 */
+    .player-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    /* プレイヤー1人分のカード */
+    .player {
+      background: #fff;
+      border: 1px solid #97eadb;
+      border-radius: 10px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .player:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    /* 選択中のプレイヤー */
+    .player.selected {
+      background: #97eadb;
+      color: white;
+    }
+    /* 星型ピンボタン */
+    .pin-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    .pin-btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #bbb;
+      clip-path: polygon(
+        50% 0%, 61% 35%, 98% 35%, 68% 57%,
+        79% 91%, 50% 70%, 21% 91%, 32% 57%,
+        2% 35%, 39% 35%
+      );
+      transition: background 0.3s;
+    }
+    .pin-btn.pinned::before {
+      background: gold;
+    }
+    /* チーム表示の枠 */
+    .teams {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .team-box {
+      flex: 1 1 300px;
+      max-width: 45%;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background: #e8f4ff;
+      color: #2c3e50;
+      user-select: none;
+      min-width: 280px;
+    }
+    .team-box.team2 {
+      background: #ffeaea;
+    }
+    .team-box h2 {
+      text-align: center;
+      color: #47b6a2;
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    ul {
+      list-style: none;
+      padding: 0 0 0 12px;
+      margin: 0;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 1.5;
+      user-select: text;
+    }
+    /* 試合数の表示 */
+    #matchCount {
+      text-align: center;
+      font-size: 12px;
+      color: gray;
+      margin-top: 8px;
+      user-select: none;
+    }
+    @media(max-width: 600px) {
+      .teams {
+        flex-direction: column;
+      }
+      .team-box {
+        max-width: 100%;
+        margin-bottom: 12px;
+      }
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -124,8 +153,10 @@ ul { list-style: none; padding: 0; }
 <body>
   <h1>チーム分けしてくれるやつ</h1>
 
-  <!-- ✅ プレイヤーリストをタイトルの下に -->
-  <div id="playerList" class="player-list"></div>
+  <div class="teams">
+    <div class="team-box team1"><h2>チーム1</h2><ul id="teamA"></ul></div>
+    <div class="team-box team2"><h2>チーム2</h2><ul id="teamB"></ul></div>
+  </div>
 
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均キル</label>
@@ -133,10 +164,7 @@ ul { list-style: none; padding: 0; }
     <label><input type="radio" name="method" value="killdiff"> キル差スコア</label>
   </div>
 
-  <div class="teams">
-    <div class="team-box team1"><h2>チーム1</h2><ul id="teamA"></ul></div>
-    <div class="team-box team2"><h2>チーム2</h2><ul id="teamB"></ul></div>
-  </div>
+  <div id="playerList" class="player-list"></div>
 
   <p id="matchCount">過去 試合のデータをもとに生成。</p>
 
@@ -157,6 +185,7 @@ ul { list-style: none; padding: 0; }
     let playerScoresAverage = {}, playerScoresWinRate = {}, playerScoresKillDiff = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
 
+    // 平均キル計算
     function calculateScoresAverage(matches) {
       const stats = {};
       matches.forEach(match => {
@@ -181,7 +210,7 @@ ul { list-style: none; padding: 0; }
       });
       return scores;
     }
-
+    // 勝率計算
     function calculateWinRate(matches) {
       const stats = {};
       matches.forEach(match => {
@@ -203,7 +232,7 @@ ul { list-style: none; padding: 0; }
       });
       return scores;
     }
-
+    // キル差スコア計算
     function calculateKillDiff(matches) {
       const stats = {}, counts = {};
       matches.forEach(match => {
@@ -212,7 +241,6 @@ ul { list-style: none; padding: 0; }
         const teamBSize = match.teamB.length;
         const diffA = (match.teamAKills - match.teamBKills) * (teamBSize / teamASize);
         const diffB = (match.teamBKills - match.teamAKills) * (teamASize / teamBSize);
-
         match.teamA.forEach(p => {
           stats[p] = (stats[p] || 0) + diffA;
           counts[p] = (counts[p] || 0) + 1;
@@ -229,6 +257,7 @@ ul { list-style: none; padding: 0; }
       return scores;
     }
 
+    // ピン留め切り替え
     function togglePin(name) {
       if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
       else pinned.push(name);
@@ -237,6 +266,7 @@ ul { list-style: none; padding: 0; }
       makeTeams();
     }
 
+    // プレイヤーリスト描画
     function renderPlayers() {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
@@ -247,9 +277,9 @@ ul { list-style: none; padding: 0; }
       container.innerHTML = "";
       let names = Object.keys(scores);
 
+      // ピン留めされた人を先頭に表示
       const pinnedPlayers = names.filter(name => pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
       const unpinnedPlayers = names.filter(name => !pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
-
       pinnedPlayers.concat(unpinnedPlayers).forEach(name => {
         const div = document.createElement("div");
         div.className = "player" + (selected.includes(name) ? " selected" : "");
@@ -261,6 +291,7 @@ ul { list-style: none; padding: 0; }
       });
     }
 
+    // チーム分け
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
@@ -281,6 +312,7 @@ ul { list-style: none; padding: 0; }
       document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
     }
 
+    // Firebaseからデータ取得
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
       matches = Object.values(snapshot.val());
