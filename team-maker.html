@@ -11,6 +11,7 @@
       margin: 0;
       padding: 16px;
     }
+
     h1 {
       text-align: center;
       color: #47b6a2;
@@ -18,11 +19,13 @@
       font-size: 26px;
       font-weight: 800;
     }
+
     .method-select {
       text-align: center;
       margin: 18px 0 12px 0;
       white-space: nowrap;
     }
+
     label {
       margin: 0 8px;
       font-weight: bold;
@@ -35,10 +38,7 @@
       border: 1.5px solid #97eadb;
       font-size: 14px;
     }
-    .toggle-box {
-      text-align: center;
-      margin-bottom: 12px;
-    }
+
     .teams {
       display: flex;
       justify-content: center;
@@ -46,6 +46,7 @@
       margin-bottom: 16px;
       flex-wrap: nowrap;
     }
+
     .team-box {
       flex: 1 1 45%;
       background: #eefaff;
@@ -55,20 +56,24 @@
       text-align: center;
       min-width: 150px;
     }
+
     .team-box.team2 {
       background: #fff1f5;
       border-color: #ffb6c1;
     }
+
     .team-box h2 {
       font-size: 18px;
       margin: 0 0 8px 0;
       color: #47b6a2;
     }
+
     .team-box ul {
       list-style: none;
       padding: 0;
       margin: 0;
     }
+
     .team-box li {
       background: white;
       border: 1.5px solid #ddd;
@@ -78,12 +83,14 @@
       font-size: 15px;
       font-weight: 500;
     }
+
     .player-list {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 12px;
       margin-bottom: 20px;
     }
+
     .player {
       background: #fff;
       border: 2px solid #97eadb;
@@ -95,14 +102,17 @@
       position: relative;
       font-size: 14px;
     }
+
     .player:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     .player.selected {
       background: #97eadb;
       color: white;
     }
+
     .pin-btn {
       position: absolute;
       top: 5px;
@@ -114,6 +124,7 @@
       cursor: pointer;
       padding: 0;
     }
+
     .pin-btn::before {
       content: "";
       position: absolute;
@@ -126,15 +137,29 @@
       );
       transition: background 0.3s;
     }
+
     .pin-btn.pinned::before {
       background: gold;
     }
+
     #matchCount {
       text-align: center;
       font-size: 12px;
       color: gray;
       margin-top: 8px;
       user-select: none;
+    }
+
+    .recent-toggle {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .team-box h2 { font-size: 16px; }
+      .team-box li { font-size: 14px; padding: 5px; }
+      .player-list { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -160,12 +185,11 @@
     <label><input type="radio" name="method" value="killdiff"> キル差</label>
   </div>
 
-  <div class="toggle-box">
-    <label><input type="checkbox" id="recentBiasToggle" checked> 直近試合を重視する</label>
+  <div class="recent-toggle">
+    <label><input type="checkbox" id="recentBiasToggle"> 直近試合重視</label>
   </div>
 
   <div id="playerList" class="player-list"></div>
-
   <p id="matchCount">過去 試合のデータをもとに生成。</p>
 
   <script>
@@ -186,22 +210,31 @@
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
 
     function calculateScoresAverage(matches) {
-      const stats = {};
+      const history = {};
       matches.forEach(match => {
         match.teamA?.forEach(p => {
-          if (!stats[p]) stats[p] = { total: 0, count: 0 };
-          stats[p].total += match.teamAKills;
-          stats[p].count++;
+          if (!history[p]) history[p] = [];
+          history[p].push(match.teamAKills);
         });
         match.teamB?.forEach(p => {
-          if (!stats[p]) stats[p] = { total: 0, count: 0 };
-          stats[p].total += match.teamBKills;
-          stats[p].count++;
+          if (!history[p]) history[p] = [];
+          history[p].push(match.teamBKills);
         });
       });
+
+      const recentBias = document.getElementById("recentBiasToggle").checked;
       const scores = {};
-      Object.keys(stats).forEach(name => {
-        scores[name] = +(stats[name].total / stats[name].count).toFixed(2);
+      Object.keys(history).forEach(name => {
+        const arr = history[name];
+        if (arr.length === 0) { scores[name] = 0; return; }
+        if (recentBias) {
+          const last = arr[arr.length - 1];
+          const prev = arr.slice(0, -1);
+          const prevAvg = prev.length ? prev.reduce((a, b) => a + b, 0) / prev.length : 0;
+          scores[name] = +(prevAvg + last).toFixed(2);
+        } else {
+          scores[name] = +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+        }
       });
       return scores;
     }
@@ -236,24 +269,15 @@
         const teamBSize = match.teamB.length;
         const diffA = (match.teamAKills - match.teamBKills) * (teamBSize / teamASize);
         const diffB = (match.teamBKills - match.teamAKills) * (teamASize / teamBSize);
-        match.teamA.forEach(p => {
-          if (!history[p]) history[p] = [];
-          history[p].push(diffA);
-        });
-        match.teamB.forEach(p => {
-          if (!history[p]) history[p] = [];
-          history[p].push(diffB);
-        });
+        match.teamA.forEach(p => { if (!history[p]) history[p] = []; history[p].push(diffA); });
+        match.teamB.forEach(p => { if (!history[p]) history[p] = []; history[p].push(diffB); });
       });
 
       const recentBias = document.getElementById("recentBiasToggle").checked;
       const scores = {};
       Object.keys(history).forEach(name => {
         const arr = history[name];
-        if (arr.length === 0) {
-          scores[name] = 0;
-          return;
-        }
+        if (arr.length === 0) { scores[name] = 0; return; }
         if (recentBias) {
           const last = arr[arr.length - 1];
           const prev = arr.slice(0, -1);
@@ -283,9 +307,8 @@
 
       container.innerHTML = "";
       let names = Object.keys(scores);
-
-      const pinnedPlayers = names.filter(name => pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
-      const unpinnedPlayers = names.filter(name => !pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
+      const pinnedPlayers = names.filter(name => pinned.includes(name)).sort((a,b) => a.localeCompare(b,"ja"));
+      const unpinnedPlayers = names.filter(name => !pinned.includes(name)).sort((a,b) => a.localeCompare(b,"ja"));
 
       pinnedPlayers.concat(unpinnedPlayers).forEach(name => {
         const div = document.createElement("div");
@@ -332,7 +355,9 @@
     document.querySelectorAll('input[name="method"]').forEach(radio => {
       radio.addEventListener("change", () => { renderPlayers(); makeTeams(); });
     });
-    document.getElementById("recentBiasToggle").addEventListener("change", () => { 
+
+    document.getElementById("recentBiasToggle").addEventListener("change", () => {
+      playerScoresAverage = calculateScoresAverage(matches);
       playerScoresKillDiff = calculateKillDiff(matches);
       makeTeams();
     });
