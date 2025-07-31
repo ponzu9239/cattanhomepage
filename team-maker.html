@@ -86,7 +86,6 @@
     let playerScoresAverage = {}, playerScoresWinRate = {}, playerScoresKillDiff = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
 
-    // スコア計算（平均キル）
     function calculateScoresAverage(matches) {
       const stats = {};
       matches.forEach(match => {
@@ -112,7 +111,6 @@
       return scores;
     }
 
-    // 勝率計算
     function calculateWinRate(matches) {
       const stats = {};
       matches.forEach(match => {
@@ -135,7 +133,6 @@
       return scores;
     }
 
-    // キル差スコア計算（全試合平均）
     function calculateKillDiff(matches) {
       const stats = {}, counts = {};
       matches.forEach(match => {
@@ -179,12 +176,11 @@
       container.innerHTML = "";
       let names = Object.keys(scores);
 
-      // ピン留め中の人は表示しない
-      names = names.filter(name => !pinned.includes(name));
+      // ピン留め中の人を先頭にまとめて表示
+      const pinnedPlayers = names.filter(name => pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
+      const unpinnedPlayers = names.filter(name => !pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
 
-      names.sort((a, b) => a.localeCompare(b, "ja"));
-
-      names.forEach(name => {
+      pinnedPlayers.concat(unpinnedPlayers).forEach(name => {
         const div = document.createElement("div");
         div.className = "player" + (selected.includes(name) ? " selected" : "");
         div.dataset.name = name;
