@@ -154,44 +154,31 @@
     margin-bottom: 10px;
     font-weight: 700;
     font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
   }
 
-  .team-box.team1 h2::before {
-    content: "💙";
-  }
-
-  .team-box.team2 h2::before {
-    content: "❤️";
-  }
-
-  /* メンバーのタグ風デザイン */
+  /* 1人ずつ改行で縦に表示 */
   .team-box ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    list-style: none;
     padding: 0;
     margin: 0;
-    justify-content: center;
   }
 
   .team-box li {
     background: white;
     border: 1.5px solid #ddd;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 15px;
     font-weight: 600;
     color: #444;
-    transition: background 0.2s, transform 0.15s;
+    margin-bottom: 6px;
+    text-align: center;
+    transition: transform 0.15s, background 0.15s;
   }
 
   .team-box li:hover {
     background: #f9f9f9;
-    transform: scale(1.05);
+    transform: scale(1.03);
   }
 
   #matchCount {
