@@ -9,20 +9,48 @@
     h1 { text-align: center; color: #47b6a2; }
     .method-select { text-align: center; margin-bottom: 15px; }
     label { margin: 0 12px; font-weight: bold; color: #47b6a2; cursor: pointer; }
-    .player-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; }
-    .player { padding: 8px 12px; border-radius: 6px; background: #fff; border: 1px solid #97eadb; cursor: pointer; display:flex; align-items:center; gap:6px; }
+    #pinnedPlayers { text-align:center; margin-bottom:10px; }
+    .pinned-name { background:#ffefaa; padding:4px 8px; margin:3px; border-radius:5px; display:inline-block; font-weight:bold; color:#b37700; }
+    .player-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .player {
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: #fff;
+      border: 1px solid #97eadb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      transition: background-color 0.3s, color 0.3s;
+    }
     .player.selected { background: #97eadb; color: white; }
-    .pin-btn { font-size: 14px; cursor: pointer; }
-    .pinned { color: #f5b800; font-weight: bold; }
-    .teams { display: flex; justify-content: space-around; margin-top: 20px; }
-    .team-box { width: 45%; padding: 10px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .pin-btn {
+      font-size: 18px;
+      cursor: pointer;
+      user-select: none;
+      color: #bbb;
+      transition: color 0.3s;
+      background: none;
+      border: none;
+      padding: 0;
+      line-height: 1;
+    }
+    .pin-btn.pinned { color: #f5b800; }
+    .pin-btn:hover { color: #f5b800; }
+    .teams { display: flex; justify-content: space-around; margin-top: 20px; max-width: 700px; margin-left: auto; margin-right: auto; }
+    .team-box {
+      width: 45%;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      background: white;
+    }
     .team-box.team1 { background: #e8f4ff; }
     .team-box.team2 { background: #ffeaea; }
-    .team-box h2 { text-align: center; color: #47b6a2; }
-    ul { list-style: none; padding: 0; }
+    .team-box h2 { text-align: center; color: #47b6a2; margin: 0 0 10px 0; }
+    ul { list-style: none; padding: 0; margin: 0; }
     #matchCount { text-align: center; font-size: 12px; color: gray; margin-top: 20px; }
-    #pinnedPlayers { text-align:center; margin-bottom:10px; }
-    .pinned-name { background:#ffefaa; padding:4px 8px; margin:3px; border-radius:5px; display:inline-block; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -63,12 +91,17 @@
     let playerScoresAverage = {}, playerScoresWinRate = {}, playerScoresKillDiff = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
 
+    // ピン留めプレイヤー表示
     function updatePinnedView() {
       const div = document.getElementById("pinnedPlayers");
-      div.innerHTML = pinned.map(p => `<span class="pinned-name">${p}</span>`).join("");
+      if(pinned.length === 0){
+        div.innerHTML = "";
+        return;
+      }
+      div.innerHTML = "<strong>ピン留め中:</strong> " + pinned.map(p => `<span class="pinned-name">${p}</span>`).join("");
     }
 
-    // ✅ 平均キル
+    // 平均キル計算
     function calculateScoresAverage(matches) {
       const stats = {};
       matches.forEach(match => {
@@ -94,17 +127,17 @@
       return scores;
     }
 
-    // ✅ 勝率
+    // 勝率計算
     function calculateWinRate(matches) {
       const stats = {};
       matches.forEach(match => {
         const teamAWins = match.teamAKills > match.teamBKills;
-        match.teamA.forEach(p => {
+        if(match.teamA) match.teamA.forEach(p => {
           if (!stats[p]) stats[p] = { win: 0, total: 0 };
           stats[p].total++;
           if (teamAWins) stats[p].win++;
         });
-        match.teamB.forEach(p => {
+        if(match.teamB) match.teamB.forEach(p => {
           if (!stats[p]) stats[p] = { win: 0, total: 0 };
           stats[p].total++;
           if (!teamAWins) stats[p].win++;
@@ -117,7 +150,7 @@
       return scores;
     }
 
-    // ✅ キル差スコア（全試合平均）
+    // キル差スコア計算（全試合平均）
     function calculateKillDiff(matches) {
       const stats = {}, counts = {};
       matches.forEach(match => {
@@ -143,6 +176,7 @@
       return scores;
     }
 
+    // ピンのON/OFF切り替え
     function togglePin(name) {
       if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
       else pinned.push(name);
@@ -151,6 +185,7 @@
       renderPlayers();
     }
 
+    // プレイヤーリスト表示
     function renderPlayers() {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
@@ -161,61 +196,34 @@
       container.innerHTML = "";
       let names = Object.keys(scores);
 
-      // 🔥 ピン留めを先頭に表示
-      names.sort((a, b) => {
-        const aPinned = pinned.includes(a);
-        const bPinned = pinned.includes(b);
-        if (aPinned && !bPinned) return -1;
-        if (!aPinned && bPinned) return 1;
-        return a.localeCompare(b, "ja");
-      });
+      // ピン留め済みはリストから除外
+      names = names.filter(n => !pinned.includes(n));
+
+      // 名前でソート
+      names.sort((a, b) => a.localeCompare(b, "ja"));
 
       names.forEach(name => {
         const div = document.createElement("div");
         div.className = "player" + (selected.includes(name) ? " selected" : "");
         div.dataset.name = name;
-        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}">📌</button>`;
-        div.querySelector(".pin-btn").onclick = e => { e.stopPropagation(); togglePin(name); };
-        div.onclick = () => { div.classList.toggle("selected"); makeTeams(); };
+        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" aria-label="ピン留め切り替え">⭐</button>`;
+        div.querySelector(".pin-btn").onclick = e => {
+          e.stopPropagation();
+          togglePin(name);
+        };
+        div.onclick = () => {
+          div.classList.toggle("selected");
+          makeTeams();
+        };
         container.appendChild(div);
       });
     }
 
+    // チーム分け
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
       let scores = method === "average" ? playerScoresAverage :
                    method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
 
-      const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
-      players.sort((a, b) => b.score - a.score);
-
-      const teamA = [], teamB = [];
-      let sumA = 0, sumB = 0;
-      players.forEach(p => {
-        if (sumA <= sumB) { teamA.push(p); sumA += p.score; }
-        else { teamB.push(p); sumB += p.score; }
-      });
-
-      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
-      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
-    }
-
-    db.ref("apex_results").on("value", snapshot => {
-      if (!snapshot.exists()) return;
-      matches = Object.values(snapshot.val());
-      playerScoresAverage = calculateScoresAverage(matches);
-      playerScoresWinRate = calculateWinRate(matches);
-      playerScoresKillDiff = calculateKillDiff(matches);
-      updatePinnedView();
-      renderPlayers();
-      makeTeams();
-      document.getElementById("matchCount").textContent = `過去${matches.length}試合のデータをもとに生成。`;
-    });
-
-    document.querySelectorAll('input[name="method"]').forEach(radio => {
-      radio.addEventListener("change", () => { renderPlayers(); makeTeams(); });
-    });
-  </script>
-</body>
-</html>
+      const players = selected.map(name => ({ name, score: scores[name] ?? 
