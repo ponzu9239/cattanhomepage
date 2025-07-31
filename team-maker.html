@@ -5,48 +5,133 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>APEXきゃたんカスタムチーム分け</title>
   <style>
-    body { font-family: "Hiragino Maru Gothic ProN", sans-serif; background: #f7fcfc; margin: 0; padding: 20px; }
-    h1 { text-align: center; color: #47b6a2; }
-    .method-select { text-align: center; margin-bottom: 15px; }
-    label { margin: 0 12px; font-weight: bold; color: #47b6a2; cursor: pointer; }
-    .player-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; }
-    .player { padding: 8px 12px; border-radius: 6px; background: #fff; border: 1px solid #97eadb; cursor: pointer; display:flex; align-items:center; gap:6px; }
-    .player.selected { background: #97eadb; color: white; }
-    .pin-btn {
-      width: 20px;
-      height: 20px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      position: relative;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-    .pin-btn::before {
-      content: "";
-      position: absolute;
-      top: 2px; left: 2px; right: 2px; bottom: 2px;
-      background: #bbb;
-      clip-path: polygon(
-        50% 0%, 61% 35%, 98% 35%, 68% 57%,
-        79% 91%, 50% 70%, 21% 91%, 32% 57%,
-        2% 35%, 39% 35%
-      );
-      transition: background 0.3s;
-    }
-    .pin-btn.pinned::before {
-      background: gold;
-    }
-    .pin-btn:hover::before {
-      background: orange;
-    }
-    .teams { display: flex; justify-content: space-around; margin-top: 20px; }
-    .team-box { width: 45%; padding: 10px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-    .team-box.team1 { background: #e8f4ff; }
-    .team-box.team2 { background: #ffeaea; }
-    .team-box h2 { text-align: center; color: #47b6a2; }
-    ul { list-style: none; padding: 0; }
-    #matchCount { text-align: center; font-size: 12px; color: gray; margin-top: 20px; }
+body {
+  font-family: "Hiragino Maru Gothic ProN", sans-serif;
+  background: #f7fcfc;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #47b6a2;
+}
+
+.method-select {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+label {
+  margin: 0 12px;
+  font-weight: bold;
+  color: #47b6a2;
+  cursor: pointer;
+}
+
+/* ✅ プレイヤーリストをカード風に整列 */
+.player-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* ✅ プレイヤー1人分のカード */
+.player {
+  background: #fff;
+  border: 1px solid #97eadb;
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+
+.player:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ 選択中のプレイヤー */
+.player.selected {
+  background: #97eadb;
+  color: white;
+}
+
+/* ✅ 星型のピンボタン */
+.pin-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pin-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #bbb;
+  clip-path: polygon(
+    50% 0%, 61% 35%, 98% 35%, 68% 57%,
+    79% 91%, 50% 70%, 21% 91%, 32% 57%,
+    2% 35%, 39% 35%
+  );
+  transition: background 0.3s;
+}
+
+.pin-btn.pinned::before {
+  background: gold;
+}
+
+/* ✅ チーム表示の枠 */
+.teams {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.team-box {
+  width: 45%;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.team-box.team1 {
+  background: #e8f4ff;
+}
+
+.team-box.team2 {
+  background: #ffeaea;
+}
+
+.team-box h2 {
+  text-align: center;
+  color: #47b6a2;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+/* ✅ 試合数の表示 */
+#matchCount {
+  text-align: center;
+  font-size: 12px;
+  color: gray;
+  margin-top: 20px;
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
