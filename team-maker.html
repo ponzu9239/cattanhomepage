@@ -9,47 +9,43 @@
     h1 { text-align: center; color: #47b6a2; }
     .method-select { text-align: center; margin-bottom: 15px; }
     label { margin: 0 12px; font-weight: bold; color: #47b6a2; cursor: pointer; }
-    #pinnedPlayers { text-align:center; margin-bottom:10px; }
-    .pinned-name { background:#ffefaa; padding:4px 8px; margin:3px; border-radius:5px; display:inline-block; font-weight:bold; color:#b37700; }
-    .player-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
-    .player {
-      padding: 8px 12px;
-      border-radius: 6px;
-      background: #fff;
-      border: 1px solid #97eadb;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      user-select: none;
-      transition: background-color 0.3s, color 0.3s;
-    }
+    .player-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; }
+    .player { padding: 8px 12px; border-radius: 6px; background: #fff; border: 1px solid #97eadb; cursor: pointer; display:flex; align-items:center; gap:6px; }
     .player.selected { background: #97eadb; color: white; }
     .pin-btn {
-      font-size: 18px;
-      cursor: pointer;
-      user-select: none;
-      color: #bbb;
-      transition: color 0.3s;
+      width: 20px;
+      height: 20px;
       background: none;
       border: none;
-      padding: 0;
-      line-height: 1;
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
     }
-    .pin-btn.pinned { color: #f5b800; }
-    .pin-btn:hover { color: #f5b800; }
-    .teams { display: flex; justify-content: space-around; margin-top: 20px; max-width: 700px; margin-left: auto; margin-right: auto; }
-    .team-box {
-      width: 45%;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      background: white;
+    .pin-btn::before {
+      content: "";
+      position: absolute;
+      top: 2px; left: 2px; right: 2px; bottom: 2px;
+      background: #bbb;
+      clip-path: polygon(
+        50% 0%, 61% 35%, 98% 35%, 68% 57%,
+        79% 91%, 50% 70%, 21% 91%, 32% 57%,
+        2% 35%, 39% 35%
+      );
+      transition: background 0.3s;
     }
+    .pin-btn.pinned::before {
+      background: gold;
+    }
+    .pin-btn:hover::before {
+      background: orange;
+    }
+    .teams { display: flex; justify-content: space-around; margin-top: 20px; }
+    .team-box { width: 45%; padding: 10px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
     .team-box.team1 { background: #e8f4ff; }
     .team-box.team2 { background: #ffeaea; }
-    .team-box h2 { text-align: center; color: #47b6a2; margin: 0 0 10px 0; }
-    ul { list-style: none; padding: 0; margin: 0; }
+    .team-box h2 { text-align: center; color: #47b6a2; }
+    ul { list-style: none; padding: 0; }
     #matchCount { text-align: center; font-size: 12px; color: gray; margin-top: 20px; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -64,7 +60,6 @@
     <label><input type="radio" name="method" value="killdiff"> キル差スコア</label>
   </div>
 
-  <div id="pinnedPlayers"></div>
   <div id="playerList" class="player-list"></div>
 
   <div class="teams">
@@ -91,17 +86,7 @@
     let playerScoresAverage = {}, playerScoresWinRate = {}, playerScoresKillDiff = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
 
-    // ピン留めプレイヤー表示
-    function updatePinnedView() {
-      const div = document.getElementById("pinnedPlayers");
-      if(pinned.length === 0){
-        div.innerHTML = "";
-        return;
-      }
-      div.innerHTML = "<strong>ピン留め中:</strong> " + pinned.map(p => `<span class="pinned-name">${p}</span>`).join("");
-    }
-
-    // 平均キル計算
+    // スコア計算（平均キル）
     function calculateScoresAverage(matches) {
       const stats = {};
       matches.forEach(match => {
@@ -132,12 +117,12 @@
       const stats = {};
       matches.forEach(match => {
         const teamAWins = match.teamAKills > match.teamBKills;
-        if(match.teamA) match.teamA.forEach(p => {
+        match.teamA.forEach(p => {
           if (!stats[p]) stats[p] = { win: 0, total: 0 };
           stats[p].total++;
           if (teamAWins) stats[p].win++;
         });
-        if(match.teamB) match.teamB.forEach(p => {
+        match.teamB.forEach(p => {
           if (!stats[p]) stats[p] = { win: 0, total: 0 };
           stats[p].total++;
           if (!teamAWins) stats[p].win++;
@@ -176,16 +161,14 @@
       return scores;
     }
 
-    // ピンのON/OFF切り替え
     function togglePin(name) {
       if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
       else pinned.push(name);
       localStorage.setItem("pinnedPlayers", JSON.stringify(pinned));
-      updatePinnedView();
       renderPlayers();
+      makeTeams();
     }
 
-    // プレイヤーリスト表示
     function renderPlayers() {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
@@ -196,30 +179,22 @@
       container.innerHTML = "";
       let names = Object.keys(scores);
 
-      // ピン留め済みはリストから除外
-      names = names.filter(n => !pinned.includes(n));
+      // ピン留め中の人は表示しない
+      names = names.filter(name => !pinned.includes(name));
 
-      // 名前でソート
       names.sort((a, b) => a.localeCompare(b, "ja"));
 
       names.forEach(name => {
         const div = document.createElement("div");
         div.className = "player" + (selected.includes(name) ? " selected" : "");
         div.dataset.name = name;
-        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" aria-label="ピン留め切り替え">⭐</button>`;
-        div.querySelector(".pin-btn").onclick = e => {
-          e.stopPropagation();
-          togglePin(name);
-        };
-        div.onclick = () => {
-          div.classList.toggle("selected");
-          makeTeams();
-        };
+        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" aria-label="ピン留め切り替え"></button>`;
+        div.querySelector(".pin-btn").onclick = e => { e.stopPropagation(); togglePin(name); };
+        div.onclick = () => { div.classList.toggle("selected"); makeTeams(); };
         container.appendChild(div);
       });
     }
 
-    // チーム分け
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
@@ -246,7 +221,6 @@
       playerScoresAverage = calculateScoresAverage(matches);
       playerScoresWinRate = calculateWinRate(matches);
       playerScoresKillDiff = calculateKillDiff(matches);
-      updatePinnedView();
       renderPlayers();
       makeTeams();
       document.getElementById("matchCount").textContent = `過去${matches.length}試合のデータをもとに生成。`;
