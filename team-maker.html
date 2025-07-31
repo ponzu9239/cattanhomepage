@@ -3,72 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>APEXきゃたんカスタムチーム分け</title>
+  <title>いい感じにチーム分けしてくれるやつ</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
       background: #f7fcfc;
       margin: 0;
-      padding: 16px;
+      padding: 20px;
     }
     h1 {
       text-align: center;
       color: #47b6a2;
-      margin-bottom: 12px;
-      font-size: 26px;
-      font-weight: 800;
     }
     .method-select {
       text-align: center;
-      margin: 18px 0 12px 0;
-      white-space: nowrap;
+      margin: 20px 0 15px 0;
     }
     label {
-      margin: 0 8px;
+      margin: 0 12px;
       font-weight: bold;
       color: #47b6a2;
       cursor: pointer;
-      user-select: none;
-      background: #fff;
-      padding: 5px 10px;
-      border-radius: 16px;
-      border: 1.5px solid #97eadb;
-      font-size: 14px;
-    }
-    .teams {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 16px;
-      flex-wrap: nowrap;
-    }
-    .team-box {
-      flex: 1 1 45%;
-      background: #eefaff;
-      padding: 12px;
-      border-radius: 12px;
-      border: 2px solid #97eadb;
-      text-align: center;
-      min-width: 150px;
-    }
-    .team-box.team2 {
-      background: #fff1f5;
-      border-color: #ffb6c1;
-    }
-    .team-box h2 {
-      font-size: 18px;
-      margin: 0 0 8px 0;
-      color: #47b6a2;
-    }
-    .team-box ul { list-style: none; padding: 0; margin: 0; }
-    .team-box li {
-      background: white;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      padding: 6px;
-      margin-bottom: 6px;
-      font-size: 15px;
-      font-weight: 500;
     }
     .player-list {
       display: grid;
@@ -78,24 +33,40 @@
     }
     .player {
       background: #fff;
-      border: 2px solid #97eadb;
+      border: 1px solid #97eadb;
       border-radius: 10px;
-      padding: 10px 6px;
+      padding: 12px 8px;
       text-align: center;
       cursor: pointer;
       transition: transform 0.15s, box-shadow 0.15s;
       position: relative;
-      font-size: 14px;
     }
-    .player:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-    .player.selected { background: #97eadb; color: white; }
+    .player:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .player.selected {
+      background: #97eadb;
+      color: white;
+    }
     .pin-btn {
-      position: absolute; top: 5px; right: 5px;
-      width: 20px; height: 20px;
-      background: none; border: none; cursor: pointer;
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
     }
     .pin-btn::before {
-      content: ""; position: absolute; inset: 0;
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: #bbb;
       clip-path: polygon(
         50% 0%, 61% 35%, 98% 35%, 68% 57%,
@@ -104,45 +75,67 @@
       );
       transition: background 0.3s;
     }
-    .pin-btn.pinned::before { background: gold; }
+    .pin-btn.pinned::before {
+      background: gold;
+    }
+    .teams {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 12px;
+      flex-wrap: nowrap;
+    }
+    .team-box {
+      flex: 1 1 50%;
+      max-width: 45%;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background: #e8f4ff;
+    }
+    .team-box.team2 {
+      background: #ffeaea;
+    }
+    .team-box h2 {
+      text-align: center;
+      color: #47b6a2;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    ul li {
+      text-align: center;
+      padding: 4px 0;
+      font-weight: bold;
+    }
     #matchCount {
       text-align: center;
       font-size: 12px;
       color: gray;
       margin-top: 8px;
-      user-select: none;
-    }
-    @media (max-width: 600px) {
-      h1 { font-size: 22px; }
-      .team-box h2 { font-size: 16px; }
-      .team-box li { font-size: 14px; padding: 5px; }
-      .player-list { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>いい感じにチーム分けしてくれるやつ</h1>
-
-  <div class="teams">
-    <div class="team-box team1">
-      <h2>チーム1</h2>
-      <ul id="teamA"></ul>
-    </div>
-    <div class="team-box team2">
-      <h2>チーム2</h2>
-      <ul id="teamB"></ul>
-    </div>
-  </div>
+  <h1>チーム分けしてくれるやつ</h1>
 
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均キル</label>
     <label><input type="radio" name="method" value="winrate"> 勝率</label>
-    <label><input type="radio" name="method" value="killdiff"> キル差</label>
+    <label><input type="radio" name="method" value="killdiff"> キル差スコア</label>
   </div>
 
   <div id="playerList" class="player-list"></div>
+
+  <div class="teams">
+    <div class="team-box team1"><h2>チーム1</h2><ul id="teamA"></ul></div>
+    <div class="team-box team2"><h2>チーム2</h2><ul id="teamB"></ul></div>
+  </div>
+
   <p id="matchCount">過去 試合のデータをもとに生成。</p>
 
   <script>
@@ -162,13 +155,58 @@
     let playerScoresAverage = {}, playerScoresWinRate = {}, playerScoresKillDiff = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
 
-    function calculateScoresAverage(matches) { /* ← そのまま */ }
-    function calculateWinRate(matches) { /* ← そのまま */ }
+    function calculateScoresAverage(matches) {
+      const stats = {};
+      matches.forEach(match => {
+        if (match.teamA) {
+          match.teamA.forEach(p => {
+            if (!stats[p]) stats[p] = { total: 0, count: 0 };
+            stats[p].total += match.teamAKills;
+            stats[p].count++;
+          });
+        }
+        if (match.teamB) {
+          match.teamB.forEach(p => {
+            if (!stats[p]) stats[p] = { total: 0, count: 0 };
+            stats[p].total += match.teamBKills;
+            stats[p].count++;
+          });
+        }
+      });
+      const scores = {};
+      Object.keys(stats).forEach(name => {
+        scores[name] = +(stats[name].total / stats[name].count).toFixed(2);
+      });
+      return scores;
+    }
 
-    // ✅ 履歴考慮版に置き換え
+    function calculateWinRate(matches) {
+      const stats = {};
+      matches.forEach(match => {
+        const teamAWins = match.teamAKills > match.teamBKills;
+        match.teamA.forEach(p => {
+          if (!stats[p]) stats[p] = { win: 0, total: 0 };
+          stats[p].total++;
+          if (teamAWins) stats[p].win++;
+        });
+        match.teamB.forEach(p => {
+          if (!stats[p]) stats[p] = { win: 0, total: 0 };
+          stats[p].total++;
+          if (!teamAWins) stats[p].win++;
+        });
+      });
+      const scores = {};
+      Object.keys(stats).forEach(name => {
+        scores[name] = +(stats[name].win / stats[name].total).toFixed(2);
+      });
+      return scores;
+    }
+
+    // ✅ 履歴考慮キル差スコアに書き換え
     function calculateKillDiff(matches) {
       const history = {};
       matches.sort((a,b) => a.matchNumber - b.matchNumber);
+
       matches.forEach(match => {
         if (!match.teamA || !match.teamB) return;
 
@@ -191,16 +229,69 @@
       const scores = {};
       Object.keys(history).forEach(name => {
         const values = history[name];
-        if (!values.length) { scores[name] = 0; return; }
-        const last = values[values.length - 1];
+        if (values.length === 0) {
+          scores[name] = 0;
+          return;
+        }
+        const last = values[values.length - 1] ?? 0;
         const prev = values.slice(0, -1);
-        const prevAvg = prev.length ? prev.reduce((a,b)=>a+b,0)/prev.length : 0;
+        const prevAvg = prev.length > 0 ? prev.reduce((a,b)=>a+b,0)/prev.length : 0;
         scores[name] = +(prevAvg + last).toFixed(2);
       });
       return scores;
     }
 
-    // togglePin(), renderPlayers(), makeTeams() はそのまま
+    function togglePin(name) {
+      if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
+      else pinned.push(name);
+      localStorage.setItem("pinnedPlayers", JSON.stringify(pinned));
+      renderPlayers();
+      makeTeams();
+    }
+
+    function renderPlayers() {
+      const container = document.getElementById("playerList");
+      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
+      const method = document.querySelector('input[name="method"]:checked').value;
+      let scores = method === "average" ? playerScoresAverage :
+                   method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
+
+      container.innerHTML = "";
+      let names = Object.keys(scores);
+
+      const pinnedPlayers = names.filter(name => pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
+      const unpinnedPlayers = names.filter(name => !pinned.includes(name)).sort((a,b) => a.localeCompare(b, "ja"));
+
+      pinnedPlayers.concat(unpinnedPlayers).forEach(name => {
+        const div = document.createElement("div");
+        div.className = "player" + (selected.includes(name) ? " selected" : "");
+        div.dataset.name = name;
+        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" aria-label="ピン留め切り替え"></button>`;
+        div.querySelector(".pin-btn").onclick = e => { e.stopPropagation(); togglePin(name); };
+        div.onclick = () => { div.classList.toggle("selected"); makeTeams(); };
+        container.appendChild(div);
+      });
+    }
+
+    function makeTeams() {
+      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
+      const method = document.querySelector('input[name="method"]:checked').value;
+      let scores = method === "average" ? playerScoresAverage :
+                   method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
+
+      const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
+      players.sort((a, b) => b.score - a.score);
+
+      const teamA = [], teamB = [];
+      let sumA = 0, sumB = 0;
+      players.forEach(p => {
+        if (sumA <= sumB) { teamA.push(p); sumA += p.score; }
+        else { teamB.push(p); sumB += p.score; }
+      });
+
+      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
+      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
+    }
 
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
