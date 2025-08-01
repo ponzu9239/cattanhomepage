@@ -300,28 +300,32 @@
       makeTeams();
     }
 
-    function renderPlayers() {
-      const container = document.getElementById("playerList");
-      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
-      const method = document.querySelector('input[name="method"]:checked').value;
-      let scores = method === "average" ? playerScoresAverage :
-                   method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
+function renderPlayers() {
+  const container = document.getElementById("playerList");
+  const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
+  const method = document.querySelector('input[name="method"]:checked').value;
+  let scores = method === "average" ? playerScoresAverage :
+               method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
 
-      container.innerHTML = "";
-      let names = Object.keys(scores);
-      const pinnedPlayers = names.filter(name => pinned.includes(name)).sort((a,b) => a.localeCompare(b,"ja"));
-      const unpinnedPlayers = names.filter(name => !pinned.includes(name)).sort((a,b) => a.localeCompare(b,"ja"));
+  container.innerHTML = "";
+  let names = Object.keys(scores);
 
-      pinnedPlayers.concat(unpinnedPlayers).forEach(name => {
-        const div = document.createElement("div");
-        div.className = "player" + (selected.includes(name) ? " selected" : "");
-        div.dataset.name = name;
-        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}"></button>`;
-        div.querySelector(".pin-btn").onclick = e => { e.stopPropagation(); togglePin(name); };
-        div.onclick = () => { div.classList.toggle("selected"); makeTeams(); };
-        container.appendChild(div);
-      });
-    }
+  // 選択状態・ピン状態で分類
+  const selectedPlayers = names.filter(name => selected.includes(name)).sort((a,b)=>a.localeCompare(b,"ja"));
+  const pinnedPlayers = names.filter(name => !selected.includes(name) && pinned.includes(name)).sort((a,b)=>a.localeCompare(b,"ja"));
+  const otherPlayers = names.filter(name => !selected.includes(name) && !pinned.includes(name)).sort((a,b)=>a.localeCompare(b,"ja"));
+
+  // 選択済み → ピン留め → それ以外 の順で並べる
+  selectedPlayers.concat(pinnedPlayers, otherPlayers).forEach(name => {
+    const div = document.createElement("div");
+    div.className = "player" + (selected.includes(name) ? " selected" : "");
+    div.dataset.name = name;
+    div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}"></button>`;
+    div.querySelector(".pin-btn").onclick = e => { e.stopPropagation(); togglePin(name); };
+    div.onclick = () => { div.classList.toggle("selected"); makeTeams(); renderPlayers(); };
+    container.appendChild(div);
+  });
+}
 
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
