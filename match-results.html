@@ -4,86 +4,78 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>APEX 試合結果入力</title>
-  <style>
-    body {
-      font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #f7fcfc;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 500px;
-      margin: 30px auto;
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    h1 { text-align: center; color: #47b6a2; }
-    textarea {
-      width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #97eadb;
-      margin-top: 4px;
-    }
-    .teams {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 20px;
-    }
-    .team-box {
-      flex: 1;
-      background: #eefaff;
-      padding: 10px;
-      border-radius: 8px;
-      border: 2px solid #97eadb;
-      min-height: 150px;
-    }
-    .team-box.team2 {
-      background: #fff1f5;
-      border-color: #ffb6c1;
-    }
-    .team-box.unassigned {
-      background: #fefae0;
-      border-color: #f1c40f;
-    }
-    .team-box h2 {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 0 8px 0;
-      color: #47b6a2;
-    }
-    .player-card {
-      background: #fff;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      padding: 6px;
-      margin: 4px 0;
-      text-align: center;
-      cursor: grab;
-    }
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background-color: #97eadb;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover { background-color: #7dd2c3; }
-    #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
-    .drag-preview {
-      position: fixed;
-      pointer-events: none;
-      opacity: 0.8;
-      z-index: 9999;
-    }
-  </style>
+<style>
+  body {
+    font-family: "Hiragino Maru Gothic ProN", sans-serif;
+    background-color: #f7fcfc;
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    max-width: 500px;
+    margin: 30px auto;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  h1 { text-align: center; color: #47b6a2; }
+  textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #97eadb;
+    margin-top: 4px;
+  }
+  .teams {
+    display: flex;
+    flex-direction: column; /* ← 縦並びに変更 */
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .team-box {
+    background: #eefaff;
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid #97eadb;
+  }
+  .team-box.team2 {
+    background: #fff1f5;
+    border-color: #ffb6c1;
+  }
+  .team-box h2 {
+    text-align: center;
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    color: #47b6a2;
+  }
+  #teamA, #teamB {
+    display: grid; /* 2列のグリッドに */
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .player-card {
+    background: #fff;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    padding: 6px;
+    text-align: center;
+    cursor: grab;
+  }
+  button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    background-color: #97eadb;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:hover { background-color: #7dd2c3; }
+  #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
+</style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
