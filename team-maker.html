@@ -115,7 +115,6 @@
       color: white;
     }
 
-    /* 🔹 入力と一致したプレイヤー用の薄い色 */
     .player.matching {
       background: #e0f7f3;
       border-color: #97eadb;
@@ -216,9 +215,8 @@
     let matches = [];
     let playerScoresAverage = {}, playerScoresWinRate = {}, playerScoresKillDiff = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
-    let matchingPlayers = []; // 試合結果入力ページと一致するプレイヤー
+    let matchingPlayers = [];
 
-    // 🔹 試合結果入力ページの入力メンバーを取得
     db.ref("currentInputPlayers").on("value", (snapshot) => {
       matchingPlayers = snapshot.exists() ? snapshot.val() : [];
       renderPlayers();
@@ -358,4 +356,30 @@
         else { teamB.push(p); sumB += p.score; }
       });
 
-      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</
+      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
+      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
+    }
+
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) return;
+      matches = Object.values(snapshot.val());
+      playerScoresAverage = calculateScoresAverage(matches);
+      playerScoresWinRate = calculateWinRate(matches);
+      playerScoresKillDiff = calculateKillDiff(matches);
+      renderPlayers();
+      makeTeams();
+      document.getElementById("matchCount").textContent = `過去${matches.length}試合のデータをもとに生成。`;
+    });
+
+    document.querySelectorAll('input[name="method"]').forEach(radio => {
+      radio.addEventListener("change", () => { renderPlayers(); makeTeams(); });
+    });
+
+    document.getElementById("recentBiasToggle").addEventListener("change", () => {
+      playerScoresAverage = calculateScoresAverage(matches);
+      playerScoresKillDiff = calculateKillDiff(matches);
+      makeTeams();
+    });
+  </script>
+</body>
+</html>
