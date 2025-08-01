@@ -5,106 +5,150 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>APEX 試合結果入力</title>
   <style>
-    body {
-      font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #f7fcfc;
-      margin: 0; padding: 0;
-    }
-    .container {
-      max-width: 500px;
-      margin: 30px auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    h1 {
-      text-align: center;
-      color: #47b6a2;
-    }
-    textarea {
-      width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #97eadb;
-      margin-top: 4px;
-    }
-    /* 上段：未割り当て */
-    .unassigned-container {
-      margin-top: 20px;
-      background: #fefae0;
-      border: 2px solid #f1c40f;
-      border-radius: 8px;
-      padding: 10px;
-      min-height: 150px;
-    }
-    /* 中段・下段のグリッド */
-    .teams-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 20px;
-    }
-    .team-box {
-      background: #eefaff;
-      border-radius: 8px;
-      border: 2px solid #97eadb;
-      padding: 10px;
-      min-height: 150px;
-      display: flex;
-      flex-direction: column;
-    }
-    .team-box.team2 {
-      background: #fff1f5;
-      border-color: #ffb6c1;
-    }
-    .team-box h2 {
-      margin: 0 0 8px 0;
-      text-align: center;
-      font-size: 16px;
-      color: #47b6a2;
-    }
-    .player-container {
-      flex-grow: 1;
-      overflow-y: auto;
-    }
-    .player-card {
-      background: #fff;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      padding: 6px;
-      margin: 4px 0;
-      text-align: center;
-      cursor: grab;
-    }
-    input[type=number] {
-      width: 90%;
-      margin-bottom: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      padding: 4px 8px;
-      align-self: center;
-    }
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background-color: #97eadb;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #7dd2c3;
-    }
-    #status {
-      margin-top: 12px;
-      text-align: center;
-      font-weight: bold;
-      color: #47b6a2;
-    }
+body {
+  font-family: "Hiragino Maru Gothic ProN", "Segoe UI", sans-serif;
+  background-color: #f7fcfc;
+  margin: 0;
+  padding: 0;
+  color: #444;
+}
+
+.container {
+  max-width: 520px;
+  margin: 30px auto;
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+  text-align: center;
+  color: #47b6a2;
+  font-size: 26px;
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #47b6a2;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1.5px solid #97eadb;
+  margin-bottom: 14px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.unassigned-container {
+  margin-top: 12px;
+  background: #fffdf4;
+  border: 2px solid #f1c40f;
+  border-radius: 10px;
+  padding: 12px;
+  min-height: 150px;
+  transition: box-shadow 0.2s;
+}
+.unassigned-container:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.teams-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.team-box {
+  background: #eefaff;
+  border-radius: 10px;
+  border: 2px solid #97eadb;
+  padding: 12px;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s;
+}
+.team-box:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.team-box.team2 {
+  background: #fff6f8;
+  border-color: #ffb6c1;
+}
+
+.team-box h2 {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 16px;
+  color: #47b6a2;
+  font-weight: 600;
+}
+
+.player-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.player-card {
+  background: #fff;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 6px;
+  margin: 4px 0;
+  text-align: center;
+  cursor: grab;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
+}
+.player-card:hover {
+  background: #f8fdfd;
+  transform: translateY(-1px);
+}
+
+input[type=number] {
+  width: 90%;
+  margin: 0 auto 8px;
+  border-radius: 8px;
+  border: 1.5px solid #ccc;
+  padding: 6px;
+  font-size: 14px;
+}
+
+button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background-color: #97eadb;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+button:hover {
+  background-color: #7dd2c3;
+  transform: translateY(-1px);
+}
+
+#status {
+  margin-top: 12px;
+  text-align: center;
+  font-weight: bold;
+  color: #47b6a2;
+  font-size: 14px;
+}
   </style>
 </head>
 <body>
