@@ -26,7 +26,6 @@
       border-radius: 6px;
       border: 1px solid #97eadb;
       margin-top: 4px;
-      resize: vertical;
     }
     .teams {
       display: flex;
@@ -41,7 +40,6 @@
       border-radius: 8px;
       border: 2px solid #97eadb;
       min-height: 150px;
-      user-select: none;
     }
     .team-box.team2 {
       background: #fff1f5;
@@ -56,7 +54,6 @@
       font-size: 16px;
       margin: 0 0 8px 0;
       color: #47b6a2;
-      user-select: none;
     }
     .player-card {
       background: #fff;
@@ -66,21 +63,25 @@
       margin: 4px 0;
       text-align: center;
       cursor: grab;
-      transition: background 0.2s;
       user-select: none;
-    }
-    .player-card.selected {
-      background: #97eadb;
-      color: white;
     }
     button {
       margin-top: 20px; width: 100%; padding: 10px;
       background-color: #97eadb; border: none; border-radius: 6px;
       color: white; font-size: 16px; cursor: pointer;
-      user-select: none;
     }
     button:hover { background-color: #7dd2c3; }
-    #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; user-select: none;}
+    #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
+    .drag-preview {
+      position: fixed;
+      pointer-events: none;
+      opacity: 0.8;
+      background: #fff;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      padding: 6px;
+      z-index: 1000;
+    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -94,19 +95,19 @@
     <textarea id="nameInput" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
 
     <div class="teams">
-      <div class="team-box unassigned" data-team="unassigned">
+      <div class="team-box unassigned" data-team="unassigned" ondragover="allowDrop(event)" ondrop="drop(event, 'unassigned')">
         <h2>チーム未割り当て</h2>
         <div id="unassigned"></div>
       </div>
     </div>
 
     <div class="teams">
-      <div class="team-box team1" data-team="teamA">
+      <div class="team-box team1" data-team="teamA" ondragover="allowDrop(event)" ondrop="drop(event, 'teamA')">
         <h2>チーム1</h2>
         <input type="number" id="teamAKills" placeholder="キル数" style="width:90%;margin-bottom:6px;" />
         <div id="teamA"></div>
       </div>
-      <div class="team-box team2" data-team="teamB">
+      <div class="team-box team2" data-team="teamB" ondragover="allowDrop(event)" ondrop="drop(event, 'teamB')">
         <h2>チーム2</h2>
         <input type="number" id="teamBKills" placeholder="キル数" style="width:90%;margin-bottom:6px;" />
         <div id="teamB"></div>
@@ -130,9 +131,6 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  let selectedCard = null;
-  const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
-
   document.getElementById("nameInput").addEventListener("input", () => {
     const names = document.getElementById("nameInput").value.split("\n").map(n => n.trim()).filter(n => n);
     renderCards(names);
@@ -150,32 +148,16 @@
       if (!currentCards[name]) {
         const card = document.createElement("div");
         card.className = "player-card";
-        card.draggable = !isTouchDevice;
         card.textContent = name;
-
-        // PCドラッグ用
+        card.draggable = true;
         card.ondragstart = e => e.dataTransfer.setData("text", name);
 
-        // スマホタップ選択用
-        if (isTouchDevice) {
-          card.addEventListener("touchend", (e) => {
-            e.preventDefault();
-            if (selectedCard === card) {
-              card.classList.remove("selected");
-              selectedCard = null;
-            } else {
-              document.querySelectorAll(".player-card").forEach(c => c.classList.remove("selected"));
-              card.classList.add("selected");
-              selectedCard = card;
-            }
-          });
-        }
-
+        // スマホ用タッチドラッグ
+        card.addEventListener("touchstart", handleTouchStart);
         document.getElementById("unassigned").appendChild(card);
       }
     });
 
-    // 入力にないカードは削除
     Object.keys(currentCards).forEach(name => {
       if (!names.includes(name)) {
         currentCards[name].remove();
@@ -183,9 +165,7 @@
     });
   }
 
-  function allowDrop(ev) {
-    ev.preventDefault();
-  }
+  function allowDrop(ev) { ev.preventDefault(); }
   function drop(ev, teamId) {
     ev.preventDefault();
     const name = ev.dataTransfer.getData("text");
@@ -193,22 +173,44 @@
     if (card) document.getElementById(teamId).appendChild(card);
   }
 
-  // スマホ用カード移動処理
-  document.querySelectorAll(".team-box").forEach(box => {
-    if (isTouchDevice) {
-      box.addEventListener("touchend", (e) => {
-        if (selectedCard) {
-          const teamId = box.getAttribute("data-team");
-          const targetDiv = document.getElementById(teamId);
-          if (targetDiv) {
-            targetDiv.appendChild(selectedCard);
-            selectedCard.classList.remove("selected");
-            selectedCard = null;
-          }
-        }
-      });
+  // ======== スマホ用タッチドラッグ =========
+  let dragCard = null;
+  let preview = null;
+
+  function handleTouchStart(e) {
+    dragCard = e.target;
+    preview = dragCard.cloneNode(true);
+    preview.classList.add("drag-preview");
+    preview.style.width = dragCard.offsetWidth + "px";
+    document.body.appendChild(preview);
+
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleTouchEnd);
+  }
+
+  function handleTouchMove(e) {
+    if (!preview) return;
+    const touch = e.touches[0];
+    preview.style.left = touch.clientX - preview.offsetWidth / 2 + "px";
+    preview.style.top = touch.clientY - preview.offsetHeight / 2 + "px";
+  }
+
+  function handleTouchEnd(e) {
+    if (preview) preview.remove();
+    preview = null;
+
+    const touch = e.changedTouches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    const teamBox = target.closest(".team-box");
+    if (teamBox) {
+      const teamDiv = teamBox.querySelector("div");
+      if (teamDiv) teamDiv.appendChild(dragCard);
     }
-  });
+
+    dragCard = null;
+    document.removeEventListener("touchmove", handleTouchMove);
+    document.removeEventListener("touchend", handleTouchEnd);
+  }
 
   async function saveResult() {
     const teamA = [...document.getElementById("teamA").children].map(c => c.textContent);
@@ -235,11 +237,9 @@
       teamAKills,
       teamB,
       teamBKills
-    })
-    .then(() => {
+    }).then(() => {
       document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
-    })
-    .catch((err) => {
+    }).catch((err) => {
       console.error(err);
       document.getElementById("status").innerText = "❌ エラーが発生しました";
     });
