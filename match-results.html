@@ -45,6 +45,10 @@
       background: #fff1f5;
       border-color: #ffb6c1;
     }
+    .team-box.unassigned {
+      background: #fefae0;
+      border-color: #f1c40f;
+    }
     .team-box h2 {
       text-align: center;
       font-size: 16px;
@@ -78,7 +82,13 @@
 
     <label>メンバー名を1行ごとに入力：</label>
     <textarea id="nameInput" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
-    <button onclick="generateCards()">カードを作成</button>
+
+    <div class="teams">
+      <div class="team-box unassigned" ondrop="drop(event, 'unassigned')" ondragover="allowDrop(event)">
+        <h2>チーム未割り当て</h2>
+        <div id="unassigned"></div>
+      </div>
+    </div>
 
     <div class="teams">
       <div class="team-box team1" ondrop="drop(event, 'teamA')" ondragover="allowDrop(event)">
@@ -110,17 +120,43 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function generateCards() {
+    // 入力されたらリアルタイムでカード生成
+    document.getElementById("nameInput").addEventListener("input", () => {
       const names = document.getElementById("nameInput").value.split("\n").map(n => n.trim()).filter(n => n);
-      document.getElementById("teamA").innerHTML = "";
-      document.getElementById("teamB").innerHTML = "";
+      renderCards(names);
+    });
+
+    function renderCards(names) {
+      const usedNames = new Set();
+      ["unassigned", "teamA", "teamB"].forEach(id => {
+        [...document.getElementById(id).children].forEach(card => usedNames.add(card.textContent));
+      });
+
+      // 入力欄にある名前のカードを更新
+      const currentCards = {};
+      ["unassigned", "teamA", "teamB"].forEach(id => {
+        [...document.getElementById(id).children].forEach(card => {
+          currentCards[card.textContent] = card;
+        });
+      });
+
+      // すでにあるカードは残す、新しい名前は未割り当てに追加
       names.forEach(name => {
-        const card = document.createElement("div");
-        card.className = "player-card";
-        card.draggable = true;
-        card.textContent = name;
-        card.ondragstart = e => e.dataTransfer.setData("text", name);
-        document.getElementById("teamA").appendChild(card); // 初期はチーム1に入れる
+        if (!currentCards[name]) {
+          const card = document.createElement("div");
+          card.className = "player-card";
+          card.draggable = true;
+          card.textContent = name;
+          card.ondragstart = e => e.dataTransfer.setData("text", name);
+          document.getElementById("unassigned").appendChild(card);
+        }
+      });
+
+      // 入力から消された名前のカードは削除
+      Object.keys(currentCards).forEach(name => {
+        if (!names.includes(name)) {
+          currentCards[name].remove();
+        }
       });
     }
 
