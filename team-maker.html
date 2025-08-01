@@ -70,8 +70,13 @@
 
 .team-box ul {
   list-style: none;
-  padding: 0;
+  padding: 0 8px; /* ← 左右に余白を追加 */
   margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  box-sizing: border-box;
+}
   
   display: grid;                 /* ここを追加 */
   grid-template-columns: repeat(2, 1fr); /* 2列に分ける */
