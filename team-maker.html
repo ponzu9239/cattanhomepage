@@ -340,25 +340,33 @@
       });
     }
 
-    function makeTeams() {
-      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
-      const method = document.querySelector('input[name="method"]:checked').value;
-      let scores = method === "average" ? playerScoresAverage :
-                   method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
+function makeTeams() {
+  const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
+  const method = document.querySelector('input[name="method"]:checked').value;
+  let scores = method === "average" ? playerScoresAverage :
+               method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
 
-      const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
-      players.sort((a, b) => b.score - a.score);
+  const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
+  players.sort((a, b) => b.score - a.score);
 
-      const teamA = [], teamB = [];
-      let sumA = 0, sumB = 0;
-      players.forEach(p => {
-        if (sumA <= sumB) { teamA.push(p); sumA += p.score; }
-        else { teamB.push(p); sumB += p.score; }
-      });
+  let teamA = [], teamB = [];
+  let sumA = 0, sumB = 0;
 
-      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
-      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
-    }
+  players.forEach(p => {
+    if (sumA <= sumB) { teamA.push(p); sumA += p.score; }
+    else { teamB.push(p); sumB += p.score; }
+  });
+
+  // 🔹 きゃたんがチームBにいたら、チームを入れ替える
+  if (teamB.some(p => p.name === "きゃたん") && !teamA.some(p => p.name === "きゃたん")) {
+    const tmp = teamA;
+    teamA = teamB;
+    teamB = tmp;
+  }
+
+  document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
+  document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
+}
 
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
