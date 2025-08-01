@@ -54,15 +54,14 @@
       color: #47b6a2;
     }
 
-    /* 名前のレイアウト */
     #teamA, #teamB {
       display: grid;
-      grid-template-columns: 1fr 1fr; /* チームは2列 */
+      grid-template-columns: 1fr 1fr;
       gap: 6px;
     }
     #unassigned {
       display: grid;
-      grid-template-columns: 1fr; /* 未割り当てだけ1列 */
+      grid-template-columns: 1fr;
       gap: 6px;
     }
 
@@ -116,20 +115,17 @@
     <textarea id="nameInput" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
 
     <div class="teams">
-      <!-- チーム未割り当て -->
       <div class="team-box unassigned" ondragover="allowDrop(event)" ondrop="drop(event, 'unassigned')">
         <h2>チーム未割り当て</h2>
         <div id="unassigned"></div>
       </div>
 
-      <!-- チーム1 -->
       <div class="team-box team1" ondragover="allowDrop(event)" ondrop="drop(event, 'teamA')">
         <h2>チーム1</h2>
         <input type="number" id="teamAKills" placeholder="キル数" />
         <div id="teamA"></div>
       </div>
 
-      <!-- チーム2 -->
       <div class="team-box team2" ondragover="allowDrop(event)" ondrop="drop(event, 'teamB')">
         <h2>チーム2</h2>
         <input type="number" id="teamBKills" placeholder="キル数" />
@@ -160,6 +156,9 @@
     document.getElementById("nameInput").addEventListener("input", () => {
       const names = document.getElementById("nameInput").value.split("\n").map(n => n.trim()).filter(n => n);
       renderCards(names);
+
+      // 🔹 入力中メンバーを Firebase に送信
+      db.ref("apex_current_members").set(names);
     });
 
     function renderCards(names) {
