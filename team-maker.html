@@ -2,140 +2,197 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>APEX 試合結果入力</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>APEXきゃたんカスタムチーム分け</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #f7fcfc;
+      background: #f7fcfc;
       margin: 0;
-      padding: 0;
+      padding: 16px;
     }
-    .container {
-      max-width: 500px;
-      margin: 30px auto;
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+      margin-bottom: 12px;
+      font-size: 26px;
+      font-weight: 800;
     }
-    h1 { text-align: center; color: #47b6a2; }
-    textarea {
-      width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #97eadb;
-      margin-top: 4px;
+
+    .method-select {
+      text-align: center;
+      margin: 18px 0 12px 0;
+      white-space: nowrap;
     }
+
+    label {
+      margin: 0 8px;
+      font-weight: bold;
+      color: #47b6a2;
+      cursor: pointer;
+      user-select: none;
+      background: #fff;
+      padding: 5px 10px;
+      border-radius: 16px;
+      border: 1.5px solid #97eadb;
+      font-size: 14px;
+    }
+
     .teams {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-top: 20px;
+      margin-bottom: 16px;
     }
+
     .team-box {
+      width: 100%;
       background: #eefaff;
-      padding: 10px;
-      border-radius: 8px;
+      padding: 12px;
+      border-radius: 12px;
       border: 2px solid #97eadb;
+      text-align: center;
     }
+
     .team-box.team2 {
       background: #fff1f5;
       border-color: #ffb6c1;
     }
-    .team-box.unassigned {
-      background: #fefae0;
-      border-color: #f1c40f;
-    }
+
     .team-box h2 {
-      text-align: center;
-      font-size: 16px;
+      font-size: 18px;
       margin: 0 0 8px 0;
       color: #47b6a2;
     }
 
-    #teamA, #teamB {
+    .team-box ul {
+      list-style: none;
+      padding: 0 8px; /* 左右の余白を追加 */
+      margin: 0;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-    #unassigned {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 6px;
+      grid-template-columns: repeat(2, minmax(0, 1fr)); /* 幅を均等に */
+      gap: 8px;
+      box-sizing: border-box;
     }
 
-    .player-card {
-      background: #fff;
+    .team-box li {
+      background: white;
       border: 1.5px solid #ddd;
       border-radius: 8px;
       padding: 6px;
+      font-size: 15px;
+      font-weight: 500;
       text-align: center;
-      cursor: grab;
     }
-    input[type=number] {
-      width: 90%;
-      margin-bottom: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      padding: 4px 8px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+
+    .player-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
     }
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background-color: #97eadb;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 16px;
+
+    .player {
+      background: #fff;
+      border: 2px solid #97eadb;
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
       cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+      font-size: 14px;
     }
-    button:hover { background-color: #7dd2c3; }
-    #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
-    .drag-preview {
-      position: fixed;
-      pointer-events: none;
-      opacity: 0.8;
-      z-index: 9999;
+
+    .player:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .player.selected {
+      background: #97eadb;
+      color: white;
+    }
+
+    .pin-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 20px;
+      height: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .pin-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #bbb;
+      clip-path: polygon(
+        50% 0%, 61% 35%, 98% 35%, 68% 57%,
+        79% 91%, 50% 70%, 21% 91%, 32% 57%,
+        2% 35%, 39% 35%
+      );
+      transition: background 0.3s;
+    }
+
+    .pin-btn.pinned::before {
+      background: gold;
+    }
+
+    #matchCount {
+      text-align: center;
+      font-size: 12px;
+      color: gray;
+      margin-top: 8px;
+      user-select: none;
+    }
+
+    .recent-toggle {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .team-box h2 { font-size: 16px; }
+      .team-box li { font-size: 14px; padding: 5px; }
+      .player-list { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
-
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>試合結果入力</h1>
+  <h1>いい感じにチーム分けしてくれるやつ</h1>
 
-    <label>メンバー名を1行ごとに入力：</label>
-    <textarea id="nameInput" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
-
-    <div class="teams">
-      <div class="team-box unassigned" ondragover="allowDrop(event)" ondrop="drop(event, 'unassigned')">
-        <h2>チーム未割り当て</h2>
-        <div id="unassigned"></div>
-      </div>
-
-      <div class="team-box team1" ondragover="allowDrop(event)" ondrop="drop(event, 'teamA')">
-        <h2>チーム1</h2>
-        <input type="number" id="teamAKills" placeholder="キル数" />
-        <div id="teamA"></div>
-      </div>
-
-      <div class="team-box team2" ondragover="allowDrop(event)" ondrop="drop(event, 'teamB')">
-        <h2>チーム2</h2>
-        <input type="number" id="teamBKills" placeholder="キル数" />
-        <div id="teamB"></div>
-      </div>
+  <div class="teams">
+    <div class="team-box team1">
+      <h2>チーム1</h2>
+      <ul id="teamA"></ul>
     </div>
-
-    <button onclick="saveResult()">保存する</button>
-    <p id="status"></p>
+    <div class="team-box team2">
+      <h2>チーム2</h2>
+      <ul id="teamB"></ul>
+    </div>
   </div>
+
+  <div class="method-select">
+    <label><input type="radio" name="method" value="average" checked> 平均キル</label>
+    <label><input type="radio" name="method" value="winrate"> 勝率</label>
+    <label><input type="radio" name="method" value="killdiff"> キル差</label>
+  </div>
+
+  <div class="recent-toggle">
+    <label><input type="checkbox" id="recentBiasToggle"> 直前試合重視(勝率除く)</label>
+  </div>
+
+  <div id="playerList" class="player-list"></div>
+  <p id="matchCount">過去 試合のデータをもとに生成。</p>
 
   <script>
     const firebaseConfig = {
@@ -150,117 +207,166 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
-    let preview = null;
+    let matches = [];
+    let playerScoresAverage = {}, playerScoresWinRate = {}, playerScoresKillDiff = {};
+    let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
 
-    document.getElementById("nameInput").addEventListener("input", () => {
-      const names = document.getElementById("nameInput").value.split("\n").map(n => n.trim()).filter(n => n);
-      renderCards(names);
-
-      // 🔹 入力中メンバーを Firebase に送信
-      db.ref("apex_current_members").set(names);
-    });
-
-    function renderCards(names) {
-      const currentCards = {};
-      ["unassigned", "teamA", "teamB"].forEach(id => {
-        [...document.getElementById(id).children].forEach(card => {
-          currentCards[card.textContent] = card;
+    function calculateScoresAverage(matches) {
+      const history = {};
+      matches.forEach(match => {
+        match.teamA?.forEach(p => {
+          if (!history[p]) history[p] = [];
+          history[p].push(match.teamAKills);
+        });
+        match.teamB?.forEach(p => {
+          if (!history[p]) history[p] = [];
+          history[p].push(match.teamBKills);
         });
       });
 
-      names.forEach(name => {
-        if (!currentCards[name]) {
-          const card = document.createElement("div");
-          card.className = "player-card";
-          card.draggable = true;
-          card.textContent = name;
-
-          card.ondragstart = e => e.dataTransfer.setData("text", name);
-
-          if (isTouchDevice) {
-            card.addEventListener("touchstart", e => {
-              e.preventDefault();
-              preview = card.cloneNode(true);
-              preview.classList.add("drag-preview");
-              document.body.appendChild(preview);
-            });
-
-            card.addEventListener("touchmove", e => {
-              if (!preview) return;
-              e.preventDefault();
-              const touch = e.touches[0];
-              preview.style.left = touch.clientX - 40 + "px";
-              preview.style.top = touch.clientY - 20 + "px";
-            });
-
-            card.addEventListener("touchend", e => {
-              if (!preview) return;
-              const touch = e.changedTouches[0];
-              const dropTargetBox = document.elementFromPoint(touch.clientX, touch.clientY)?.closest(".team-box");
-              if (dropTargetBox) {
-                const containerDiv = dropTargetBox.querySelector("div");
-                if (containerDiv) containerDiv.appendChild(card);
-              }
-              preview.remove();
-              preview = null;
-            });
-          }
-
-          document.getElementById("unassigned").appendChild(card);
+      const recentBias = document.getElementById("recentBiasToggle").checked;
+      const scores = {};
+      Object.keys(history).forEach(name => {
+        const arr = history[name];
+        if (arr.length === 0) { scores[name] = 0; return; }
+        if (recentBias) {
+          const last = arr[arr.length - 1];
+          const prev = arr.slice(0, -1);
+          const prevAvg = prev.length ? prev.reduce((a, b) => a + b, 0) / prev.length : 0;
+          scores[name] = +(prevAvg + last).toFixed(2);
+        } else {
+          scores[name] = +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
         }
       });
+      return scores;
+    }
 
-      Object.keys(currentCards).forEach(name => {
-        if (!names.includes(name)) currentCards[name].remove();
+    function calculateWinRate(matches) {
+      const stats = {};
+      matches.forEach(match => {
+        const teamAWins = match.teamAKills > match.teamBKills;
+        match.teamA.forEach(p => {
+          if (!stats[p]) stats[p] = { win: 0, total: 0 };
+          stats[p].total++;
+          if (teamAWins) stats[p].win++;
+        });
+        match.teamB.forEach(p => {
+          if (!stats[p]) stats[p] = { win: 0, total: 0 };
+          stats[p].total++;
+          if (!teamAWins) stats[p].win++;
+        });
       });
-    }
-
-    function allowDrop(ev) {
-      ev.preventDefault();
-    }
-
-    function drop(ev, teamId) {
-      ev.preventDefault();
-      const name = ev.dataTransfer.getData("text");
-      const card = [...document.querySelectorAll(".player-card")].find(c => c.textContent === name);
-      if (card) document.getElementById(teamId).appendChild(card);
-    }
-
-    async function saveResult() {
-      const teamA = [...document.getElementById("teamA").children].map(c => c.textContent);
-      const teamB = [...document.getElementById("teamB").children].map(c => c.textContent);
-      const teamAKills = Number(document.getElementById("teamAKills").value);
-      const teamBKills = Number(document.getElementById("teamBKills").value);
-
-      if (teamA.length === 0 || teamB.length === 0) {
-        document.getElementById("status").innerText = "⚠️ チームにメンバーを入れてください";
-        return;
-      }
-
-      const snapshot = await db.ref("apex_results").once("value");
-      let nextMatchNumber = 1;
-      if (snapshot.exists()) {
-        const matches = Object.values(snapshot.val());
-        const maxMatch = Math.max(...matches.map(m => m.matchNumber || 0));
-        nextMatchNumber = maxMatch + 1;
-      }
-
-      db.ref("apex_results").push({
-        matchNumber: nextMatchNumber,
-        teamA,
-        teamAKills,
-        teamB,
-        teamBKills
-      })
-      .then(() => {
-        document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
-      })
-      .catch((err) => {
-        console.error(err);
-        document.getElementById("status").innerText = "❌ エラーが発生しました";
+      const scores = {};
+      Object.keys(stats).forEach(name => {
+        scores[name] = +(stats[name].win / stats[name].total).toFixed(2);
       });
+      return scores;
     }
+
+    function calculateKillDiff(matches) {
+      const history = {};
+      matches.forEach(match => {
+        if (!match.teamA || !match.teamB) return;
+        const teamASize = match.teamA.length;
+        const teamBSize = match.teamB.length;
+        const diffA = (match.teamAKills - match.teamBKills) * (teamBSize / teamASize);
+        const diffB = (match.teamBKills - match.teamAKills) * (teamASize / teamBSize);
+        match.teamA.forEach(p => { if (!history[p]) history[p] = []; history[p].push(diffA); });
+        match.teamB.forEach(p => { if (!history[p]) history[p] = []; history[p].push(diffB); });
+      });
+
+      const recentBias = document.getElementById("recentBiasToggle").checked;
+      const scores = {};
+      Object.keys(history).forEach(name => {
+        const arr = history[name];
+        if (arr.length === 0) { scores[name] = 0; return; }
+        if (recentBias) {
+          const last = arr[arr.length - 1];
+          const prev = arr.slice(0, -1);
+          const prevAvg = prev.length ? prev.reduce((a, b) => a + b, 0) / prev.length : 0;
+          scores[name] = +(prevAvg + last).toFixed(2);
+        } else {
+          scores[name] = +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+        }
+      });
+      return scores;
+    }
+
+    function togglePin(name) {
+      if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
+      else pinned.push(name);
+      localStorage.setItem("pinnedPlayers", JSON.stringify(pinned));
+      renderPlayers();
+      makeTeams();
+    }
+
+function renderPlayers() {
+  const container = document.getElementById("playerList");
+  const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
+  const method = document.querySelector('input[name="method"]:checked').value;
+  let scores = method === "average" ? playerScoresAverage :
+               method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
+
+  container.innerHTML = "";
+  let names = Object.keys(scores);
+
+  // 選択状態・ピン状態で分類
+  const selectedPlayers = names.filter(name => selected.includes(name)).sort((a,b)=>a.localeCompare(b,"ja"));
+  const pinnedPlayers = names.filter(name => !selected.includes(name) && pinned.includes(name)).sort((a,b)=>a.localeCompare(b,"ja"));
+  const otherPlayers = names.filter(name => !selected.includes(name) && !pinned.includes(name)).sort((a,b)=>a.localeCompare(b,"ja"));
+
+  // 選択済み → ピン留め → それ以外 の順で並べる
+  selectedPlayers.concat(pinnedPlayers, otherPlayers).forEach(name => {
+    const div = document.createElement("div");
+    div.className = "player" + (selected.includes(name) ? " selected" : "");
+    div.dataset.name = name;
+    div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}"></button>`;
+    div.querySelector(".pin-btn").onclick = e => { e.stopPropagation(); togglePin(name); };
+    div.onclick = () => { div.classList.toggle("selected"); makeTeams(); renderPlayers(); };
+    container.appendChild(div);
+  });
+}
+
+    function makeTeams() {
+      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
+      const method = document.querySelector('input[name="method"]:checked').value;
+      let scores = method === "average" ? playerScoresAverage :
+                   method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
+
+      const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
+      players.sort((a, b) => b.score - a.score);
+
+      const teamA = [], teamB = [];
+      let sumA = 0, sumB = 0;
+      players.forEach(p => {
+        if (sumA <= sumB) { teamA.push(p); sumA += p.score; }
+        else { teamB.push(p); sumB += p.score; }
+      });
+
+      document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
+      document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
+    }
+
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) return;
+      matches = Object.values(snapshot.val());
+      playerScoresAverage = calculateScoresAverage(matches);
+      playerScoresWinRate = calculateWinRate(matches);
+      playerScoresKillDiff = calculateKillDiff(matches);
+      renderPlayers();
+      makeTeams();
+      document.getElementById("matchCount").textContent = `過去${matches.length}試合のデータをもとに生成。`;
+    });
+
+    document.querySelectorAll('input[name="method"]').forEach(radio => {
+      radio.addEventListener("change", () => { renderPlayers(); makeTeams(); });
+    });
+
+    document.getElementById("recentBiasToggle").addEventListener("change", () => {
+      playerScoresAverage = calculateScoresAverage(matches);
+      playerScoresKillDiff = calculateKillDiff(matches);
+      makeTeams();
+    });
   </script>
 </body>
 </html>
