@@ -26,6 +26,7 @@
       border-radius: 6px;
       border: 1px solid #97eadb;
       margin-top: 4px;
+      resize: vertical;
     }
     .teams {
       display: flex;
@@ -40,6 +41,7 @@
       border-radius: 8px;
       border: 2px solid #97eadb;
       min-height: 150px;
+      user-select: none;
     }
     .team-box.team2 {
       background: #fff1f5;
@@ -54,6 +56,7 @@
       font-size: 16px;
       margin: 0 0 8px 0;
       color: #47b6a2;
+      user-select: none;
     }
     .player-card {
       background: #fff;
@@ -64,6 +67,7 @@
       text-align: center;
       cursor: grab;
       transition: background 0.2s;
+      user-select: none;
     }
     .player-card.selected {
       background: #97eadb;
@@ -73,9 +77,10 @@
       margin-top: 20px; width: 100%; padding: 10px;
       background-color: #97eadb; border: none; border-radius: 6px;
       color: white; font-size: 16px; cursor: pointer;
+      user-select: none;
     }
     button:hover { background-color: #7dd2c3; }
-    #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
+    #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; user-select: none;}
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -148,10 +153,10 @@
         card.draggable = !isTouchDevice;
         card.textContent = name;
 
-        // PC用ドラッグ
+        // PCドラッグ用
         card.ondragstart = e => e.dataTransfer.setData("text", name);
 
-        // スマホ用タップ
+        // スマホタップ選択用
         if (isTouchDevice) {
           card.addEventListener("touchend", (e) => {
             e.preventDefault();
@@ -170,6 +175,7 @@
       }
     });
 
+    // 入力にないカードは削除
     Object.keys(currentCards).forEach(name => {
       if (!names.includes(name)) {
         currentCards[name].remove();
@@ -187,12 +193,13 @@
     if (card) document.getElementById(teamId).appendChild(card);
   }
 
-  // スマホ用タップ移動
+  // スマホ用カード移動処理
   document.querySelectorAll(".team-box").forEach(box => {
     if (isTouchDevice) {
       box.addEventListener("touchend", (e) => {
         if (selectedCard) {
-          const targetDiv = box.querySelector("div");
+          const teamId = box.getAttribute("data-team");
+          const targetDiv = document.getElementById(teamId);
           if (targetDiv) {
             targetDiv.appendChild(selectedCard);
             selectedCard.classList.remove("selected");
@@ -202,6 +209,41 @@
       });
     }
   });
+
+  async function saveResult() {
+    const teamA = [...document.getElementById("teamA").children].map(c => c.textContent);
+    const teamB = [...document.getElementById("teamB").children].map(c => c.textContent);
+    const teamAKills = Number(document.getElementById("teamAKills").value);
+    const teamBKills = Number(document.getElementById("teamBKills").value);
+
+    if (teamA.length === 0 || teamB.length === 0) {
+      document.getElementById("status").innerText = "⚠️ チームにメンバーを入れてください";
+      return;
+    }
+
+    const snapshot = await db.ref("apex_results").once("value");
+    let nextMatchNumber = 1;
+    if (snapshot.exists()) {
+      const matches = Object.values(snapshot.val());
+      const maxMatch = Math.max(...matches.map(m => m.matchNumber || 0));
+      nextMatchNumber = maxMatch + 1;
+    }
+
+    db.ref("apex_results").push({
+      matchNumber: nextMatchNumber,
+      teamA,
+      teamAKills,
+      teamB,
+      teamBKills
+    })
+    .then(() => {
+      document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
+    })
+    .catch((err) => {
+      console.error(err);
+      document.getElementById("status").innerText = "❌ エラーが発生しました";
+    });
+  }
 </script>
 </body>
 </html>
