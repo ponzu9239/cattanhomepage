@@ -29,7 +29,7 @@
     }
     .teams {
       display: flex;
-      flex-direction: column; /* 縦並び */
+      flex-direction: column;
       gap: 16px;
       margin-top: 20px;
     }
@@ -53,11 +53,19 @@
       margin: 0 0 8px 0;
       color: #47b6a2;
     }
-    #teamA, #teamB, #unassigned {
+
+    /* 名前のレイアウト */
+    #teamA, #teamB {
       display: grid;
-      grid-template-columns: 1fr 1fr; /* 2列に */
+      grid-template-columns: 1fr 1fr; /* チームは2列 */
       gap: 6px;
     }
+    #unassigned {
+      display: grid;
+      grid-template-columns: 1fr; /* 未割り当てだけ1列 */
+      gap: 6px;
+    }
+
     .player-card {
       background: #fff;
       border: 1.5px solid #ddd;
@@ -107,8 +115,8 @@
     <label>メンバー名を1行ごとに入力：</label>
     <textarea id="nameInput" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
 
-    <!-- チーム未割り当て -->
     <div class="teams">
+      <!-- チーム未割り当て -->
       <div class="team-box unassigned" ondragover="allowDrop(event)" ondrop="drop(event, 'unassigned')">
         <h2>チーム未割り当て</h2>
         <div id="unassigned"></div>
