@@ -20,6 +20,14 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     h1 { text-align: center; color: #47b6a2; }
+    label { display: block; margin-top: 12px; font-weight: bold; color: #444; }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #97eadb;
+      margin-top: 4px;
+    }
     textarea {
       width: 100%;
       padding: 8px;
@@ -27,47 +35,38 @@
       border: 1px solid #97eadb;
       margin-top: 4px;
     }
-    .teams {
+    .team-area {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
-      margin-top: 20px;
+      margin-top: 16px;
+      gap: 10px;
     }
     .team-box {
       flex: 1;
       background: #eefaff;
       padding: 10px;
-      border-radius: 8px;
-      border: 2px solid #97eadb;
+      border-radius: 10px;
       min-height: 150px;
+      border: 2px dashed #97eadb;
     }
-    .team-box.team2 {
-      background: #fff1f5;
-      border-color: #ffb6c1;
-    }
-    .team-box.unassigned {
-      background: #fefae0;
-      border-color: #f1c40f;
-    }
-    .team-box h2 {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 0 8px 0;
-      color: #47b6a2;
-    }
+    .team-box.team2 { background: #fff1f5; border-color: #ffb6c1; }
+    .team-box.unassigned { background: #f9f9f9; border-color: #bbb; }
+    .team-box h3 { margin: 0 0 8px; text-align: center; color: #47b6a2; }
     .player-card {
-      background: #fff;
-      border: 1.5px solid #ddd;
+      background: white;
+      border: 1px solid #ccc;
       border-radius: 8px;
       padding: 6px;
       margin: 4px 0;
       text-align: center;
       cursor: grab;
+      user-select: none;
     }
+    .player-card.selected { border: 2px solid #47b6a2; background: #e0faf6; }
     button {
       margin-top: 20px; width: 100%; padding: 10px;
       background-color: #97eadb; border: none; border-radius: 6px;
-      color: white; font-size: 16px; cursor: pointer;
+      color: white; font-size: 16px; cursor: pointer; transition: 0.2s;
     }
     button:hover { background-color: #7dd2c3; }
     #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
@@ -80,28 +79,20 @@
   <div class="container">
     <h1>試合結果入力</h1>
 
-    <label>メンバー名を1行ごとに入力：</label>
-    <textarea id="nameInput" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
+    <label>メンバー名（1行ごとに入力）：</label>
+    <textarea id="allPlayers" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
 
-    <div class="teams">
-      <div class="team-box unassigned" ondrop="drop(event, 'unassigned')" ondragover="allowDrop(event)">
-        <h2>チーム未割り当て</h2>
-        <div id="unassigned"></div>
-      </div>
+    <div class="team-area">
+      <div class="team-box unassigned" id="unassigned"><h3>未割り当て</h3></div>
+      <div class="team-box" id="teamA"><h3>チーム1</h3></div>
+      <div class="team-box team2" id="teamB"><h3>チーム2</h3></div>
     </div>
 
-    <div class="teams">
-      <div class="team-box team1" ondrop="drop(event, 'teamA')" ondragover="allowDrop(event)">
-        <h2>チーム1</h2>
-        <input type="number" id="teamAKills" placeholder="キル数" style="width:90%;margin-bottom:6px;" />
-        <div id="teamA"></div>
-      </div>
-      <div class="team-box team2" ondrop="drop(event, 'teamB')" ondragover="allowDrop(event)">
-        <h2>チーム2</h2>
-        <input type="number" id="teamBKills" placeholder="キル数" style="width:90%;margin-bottom:6px;" />
-        <div id="teamB"></div>
-      </div>
-    </div>
+    <label>チーム1のキル数：</label>
+    <input type="number" id="teamAKills" />
+
+    <label>チーム2のキル数：</label>
+    <input type="number" id="teamBKills" />
 
     <button onclick="saveResult()">保存する</button>
     <p id="status"></p>
@@ -120,65 +111,73 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 入力されたらリアルタイムでカード生成
-    document.getElementById("nameInput").addEventListener("input", () => {
-      const names = document.getElementById("nameInput").value.split("\n").map(n => n.trim()).filter(n => n);
-      renderCards(names);
+    const allPlayersInput = document.getElementById("allPlayers");
+    const unassignedBox = document.getElementById("unassigned");
+    const teamABox = document.getElementById("teamA");
+    const teamBBox = document.getElementById("teamB");
+    let selectedCard = null;
+
+    allPlayersInput.addEventListener("input", () => {
+      updateCards();
     });
 
-    function renderCards(names) {
-      const usedNames = new Set();
-      ["unassigned", "teamA", "teamB"].forEach(id => {
-        [...document.getElementById(id).children].forEach(card => usedNames.add(card.textContent));
-      });
+    function updateCards() {
+      const names = allPlayersInput.value.split("\n").map(s => s.trim()).filter(s => s !== "");
+      const existing = Array.from(document.querySelectorAll(".player-card")).map(c => c.textContent);
+      document.querySelectorAll(".player-card").forEach(c => c.remove());
 
-      // 入力欄にある名前のカードを更新
-      const currentCards = {};
-      ["unassigned", "teamA", "teamB"].forEach(id => {
-        [...document.getElementById(id).children].forEach(card => {
-          currentCards[card.textContent] = card;
-        });
-      });
+      names.forEach(name => createCard(name, unassignedBox));
+    }
 
-      // すでにあるカードは残す、新しい名前は未割り当てに追加
-      names.forEach(name => {
-        if (!currentCards[name]) {
-          const card = document.createElement("div");
-          card.className = "player-card";
-          card.draggable = true;
-          card.textContent = name;
-          card.ondragstart = e => e.dataTransfer.setData("text", name);
-          document.getElementById("unassigned").appendChild(card);
+    function createCard(name, container) {
+      const card = document.createElement("div");
+      card.className = "player-card";
+      card.textContent = name;
+
+      card.draggable = true;
+      card.addEventListener("dragstart", e => { e.dataTransfer.setData("text/plain", name); });
+
+      card.addEventListener("click", () => {
+        if (isMobile()) {
+          document.querySelectorAll(".player-card").forEach(c => c.classList.remove("selected"));
+          card.classList.add("selected");
+          selectedCard = card;
         }
       });
 
-      // 入力から消された名前のカードは削除
-      Object.keys(currentCards).forEach(name => {
-        if (!names.includes(name)) {
-          currentCards[name].remove();
+      container.appendChild(card);
+    }
+
+    [unassignedBox, teamABox, teamBBox].forEach(box => {
+      box.addEventListener("dragover", e => e.preventDefault());
+      box.addEventListener("drop", e => {
+        e.preventDefault();
+        const name = e.dataTransfer.getData("text/plain");
+        const card = [...document.querySelectorAll(".player-card")].find(c => c.textContent === name);
+        if (card) box.appendChild(card);
+      });
+
+      box.addEventListener("click", () => {
+        if (isMobile() && selectedCard) {
+          box.appendChild(selectedCard);
+          selectedCard.classList.remove("selected");
+          selectedCard = null;
         }
       });
-    }
+    });
 
-    function allowDrop(ev) {
-      ev.preventDefault();
-    }
-
-    function drop(ev, teamId) {
-      ev.preventDefault();
-      const name = ev.dataTransfer.getData("text");
-      const card = [...document.querySelectorAll(".player-card")].find(c => c.textContent === name);
-      if (card) document.getElementById(teamId).appendChild(card);
+    function isMobile() {
+      return window.matchMedia("(pointer: coarse)").matches;
     }
 
     async function saveResult() {
-      const teamA = [...document.getElementById("teamA").children].map(c => c.textContent);
-      const teamB = [...document.getElementById("teamB").children].map(c => c.textContent);
+      const teamA = Array.from(teamABox.querySelectorAll(".player-card")).map(c => c.textContent);
+      const teamB = Array.from(teamBBox.querySelectorAll(".player-card")).map(c => c.textContent);
       const teamAKills = Number(document.getElementById("teamAKills").value);
       const teamBKills = Number(document.getElementById("teamBKills").value);
 
       if (teamA.length === 0 || teamB.length === 0) {
-        document.getElementById("status").innerText = "⚠️ チームにメンバーを入れてください";
+        document.getElementById("status").innerText = "⚠️ 必要な情報を入力してください";
         return;
       }
 
@@ -200,8 +199,7 @@
       .then(() => {
         document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
         document.getElementById("status").innerText = "❌ エラーが発生しました";
       });
     }
