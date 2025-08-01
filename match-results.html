@@ -12,7 +12,7 @@
       padding: 0;
     }
     .container {
-      max-width: 400px;
+      max-width: 500px;
       margin: 30px auto;
       background: #ffffff;
       border-radius: 12px;
@@ -20,21 +20,55 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     h1 { text-align: center; color: #47b6a2; }
-    label { display: block; margin-top: 12px; font-weight: bold; color: #444; }
-    textarea, input {
-      width: 100%; padding: 8px; border-radius: 6px;
-      border: 1px solid #97eadb; margin-top: 4px; resize: vertical;
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #97eadb;
+      margin-top: 4px;
+    }
+    .teams {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .team-box {
+      flex: 1;
+      background: #eefaff;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #97eadb;
+      min-height: 150px;
+    }
+    .team-box.team2 {
+      background: #fff1f5;
+      border-color: #ffb6c1;
+    }
+    .team-box h2 {
+      text-align: center;
+      font-size: 16px;
+      margin: 0 0 8px 0;
+      color: #47b6a2;
+    }
+    .player-card {
+      background: #fff;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      margin: 4px 0;
+      text-align: center;
+      cursor: grab;
     }
     button {
       margin-top: 20px; width: 100%; padding: 10px;
       background-color: #97eadb; border: none; border-radius: 6px;
-      color: white; font-size: 16px; cursor: pointer; transition: 0.2s;
+      color: white; font-size: 16px; cursor: pointer;
     }
     button:hover { background-color: #7dd2c3; }
     #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
   </style>
 
-  <!-- ✅ Firebase Realtime Database SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -42,24 +76,28 @@
   <div class="container">
     <h1>試合結果入力</h1>
 
-    <label>チーム1のメンバー（1行ごとに入力）：</label>
-    <textarea id="teamA" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
+    <label>メンバー名を1行ごとに入力：</label>
+    <textarea id="nameInput" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
+    <button onclick="generateCards()">カードを作成</button>
 
-    <label>チーム1のキル数：</label>
-    <input type="number" id="teamAKills" />
-
-    <label>チーム2のメンバー（1行ごとに入力）：</label>
-    <textarea id="teamB" rows="4" placeholder="りょうが&#10;ゆめち&#10;あおい"></textarea>
-
-    <label>チーム2のキル数：</label>
-    <input type="number" id="teamBKills" />
+    <div class="teams">
+      <div class="team-box team1" ondrop="drop(event, 'teamA')" ondragover="allowDrop(event)">
+        <h2>チーム1</h2>
+        <input type="number" id="teamAKills" placeholder="キル数" style="width:90%;margin-bottom:6px;" />
+        <div id="teamA"></div>
+      </div>
+      <div class="team-box team2" ondrop="drop(event, 'teamB')" ondragover="allowDrop(event)">
+        <h2>チーム2</h2>
+        <input type="number" id="teamBKills" placeholder="キル数" style="width:90%;margin-bottom:6px;" />
+        <div id="teamB"></div>
+      </div>
+    </div>
 
     <button onclick="saveResult()">保存する</button>
     <p id="status"></p>
   </div>
 
   <script>
-    // ✅ Firebase設定
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -69,22 +107,45 @@
       messagingSenderId: "759877853492",
       appId: "1:759877853492:web:a10935960bf8230af90561"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    function generateCards() {
+      const names = document.getElementById("nameInput").value.split("\n").map(n => n.trim()).filter(n => n);
+      document.getElementById("teamA").innerHTML = "";
+      document.getElementById("teamB").innerHTML = "";
+      names.forEach(name => {
+        const card = document.createElement("div");
+        card.className = "player-card";
+        card.draggable = true;
+        card.textContent = name;
+        card.ondragstart = e => e.dataTransfer.setData("text", name);
+        document.getElementById("teamA").appendChild(card); // 初期はチーム1に入れる
+      });
+    }
+
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drop(ev, teamId) {
+      ev.preventDefault();
+      const name = ev.dataTransfer.getData("text");
+      const card = [...document.querySelectorAll(".player-card")].find(c => c.textContent === name);
+      if (card) document.getElementById(teamId).appendChild(card);
+    }
+
     async function saveResult() {
-      const teamA = document.getElementById("teamA").value.split("\n").map(s => s.trim()).filter(s => s !== "");
+      const teamA = [...document.getElementById("teamA").children].map(c => c.textContent);
+      const teamB = [...document.getElementById("teamB").children].map(c => c.textContent);
       const teamAKills = Number(document.getElementById("teamAKills").value);
-      const teamB = document.getElementById("teamB").value.split("\n").map(s => s.trim()).filter(s => s !== "");
       const teamBKills = Number(document.getElementById("teamBKills").value);
 
       if (teamA.length === 0 || teamB.length === 0) {
-        document.getElementById("status").innerText = "⚠️ 必要な情報を入力してください";
+        document.getElementById("status").innerText = "⚠️ チームにメンバーを入れてください";
         return;
       }
 
-      // 🔹 既存データから試合番号を決定
       const snapshot = await db.ref("apex_results").once("value");
       let nextMatchNumber = 1;
       if (snapshot.exists()) {
@@ -93,7 +154,6 @@
         nextMatchNumber = maxMatch + 1;
       }
 
-      // 🔹 データ保存
       db.ref("apex_results").push({
         matchNumber: nextMatchNumber,
         teamA,
@@ -104,8 +164,8 @@
       .then(() => {
         document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
       })
-      .catch((error) => {
-        console.error(error);
+      .catch((err) => {
+        console.error(err);
         document.getElementById("status").innerText = "❌ エラーが発生しました";
       });
     }
