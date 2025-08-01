@@ -4,78 +4,98 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>APEX 試合結果入力</title>
-<style>
-  body {
-    font-family: "Hiragino Maru Gothic ProN", sans-serif;
-    background-color: #f7fcfc;
-    margin: 0;
-    padding: 0;
-  }
-  .container {
-    max-width: 500px;
-    margin: 30px auto;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  h1 { text-align: center; color: #47b6a2; }
-  textarea {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #97eadb;
-    margin-top: 4px;
-  }
-  .teams {
-    display: flex;
-    flex-direction: column; /* ← 縦並びに変更 */
-    gap: 16px;
-    margin-top: 20px;
-  }
-  .team-box {
-    background: #eefaff;
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid #97eadb;
-  }
-  .team-box.team2 {
-    background: #fff1f5;
-    border-color: #ffb6c1;
-  }
-  .team-box h2 {
-    text-align: center;
-    font-size: 16px;
-    margin: 0 0 8px 0;
-    color: #47b6a2;
-  }
-  #teamA, #teamB {
-    display: grid; /* 2列のグリッドに */
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-  .player-card {
-    background: #fff;
-    border: 1.5px solid #ddd;
-    border-radius: 8px;
-    padding: 6px;
-    text-align: center;
-    cursor: grab;
-  }
-  button {
-    margin-top: 20px;
-    width: 100%;
-    padding: 10px;
-    background-color: #97eadb;
-    border: none;
-    border-radius: 6px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  button:hover { background-color: #7dd2c3; }
-  #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
-</style>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background-color: #f7fcfc;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 { text-align: center; color: #47b6a2; }
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #97eadb;
+      margin-top: 4px;
+    }
+    .teams {
+      display: flex;
+      flex-direction: column; /* 縦並び */
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .team-box {
+      background: #eefaff;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #97eadb;
+    }
+    .team-box.team2 {
+      background: #fff1f5;
+      border-color: #ffb6c1;
+    }
+    .team-box.unassigned {
+      background: #fefae0;
+      border-color: #f1c40f;
+    }
+    .team-box h2 {
+      text-align: center;
+      font-size: 16px;
+      margin: 0 0 8px 0;
+      color: #47b6a2;
+    }
+    #teamA, #teamB, #unassigned {
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* 2列に */
+      gap: 6px;
+    }
+    .player-card {
+      background: #fff;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      text-align: center;
+      cursor: grab;
+    }
+    input[type=number] {
+      width: 90%;
+      margin-bottom: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      padding: 4px 8px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #97eadb;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #7dd2c3; }
+    #status { margin-top: 12px; text-align: center; font-weight: bold; color: #47b6a2; }
+    .drag-preview {
+      position: fixed;
+      pointer-events: none;
+      opacity: 0.8;
+      z-index: 9999;
+    }
+  </style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -87,22 +107,24 @@
     <label>メンバー名を1行ごとに入力：</label>
     <textarea id="nameInput" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
 
+    <!-- チーム未割り当て -->
     <div class="teams">
       <div class="team-box unassigned" ondragover="allowDrop(event)" ondrop="drop(event, 'unassigned')">
         <h2>チーム未割り当て</h2>
         <div id="unassigned"></div>
       </div>
-    </div>
 
-    <div class="teams">
+      <!-- チーム1 -->
       <div class="team-box team1" ondragover="allowDrop(event)" ondrop="drop(event, 'teamA')">
         <h2>チーム1</h2>
-        <input type="number" id="teamAKills" placeholder="キル数" style="width:90%;margin-bottom:6px;" />
+        <input type="number" id="teamAKills" placeholder="キル数" />
         <div id="teamA"></div>
       </div>
+
+      <!-- チーム2 -->
       <div class="team-box team2" ondragover="allowDrop(event)" ondrop="drop(event, 'teamB')">
         <h2>チーム2</h2>
-        <input type="number" id="teamBKills" placeholder="キル数" style="width:90%;margin-bottom:6px;" />
+        <input type="number" id="teamBKills" placeholder="キル数" />
         <div id="teamB"></div>
       </div>
     </div>
