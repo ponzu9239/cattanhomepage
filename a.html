@@ -1,197 +1,147 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ルーレット抽選</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>きゃたん ルーレット</title>
   <style>
     body {
-      margin: 0;
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background: #e6f9fd;
-      color: #333;
+      background-color: #fff9f9;
       text-align: center;
+      padding: 2rem;
     }
-    header {
-      background-color: #97EADB;
-      padding: 1rem;
+    h1 {
+      color: #97EADB;
     }
-    header h1 { color: white; margin: 0; }
-    .hero { margin: 20px 0; }
-    #rouletteCanvas {
-      margin: 20px auto;
-      display: block;
-      border: 8px solid #fff;
-      border-radius: 50%;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    canvas {
+      margin-top: 20px;
     }
-    #spinBtn {
-      background: linear-gradient(135deg, #ffb6c1, #ffd1dc);
-      border: none;
-      padding: 12px 30px;
-      border-radius: 999px;
-      font-size: 1.3em;
+    #winnerDisplay {
+      font-size: 2rem;
       font-weight: bold;
-      color: #fff;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 10px rgba(255,182,193,0.5);
+      margin-top: 20px;
+      color: #FFD700;
+      text-shadow: 2px 2px 4px #000;
     }
-    #spinBtn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 15px rgba(255,182,193,0.7);
+    @keyframes winnerPop {
+      0% { transform: scale(1); opacity: 0.2; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); }
     }
-    #winner {
-      margin: 30px auto;
-      background: #ffeef5;
-      border: 2px solid #ffb3c1;
-      padding: 20px;
-      border-radius: 12px;
-      width: fit-content;
-      max-width: 90%;
-    }
-    #winner h2 { margin: 0 0 10px; color: #e91e63; }
-    #winnerName {
-      font-size: 1.5em;
-      font-weight: bold;
-      color: #333;
+    .winner-animated {
+      animation: winnerPop 0.6s ease;
+      display: inline-block;
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
+  <h1>🎰 きゃたん ルーレット</h1>
+  <canvas id="rouletteCanvas" width="400" height="400"></canvas>
+  <div id="winnerDisplay"></div>
 
-<header>
-  <h1>🎡 ルーレット抽選 🎡</h1>
-</header>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.appspot.com",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-<div class="hero">
-  <canvas id="rouletteCanvas" width="400" height="400"></canvas><br>
-  <button id="spinBtn">回す！</button>
-</div>
+    const canvas = document.getElementById("rouletteCanvas");
+    const ctx = canvas.getContext("2d");
+    let participants = [];
+    let colors = [];
+    let angle = 0;
+    let velocity = 0;
+    let spinning = false;
 
-<div id="winner">
-  <h2>🎉 当選者 🎉</h2>
-  <div id="winnerName">まだ抽選していません</div>
-</div>
-
-<script>
-  // ✅ Firebase 初期化
-  const firebaseConfig = {
-    apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-    authDomain: "catiffanygame.firebaseapp.com",
-    databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-    projectId: "catiffanygame",
-    storageBucket: "catiffanygame.appspot.com",
-    messagingSenderId: "166871605809",
-    appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-    measurementId: "G-ZNGEZZWMTP"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  const canvas = document.getElementById("rouletteCanvas");
-  const ctx = canvas.getContext("2d");
-  const spinBtn = document.getElementById("spinBtn");
-  const winnerNameEl = document.getElementById("winnerName");
-
-  let participants = [];
-  let currentAngle = 0;
-
-  // 🎯 参加者取得
-  firebase.database().ref("/roulette/participants").on("value", (snapshot) => {
-    participants = Object.values(snapshot.val() || {});
-    drawRoulette();
-  });
-
-  // 🎨 パステルカラー配列
-  function getPastelColors(count) {
-    const colors = [];
-    for (let i = 0; i < count; i++) {
-      const hue = (i * 360 / count) + Math.random() * 30;
-      colors.push(`hsl(${hue}, 80%, 80%)`);
+    function randomPastelColor() {
+      const r = Math.floor(Math.random() * 127 + 127);
+      const g = Math.floor(Math.random() * 127 + 127);
+      const b = Math.floor(Math.random() * 127 + 127);
+      return `rgb(${r},${g},${b})`;
     }
-    return colors;
-  }
 
-  function drawRoulette(angle = 0) {
-    if (participants.length === 0) return;
+    function drawRoulette() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = 150;
 
-    const totalWeight = participants.reduce((sum, p) => sum + (p.multiplier || 1), 0);
-    const colors = getPastelColors(participants.length);
-    let startAngle = angle;
+      if (participants.length === 0) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    participants.forEach((p, i) => {
-      const sliceAngle = 2 * Math.PI * (p.multiplier || 1) / totalWeight;
+      const arc = (2 * Math.PI) / participants.length;
+
+      for (let i = 0; i < participants.length; i++) {
+        const start = angle + i * arc;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, start, start + arc);
+        ctx.closePath();
+        ctx.fillStyle = colors[i];
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(start + arc / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#333";
+        ctx.font = "16px Hiragino Maru Gothic ProN";
+        ctx.fillText(participants[i].name, radius - 10, 5);
+        ctx.restore();
+      }
+
+      // 中央のポインタ
       ctx.beginPath();
-      ctx.moveTo(200, 200);
-      ctx.arc(200, 200, 200, startAngle, startAngle + sliceAngle);
+      ctx.moveTo(centerX, centerY - radius - 10);
+      ctx.lineTo(centerX - 10, centerY - radius - 25);
+      ctx.lineTo(centerX + 10, centerY - radius - 25);
       ctx.closePath();
-      ctx.fillStyle = colors[i];
+      ctx.fillStyle = "#FF69B4";
       ctx.fill();
+    }
 
-      // 名前表示
-      ctx.save();
-      ctx.translate(200, 200);
-      ctx.rotate(startAngle + sliceAngle / 2);
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#333";
-      ctx.font = "16px sans-serif";
-      ctx.fillText(p.name, 170, 5);
-      ctx.restore();
+    function animate() {
+      if (spinning) {
+        angle += velocity;
+        angle %= 2 * Math.PI;
+      }
+      drawRoulette();
+      requestAnimationFrame(animate);
+    }
 
-      startAngle += sliceAngle;
+    // 🎯 ルーレット状態の同期
+    db.ref("/roulette/participants").on("value", (snapshot) => {
+      const data = snapshot.val() || [];
+      participants = data;
+      colors = participants.map(() => randomPastelColor());
+      drawRoulette();
     });
 
-    // 矢印
-    ctx.beginPath();
-    ctx.moveTo(190, 10);
-    ctx.lineTo(210, 10);
-    ctx.lineTo(200, 40);
-    ctx.closePath();
-    ctx.fillStyle = "#e91e63";
-    ctx.fill();
-  }
+    db.ref("/roulette/state").on("value", (snapshot) => {
+      const state = snapshot.val();
+      if (!state) return;
 
-  // 🎡 回転処理
-  spinBtn.addEventListener("click", () => {
-    if (participants.length === 0) return alert("参加者がいません！");
-    spinBtn.disabled = true;
-
-    let velocity = Math.random() * 0.3 + 0.3; // 初速
-    const friction = 0.995; // 減速率
-
-    const spinInterval = setInterval(() => {
-      velocity *= friction;
-      currentAngle += velocity;
-      drawRoulette(currentAngle);
-
-      if (velocity < 0.002) {
-        clearInterval(spinInterval);
-        decideWinner();
-        spinBtn.disabled = false;
+      spinning = state.status === "spinning";
+      velocity = state.velocity || 0;
+      if (!spinning && state.winner) {
+        const winnerEl = document.getElementById("winnerDisplay");
+        winnerEl.textContent = `🎉 当選者: ${state.winner}`;
+        winnerEl.classList.remove("winner-animated");
+        void winnerEl.offsetWidth; // アニメーションをリセット
+        winnerEl.classList.add("winner-animated");
       }
-    }, 16);
-  });
+    });
 
-  function decideWinner() {
-    const totalWeight = participants.reduce((sum, p) => sum + (p.multiplier || 1), 0);
-    let angle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-    let cumulative = 0;
-
-    for (let p of participants) {
-      const slice = 2 * Math.PI * (p.multiplier || 1) / totalWeight;
-      cumulative += slice;
-      if (angle <= cumulative) {
-        winnerNameEl.textContent = `🎊 ${p.name} 🎊`;
-        firebase.database().ref("/roulette/winner").push(p.name);
-        return;
-      }
-    }
-  }
-</script>
-
+    animate();
+  </script>
 </body>
 </html>
