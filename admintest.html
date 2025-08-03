@@ -147,15 +147,18 @@
 }
 
     /* 現在選ばれている人名表示 */
-    #currentNameDisplay {
-      margin-top: 10px;
-      font-weight: bold;
-      font-size: 1.3rem;
-      color: #97EADB;
-      min-height: 1.5em;
-      user-select: none;
-      text-shadow: 1px 1px 2px #aaa;
-    }
+ #currentNameDisplay {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 1.3rem;
+  color: #97EADB;
+  min-height: 1.5em;
+  user-select: none;
+  text-shadow: 1px 1px 2px #aaa;
+
+  text-align: center;      /* ← 文字を中央寄せ */
+  width: 100%;             /* ← 幅をいっぱいに広げる */
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -196,10 +199,10 @@
     <div id="rouletteContainer">
       <canvas id="rouletteCanvas" width="400" height="400"></canvas>
             <div id="pointer"></div>
-            <div id="currentNameDisplay"></div>
     </div>
-
+            <div id="currentNameDisplay">
     <p id="rouletteStatus"></p>
+    </div>
   </section>
 
   <p id="status"></p>
