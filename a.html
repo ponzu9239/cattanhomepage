@@ -3,139 +3,199 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>きゃたんルーレット</title>
+  <title>ルーレット抽選</title>
   <style>
     body {
+      margin: 0;
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      text-align: center;
       background: #e6f9fd;
+      color: #333;
+      text-align: center;
     }
-    canvas {
-      margin-top: 20px;
+    header {
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
     }
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 18px;
+    header h1 { color: white; margin: 0; }
+    .hero { margin: 20px 0; }
+    #rouletteCanvas {
+      margin: 20px auto;
+      display: block;
+    }
+    #spinBtn {
+      background: #97EADB;
       border: none;
-      border-radius: 8px;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: white;
       cursor: pointer;
-      background: #97eadb;
+      transition: transform 0.2s;
     }
-    button:hover {
-      background: #6dcfd0;
+    #spinBtn:hover { transform: scale(1.1); }
+    #winner {
+      margin: 30px auto;
+      background: #ffeef5;
+      border: 2px solid #ffb3c1;
+      padding: 20px;
+      border-radius: 12px;
+      width: fit-content;
     }
+    #winner h2 { margin: 0 0 10px; color: #e91e63; }
+    #winnerName { font-size: 1.4em; font-weight: bold; }
   </style>
-</head>
-<body>
-  <h1>🎡 きゃたんルーレット 🎡</h1>
-  <canvas id="rouletteCanvas" width="400" height="400"></canvas><br>
-  <button onclick="startRoulette()">▶ 回す</button>
-  <button onclick="stopRoulette()">⏹ 止める</button>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+</head>
+<body>
 
-  <script>
-    // Firebase設定
-    const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-    };
-    firebase.initializeApp(firebaseConfig);
+<header>
+  <h1>🎡 ルーレット抽選 🎡</h1>
+</header>
 
-    const participantsRef = firebase.database().ref("/roulette/participants");
+<div class="hero">
+  <canvas id="rouletteCanvas" width="400" height="400"></canvas><br>
+  <button id="spinBtn">回す！</button>
+</div>
 
-    const canvas = document.getElementById("rouletteCanvas");
-    const ctx = canvas.getContext("2d");
-    let participants = [];
-    let angle = 0;
-    let spinning = false;
-    let speed = 0;
+<div id="winner">
+  <h2>🎉 当選者 🎉</h2>
+  <div id="winnerName">まだ抽選していません</div>
+</div>
 
-    // Firebaseから参加者を取得
-    participantsRef.on("value", (snapshot) => {
-      const data = snapshot.val() || {};
-      participants = Object.values(data);
-      drawRoulette();
-    });
+<canvas id="probabilityPieChart" width="300" height="300"></canvas>
 
-    function drawRoulette() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (participants.length === 0) {
-        ctx.fillText("参加者なし", 150, 200);
-        return;
-      }
+<script>
+  // ✅ Firebase 初期化
+  const firebaseConfig = {
+    apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+    authDomain: "catiffanygame.firebaseapp.com",
+    databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+    projectId: "catiffanygame",
+    storageBucket: "catiffanygame.appspot.com",
+    messagingSenderId: "166871605809",
+    appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+    measurementId: "G-ZNGEZZWMTP"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-      const total = participants.reduce((sum, p) => sum + (p.multiplier || 1), 0);
-      let startAngle = angle;
+  const canvas = document.getElementById("rouletteCanvas");
+  const ctx = canvas.getContext("2d");
+  const spinBtn = document.getElementById("spinBtn");
+  const winnerNameEl = document.getElementById("winnerName");
 
-      participants.forEach((p, i) => {
-        const value = p.multiplier || 1;
-        const slice = (value / total) * 2 * Math.PI;
+  let participants = [];
 
-        // 色を可愛い系で決定
-        const hue = (i * 360 / participants.length) % 360;
-        ctx.fillStyle = `hsl(${hue}, 80%, 70%)`;
+  // 🎯 参加者取得
+  firebase.database().ref("/roulette/participants").on("value", (snapshot) => {
+    participants = Object.values(snapshot.val() || {});
+    drawRoulette();
+    drawProbabilityPieChart(participants);
+  });
 
-        ctx.beginPath();
-        ctx.moveTo(200, 200);
-        ctx.arc(200, 200, 180, startAngle, startAngle + slice);
-        ctx.closePath();
-        ctx.fill();
+  function drawRoulette(angle = 0) {
+    if (participants.length === 0) return;
 
-        // 名前を描画
-        ctx.save();
-        ctx.translate(200, 200);
-        ctx.rotate(startAngle + slice / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#333";
-        ctx.font = "16px sans-serif";
-        ctx.fillText(p.name, 160, 5);
-        ctx.restore();
+    const totalWeight = participants.reduce((sum, p) => sum + (p.multiplier || 1), 0);
+    let startAngle = angle;
 
-        startAngle += slice;
-      });
-
-      // 中央の円
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    participants.forEach((p, i) => {
+      const sliceAngle = 2 * Math.PI * (p.multiplier || 1) / totalWeight;
       ctx.beginPath();
-      ctx.arc(200, 200, 40, 0, 2 * Math.PI);
-      ctx.fillStyle = "#fff";
+      ctx.moveTo(200, 200);
+      ctx.arc(200, 200, 200, startAngle, startAngle + sliceAngle);
+      ctx.closePath();
+      ctx.fillStyle = `hsl(${i * 60}, 80%, 70%)`;
       ctx.fill();
 
+      // 名前表示
+      ctx.save();
+      ctx.translate(200, 200);
+      ctx.rotate(startAngle + sliceAngle / 2);
+      ctx.textAlign = "right";
       ctx.fillStyle = "#333";
-      ctx.textAlign = "center";
-      ctx.font = "20px bold sans-serif";
-      ctx.fillText("STOP", 200, 205);
+      ctx.font = "16px sans-serif";
+      ctx.fillText(p.name, 170, 5);
+      ctx.restore();
+
+      startAngle += sliceAngle;
+    });
+
+    // 矢印
+    ctx.beginPath();
+    ctx.moveTo(190, 10);
+    ctx.lineTo(210, 10);
+    ctx.lineTo(200, 40);
+    ctx.closePath();
+    ctx.fillStyle = "#e91e63";
+    ctx.fill();
+  }
+
+  // 🎡 回転処理
+  let currentAngle = 0;
+  spinBtn.addEventListener("click", () => {
+    if (participants.length === 0) return alert("参加者がいません！");
+    spinBtn.disabled = true;
+
+    let velocity = Math.random() * 0.3 + 0.3; // 初速
+    const friction = 0.995; // 減速率
+
+    const spinInterval = setInterval(() => {
+      velocity *= friction;
+      currentAngle += velocity;
+      drawRoulette(currentAngle);
+
+      if (velocity < 0.002) {
+        clearInterval(spinInterval);
+        decideWinner();
+        spinBtn.disabled = false;
+      }
+    }, 16);
+  });
+
+  function decideWinner() {
+    const totalWeight = participants.reduce((sum, p) => sum + (p.multiplier || 1), 0);
+    let angle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+    let cumulative = 0;
+
+    for (let p of participants) {
+      const slice = 2 * Math.PI * (p.multiplier || 1) / totalWeight;
+      cumulative += slice;
+      if (angle <= cumulative) {
+        winnerNameEl.textContent = `🎊 ${p.name} 🎊`;
+        firebase.database().ref("/roulette/winner").push(p.name);
+        return;
+      }
     }
+  }
 
-    function startRoulette() {
-      if (spinning) return;
-      spinning = true;
-      speed = 0.3;
-      animate();
-    }
+  // 🎨 円グラフ
+  function drawProbabilityPieChart(participants) {
+    const ctxPie = document.getElementById("probabilityPieChart").getContext("2d");
+    if (window.pieChart) window.pieChart.destroy();
 
-    function animate() {
-      if (!spinning && speed <= 0) return;
+    const labels = participants.map(p => p.name);
+    const values = participants.map(p => p.multiplier || 1);
 
-      angle += speed;
-      angle %= 2 * Math.PI;
+    window.pieChart = new Chart(ctxPie, {
+      type: "pie",
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: labels.map((_, i) =>
+            `hsl(${i * 60}, 80%, 70%)`
+          )
+        }]
+      }
+    });
+  }
+</script>
 
-      if (!spinning) speed *= 0.97; // 慣性で減速
-
-      drawRoulette();
-      requestAnimationFrame(animate);
-    }
-
-    function stopRoulette() {
-      spinning = false;
-    }
-  </script>
 </body>
 </html>
