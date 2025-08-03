@@ -145,7 +145,7 @@
 }
 
 #currentNameDisplay {
-  margin-top: 40px;  /* 矢印と名前の間の余白 */
+  margin-top: 30px; /* 矢印との距離をしっかり取る */
   font-weight: bold;
   font-size: 1.3rem;
   color: #97EADB;
@@ -193,9 +193,10 @@
 <div id="rouletteContainer">
   <canvas id="rouletteCanvas" width="400" height="400"></canvas>
   <div id="pointer"></div>
-  <p id="currentNameDisplay"></p> <!-- ここに移動 -->
-  <p id="rouletteStatus"></p>     <!-- これも一緒に入れると中央揃えになる -->
 </div>
+
+<p id="currentNameDisplay"></p>
+<p id="rouletteStatus"></p>
   </section>
 
   <p id="status"></p>
