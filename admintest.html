@@ -66,27 +66,6 @@
       padding: 0.2rem;
     }
 
-    #rouletteContainer {
-      margin: 1rem auto;
-      text-align: center;
-    }
-
-    #roulette {
-      background-color: white;
-      border: 2px solid #97EADB;
-      border-radius: 50%;
-      display: block;
-      margin: 0 auto 1rem auto;
-    }
-
-    #winnerDisplay {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #FFD700;
-      text-shadow: 1px 1px 2px #000;
-      min-height: 2em;
-    }
-
     @keyframes winnerPop {
       0% {
         transform: scale(1);
@@ -107,10 +86,14 @@
       animation: winnerPop 0.6s ease;
       display: inline-block;
       transform-origin: center;
+      /* ← 拡大中心を中央に設定 */
       font-weight: bold;
       color: #FFD700;
+      /* 明るい金色 */
       text-shadow: 2px 2px 4px #000000;
+      /* 黒い縁取りでくっきり */
       background-color: rgba(0, 0, 0, 0.6);
+      /* 半透明黒で背景 */
       padding: 8px 16px;
       border-radius: 10px;
     }
@@ -168,10 +151,16 @@
 
     <p id="rouletteStatus"></p>
 
-    <div id="rouletteContainer">
-      <canvas id="roulette" width="300" height="300"></canvas>
-      <p id="winnerDisplay"></p>
+    <!-- ルーレット用キャンバス -->
+    <canvas id="rouletteCanvas" width="400" height="400" style="display: block; margin: 1rem auto;"></canvas>
+
+    <!-- 矢印付きの選択者表示 -->
+    <div style="text-align:center; margin-top: 0.5rem;">
+      <div style="font-weight:bold; font-size:1.2rem; color:#97EADB;">
+        ▶️ 現在の選択者: <span id="currentWinner">-</span>
+      </div>
     </div>
+
   </section>
 
   <p id="status"></p>
@@ -191,143 +180,87 @@
     const db = firebase.database();
 
     // HTML要素
-    const canvas = document.getElementById("roulette");
+    const canvas = document.getElementById("rouletteCanvas");
     const ctx = canvas.getContext("2d");
-    const radius = canvas.width / 2;
-    ctx.translate(radius, radius);
-
-    const winnerDisplay = document.getElementById("winnerDisplay");
-    const statusEl = document.getElementById("rouletteStatus");
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 180;
+    const arrowSize = 20;
+    const currentWinnerEl = document.getElementById("currentWinner");
+    const rouletteStatusEl = document.getElementById("rouletteStatus");
     const spinStopButton = document.getElementById("spinStopButton");
 
-    // 状態管理
-    let participants = [];
-    let totalWeight = 0;
-    let segments = [];
-    let angle = 0;              // 回転角度（ラジアン）
-    let angularVelocity = 0;    // 回転速度（ラジアン/フレーム）
+    // 参加者データ（配列: {name, multiplier}）
+    let participantsList = [];
+
+    // 回転制御
     let spinning = false;
-    let decelerating = false;
+    let angle = 0; // ラジアン
+    let spinSpeed = 0; // ラジアン/frame
+    let spinAnimationId = null;
 
-    // パステルカラーの例
-    const pastelColors = ["#FFC1CC", "#C1FFC1", "#C1D4FF", "#FFD9B3", "#F0C6D1", "#D1F0E1"];
+    // --- ページ読み込み時の処理 ---
+    window.onload = () => {
+      // 参加型コード＆配信URLの読み込み
+      db.ref("/cattan").once("value").then(snapshot => {
+        const data = snapshot.val() || {};
+        document.getElementById("participantCode").value = data.code || "";
+        document.getElementById("streamUrl").value = data.stream || "";
+      });
 
-    // 参加者テーブルに行を追加
+      // 参加者リスト読み込み
+      db.ref("/roulette/participants").once("value").then(snapshot => {
+        const data = snapshot.val() || [];
+        if (data.length === 0) {
+          addParticipantRow();
+          return;
+        }
+        data.forEach(p => addParticipantRow(p.name, p.multiplier));
+      });
+
+      // 参加者変更のリアルタイム監視
+      db.ref("/roulette/participants").on("value", () => {
+        updateParticipantsList();
+      });
+
+      // ルーレット状態監視
+      watchRouletteStatus();
+
+      // 初回ルーレット描画
+      updateParticipantsList();
+      drawRoulette();
+    };
+
+    // 参加者追加行を追加
     function addParticipantRow(name = "", multiplier = 1) {
       const tbody = document.getElementById("participantsTbody");
       const tr = document.createElement("tr");
       tr.innerHTML = `
-      <td><input type="text" value="${name}" placeholder="名前" oninput="saveParticipantsAuto()" /></td>
-      <td><input type="number" min="1" value="${multiplier}" oninput="saveParticipantsAuto()" /></td>
-      <td><button onclick="this.closest('tr').remove(); saveParticipantsAuto()">削除</button></td>
-    `;
+        <td><input type="text" value="${name}" placeholder="名前" oninput="saveParticipantsAuto()" /></td>
+        <td><input type="number" min="1" value="${multiplier}" oninput="saveParticipantsAuto()" /></td>
+        <td><button onclick="this.closest('tr').remove(); saveParticipantsAuto()">削除</button></td>
+      `;
       tbody.appendChild(tr);
     }
 
-    // 参加者情報をFirebaseへ自動保存
+    // 自動保存（参加者変更時）
     function saveParticipantsAuto() {
       const tbody = document.getElementById("participantsTbody");
       const rows = tbody.querySelectorAll("tr");
-      const arr = [];
+      const participants = [];
+
       for (const row of rows) {
         const name = row.cells[0].querySelector("input").value.trim();
         let multiplier = parseInt(row.cells[1].querySelector("input").value);
         if (!name) continue;
         if (isNaN(multiplier) || multiplier < 1) multiplier = 1;
-        arr.push({ name, multiplier });
-      }
-      db.ref("/roulette/participants").set(arr);
-    }
-
-    // 参加者リストからルーレットの区間を計算
-    function createSegments() {
-      totalWeight = participants.reduce((sum, p) => sum + p.multiplier, 0);
-      let start = 0;
-      segments = participants.map((p, i) => {
-        const portion = (p.multiplier / totalWeight) * 2 * Math.PI;
-        const seg = {
-          startAngle: start,
-          endAngle: start + portion,
-          name: p.name,
-          color: pastelColors[i % pastelColors.length]
-        };
-        start += portion;
-        return seg;
-      });
-    }
-
-    // ルーレット描画
-    function drawRoulette() {
-      ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
-      segments.forEach(seg => {
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.arc(0, 0, radius, seg.startAngle + angle, seg.endAngle + angle);
-        ctx.fillStyle = seg.color;
-        ctx.fill();
-
-        // 文字描画
-        const midAngle = (seg.startAngle + seg.endAngle) / 2 + angle;
-        ctx.fillStyle = "#333";
-        ctx.font = "14px sans-serif";
-        ctx.textAlign = "right";
-        ctx.textBaseline = "middle";
-        const textRadius = radius * 0.8;
-        ctx.save();
-        ctx.translate(Math.cos(midAngle) * textRadius, Math.sin(midAngle) * textRadius);
-        ctx.rotate(midAngle + Math.PI / 2);
-        ctx.fillText(seg.name, 0, 0);
-        ctx.restore();
-      });
-
-      // 選択マーカー（三角形）描画
-      ctx.fillStyle = "red";
-      ctx.beginPath();
-      ctx.moveTo(0, -radius - 10);
-      ctx.lineTo(-10, -radius + 10);
-      ctx.lineTo(10, -radius + 10);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    // アニメーションループ
-    function animate() {
-      if (!spinning && !decelerating) {
-        drawRoulette();
-        requestAnimationFrame(animate);
-        return;
+        participants.push({ name, multiplier });
       }
 
-      if (spinning) {
-        angularVelocity = 0.3; // 高速回転（ラジアン/frame）
-      } else if (decelerating) {
-        angularVelocity -= 0.007; // 徐々に減速
-        if (angularVelocity <= 0) {
-          angularVelocity = 0;
-          decelerating = false;
-          showWinner();
-        }
-      }
-
-      angle += angularVelocity;
-      angle %= 2 * Math.PI;
-
-      drawRoulette();
-
-      requestAnimationFrame(animate);
+      db.ref("/roulette/participants").set(participants);
     }
 
-    // 当選者を表示
-    function showWinner() {
-      let normalizedAngle = (2 * Math.PI - (angle % (2 * Math.PI))) % (2 * Math.PI);
-      const winnerSeg = segments.find(seg => normalizedAngle >= seg.startAngle && normalizedAngle < seg.endAngle);
-      winnerDisplay.textContent = `🎉 当選者: ${winnerSeg ? winnerSeg.name : "不明"}`;
-      winnerDisplay.classList.remove("winner-animated");
-      void winnerDisplay.offsetWidth;
-      winnerDisplay.classList.add("winner-animated");
-    }
-
-    // 参加型コード・配信URL保存
+    // 保存ボタン処理
     function saveData() {
       const participantCode = document.getElementById("participantCode").value.trim();
       const streamUrl = document.getElementById("streamUrl").value.trim();
@@ -342,28 +275,6 @@
       });
     }
 
-    // ルーレット開始・停止切替
-    function spinStopToggle() {
-      if (!spinning && !decelerating) {
-        // 開始
-        if (participants.length === 0) {
-          statusEl.textContent = "参加者がいません。";
-          return;
-        }
-        spinning = true;
-        decelerating = false;
-        spinStopButton.textContent = "停止";
-        winnerDisplay.textContent = "";
-        db.ref("/roulette/status").set("spinning");
-      } else if (spinning) {
-        // 停止（減速開始）
-        spinning = false;
-        decelerating = true;
-        spinStopButton.textContent = "ルーレットを回す";
-        db.ref("/roulette/status").set("stopped");
-      }
-    }
-
     // リセット処理
     function resetRoulette() {
       db.ref("/roulette/participants").remove();
@@ -374,54 +285,204 @@
       const tbody = document.getElementById("participantsTbody");
       tbody.innerHTML = "";
       addParticipantRow();
-      participants = [];
-      segments = [];
-      winnerDisplay.textContent = "";
-      angle = 0;
-      angularVelocity = 0;
+      participantsList = [];
       spinning = false;
-      decelerating = false;
-      spinStopButton.textContent = "ルーレットを回す";
+      spinSpeed = 0;
+      angle = 0;
+      cancelAnimationFrame(spinAnimationId);
+      spinAnimationId = null;
+      currentWinnerEl.textContent = "-";
       drawRoulette();
+      spinStopButton.textContent = "ルーレットを回す";
     }
 
-    // Firebaseから参加者・コード・URLを読み込み初期化
-    window.onload = () => {
-      db.ref("/cattan").once("value").then(snapshot => {
-        const data = snapshot.val() || {};
-        document.getElementById("participantCode").value = data.code || "";
-        document.getElementById("streamUrl").value = data.stream || "";
-      });
+    // ルーレットの状態に応じて回転開始/停止トグル
+    function spinStopToggle() {
+      if (!spinning) {
+        // 抽選開始
+        db.ref("/roulette/participants").once("value").then(snapshot => {
+          const data = snapshot.val() || [];
+          if (data.length === 0) {
+            rouletteStatusEl.textContent = "参加者がいません。";
+            return;
+          }
+          // spinning開始
+          spinning = true;
+          spinStopButton.textContent = "停止";
+          rouletteStatusEl.textContent = "ルーレット回転中…";
 
-      db.ref("/roulette/participants").on("value", snapshot => {
+          db.ref("/roulette/status").set("spinning");
+          // spinSpeedは監視のwatchRouletteStatusでセットされるので不要ここでセットしない
+        });
+      } else {
+        // 抽選停止
+        spinning = false;
+        spinStopButton.textContent = "ルーレットを回す";
+        rouletteStatusEl.textContent = "ルーレット停止中…";
+        db.ref("/roulette/status").set("stopped");
+      }
+    }
+
+    // 参加者リストの最新化（firebaseの値から読み込む）
+    function updateParticipantsList() {
+      db.ref("/roulette/participants").once("value").then(snapshot => {
         const data = snapshot.val() || [];
-        participants = data;
-        if (participants.length === 0) {
-          addParticipantRow();
-        }
-        createSegments();
+        participantsList = data.filter(p => p.name).map(p => ({
+          name: p.name,
+          multiplier: (p.multiplier && p.multiplier >= 1) ? p.multiplier : 1
+        }));
         drawRoulette();
       });
+    }
 
+    // ルーレット描画
+    function drawRoulette() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (participantsList.length === 0) {
+        ctx.fillStyle = "#999";
+        ctx.font = "20px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("参加者がいません", centerX, centerY);
+        drawArrow();
+        return;
+      }
+
+      const totalWeight = participantsList.reduce((acc, p) => acc + p.multiplier, 0);
+      let startAngle = angle;
+
+      participantsList.forEach(({ name, multiplier }) => {
+        const sliceAngle = (multiplier / totalWeight) * Math.PI * 2;
+
+        // 色生成（名前ハッシュ）
+        const color = stringToColor(name);
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 名前描画
+        ctx.save();
+        ctx.fillStyle = "#fff";
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.textAlign = "right";
+        ctx.font = "14px sans-serif";
+        ctx.fillText(name, radius - 10, 6);
+        ctx.restore();
+
+        startAngle += sliceAngle;
+      });
+
+      drawArrow();
+    }
+
+    // 矢印描画
+    function drawArrow() {
+      ctx.fillStyle = "#f66";
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY - radius - arrowSize);
+      ctx.lineTo(centerX - arrowSize / 2, centerY - radius);
+      ctx.lineTo(centerX + arrowSize / 2, centerY - radius);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // 名前から色を生成（簡易ハッシュ関数）
+    function stringToColor(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const c = (hash & 0x00ffffff).toString(16).toUpperCase();
+      return "#" + "00000".substring(0, 6 - c.length) + c;
+    }
+
+    // アニメーションループ
+    function animate() {
+      if (!spinning && spinSpeed <= 0.001) {
+        spinSpeed = 0;
+        cancelAnimationFrame(spinAnimationId);
+        spinAnimationId = null;
+        updateCurrentWinner();
+        return;
+      }
+
+      angle += spinSpeed;
+      angle %= Math.PI * 2;
+
+      drawRoulette();
+
+      if (!spinning && spinSpeed > 0) {
+        spinSpeed *= 0.95; // 徐々に減速
+      }
+
+      updateCurrentWinner();
+
+      spinAnimationId = requestAnimationFrame(animate);
+    }
+
+    // 矢印先端の参加者を判定して画面＆firebase更新
+    function updateCurrentWinner() {
+      if (participantsList.length === 0) {
+        currentWinnerEl.textContent = "-";
+        db.ref("/roulette/currentName").set(null);
+        return;
+      }
+
+      // canvasの回転は反時計回りなので時計回りに変換
+      const normalizedAngle = (Math.PI * 2 - (angle % (Math.PI * 2))) % (Math.PI * 2);
+
+      const totalWeight = participantsList.reduce((acc, p) => acc + p.multiplier, 0);
+      let accAngle = 0;
+      let currentName = null;
+
+      for (const p of participantsList) {
+        const sliceAngle = (p.multiplier / totalWeight) * Math.PI * 2;
+        if (normalizedAngle >= accAngle && normalizedAngle < accAngle + sliceAngle) {
+          currentName = p.name;
+          break;
+        }
+        accAngle += sliceAngle;
+      }
+
+      if (currentName) {
+        currentWinnerEl.textContent = currentName;
+        db.ref("/roulette/currentName").set(currentName);
+      }
+    }
+
+    // Firebaseの状態監視で回転速度制御
+    function watchRouletteStatus() {
       db.ref("/roulette/status").on("value", snapshot => {
         const status = snapshot.val();
         if (status === "spinning") {
-          spinning = true;
-          decelerating = false;
-          spinStopButton.textContent = "停止";
-          winnerDisplay.textContent = "";
-          animate();
-        } else if (status === "stopped") {
-          if (spinning) {
-            spinning = false;
-            decelerating = true;
-            spinStopButton.textContent = "ルーレットを回す";
+          if (!spinning) {
+            spinning = true;
+            spinSpeed = 0.5 + Math.random() * 0.3; // 超高速回転開始
+            if (!spinAnimationId) animate();
+            rouletteStatusEl.textContent = "ルーレット回転中…";
+            spinStopButton.textContent = "停止";
           }
+        } else if (status === "stopped") {
+          spinning = false; // 徐々に減速開始
+          rouletteStatusEl.textContent = "ルーレット停止中…";
+          spinStopButton.textContent = "ルーレットを回す";
+        } else {
+          spinning = false;
+          spinSpeed = 0;
+          rouletteStatusEl.textContent = "";
+          spinStopButton.textContent = "ルーレットを回す";
+          if (!spinAnimationId) drawRoulette();
         }
       });
-
-      animate();
-    };
+    }
   </script>
 </body>
 
