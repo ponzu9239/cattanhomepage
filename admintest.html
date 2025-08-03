@@ -164,6 +164,16 @@
   line-height: 1.4;         /* 行間調整（任意） */
 }
 
+/* 新しい親要素 */
+#centerDisplay {
+  display: flex;
+  flex-direction: column;  /* 縦並び */
+  justify-content: center; /* 縦方向中央 */
+  align-items: center;     /* 横方向中央 */
+  height: 100vh;           /* 画面高さ全部 */
+  text-align: center;      /* テキスト中央揃え */
+  gap: 8px;                /* 行間の余白 */
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
