@@ -152,13 +152,13 @@
       return pastelColor(Math.abs(hash) % 6);
     }
 
-    // ▼ 下向き矢印
+    // 矢印を円の下側縁の内側に表示
     function drawArrow() {
       ctx.fillStyle = "#f66";
       ctx.beginPath();
-      ctx.moveTo(centerX, centerY + radius + arrowSize); // 先端（下）
-      ctx.lineTo(centerX - arrowSize / 2, centerY + radius); // 左上
-      ctx.lineTo(centerX + arrowSize / 2, centerY + radius); // 右上
+      ctx.moveTo(centerX, centerY + radius - arrowSize); // 先端（下）
+      ctx.lineTo(centerX - arrowSize / 2, centerY + radius - arrowSize * 2); // 左
+      ctx.lineTo(centerX + arrowSize / 2, centerY + radius - arrowSize * 2); // 右
       ctx.closePath();
       ctx.fill();
     }
@@ -201,7 +201,6 @@
       drawArrow();
     }
 
-    // ▼ 下向き矢印に合わせた当選者計算
     function getWinnerName() {
       if (participantsList.length === 0) return null;
 
@@ -212,8 +211,9 @@
       for (const p of participantsList) {
         const slice = (p.multiplier / totalWeight) * Math.PI * 2;
 
-        const start = acc + Math.PI / 2; // 下方向基準
-        const end = acc + slice + Math.PI / 2;
+        // 角度の基準を矢印の下向きに合わせて調整
+        const start = acc - Math.PI / 2;
+        const end = acc + slice - Math.PI / 2;
 
         if (normalizedAngle >= start && normalizedAngle < end) {
           return p.name;
