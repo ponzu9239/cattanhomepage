@@ -451,26 +451,27 @@
       }
     }
 
-    // 勝者決定時の処理
-    function announceWinner() {
-      const winner = getCurrentSegmentName();
-      if (!winner) {
-        statusEl.textContent = "当選者が決まりませんでした。";
-        db.ref("/roulette/status").set("stopped");
-        return;
-      }
-      const timestamp = Date.now();
+function announceWinner() {
+  const winner = getCurrentSegmentName();
+  if (!winner) {
+    currentNameDisplay.textContent = "当選者が決まりませんでした。";
+    db.ref("/roulette/status").set("stopped");
+    return;
+  }
 
-      db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
-        statusEl.textContent = `🎉 当選者: ${winner}`;
-        db.ref("/roulette/status").set("stopped");
+  const timestamp = Date.now();
 
-        // 勝者名を強調アニメーション
-        currentNameDisplay.classList.remove("winner-animated");
-        void currentNameDisplay.offsetWidth;
-        currentNameDisplay.classList.add("winner-animated");
-      });
-    }
+  db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
+    // 🎲 抽選中 → 🎉 当選者 に書き換える
+    currentNameDisplay.textContent = `🎉 当選者: ${winner}`;
+    db.ref("/roulette/status").set("stopped");
+
+    // 勝者名を強調アニメーション
+    currentNameDisplay.classList.remove("winner-animated");
+    void currentNameDisplay.offsetWidth; // アニメーションリセット
+    currentNameDisplay.classList.add("winner-animated");
+  });
+}
 
     // リセット処理
     function resetRoulette() {
