@@ -476,4 +476,19 @@
       });
     }
 
-    //
+    // リセット処理
+    function resetRoulette() {
+      db.ref("/roulette/participants").remove();
+      db.ref("/roulette/winner").remove();
+      db.ref("/roulette/currentName").remove();
+      document.getElementById("rouletteStatus").textContent = "ルーレットをリセットしました。";
+      const tbody = document.getElementById("participantsTbody");
+      tbody.innerHTML = "";
+      addParticipantRow();
+      updateParticipantsFromInputs();
+      drawRoulette();
+    }
+  </script>
+</body>
+
+</html>
