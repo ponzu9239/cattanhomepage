@@ -132,19 +132,19 @@
     }
 
     /* 矢印（下向き三角） */
-    #pointer {
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-top: 8px;
-      width: 0;
-      height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-top: 25px solid #97EADB;
-      filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
-    }
+#pointer {
+  position: absolute;
+  bottom: 100%;  /* ← ここを変更 */
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px; /* キャンバスとの間隔 */
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 25px solid #97EADB;  /* ← 下向きに変更 */
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+}
 
     /* 現在選ばれている人名表示 */
     #currentNameDisplay {
