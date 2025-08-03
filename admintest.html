@@ -470,7 +470,7 @@ function announceWinner() {
 
   db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
     // 🎲 抽選中 → 🎉 当選者 に書き換える
-    currentNameDisplay.innerHTML = `🎉 当選者　🎉<br>${winner}`;
+    currentNameDisplay.innerHTML = `🎉 当選者 🎉<br>${winner}`;
     db.ref("/roulette/status").set("stopped");
 
     // 勝者名を強調アニメーション
