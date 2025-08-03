@@ -15,26 +15,32 @@
     header {
       background-color: #97EADB;
       padding: 1rem;
-      text-align: center;
     }
     header h1 { color: white; margin: 0; }
     .hero { margin: 20px 0; }
     #rouletteCanvas {
       margin: 20px auto;
       display: block;
+      border: 8px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
     #spinBtn {
-      background: #97EADB;
+      background: linear-gradient(135deg, #ffb6c1, #ffd1dc);
       border: none;
-      padding: 12px 24px;
+      padding: 12px 30px;
       border-radius: 999px;
-      font-size: 1.2em;
+      font-size: 1.3em;
       font-weight: bold;
-      color: white;
+      color: #fff;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 10px rgba(255,182,193,0.5);
     }
-    #spinBtn:hover { transform: scale(1.1); }
+    #spinBtn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 15px rgba(255,182,193,0.7);
+    }
     #winner {
       margin: 30px auto;
       background: #ffeef5;
@@ -42,11 +48,15 @@
       padding: 20px;
       border-radius: 12px;
       width: fit-content;
+      max-width: 90%;
     }
     #winner h2 { margin: 0 0 10px; color: #e91e63; }
-    #winnerName { font-size: 1.4em; font-weight: bold; }
+    #winnerName {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #333;
+    }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 </head>
@@ -65,8 +75,6 @@
   <h2>🎉 当選者 🎉</h2>
   <div id="winnerName">まだ抽選していません</div>
 </div>
-
-<canvas id="probabilityPieChart" width="300" height="300"></canvas>
 
 <script>
   // ✅ Firebase 初期化
@@ -89,18 +97,29 @@
   const winnerNameEl = document.getElementById("winnerName");
 
   let participants = [];
+  let currentAngle = 0;
 
   // 🎯 参加者取得
   firebase.database().ref("/roulette/participants").on("value", (snapshot) => {
     participants = Object.values(snapshot.val() || {});
     drawRoulette();
-    drawProbabilityPieChart(participants);
   });
+
+  // 🎨 パステルカラー配列
+  function getPastelColors(count) {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+      const hue = (i * 360 / count) + Math.random() * 30;
+      colors.push(`hsl(${hue}, 80%, 80%)`);
+    }
+    return colors;
+  }
 
   function drawRoulette(angle = 0) {
     if (participants.length === 0) return;
 
     const totalWeight = participants.reduce((sum, p) => sum + (p.multiplier || 1), 0);
+    const colors = getPastelColors(participants.length);
     let startAngle = angle;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -110,7 +129,7 @@
       ctx.moveTo(200, 200);
       ctx.arc(200, 200, 200, startAngle, startAngle + sliceAngle);
       ctx.closePath();
-      ctx.fillStyle = `hsl(${i * 60}, 80%, 70%)`;
+      ctx.fillStyle = colors[i];
       ctx.fill();
 
       // 名前表示
@@ -137,7 +156,6 @@
   }
 
   // 🎡 回転処理
-  let currentAngle = 0;
   spinBtn.addEventListener("click", () => {
     if (participants.length === 0) return alert("参加者がいません！");
     spinBtn.disabled = true;
@@ -172,28 +190,6 @@
         return;
       }
     }
-  }
-
-  // 🎨 円グラフ
-  function drawProbabilityPieChart(participants) {
-    const ctxPie = document.getElementById("probabilityPieChart").getContext("2d");
-    if (window.pieChart) window.pieChart.destroy();
-
-    const labels = participants.map(p => p.name);
-    const values = participants.map(p => p.multiplier || 1);
-
-    window.pieChart = new Chart(ctxPie, {
-      type: "pie",
-      data: {
-        labels,
-        datasets: [{
-          data: values,
-          backgroundColor: labels.map((_, i) =>
-            `hsl(${i * 60}, 80%, 70%)`
-          )
-        }]
-      }
-    });
   }
 </script>
 
