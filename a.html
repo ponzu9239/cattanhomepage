@@ -119,12 +119,10 @@
     let participants = [];
     let totalMultiplier = 0;
     let segments = [];
-
-    let angle = 0; // ルーレット角度（ラジアン）
-    let spinning = false;
+    let angle = 0;
     let angularVelocity = 0;
+    let spinning = false;
     let decelerating = false;
-    let animationId = null;
 
     const colors = [
       "#A0E7E5", "#B4F8C8", "#FBE7C6",
@@ -150,7 +148,8 @@
 
     function drawRoulette() {
       const size = Math.min(canvas.width, canvas.height);
-      const cx = size / 2, cy = size / 2;
+      const cx = size / 2;
+      const cy = size / 2;
       const radius = size / 2 - 20;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -174,7 +173,6 @@
         ctx.fill();
         ctx.stroke();
 
-        // 名前を描く
         const midAngle = (seg.startAngle + seg.endAngle) / 2 + angle;
         const textRadius = radius * 0.6;
         ctx.fillStyle = "#333";
@@ -187,45 +185,7 @@
       });
     }
 
-    // pointerの位置（下向き＝π/2）に合う参加者を取得
-    function getCurrentSegmentName() {
-      let normalizedAngle = angle % (2 * Math.PI);
-      if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
-
-      const pointerAngle = Math.PI / 2;
-      const checkAngle = (2 * Math.PI + pointerAngle - normalizedAngle) % (2 * Math.PI);
-
-      for (const seg of segments) {
-        if (checkAngle >= seg.startAngle && checkAngle < seg.endAngle) {
-          return seg.name;
-        }
-      }
-      return "";
-    }
-
-    function animate() {
-      angle += angularVelocity;
-      if (decelerating) {
-        angularVelocity *= 0.97;
-        if (angularVelocity < 0.002) {
-          angularVelocity = 0;
-          decelerating = false;
-          spinning = false;
-          statusEl.textContent = "停止しました";
-        }
-      }
-      drawRoulette();
-
-      if (spinning) {
-        animationId = requestAnimationFrame(animate);
-      } else {
-        cancelAnimationFrame(animationId);
-      }
-    }
-
-    // Firebase監視＆状態反映
-
-    // 参加者更新時
+    // 🔽 Firebaseからリアルタイム受信
     db.ref("/roulette/participants").on("value", snap => {
       participants = snap.val() || [];
       totalMultiplier = participants.reduce((acc, p) => acc + p.multiplier, 0);
@@ -233,39 +193,34 @@
       drawRoulette();
     });
 
-    // 状態(spinning, stopped)更新時
-    db.ref("/roulette/status").on("value", snap => {
-      const status = snap.val();
-      if (status === "spinning") {
-        if (!spinning) {
-          spinning = true;
-          decelerating = false;
-          angularVelocity = 0.3; // 視聴者は適当な速度から始める（管理者の速度と厳密同期は難しい）
-          statusEl.textContent = "回転中…";
-          animate();
-        }
-      } else if (status === "stopped") {
-        decelerating = true;
-        statusEl.textContent = "停止中…";
+    db.ref("/roulette/angle").on("value", snap => {
+      if (snap.exists()) {
+        angle = snap.val();
+        drawRoulette();
       }
     });
-
-    // 抽選中の名前表示
+    db.ref("/roulette/angularVelocity").on("value", snap => {
+      if (snap.exists()) angularVelocity = snap.val();
+    });
+    db.ref("/roulette/spinning").on("value", snap => {
+      if (snap.exists()) spinning = snap.val();
+    });
+    db.ref("/roulette/decelerating").on("value", snap => {
+      if (snap.exists()) decelerating = snap.val();
+    });
     db.ref("/roulette/currentName").on("value", snap => {
       const name = snap.val() || "";
-      if (name) currentNameDisplay.innerHTML = `🎲 抽選中 🎲<br>${name}`;
-      else currentNameDisplay.textContent = "";
+      currentNameDisplay.innerHTML = name ? `🎲 抽選中 🎲<br>${name}` : "";
     });
 
-    // 当選者更新時
+    // 当選者表示
     db.ref("/roulette/winner").limitToLast(1).on("child_added", snap => {
       const winner = snap.val();
       if (winner) {
         currentNameDisplay.innerHTML = `🎉 当選者 🎉<br>${winner}`;
         currentNameDisplay.classList.remove("winner-animated");
-        void currentNameDisplay.offsetWidth; // 強制再描画でアニメーションリセット
+        void currentNameDisplay.offsetWidth;
         currentNameDisplay.classList.add("winner-animated");
-        statusEl.textContent = "停止しました";
       }
     });
   </script>
