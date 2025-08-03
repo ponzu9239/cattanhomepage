@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ルーレット抽選</title>
+  <title>ルーレット抽選（視聴者用）</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -13,7 +13,10 @@
       margin: auto;
       color: #333;
     }
-    h1 { text-align: center; color: #97EADB; }
+    h1 {
+      text-align: center;
+      color: #97EADB;
+    }
     #rouletteCanvas {
       background-color: #fff;
       border-radius: 50%;
@@ -50,6 +53,7 @@
       margin-left: auto;
       margin-right: auto;
       line-height: 1.4;
+      user-select: none;
     }
     #centerDisplay {
       margin: 0 auto;
@@ -70,18 +74,18 @@
       transform-origin: center;
       font-weight: bold;
       color: #FFD700;
-      text-shadow: 2px 2px 4px #000;
+      text-shadow: 2px 2px 4px #000000;
       background-color: rgba(0, 0, 0, 0.6);
       padding: 8px 16px;
       border-radius: 10px;
     }
   </style>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
-
 <body>
-  <h1>ルーレット抽選</h1>
+  <h1>ルーレット抽選（視聴者用）</h1>
 
   <section>
     <div id="rouletteContainer">
@@ -110,20 +114,22 @@
     const canvas = document.getElementById("rouletteCanvas");
     const ctx = canvas.getContext("2d");
     const currentNameDisplay = document.getElementById("currentNameDisplay");
+    const statusEl = document.getElementById("rouletteStatus");
 
     let participants = [];
     let totalMultiplier = 0;
     let segments = [];
-    let angle = 0;
+
+    let angle = 0; // ルーレット角度（ラジアン）
     let spinning = false;
     let angularVelocity = 0;
     let decelerating = false;
     let animationId = null;
 
     const colors = [
-      "#A0E7E5","#B4F8C8","#FBE7C6",
-      "#FFAEBC","#A0CED9","#FFC6FF",
-      "#FFB5A7","#D0F4DE"
+      "#A0E7E5", "#B4F8C8", "#FBE7C6",
+      "#FFAEBC", "#A0CED9", "#FFC6FF",
+      "#FFB5A7", "#D0F4DE"
     ];
 
     function calculateSegments() {
@@ -144,8 +150,11 @@
 
     function drawRoulette() {
       const size = Math.min(canvas.width, canvas.height);
-      const cx = size / 2, cy = size / 2, radius = size / 2 - 20;
+      const cx = size / 2, cy = size / 2;
+      const radius = size / 2 - 20;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       if (segments.length === 0) {
         ctx.fillStyle = "#999";
         ctx.font = "20px 'Hiragino Maru Gothic ProN', sans-serif";
@@ -153,25 +162,45 @@
         ctx.fillText("参加者を追加してください", cx, cy);
         return;
       }
+
       segments.forEach(seg => {
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.fillStyle = seg.color;
-        ctx.strokeStyle = "#fff";
+        ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
         ctx.arc(cx, cy, radius, seg.startAngle + angle, seg.endAngle + angle);
         ctx.lineTo(cx, cy);
-        ctx.fill(); ctx.stroke();
-        const midAngle = (seg.startAngle + seg.endAngle)/2 + angle;
-        const textR = radius * 0.6;
+        ctx.fill();
+        ctx.stroke();
+
+        // 名前を描く
+        const midAngle = (seg.startAngle + seg.endAngle) / 2 + angle;
+        const textRadius = radius * 0.6;
         ctx.fillStyle = "#333";
         ctx.font = "bold 14px 'Hiragino Maru Gothic ProN', sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        const x = cx + Math.cos(midAngle) * textR;
-        const y = cy + Math.sin(midAngle) * textR;
+        const x = cx + Math.cos(midAngle) * textRadius;
+        const y = cy + Math.sin(midAngle) * textRadius;
         ctx.fillText(seg.name, x, y);
       });
+    }
+
+    // pointerの位置（下向き＝π/2）に合う参加者を取得
+    function getCurrentSegmentName() {
+      let normalizedAngle = angle % (2 * Math.PI);
+      if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
+
+      const pointerAngle = Math.PI / 2;
+      const checkAngle = (2 * Math.PI + pointerAngle - normalizedAngle) % (2 * Math.PI);
+
+      for (const seg of segments) {
+        if (checkAngle >= seg.startAngle && checkAngle < seg.endAngle) {
+          return seg.name;
+        }
+      }
+      return "";
     }
 
     function animate() {
@@ -182,46 +211,61 @@
           angularVelocity = 0;
           decelerating = false;
           spinning = false;
+          statusEl.textContent = "停止しました";
         }
       }
       drawRoulette();
-      if (spinning) animationId = requestAnimationFrame(animate);
-      else cancelAnimationFrame(animationId);
+
+      if (spinning) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        cancelAnimationFrame(animationId);
+      }
     }
 
-    // 🔹 Firebaseからリアルタイム取得
+    // Firebase監視＆状態反映
+
+    // 参加者更新時
     db.ref("/roulette/participants").on("value", snap => {
       participants = snap.val() || [];
-      totalMultiplier = participants.reduce((s,p)=>s+p.multiplier,0);
+      totalMultiplier = participants.reduce((acc, p) => acc + p.multiplier, 0);
       calculateSegments();
       drawRoulette();
     });
 
+    // 状態(spinning, stopped)更新時
     db.ref("/roulette/status").on("value", snap => {
       const status = snap.val();
       if (status === "spinning") {
         if (!spinning) {
           spinning = true;
-          angularVelocity = 0.2; // 初期速度
+          decelerating = false;
+          angularVelocity = 0.3; // 視聴者は適当な速度から始める（管理者の速度と厳密同期は難しい）
+          statusEl.textContent = "回転中…";
           animate();
         }
       } else if (status === "stopped") {
         decelerating = true;
+        statusEl.textContent = "停止中…";
       }
     });
 
+    // 抽選中の名前表示
     db.ref("/roulette/currentName").on("value", snap => {
       const name = snap.val() || "";
       if (name) currentNameDisplay.innerHTML = `🎲 抽選中 🎲<br>${name}`;
+      else currentNameDisplay.textContent = "";
     });
 
+    // 当選者更新時
     db.ref("/roulette/winner").limitToLast(1).on("child_added", snap => {
       const winner = snap.val();
       if (winner) {
         currentNameDisplay.innerHTML = `🎉 当選者 🎉<br>${winner}`;
         currentNameDisplay.classList.remove("winner-animated");
-        void currentNameDisplay.offsetWidth;
+        void currentNameDisplay.offsetWidth; // 強制再描画でアニメーションリセット
         currentNameDisplay.classList.add("winner-animated");
+        statusEl.textContent = "停止しました";
       }
     });
   </script>
