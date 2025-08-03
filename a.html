@@ -3,72 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>試合番号を1つ下げる（34〜174）</title>
+  <title>きゃたんルーレット</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background: #f7fcfc;
-      padding: 20px;
+      text-align: center;
+      background: #e6f9fd;
     }
-    h1 { text-align: center; color: #47b6a2; }
+    canvas {
+      margin-top: 20px;
+    }
     button {
-      display: block;
-      margin: 20px auto;
+      margin: 10px;
       padding: 10px 20px;
-      background: #97eadb;
-      color: white;
+      font-size: 18px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
+      background: #97eadb;
     }
-    #status { text-align: center; margin-top: 15px; font-weight: bold; }
+    button:hover {
+      background: #6dcfd0;
+    }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>試合番号を1つ下げる（34〜174）</h1>
-  <button onclick="updateMatchNumbers()">更新する</button>
-  <p id="status"></p>
+  <h1>🎡 きゃたんルーレット 🎡</h1>
+  <canvas id="rouletteCanvas" width="400" height="400"></canvas><br>
+  <button onclick="startRoulette()">▶ 回す</button>
+  <button onclick="stopRoulette()">⏹ 止める</button>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <script>
-    // ✅ Firebase設定
+    // Firebase設定
     const firebaseConfig = {
-      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
-      authDomain: "match-result-ea475.firebaseapp.com",
-      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
-      projectId: "match-result-ea475",
-      storageBucket: "match-result-ea475.firebasestorage.app",
-      messagingSenderId: "759877853492",
-      appId: "1:759877853492:web:a10935960bf8230af90561"
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.appspot.com",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
 
-    async function updateMatchNumbers() {
-      document.getElementById("status").textContent = "⏳ 更新中...";
+    const participantsRef = firebase.database().ref("/roulette/participants");
 
-      const snapshot = await db.ref("apex_results").once("value");
-      if (!snapshot.exists()) {
-        document.getElementById("status").textContent = "❌ データがありません";
+    const canvas = document.getElementById("rouletteCanvas");
+    const ctx = canvas.getContext("2d");
+    let participants = [];
+    let angle = 0;
+    let spinning = false;
+    let speed = 0;
+
+    // Firebaseから参加者を取得
+    participantsRef.on("value", (snapshot) => {
+      const data = snapshot.val() || {};
+      participants = Object.values(data);
+      drawRoulette();
+    });
+
+    function drawRoulette() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (participants.length === 0) {
+        ctx.fillText("参加者なし", 150, 200);
         return;
       }
 
-      const updates = [];
-      snapshot.forEach(child => {
-        const key = child.key;
-        const match = child.val();
+      const total = participants.reduce((sum, p) => sum + (p.multiplier || 1), 0);
+      let startAngle = angle;
 
-        if (match.matchNumber >= 34 && match.matchNumber <= 174) {
-          const newNumber = match.matchNumber - 1;
-          updates.push(db.ref("apex_results/" + key).update({ matchNumber: newNumber }));
-        }
+      participants.forEach((p, i) => {
+        const value = p.multiplier || 1;
+        const slice = (value / total) * 2 * Math.PI;
+
+        // 色を可愛い系で決定
+        const hue = (i * 360 / participants.length) % 360;
+        ctx.fillStyle = `hsl(${hue}, 80%, 70%)`;
+
+        ctx.beginPath();
+        ctx.moveTo(200, 200);
+        ctx.arc(200, 200, 180, startAngle, startAngle + slice);
+        ctx.closePath();
+        ctx.fill();
+
+        // 名前を描画
+        ctx.save();
+        ctx.translate(200, 200);
+        ctx.rotate(startAngle + slice / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#333";
+        ctx.font = "16px sans-serif";
+        ctx.fillText(p.name, 160, 5);
+        ctx.restore();
+
+        startAngle += slice;
       });
 
-      await Promise.all(updates);
-      document.getElementById("status").textContent = "✅ 更新が完了しました！";
+      // 中央の円
+      ctx.beginPath();
+      ctx.arc(200, 200, 40, 0, 2 * Math.PI);
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+
+      ctx.fillStyle = "#333";
+      ctx.textAlign = "center";
+      ctx.font = "20px bold sans-serif";
+      ctx.fillText("STOP", 200, 205);
+    }
+
+    function startRoulette() {
+      if (spinning) return;
+      spinning = true;
+      speed = 0.3;
+      animate();
+    }
+
+    function animate() {
+      if (!spinning && speed <= 0) return;
+
+      angle += speed;
+      angle %= 2 * Math.PI;
+
+      if (!spinning) speed *= 0.97; // 慣性で減速
+
+      drawRoulette();
+      requestAnimationFrame(animate);
+    }
+
+    function stopRoulette() {
+      spinning = false;
     }
   </script>
 </body>
