@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -14,22 +13,14 @@
       margin: auto;
       color: #333;
     }
+    h1 { text-align: center; color: #97EADB; }
 
-    h1 {
-      text-align: center;
-      color: #97EADB;
-    }
-
-    label,
-    input,
-    textarea,
-    button {
+    label, input, button {
       display: block;
       margin: 1rem 0;
       width: 100%;
       font-size: 1rem;
     }
-
     button {
       background-color: #97EADB;
       color: white;
@@ -38,33 +29,11 @@
       border-radius: 0.5rem;
       cursor: pointer;
     }
+    button:hover { background-color: #7fcbd5; }
+    button.danger { background-color: #f66; }
 
-    button:hover {
-      background-color: #7fcbd5;
-    }
-
-    button.danger {
-      background-color: #f66;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-    }
-
-    th,
-    td {
-      border: 1px solid #97EADB;
-      padding: 0.5rem;
-      text-align: center;
-    }
-
-    input[type="text"],
-    input[type="number"] {
-      width: 90%;
-      padding: 0.2rem;
-    }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    th, td { border: 1px solid #97EADB; padding: 0.5rem; text-align: center; }
 
     #rouletteCanvas {
       display: block;
@@ -75,34 +44,29 @@
     }
 
     @keyframes winnerPop {
-      0% {
-        transform: scale(1);
-        opacity: 0.2;
-      }
-      50% {
-        transform: scale(1.3);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(1);
-      }
+      0% { transform: scale(1); opacity: 0.2; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); }
     }
 
-    .winner-animated {
-      animation: winnerPop 0.6s ease;
+    #finalWinner {
       display: inline-block;
+      font-size: 1.4rem;
       font-weight: bold;
       color: #FFD700;
       text-shadow: 2px 2px 4px #000;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 8px 16px;
-      border-radius: 10px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #finalWinner.show {
+      opacity: 1;
+      animation: winnerPop 0.6s ease;
     }
   </style>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
-
 <body>
   <h1>きゃたん 管理者ページ</h1>
 
@@ -137,14 +101,14 @@
     <!-- ルーレット -->
     <canvas id="rouletteCanvas" width="400" height="400"></canvas>
 
-    <div style="text-align:center;">
-      <div style="font-weight:bold; font-size:1.2rem; color:#97EADB;">
-        ▶️ 現在の選択者: <span id="currentWinner">-</span>
-      </div>
+    <div style="text-align:center; font-weight:bold; font-size:1.2rem; color:#97EADB;">
+      ▶️ 現在の選択者: <span id="currentWinner">-</span>
+    </div>
+
+    <div style="text-align:center; margin-top:10px;">
+      <span id="finalWinner"></span>
     </div>
   </section>
-
-  <p id="status"></p>
 
   <script>
     const firebaseConfig = {
@@ -173,8 +137,8 @@
     let spinAnimationId = null;
 
     const currentWinnerEl = document.getElementById("currentWinner");
+    const finalWinnerEl = document.getElementById("finalWinner");
 
-    // pastel color generator
     function pastelColor(i) {
       const colors = ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF", "#E0BAFF"];
       return colors[i % colors.length];
@@ -236,24 +200,28 @@
       drawArrow();
     }
 
-    function updateCurrentWinner() {
-      if (participantsList.length === 0) {
-        currentWinnerEl.textContent = "-";
-        db.ref("/roulette/currentName").set(null);
-        return;
-      }
-      const normalizedAngle = (Math.PI * 2 - angle) % (Math.PI * 2);
+    function getWinnerName() {
+      if (participantsList.length === 0) return null;
       const totalWeight = participantsList.reduce((a, p) => a + p.multiplier, 0);
+      const normalizedAngle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+
       let acc = 0;
       for (const p of participantsList) {
         const slice = (p.multiplier / totalWeight) * Math.PI * 2;
-        if (normalizedAngle >= acc && normalizedAngle < acc + slice) {
-          currentWinnerEl.textContent = p.name;
-          db.ref("/roulette/currentName").set(p.name);
-          break;
+        const start = acc - Math.PI / 2;
+        const end = acc + slice - Math.PI / 2;
+        if (normalizedAngle >= start && normalizedAngle < end) {
+          return p.name;
         }
         acc += slice;
       }
+      return null;
+    }
+
+    function updateCurrentWinner() {
+      const name = getWinnerName();
+      currentWinnerEl.textContent = name || "-";
+      db.ref("/roulette/currentName").set(name || null);
     }
 
     function animate() {
@@ -261,9 +229,21 @@
         spinSpeed = 0;
         cancelAnimationFrame(spinAnimationId);
         spinAnimationId = null;
+
+        const finalWinner = getWinnerName();
+        if (finalWinner) {
+          const timestamp = Date.now();
+          db.ref(`/roulette/winner/${timestamp}`).set(finalWinner);
+
+          finalWinnerEl.textContent = `🎉 当選者: ${finalWinner} 🎉`;
+          finalWinnerEl.classList.remove("show");
+          void finalWinnerEl.offsetWidth;
+          finalWinnerEl.classList.add("show");
+        }
         updateCurrentWinner();
         return;
       }
+
       angle += spinSpeed;
       drawRoulette();
       if (!spinning && spinSpeed > 0) spinSpeed *= 0.96;
@@ -302,11 +282,8 @@
     }
 
     function spinStopToggle() {
-      if (!spinning) {
-        db.ref("/roulette/status").set("spinning");
-      } else {
-        db.ref("/roulette/status").set("stopped");
-      }
+      if (!spinning) db.ref("/roulette/status").set("spinning");
+      else db.ref("/roulette/status").set("stopped");
     }
 
     function addParticipantRow(name = "", multiplier = 1) {
@@ -347,6 +324,7 @@
       cancelAnimationFrame(spinAnimationId);
       drawRoulette();
       currentWinnerEl.textContent = "-";
+      finalWinnerEl.textContent = "";
     }
 
     window.onload = () => {
