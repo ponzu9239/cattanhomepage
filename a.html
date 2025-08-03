@@ -397,7 +397,6 @@ function updateProbabilityTable() {
       }
     });
     
-    <script>
   const winnerEl = document.getElementById("winnerName");
   const winnerRef = firebase.database().ref("/roulette/winner");
 
@@ -447,7 +446,6 @@ function updateProbabilityTable() {
       text.textContent = `当選確率: ${percent.toFixed(1)}%`;
     });
   }
-</script>
   </script>
 </body>
 </html>
