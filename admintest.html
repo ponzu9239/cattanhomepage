@@ -134,15 +134,15 @@
     /* 矢印（下向き三角） */
 #pointer {
   position: absolute;
-  bottom: 100%;  /* ← ここを変更 */
+  top: 100%;  /* キャンバスの下に配置 */
   left: 50%;
   transform: translateX(-50%);
-  margin-bottom: 8px; /* キャンバスとの間隔 */
+  margin-top: 8px; /* キャンバスとの間隔 */
   width: 0;
   height: 0;
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
-  border-bottom: 25px solid #97EADB;  /* ← 下向きに変更 */
+  border-top: 25px solid #97EADB;  /* 上向き△ */
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
 }
 
