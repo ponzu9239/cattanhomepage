@@ -340,20 +340,22 @@
       });
     }
 
-    function getCurrentSegmentName() {
-      let normalizedAngle = angle % (2 * Math.PI);
-      if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
+function getCurrentSegmentName() {
+  let normalizedAngle = angle % (2 * Math.PI);
+  if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
 
-      const pointerAngle = Math.PI / 2;
-      const checkAngle = (2 * Math.PI + pointerAngle - normalizedAngle) % (2 * Math.PI);
+  const pointerAngle = 3 * Math.PI / 2; // 矢印が下向き（270度）
 
-      for (const seg of segments) {
-        if (checkAngle >= seg.startAngle && checkAngle < seg.endAngle) {
-          return seg.name;
-        }
-      }
-      return "";
+  // pointerの位置を基準に角度を計算
+  const checkAngle = (2 * Math.PI + pointerAngle - normalizedAngle) % (2 * Math.PI);
+
+  for (const seg of segments) {
+    if (checkAngle >= seg.startAngle && checkAngle < seg.endAngle) {
+      return seg.name;
     }
+  }
+  return "";
+}
 
     function animate() {
       angle += angularVelocity;
