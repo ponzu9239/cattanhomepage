@@ -360,19 +360,20 @@
     });
   }
 
-  function getCurrentSegmentName() {
-    let normalizedAngle = angle % (2 * Math.PI);
-    if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
-    const pointerAngle = 3 * Math.PI / 2;
-    const checkAngle = (2 * Math.PI + pointerAngle - normalizedAngle) % (2 * Math.PI);
+function getCurrentSegmentName() {
+  let normalizedAngle = angle % (2 * Math.PI);
+  if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
 
-    for (const seg of segments) {
-      if (checkAngle >= seg.startAngle && checkAngle < seg.endAngle) {
-        return seg.name;
-      }
+  const pointerAngle = 3 * Math.PI / 2; // 下方向
+  const checkAngle = (pointerAngle - normalizedAngle + 2 * Math.PI) % (2 * Math.PI);
+
+  for (const seg of segments) {
+    if (checkAngle >= seg.startAngle && checkAngle < seg.endAngle) {
+      return seg.name;
     }
-    return "";
   }
+  return "";
+}
 
   function animate() {
     angle += angularVelocity;
