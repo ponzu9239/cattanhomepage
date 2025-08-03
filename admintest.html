@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>きゃたん 管理者ページ</title>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background-color: #fff9f9;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
+      color: #333;
+      text-align: center;
+    }
+    h1 { color: #97EADB; }
+    table { width: 100%; margin-bottom: 1rem; border-collapse: collapse; }
+    th, td { border: 1px solid #97EADB; padding: 0.5rem; }
+    input { width: 90%; padding: 0.3rem; }
+    button { padding: 0.5rem 1rem; margin: 0.3rem; border: none; border-radius: 0.5rem; cursor: pointer; }
+    button:hover { opacity: 0.8; }
+    button.primary { background-color: #97EADB; color: white; }
+    button.danger { background-color: #f66; color: white; }
+    #rouletteCanvas { margin-top: 20px; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+</head>
+<body>
+  <h1>🎰 きゃたん 管理者ページ</h1>
+
+  <h2>参加者管理</h2>
+  <table>
+    <thead>
+      <tr><th>名前</th><th>倍率</th><th>削除</th></tr>
+    </thead>
+    <tbody id="participantsTbody"></tbody>
+  </table>
+  <button class="primary" onclick="addParticipantRow()">参加者を追加</button>
+
+  <h2>ルーレット</h2>
+  <canvas id="rouletteCanvas" width="400" height="400"></canvas><br>
+  <button class="primary" id="spinStopButton" onclick="spinStopToggle()">回す</button>
+  <button class="danger" onclick="resetRoulette()">リセット</button>
+  <p id="rouletteStatus"></p>
+
+  <script>
+    // Firebase 初期化
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.appspot.com",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const tbody = document.getElementById("participantsTbody");
+    const canvas = document.getElementById("rouletteCanvas");
+    const ctx = canvas.getContext("2d");
+    let spinning = false;
+    let rotation = 0;
+
+    // パステルカラー生成
+    function pastelColor(i) {
+      const hue = (i * 137) % 360;
+      return `hsl(${hue}, 80%, 75%)`;
+    }
+
+    // 参加者追加
+    function addParticipantRow(name = "", multiplier = 1) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="text" value="${name}" oninput="saveParticipantsAuto()"></td>
+        <td><input type="number" min="1" value="${multiplier}" oninput="saveParticipantsAuto()"></td>
+        <td><button onclick="this.closest('tr').remove(); saveParticipantsAuto()">削除</button></td>`;
+      tbody.appendChild(tr);
+    }
+
+    // 参加者をFirebaseに保存 & ルーレット描画
+    function saveParticipantsAuto() {
+      const rows = tbody.querySelectorAll("tr");
+      const participants = [];
+      rows.forEach((row) => {
+        const name = row.cells[0].querySelector("input").value.trim();
+        let m = parseInt(row.cells[1].querySelector("input").value) || 1;
+        if (name) participants.push({ name, multiplier: m });
+      });
+      db.ref("/roulette/participants").set(participants);
+      drawRoulette(participants);
+    }
+
+    // ルーレット描画
+    function drawRoulette(participants) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (participants.length === 0) return;
+
+      let weightedList = [];
+      participants.forEach((p) => {
+        for (let i = 0; i < p.multiplier; i++) weightedList.push(p.name);
+      });
+
+      const total = weightedList.length;
+      let startAngle = 0;
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(rotation);
+
+      weightedList.forEach((name, i) => {
+        const angle = (2 * Math.PI) / total;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, 180, startAngle, startAngle + angle);
+        ctx.fillStyle = pastelColor(i);
+        ctx.fill();
+        ctx.stroke();
+        ctx.save();
+        ctx.rotate(startAngle + angle / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#333";
+        ctx.font = "14px sans-serif";
+        ctx.fillText(name, 160, 5);
+        ctx.restore();
+        startAngle += angle;
+      });
+
+      ctx.restore();
+
+      // Firebaseにセグメント情報も保存
+      const segments = weightedList.map((name, i) => ({
+        name,
+        color: pastelColor(i),
+        angle: (2 * Math.PI) / total,
+      }));
+      db.ref("/roulette/segments").set(segments);
+    }
+
+    // ルーレット回転
+    function spinStopToggle() {
+      const btn = document.getElementById("spinStopButton");
+      if (!spinning) {
+        spinning = true;
+        btn.textContent = "停止";
+        db.ref("/roulette/status").set("spinning");
+        requestAnimationFrame(spin);
+      } else {
+        spinning = false;
+        btn.textContent = "回す";
+        db.ref("/roulette/status").set("stopped");
+      }
+    }
+
+    function spin() {
+      if (!spinning) return;
+      rotation += 0.3; // 回転速度
+      saveParticipantsAuto(); // 回転中も描画更新
+      requestAnimationFrame(spin);
+    }
+
+    // リセット
+    function resetRoulette() {
+      tbody.innerHTML = "";
+      db.ref("/roulette").remove();
+      addParticipantRow();
+      drawRoulette([]);
+    }
+
+    // 初期化
+    db.ref("/roulette/participants").once("value").then((snap) => {
+      const data = snap.val() || [];
+      if (data.length === 0) addParticipantRow();
+      else data.forEach((p) => addParticipantRow(p.name, p.multiplier));
+      drawRoulette(data);
+    });
+  </script>
+</body>
+</html>
