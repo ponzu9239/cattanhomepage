@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,14 +14,22 @@
       margin: auto;
       color: #333;
     }
-    h1 { text-align: center; color: #97EADB; }
 
-    label, input, button {
+    h1 {
+      text-align: center;
+      color: #97EADB;
+    }
+
+    label,
+    input,
+    textarea,
+    button {
       display: block;
       margin: 1rem 0;
       width: 100%;
       font-size: 1rem;
     }
+
     button {
       background-color: #97EADB;
       color: white;
@@ -28,49 +37,130 @@
       padding: 0.5rem;
       border-radius: 0.5rem;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-    button:hover { background-color: #7fcbd5; }
-    button.danger { background-color: #f66; }
 
-    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
-    th, td { border: 1px solid #97EADB; padding: 0.5rem; text-align: center; }
-    input[type="text"], input[type="number"] { width: 90%; padding: 0.2rem; }
+    button:hover {
+      background-color: #7fcbd5;
+    }
 
-    /* 当選アニメーション */
+    button.danger {
+      background-color: #f66;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+
+    th,
+    td {
+      border: 1px solid #97EADB;
+      padding: 0.5rem;
+      text-align: center;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 90%;
+      padding: 0.2rem;
+    }
+
     @keyframes winnerPop {
-      0% { transform: scale(1); opacity: 0.2; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+        opacity: 0.2;
+      }
+
+      50% {
+        transform: scale(1.3);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
+
     .winner-animated {
       animation: winnerPop 0.6s ease;
       display: inline-block;
       transform-origin: center;
+      /* ← 拡大中心を中央に設定 */
       font-weight: bold;
       color: #FFD700;
+      /* 明るい金色 */
       text-shadow: 2px 2px 4px #000000;
+      /* 黒い縁取りでくっきり */
       background-color: rgba(0, 0, 0, 0.6);
+      /* 半透明黒で背景 */
       padding: 8px 16px;
       border-radius: 10px;
     }
 
-    #pointer {
-      position: absolute;
-      top: 100%; /* キャンバスの下 */
-      left: 50%;
-      transform: translateX(-50%);
-      margin-top: 8px;
-      width: 0;
-      height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 25px solid #97EADB; /* ▽ */
-      filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+    #participantsTable td button {
+      white-space: nowrap;
+      font-size: 0.9rem;
+      padding: 4px 8px;
+      line-height: 1.2;
+      max-width: 100%;
+      display: inline-block;
+      word-break: keep-all;
+    }
+
+    #participantsTable td {
+      padding: 0px 6px;
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+
+    /* ルーレットキャンバスと矢印の配置 */
+    #rouletteContainer {
+      margin: 1.5rem 0;
+      text-align: center;
+      position: relative;
+    }
+
+    #rouletteCanvas {
+      background-color: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #97EADBAA;
+      max-width: 100%;
+      height: auto;
+      user-select: none;
+    }
+
+    /* 矢印（下向き三角） */
+#pointer {
+  position: absolute;
+  top: 100%;  /* キャンバスの下に配置 */
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px; /* キャンバスとの間隔 */
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 25px solid #97EADB;  /* 上向き△ */
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+}
+
+    /* 現在選ばれている人名表示 */
+    #currentNameDisplay {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: #97EADB;
+      min-height: 1.5em;
+      user-select: none;
+      text-shadow: 1px 1px 2px #aaa;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
+
 <body>
   <h1>きゃたん 管理者ページ</h1>
 
@@ -93,16 +183,20 @@
           <th>削除</th>
         </tr>
       </thead>
-      <tbody id="participantsTbody"></tbody>
+      <tbody id="participantsTbody">
+        <!-- 参加者行ここに追加 -->
+      </tbody>
     </table>
 
     <button onclick="addParticipantRow()">参加者を追加</button>
     <button id="spinStopButton" onclick="spinStopToggle()">ルーレットを回す</button>
     <button onclick="resetRoulette()" class="danger">リセット</button>
 
-    <div style="position: relative; display: flex; justify-content: center; margin-top: 20px;">
-      <canvas id="rouletteCanvas" width="300" height="300"></canvas>
-      <div id="pointer"></div>
+    <!-- ここにルーレット描画と矢印 -->
+    <div id="rouletteContainer">
+      <canvas id="rouletteCanvas" width="400" height="400"></canvas>
+            <div id="pointer"></div>
+      <div id="currentNameDisplay"></div>
     </div>
 
     <p id="rouletteStatus"></p>
@@ -123,161 +217,278 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let participants = [];
-    let spinning = false;
-    let currentAngle = 0;
-    let spinSpeed = 0;
-    let animationId;
-
     const canvas = document.getElementById("rouletteCanvas");
     const ctx = canvas.getContext("2d");
-    const center = canvas.width / 2;
+    const currentNameDisplay = document.getElementById("currentNameDisplay");
+    const statusEl = document.getElementById("rouletteStatus");
+    const spinStopButton = document.getElementById("spinStopButton");
 
+    let participants = [];
+    let totalMultiplier = 0;
+    let segments = []; // {name, multiplier, startAngle, endAngle, color}
+
+    let spinning = false;
+    let animationId = null;
+    let angle = 0; // ルーレットの回転角度（ラジアン）
+    let angularVelocity = 0; // 回転速度（ラジアン/ms）
+    let decelerating = false;
+
+    // 色配列（かわいいパステル調）
+    const colors = [
+      "#A0E7E5",
+      "#B4F8C8",
+      "#FBE7C6",
+      "#FFAEBC",
+      "#A0CED9",
+      "#FFC6FF",
+      "#FFB5A7",
+      "#D0F4DE"
+    ];
+
+    // 参加者行追加関数（既存のもの）
+    function addParticipantRow(name = "", multiplier = 1) {
+      const tbody = document.getElementById("participantsTbody");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+    <td><input type="text" value="${name}" placeholder="名前" oninput="saveParticipantsAuto()" /></td>
+    <td><input type="number" min="1" value="${multiplier}" oninput="saveParticipantsAuto()" /></td>
+    <td><button onclick="this.closest('tr').remove(); saveParticipantsAuto()">削除</button></td>
+  `;
+      tbody.appendChild(tr);
+    }
+
+    // Firebaseから参加者読み込み＋初期化描画
     window.onload = () => {
-      db.ref("/cattan").once("value").then(snap => {
-        const data = snap.val() || {};
+      db.ref("/cattan").once("value").then(snapshot => {
+        const data = snapshot.val() || {};
         document.getElementById("participantCode").value = data.code || "";
         document.getElementById("streamUrl").value = data.stream || "";
       });
-      db.ref("/roulette/participants").once("value").then(snap => {
-        const data = snap.val() || [];
-        if (data.length === 0) addParticipantRow();
-        else data.forEach(p => addParticipantRow(p.name, p.multiplier));
+
+      db.ref("/roulette/participants").once("value").then(snapshot => {
+        const data = snapshot.val() || [];
+        if (!data || data.length === 0) {
+          addParticipantRow();
+          updateParticipantsFromInputs();
+          drawRoulette();
+          return;
+        }
+        data.forEach(p => addParticipantRow(p.name, p.multiplier));
         updateParticipantsFromInputs();
         drawRoulette();
       });
     };
 
+    // 保存処理（既存）
     function saveData() {
       const participantCode = document.getElementById("participantCode").value.trim();
       const streamUrl = document.getElementById("streamUrl").value.trim();
-      db.ref("/cattan").set({
+
+      const updates = {
         code: participantCode || "現在、参加型カスタムは行われておりません。",
         stream: streamUrl || "現在、配信は行われていません。"
-      }).then(() => document.getElementById("status").textContent = "保存しました！");
-    }
+      };
 
-    function addParticipantRow(name = "", multiplier = 1) {
-      const tbody = document.getElementById("participantsTbody");
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><input type="text" value="${name}" placeholder="名前" oninput="saveParticipantsAuto()" /></td>
-        <td><input type="number" min="1" value="${multiplier}" oninput="saveParticipantsAuto()" /></td>
-        <td><button onclick="this.closest('tr').remove(); saveParticipantsAuto()">削除</button></td>
-      `;
-      tbody.appendChild(tr);
-    }
-
-    function saveParticipantsAuto() {
-      const rows = document.querySelectorAll("#participantsTbody tr");
-      participants = [];
-      rows.forEach(row => {
-        const name = row.cells[0].querySelector("input").value.trim();
-        let multiplier = parseInt(row.cells[1].querySelector("input").value);
-        if (name && multiplier >= 1) participants.push({ name, multiplier });
+      db.ref("/cattan").set(updates).then(() => {
+        document.getElementById("status").textContent = "保存しました！";
       });
+    }
+
+    // 参加者テーブルの入力から配列に反映しFirebaseにも保存
+    function saveParticipantsAuto() {
+      updateParticipantsFromInputs();
       db.ref("/roulette/participants").set(participants);
       drawRoulette();
     }
 
-    function updateParticipantsFromInputs() { saveParticipantsAuto(); }
+    // テーブルの値からparticipants配列を作成
+    function updateParticipantsFromInputs() {
+      const tbody = document.getElementById("participantsTbody");
+      const rows = tbody.querySelectorAll("tr");
+      participants = [];
+      for (const row of rows) {
+        const name = row.cells[0].querySelector("input").value.trim();
+        let multiplier = parseInt(row.cells[1].querySelector("input").value);
+        if (!name) continue;
+        if (isNaN(multiplier) || multiplier < 1) multiplier = 1;
+        participants.push({ name, multiplier });
+      }
+      totalMultiplier = participants.reduce((sum, p) => sum + p.multiplier, 0);
+      calculateSegments();
+    }
 
+    // 参加者と倍率に応じてセグメントの角度を計算してsegments配列に格納
+    function calculateSegments() {
+      segments = [];
+      let startAngle = 0;
+      for (let i = 0; i < participants.length; i++) {
+        const p = participants[i];
+        const angleSpan = (p.multiplier / totalMultiplier) * 2 * Math.PI;
+        segments.push({
+          name: p.name,
+          multiplier: p.multiplier,
+          startAngle: startAngle,
+          endAngle: startAngle + angleSpan,
+          color: colors[i % colors.length]
+        });
+        startAngle += angleSpan;
+      }
+    }
+
+    // ルーレットをキャンバスに描画する関数
     function drawRoulette() {
+      const size = Math.min(canvas.width, canvas.height);
+      const cx = size / 2;
+      const cy = size / 2;
+      const radius = size / 2 - 20;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (participants.length === 0) return;
-      const total = participants.reduce((a, p) => a + p.multiplier, 0);
-      let startAngle = currentAngle;
-      participants.forEach(p => {
-        const slice = (p.multiplier / total) * 2 * Math.PI;
+
+      if (segments.length === 0) {
+        // セグメントなしなら真ん中にメッセージ
+        ctx.fillStyle = "#999";
+        ctx.font = "20px 'Hiragino Maru Gothic ProN', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("参加者を追加してください", cx, cy);
+        return;
+      }
+
+      // パイを描く
+      segments.forEach((seg) => {
         ctx.beginPath();
-        ctx.moveTo(center, center);
-        ctx.arc(center, center, center, startAngle, startAngle + slice);
-        ctx.fillStyle = `hsl(${Math.random() * 360},70%,80%)`;
+        ctx.moveTo(cx, cy);
+        ctx.fillStyle = seg.color;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.arc(cx, cy, radius, seg.startAngle + angle, seg.endAngle + angle);
+        ctx.lineTo(cx, cy);
         ctx.fill();
         ctx.stroke();
 
-        ctx.save();
-        ctx.translate(center, center);
-        ctx.rotate(startAngle + slice / 2);
-        ctx.textAlign = "right";
+        // 角度中央に名前を描画
+        const midAngle = (seg.startAngle + seg.endAngle) / 2 + angle;
+        const textRadius = radius * 0.6;
         ctx.fillStyle = "#333";
-        ctx.font = "16px Hiragino Maru Gothic ProN";
-        ctx.fillText(p.name, center - 10, 5);
-        ctx.restore();
-
-        startAngle += slice;
+        ctx.font = "bold 14px 'Hiragino Maru Gothic ProN', sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const x = cx + Math.cos(midAngle) * textRadius;
+        const y = cy + Math.sin(midAngle) * textRadius;
+        ctx.fillText(seg.name, x, y);
       });
     }
 
-    function getCurrentName() {
-      if (participants.length === 0) return "";
-      const total = participants.reduce((a, p) => a + p.multiplier, 0);
-      let angle = (3 * Math.PI / 2 - currentAngle + 2 * Math.PI) % (2 * Math.PI);
-      let acc = 0;
-      for (let p of participants) {
-        const slice = (p.multiplier / total) * 2 * Math.PI;
-        if (angle >= acc && angle < acc + slice) return p.name;
-        acc += slice;
+    // 現在角度から選ばれている参加者名を返す
+    function getCurrentSegmentName() {
+      let normalizedAngle = angle % (2 * Math.PI);
+      if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
+
+      // pointerは下向き = 90度(π/2) なので、
+      // 角度は pointer位置(π/2)を基準に逆回転方向で判定する
+      // 回転角度angleはキャンバス描画に足してるので、
+      // 実際の選択は (2π + π/2 - normalizedAngle) % 2π の位置を判定
+      const pointerAngle = Math.PI / 2;
+      const checkAngle = (2 * Math.PI + pointerAngle - normalizedAngle) % (2 * Math.PI);
+
+      for (const seg of segments) {
+        if (checkAngle >= seg.startAngle && checkAngle < seg.endAngle) {
+          return seg.name;
+        }
       }
       return "";
     }
 
-    function spinStopToggle() {
-      const button = document.getElementById("spinStopButton");
-      const statusEl = document.getElementById("rouletteStatus");
-
-      if (!spinning) {
-        spinning = true;
-        button.textContent = "停止";
-        db.ref("/roulette/status").set("spinning");
-        spinSpeed = 0.5;
-        animate();
-      } else {
-        spinning = false;
-        button.textContent = "ルーレットを回す";
-        slowDown();
-      }
-    }
-
+    // アニメーションループ
     function animate() {
-      currentAngle += spinSpeed;
-      drawRoulette();
-      const name = getCurrentName();
-      document.getElementById("rouletteStatus").textContent = `🎲 抽選中: ${name}`;
-      db.ref("/roulette/currentName").set(name);
-      animationId = requestAnimationFrame(animate);
-    }
+      // 回転角度を更新
+      angle += angularVelocity;
 
-    function slowDown() {
-      if (spinSpeed > 0.01) {
-        spinSpeed *= 0.97;
-        currentAngle += spinSpeed;
-        drawRoulette();
-        requestAnimationFrame(slowDown);
+      // 減速処理
+      if (decelerating) {
+        angularVelocity *= 0.97; // 減速率 調整可
+        if (angularVelocity < 0.002) {
+          angularVelocity = 0;
+          decelerating = false;
+          spinning = false;
+          spinStopButton.textContent = "ルーレットを回す";
+          announceWinner();
+        }
+      }
+
+      drawRoulette();
+
+      // 現在選択中の名前を表示・Firebaseに送信
+      const currentName = getCurrentSegmentName();
+      currentNameDisplay.textContent = currentName ? `🎲 抽選中: ${currentName}` : "";
+      db.ref("/roulette/currentName").set(currentName);
+
+      if (spinning) {
+        animationId = requestAnimationFrame(animate);
       } else {
         cancelAnimationFrame(animationId);
-        const winner = getCurrentName();
-        db.ref(`/roulette/winner/${Date.now()}`).set(winner).then(() => {
-          const statusEl = document.getElementById("rouletteStatus");
-          statusEl.textContent = `🎉 当選者: ${winner}`;
-          statusEl.classList.remove("winner-animated");
-          void statusEl.offsetWidth;
-          statusEl.classList.add("winner-animated");
-          db.ref("/roulette/status").set("stopped");
-        });
       }
     }
 
+    // 抽選開始・停止トグル
+    function spinStopToggle() {
+      if (!spinning) {
+        // 参加者なしは警告
+        if (participants.length === 0) {
+          statusEl.textContent = "参加者がいません。参加者を追加してください。";
+          return;
+        }
+
+        spinning = true;
+        decelerating = false;
+        angularVelocity = 0.4 + Math.random() * 0.2; // 超高速回転初速（ラジアン/frame）
+        spinStopButton.textContent = "停止";
+        statusEl.textContent = "";
+
+        db.ref("/roulette/status").set("spinning");
+
+        animate();
+
+      } else if (!decelerating) {
+        // 停止要求 → 徐々に減速
+        decelerating = true;
+        spinStopButton.textContent = "停止中…";
+      }
+    }
+
+    // 勝者決定時の処理
+    function announceWinner() {
+      const winner = getCurrentSegmentName();
+      if (!winner) {
+        statusEl.textContent = "当選者が決まりませんでした。";
+        db.ref("/roulette/status").set("stopped");
+        return;
+      }
+      const timestamp = Date.now();
+
+      db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
+        statusEl.textContent = `🎉 当選者: ${winner}`;
+        db.ref("/roulette/status").set("stopped");
+
+        // 勝者名を強調アニメーション
+        currentNameDisplay.classList.remove("winner-animated");
+        void currentNameDisplay.offsetWidth;
+        currentNameDisplay.classList.add("winner-animated");
+      });
+    }
+
+    // リセット処理
     function resetRoulette() {
       db.ref("/roulette/participants").remove();
       db.ref("/roulette/winner").remove();
       db.ref("/roulette/currentName").remove();
       document.getElementById("rouletteStatus").textContent = "ルーレットをリセットしました。";
-      document.getElementById("participantsTbody").innerHTML = "";
+      const tbody = document.getElementById("participantsTbody");
+      tbody.innerHTML = "";
       addParticipantRow();
       updateParticipantsFromInputs();
       drawRoulette();
     }
   </script>
 </body>
+
 </html>
