@@ -32,6 +32,27 @@
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { border: 1px solid #97EADB; padding: 0.5rem; text-align: center; }
     canvas { display: block; margin: 1rem auto; background: white; border-radius: 50%; }
+    
+      /* 既存のstyleの最後に追記 */
+  #participantsTable input[type="text"],
+  #participantsTable input[type="number"] {
+    width: 90%;
+    padding: 4px 6px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    height: 30px;  /* 高さを統一 */
+    margin: 0;
+  }
+
+  #participantsTable td {
+    padding: 4px;
+    vertical-align: middle; /* 上下中央揃え */
+  }
+
+  #participantsTable td:nth-child(2) input {
+    width: 60px; /* 倍率入力欄だけ狭め */
+  }
+
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
