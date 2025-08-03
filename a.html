@@ -1,156 +1,165 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>きゃたん ルーレット</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ルーレット抽選</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #fff9f9;
       text-align: center;
+      background: #e6f9fd;
+      margin: 0;
       padding: 2rem;
     }
-    h1 { color: #97EADB; }
-    canvas { margin-top: 20px; }
-    #winnerDisplay {
-      font-size: 2rem;
+    canvas {
+      display: block;
+      margin: auto;
+    }
+    #arrow {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 40px solid red;
+      margin: 10px auto;
+    }
+
+    /* 🎉 当選者表示デザイン */
+    #winner {
+      text-align: center;
+      background-color: #ffeef5;
+      border: 2px solid #ffb3c1;
+      padding: 1em;
+      margin: 2em auto;
+      border-radius: 10px;
+      width: fit-content;
+      max-width: 90%;
+    }
+
+    #winner h2 {
+      font-size: 1.5em;
+      color: #e91e63;
+      margin-bottom: 0.5em;
+    }
+
+    #winnerName {
+      font-size: 1.2em;
       font-weight: bold;
+      color: #333;
+    }
+
+    @keyframes winnerAnimation {
+      0% { transform: scale(1); color: #e91e63; opacity: 1; }
+      50% { transform: scale(1.3); color: #ff4081; opacity: 1; }
+      100% { transform: scale(1); color: #e91e63; opacity: 1; }
+    }
+
+    .animate-winner {
+      animation: winnerAnimation 1.5s ease-in-out;
+    }
+
+    button {
       margin-top: 20px;
-      color: #FFD700;
-      text-shadow: 2px 2px 4px #000;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      background: #97EADB;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
     }
-    @keyframes winnerPop {
-      0% { transform: scale(1); opacity: 0.2; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(1); }
-    }
-    .winner-animated {
-      animation: winnerPop 0.6s ease;
-      display: inline-block;
+
+    button:hover {
+      background: #6fcad0;
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
-  <h1>🎰 きゃたん ルーレット</h1>
-  <canvas id="rouletteCanvas" width="400" height="400"></canvas>
-  <div id="winnerDisplay"></div>
+
+  <h1>ルーレット抽選</h1>
+  <canvas id="roulette" width="400" height="400"></canvas>
+  <div id="arrow"></div>
+  <button onclick="startSpin()">🎲 抽選スタート</button>
+
+  <!-- 🎉 当選者表示 -->
+  <div id="winner">
+    <h2>🎉本日の当選者🎉</h2>
+    <div id="winnerName">まだ抽選していません</div>
+  </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const canvas = document.getElementById("rouletteCanvas");
+    const canvas = document.getElementById("roulette");
     const ctx = canvas.getContext("2d");
-    let participants = [];
-    let colors = [];
-    let angle = 0;
-    let velocity = 0;
+    const names = ["Aさん", "Bさん", "Cさん", "Dさん", "Eさん"];
+    const colors = ["#FFB3BA", "#BAE1FF", "#BAFFC9", "#FFFFBA", "#FFDFBA"];
+    let startAngle = 0;
+    let spinAngle = 0;
     let spinning = false;
 
-    function randomPastelColor() {
-      const r = Math.floor(Math.random() * 127 + 127);
-      const g = Math.floor(Math.random() * 127 + 127);
-      const b = Math.floor(Math.random() * 127 + 127);
-      return `rgb(${r},${g},${b})`;
-    }
-
     function drawRoulette() {
+      const arc = (2 * Math.PI) / names.length;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const radius = 150;
 
-      if (participants.length === 0) return;
-      const arc = (2 * Math.PI) / participants.length;
-
-      for (let i = 0; i < participants.length; i++) {
-        const start = angle + i * arc;
+      for (let i = 0; i < names.length; i++) {
+        const angle = startAngle + i * arc;
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, start, start + arc);
-        ctx.closePath();
         ctx.fillStyle = colors[i];
+        ctx.moveTo(200, 200);
+        ctx.arc(200, 200, 200, angle, angle + arc);
         ctx.fill();
 
         ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(start + arc / 2);
+        ctx.translate(200, 200);
+        ctx.rotate(angle + arc / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#333";
-        ctx.font = "16px Hiragino Maru Gothic ProN";
-        ctx.fillText(participants[i].name, radius - 10, 5);
+        ctx.font = "16px sans-serif";
+        ctx.fillText(names[i], 180, 10);
         ctx.restore();
       }
-
-      // ポインタ
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY - radius - 10);
-      ctx.lineTo(centerX - 10, centerY - radius - 25);
-      ctx.lineTo(centerX + 10, centerY - radius - 25);
-      ctx.closePath();
-      ctx.fillStyle = "#FF69B4";
-      ctx.fill();
     }
 
-    function animate() {
-      if (spinning) {
-        angle += velocity;
-        angle %= 2 * Math.PI;
-      }
-      drawRoulette();
-      requestAnimationFrame(animate);
+    function getCurrentName() {
+      const arc = (2 * Math.PI) / names.length;
+      const currentIndex = Math.floor(
+        (names.length - (startAngle % (2 * Math.PI)) / arc) % names.length
+      );
+      return names[currentIndex];
     }
 
-    // 参加者リストの同期
-    db.ref("/roulette/participants").on("value", (snapshot) => {
-      const data = snapshot.val() || [];
-      participants = data;
-      colors = participants.map(() => randomPastelColor());
-      drawRoulette();
-    });
+    function startSpin() {
+      if (spinning) return;
+      spinning = true;
 
-    // 🔥 ルーレット状態の監視
-    db.ref("/roulette/status").on("value", (snapshot) => {
-      const status = snapshot.val();
-      if (status === "spinning") {
-        spinning = true;
-        velocity = 0.5; // 🔥 高速回転
-        document.getElementById("winnerDisplay").textContent = "";
-      } else {
-        spinning = false;
-        velocity = 0;
+      let spinTime = 0;
+      const spinTimeTotal = Math.random() * 3000 + 3000;
+
+      function rotate() {
+        spinTime += 30;
+        if (spinTime >= spinTimeTotal) {
+          spinning = false;
+          const winner = getCurrentName();
+          announceWinner(winner);
+          return;
+        }
+        const spinAngleIncrement = (Math.random() * 0.2 + 0.3) * (1 - spinTime / spinTimeTotal);
+        startAngle += spinAngleIncrement;
+        drawRoulette();
+        requestAnimationFrame(rotate);
       }
-    });
+      rotate();
+    }
 
-    // 🔥 当選者の監視
-    db.ref("/roulette/currentName").on("value", (snapshot) => {
-      // spinning中は表示しない
-    });
+    function announceWinner(name) {
+      const winnerEl = document.getElementById("winnerName");
+      winnerEl.textContent = `🎊 ${name} 🎊`;
+      winnerEl.classList.remove("animate-winner");
+      void winnerEl.offsetWidth; // 再描画トリガー
+      winnerEl.classList.add("animate-winner");
+    }
 
-    db.ref("/roulette/winner").on("child_added", (snapshot) => {
-      const winner = snapshot.val();
-      if (winner) {
-        const el = document.getElementById("winnerDisplay");
-        el.textContent = `🎉 当選者: ${winner}`;
-        el.classList.remove("winner-animated");
-        void el.offsetWidth;
-        el.classList.add("winner-animated");
-      }
-    });
-
-    animate();
+    drawRoulette();
   </script>
 </body>
 </html>
