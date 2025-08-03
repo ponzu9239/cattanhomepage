@@ -364,7 +364,7 @@ function getCurrentSegmentName() {
   let normalizedAngle = angle % (2 * Math.PI);
   if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
 
-  const pointerAngle = 3 * Math.PI / 2; // 下方向
+  const pointerAngle = Math.PI / 2; // 下方向
   const checkAngle = (pointerAngle - normalizedAngle + 2 * Math.PI) % (2 * Math.PI);
 
   for (const seg of segments) {
