@@ -102,7 +102,7 @@
     <canvas id="rouletteCanvas" width="400" height="400"></canvas>
 
     <div style="text-align:center; font-weight:bold; font-size:1.2rem; color:#97EADB;">
-      ▶️ 現在の選択者: <span id="currentWinner">-</span>
+      🎯 矢印の先: <span id="currentWinner">-</span>
     </div>
 
     <div style="text-align:center; margin-top:10px;">
@@ -152,12 +152,13 @@
       return pastelColor(Math.abs(hash) % 6);
     }
 
+    // ▼ 下向き矢印
     function drawArrow() {
       ctx.fillStyle = "#f66";
       ctx.beginPath();
-      ctx.moveTo(centerX, centerY - radius - arrowSize);
-      ctx.lineTo(centerX - arrowSize / 2, centerY - radius);
-      ctx.lineTo(centerX + arrowSize / 2, centerY - radius);
+      ctx.moveTo(centerX, centerY + radius + arrowSize); // 先端（下）
+      ctx.lineTo(centerX - arrowSize / 2, centerY + radius); // 左上
+      ctx.lineTo(centerX + arrowSize / 2, centerY + radius); // 右上
       ctx.closePath();
       ctx.fill();
     }
@@ -200,16 +201,20 @@
       drawArrow();
     }
 
+    // ▼ 下向き矢印に合わせた当選者計算
     function getWinnerName() {
       if (participantsList.length === 0) return null;
+
       const totalWeight = participantsList.reduce((a, p) => a + p.multiplier, 0);
       const normalizedAngle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
 
       let acc = 0;
       for (const p of participantsList) {
         const slice = (p.multiplier / totalWeight) * Math.PI * 2;
-        const start = acc - Math.PI / 2;
-        const end = acc + slice - Math.PI / 2;
+
+        const start = acc + Math.PI / 2; // 下方向基準
+        const end = acc + slice + Math.PI / 2;
+
         if (normalizedAngle >= start && normalizedAngle < end) {
           return p.name;
         }
