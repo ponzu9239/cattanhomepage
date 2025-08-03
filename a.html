@@ -154,6 +154,53 @@
   white-space: nowrap;
   overflow: hidden;
 }
+
+#winner {
+  text-align: center;
+  background-color: #ffeef5;
+  border: 2px solid #ffb3c1;
+  padding: 1em;
+  margin: 2em auto;
+  border-radius: 10px;
+  width: fit-content;
+  max-width: 90%;
+}
+
+#winner h2 {
+  font-size: 1.5em;
+  color: #e91e63;
+  margin-bottom: 0.5em;
+}
+
+#winnerName {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+}
+
+@keyframes winnerAnimation {
+  0% {
+    transform: scale(1);
+    color: #e91e63;
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.3);
+    color: #ff4081;
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    color: #e91e63;
+    opacity: 1;
+  }
+}
+
+.animate-winner {
+  animation: winnerAnimation 1.5s ease-in-out;
+}
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -171,6 +218,25 @@
       <p id="currentNameDisplay"></p>
       <p id="rouletteStatus"></p>
     </div>
+    
+    <section id="rouletteSection">
+  <div id="winner">
+    <h2>🎉本日の当選者🎉</h2>
+    <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
+
+    <!-- 当選確率バー -->
+    <div id="probabilityBarContainer" style="margin-top: 1em;">
+      <div id="probabilityBarBackground"
+        style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
+        <div id="probabilityBar" style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;">
+        </div>
+      </div>
+      <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">
+        当選確率: ??%
+      </div>
+    </div>
+  </div>
+</section>
     
     <div id="probabilityTableContainer">
   <h2>📊 当選確率</h2>
@@ -330,6 +396,58 @@ function updateProbabilityTable() {
         currentNameDisplay.classList.add("winner-animated");
       }
     });
+    
+    <script>
+  const winnerEl = document.getElementById("winnerName");
+  const winnerRef = firebase.database().ref("/roulette/winner");
+
+  winnerRef.on("value", (snapshot) => {
+    const winners = snapshot.val();
+    if (winners) {
+      const keys = Object.keys(winners);
+      if (keys.length > 0) {
+        keys.sort();
+        const latestWinner = winners[keys[keys.length - 1]];
+        winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
+        updateProbabilityBar(latestWinner);
+
+        // アニメーション付与
+        winnerEl.classList.remove("animate-winner");
+        void winnerEl.offsetWidth; // 再描画
+        winnerEl.classList.add("animate-winner");
+        return;
+      }
+    }
+    winnerEl.textContent = "まだ抽選が行われていません。";
+  });
+
+  function updateProbabilityBar(winnerName) {
+    firebase.database().ref("/roulette/participants").once("value").then(snapshot => {
+      const participantsObj = snapshot.val() || {};
+      const participants = Object.values(participantsObj);
+
+      const winner = participants.find(p => {
+        if (typeof p === "object") return p.name === winnerName;
+        return p === winnerName;
+      });
+
+      if (!winner) return;
+
+      const winnerMultiplier = winner.multiplier || 1;
+      const total = participants.reduce((sum, u) => {
+        return sum + (typeof u === "object" ? (u.multiplier || 1) : 1);
+      }, 0);
+
+      const percent = (winnerMultiplier / total) * 100;
+
+      const bar = document.getElementById("probabilityBar");
+      const text = document.getElementById("probabilityPercent");
+
+      bar.style.width = `${percent}%`;
+      text.textContent = `当選確率: ${percent.toFixed(1)}%`;
+    });
+  }
+</script>
   </script>
 </body>
 </html>
