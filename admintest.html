@@ -115,13 +115,6 @@
       line-height: 1;
     }
 
-    /* ルーレットキャンバスと矢印の配置 */
-    #rouletteContainer {
-      margin: 1.5rem 0;
-      text-align: center;
-      position: relative;
-    }
-
     #rouletteCanvas {
       background-color: #fff;
       border-radius: 50%;
@@ -131,32 +124,35 @@
       user-select: none;
     }
 
-    /* 矢印（下向き三角） */
+  
+  #rouletteContainer {
+  margin: 1.5rem 0;
+  text-align: center; /* これで中身が中央寄せになる */
+  position: relative;
+}
+
 #pointer {
   position: absolute;
-  top: 100%;  /* キャンバスの下に配置 */
+  top: 100%; /* canvasの真下に配置 */
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 8px; /* キャンバスとの間隔 */
+  margin-top: 8px;
   width: 0;
   height: 0;
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
-  border-bottom: 25px solid #97EADB;  /* 上向き△ */
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+  border-bottom: 25px solid #97EADB; /* 上向き△ */
 }
 
-    /* 現在選ばれている人名表示 */
- #currentNameDisplay {
-  margin-top: 10px;
+#currentNameDisplay {
+  margin-top: 40px;  /* 矢印と名前の間の余白 */
   font-weight: bold;
   font-size: 1.3rem;
   color: #97EADB;
   min-height: 1.5em;
   user-select: none;
   text-shadow: 1px 1px 2px #aaa;
-  text-align: center;
-  }
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
