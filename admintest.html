@@ -145,13 +145,19 @@
 }
 
 #currentNameDisplay {
-  margin-top: 30px; /* 矢印との距離をしっかり取る */
+  margin-top: 40px;
   font-weight: bold;
   font-size: 1.3rem;
   color: #97EADB;
-  min-height: 1.5em;
-  user-select: none;
   text-shadow: 1px 1px 2px #aaa;
+
+  /* 横幅指定なし */
+  text-align: center; /* テキスト中央揃え */
+  display: inline-block; /* 幅は内容に合わせる */
+  user-select: none;
+  /* 親要素の中央に配置するために */
+  margin-left: auto;
+  margin-right: auto;
 }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -416,7 +422,7 @@
 
       // 現在選択中の名前を表示・Firebaseに送信
       const currentName = getCurrentSegmentName();
-      currentNameDisplay.textContent = currentName ? `🎲 抽選中: ${currentName}` : "";
+      currentNameDisplay.innerHTML = currentName ? `🎲 抽選中 🎲<br>${currentName}` : "";
       db.ref("/roulette/currentName").set(currentName);
 
       if (spinning) {
@@ -464,7 +470,7 @@ function announceWinner() {
 
   db.ref(`/roulette/winner/${timestamp}`).set(winner).then(() => {
     // 🎲 抽選中 → 🎉 当選者 に書き換える
-    currentNameDisplay.textContent = `🎉 当選者: ${winner}`;
+    currentNameDisplay.innerHTML = `🎉 当選者　🎉<br>${winner}`;
     db.ref("/roulette/status").set("stopped");
 
     // 勝者名を強調アニメーション
