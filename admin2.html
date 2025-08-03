@@ -378,7 +378,7 @@ function getCurrentSegmentName() {
   function animate() {
     angle += angularVelocity;
     if (decelerating) {
-      angularVelocity *= 0.97;
+      angularVelocity *= 0.99;
       if (angularVelocity < 0.002) {
         angularVelocity = 0;
         decelerating = false;
