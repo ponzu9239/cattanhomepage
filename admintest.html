@@ -165,15 +165,11 @@
 }
 
 #centerDisplay {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;  /* 縦方向中央 */
-  align-items: center;      /* 横方向中央 */
-  height: auto;             /* 高さは中身に合わせる */
-  margin-top: 20vh;         /* 上に余白を作って画面中央っぽく */
-  margin-bottom: 20vh;      /* 下も余白 */
-  text-align: center;
-  gap: 8px;
+  margin: 0 auto;       /* 横方向中央寄せ */
+  display: block;       /* ブロック要素化で幅調整 */
+  text-align: center;   /* 中のテキストを中央揃え */
+  width: fit-content;   /* テキスト幅に合わせる（必要に応じて） */
+  max-width: 100%;      /* 幅が広すぎないように */
 }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
