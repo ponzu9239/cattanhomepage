@@ -138,6 +138,23 @@
   </div>
 
   <script>
+  // ページ読み込み時にユーザーIDを作成・保存して使う
+let userId = localStorage.getItem("userId");
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).slice(2);
+  localStorage.setItem("userId", userId);
+}
+
+// 名前入力欄のinputイベントの中で、Firebaseに保存するパスをユーザーごとに分ける
+document.getElementById("nameInput").addEventListener("input", () => {
+  const names = document.getElementById("nameInput").value.split("\n").map(n => n.trim()).filter(n => n);
+
+  // ここを
+  // db.ref("currentInputPlayers").set(names);
+  // ↓こう変えるだけ
+  db.ref("currentInputPlayers/" + userId).set(names);
+});
+  
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
