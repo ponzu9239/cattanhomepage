@@ -22,6 +22,7 @@
       border-radius: 6px;
       font-size: 16px;
       margin: 5px;
+      width: 150px;
     }
     button {
       padding: 8px 16px;
@@ -66,6 +67,13 @@
     <input type="text" id="oldName" placeholder="旧プレイヤー名" />
     →
     <input type="text" id="newName" placeholder="新プレイヤー名" />
+  </div>
+  
+  <!-- 範囲指定 -->
+  <div class="box">
+    <input type="number" id="startMatch" placeholder="開始試合番号" />
+    〜
+    <input type="number" id="endMatch" placeholder="終了試合番号" />
     <button onclick="replacePlayer()">名前を置換</button>
   </div>
 
@@ -103,7 +111,7 @@
       }
     });
 
-    // 🔹 キル差スコアを計算する関数
+    // キル差スコアを計算する関数
     function calculateKillDiffScore(match, playerName) {
       const isTeamA = match.teamA.includes(playerName);
       const teamKills = isTeamA ? match.teamAKills : match.teamBKills;
@@ -117,7 +125,7 @@
       return ((teamKills - enemyKills) * (enemySize / myTeamSize)).toFixed(2);
     }
 
-    // 🔹 検索機能
+    // 検索機能
     function searchPlayer() {
       const name = document.getElementById("playerName").value.trim();
       const tbody = document.getElementById("resultTable");
@@ -148,20 +156,35 @@
       });
     }
 
-    // 🔹 名前置換機能
+    // 名前置換機能（範囲指定対応）
     async function replacePlayer() {
       const oldName = document.getElementById("oldName").value.trim();
       const newName = document.getElementById("newName").value.trim();
+      const startMatch = parseInt(document.getElementById("startMatch").value, 10);
+      const endMatch = parseInt(document.getElementById("endMatch").value, 10);
 
       if (!oldName || !newName) {
         alert("旧名と新名を入力してください");
         return;
       }
 
+      if (isNaN(startMatch) || isNaN(endMatch) || startMatch > endMatch) {
+        alert("有効な試合番号範囲を指定してください");
+        return;
+      }
+
+      let replacedCount = 0;
+
       for (let i = 0; i < allMatches.length; i++) {
         const key = matchKeys[i];
-        let updated = false;
         const match = { ...allMatches[i] };
+        const matchNum = match.matchNumber;
+
+        if (matchNum < startMatch || matchNum > endMatch) {
+          continue;
+        }
+
+        let updated = false;
 
         if (match.teamA.includes(oldName)) {
           match.teamA = match.teamA.map(p => (p === oldName ? newName : p));
@@ -174,10 +197,12 @@
 
         if (updated) {
           await db.ref("apex_results/" + key).set(match);
+          replacedCount++;
         }
       }
 
-      alert("名前を置換しました！");
+      alert(`名前を置換しました！ 試合数: ${replacedCount}`);
+      searchPlayer();
     }
   </script>
 </body>
