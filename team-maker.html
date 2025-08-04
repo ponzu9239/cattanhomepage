@@ -217,10 +217,21 @@
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     let matchingPlayers = [];
 
-    db.ref("currentInputPlayers").on("value", (snapshot) => {
-      matchingPlayers = snapshot.exists() ? snapshot.val() : [];
-      renderPlayers();
-    });
+db.ref("currentInputPlayers").on("value", (snapshot) => {
+  const data = snapshot.val() || {};
+  matchingPlayers = [];
+
+  Object.values(data).forEach(nameList => {
+    if (Array.isArray(nameList)) {
+      matchingPlayers.push(...nameList);
+    }
+  });
+
+  // 重複除去（必要なら）
+  matchingPlayers = [...new Set(matchingPlayers)];
+
+  renderPlayers();
+});
 
     function calculateScoresAverage(matches) {
       const history = {};
