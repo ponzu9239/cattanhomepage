@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,10 +14,12 @@
       margin: auto;
       color: #333;
     }
+
     h1 {
       text-align: center;
       color: #97EADB;
     }
+
     #rouletteCanvas {
       background-color: #fff;
       border-radius: 50%;
@@ -25,11 +28,13 @@
       height: auto;
       user-select: none;
     }
+
     #rouletteContainer {
       margin: 1.5rem 0;
       text-align: center;
       position: relative;
     }
+
     #pointer {
       position: absolute;
       top: 100%;
@@ -42,6 +47,7 @@
       border-right: 15px solid transparent;
       border-bottom: 25px solid #97EADB;
     }
+
     #currentNameDisplay {
       margin-top: 40px;
       font-weight: bold;
@@ -55,6 +61,7 @@
       line-height: 1.4;
       user-select: none;
     }
+
     #centerDisplay {
       margin: 0 auto;
       display: block;
@@ -63,11 +70,23 @@
       max-width: 100%;
       margin-top: 50px;
     }
+
     @keyframes winnerPop {
-      0% { transform: scale(1); opacity: 0.2; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+        opacity: 0.2;
+      }
+
+      50% {
+        transform: scale(1.3);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
+
     .winner-animated {
       animation: winnerPop 0.6s ease;
       display: inline-block;
@@ -79,133 +98,137 @@
       padding: 8px 16px;
       border-radius: 10px;
     }
-    
+
     #probabilityTableContainer {
-  margin-top: 30px;
-  text-align: center;
-  font-family: "Hiragino Maru Gothic ProN", sans-serif;
-  color: #333;
-  user-select: none;
-}
+      margin-top: 30px;
+      text-align: center;
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      color: #333;
+      user-select: none;
+    }
 
-#probabilityTableContainer h2 {
-  color: #97EADB;
-  font-weight: bold;
-  font-size: 1.5rem;
-  margin-bottom: 12px;
-  text-shadow: 1px 1px 2px #a0d9de88;
-}
+    #probabilityTableContainer h2 {
+      color: #97EADB;
+      font-weight: bold;
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      text-shadow: 1px 1px 2px #a0d9de88;
+    }
 
-#probabilityTable {
-  margin: auto;
-  border-collapse: separate;
-  border-spacing: 0 8px; /* 行間にスペース */
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 4px 10px rgba(151, 234, 219, 0.4);
-  border-radius: 12px;
-  overflow: hidden;
-  background: #e0f7f9; /* 薄い水色背景 */
-}
+    #probabilityTable {
+      margin: auto;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+      /* 行間にスペース */
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 4px 10px rgba(151, 234, 219, 0.4);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #e0f7f9;
+      /* 薄い水色背景 */
+    }
 
-#probabilityTable thead tr {
-  background-color: #97EADB;
-  color: white;
-  font-weight: 700;
-  font-size: 1.1rem;
-  text-shadow: 0 0 3px #51b8bb;
-}
+    #probabilityTable thead tr {
+      background-color: #97EADB;
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-shadow: 0 0 3px #51b8bb;
+    }
 
-#probabilityTable thead th {
-  padding: 12px 16px;
-}
+    #probabilityTable thead th {
+      padding: 12px 16px;
+    }
 
-#probabilityTable tbody tr {
-  background-color: #ffffff;
-  transition: background-color 0.3s ease;
-  cursor: default;
-}
+    #probabilityTable tbody tr {
+      background-color: #ffffff;
+      transition: background-color 0.3s ease;
+      cursor: default;
+    }
 
-#probabilityTable tbody tr:hover {
-  background-color: #b5e7e9;
-}
+    #probabilityTable tbody tr:hover {
+      background-color: #b5e7e9;
+    }
 
-#probabilityTable tbody td {
-  padding: 10px 14px;
-  font-weight: 600;
-  font-size: 1rem;
-  color: #397f81;
-}
+    #probabilityTable tbody td {
+      padding: 10px 14px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #397f81;
+    }
 
-#probabilityTable tbody td:nth-child(3) {
-  font-weight: 700;
-  color: #1e5556;
-  text-shadow: 0 0 2px #a0d9deaa;
-}
+    #probabilityTable tbody td:nth-child(3) {
+      font-weight: 700;
+      color: #1e5556;
+      text-shadow: 0 0 2px #a0d9deaa;
+    }
 
-#rouletteDisplay {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: #007ACC;
-  text-align: center;
-  margin-bottom: 0.8em;
-  min-height: 1.6em;
-  font-family: 'Rounded Mplus 1c', 'Hiragino Maru Gothic ProN', sans-serif;
-  white-space: nowrap;
-  overflow: hidden;
-}
+    #rouletteDisplay {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #007ACC;
+      text-align: center;
+      margin-bottom: 0.8em;
+      min-height: 1.6em;
+      font-family: 'Rounded Mplus 1c', 'Hiragino Maru Gothic ProN', sans-serif;
+      white-space: nowrap;
+      overflow: hidden;
+    }
 
-#winner {
-  text-align: center;
-  background-color: #ffeef5;
-  border: 2px solid #ffb3c1;
-  padding: 1em;
-  margin: 2em auto;
-  border-radius: 10px;
-  width: fit-content;
-  max-width: 90%;
-}
+    #winner {
+      text-align: center;
+      background-color: #ffeef5;
+      border: 2px solid #ffb3c1;
+      padding: 1em;
+      margin: 2em auto;
+      border-radius: 10px;
+      width: fit-content;
+      max-width: 90%;
+      margin-top: 50px;
+    }
 
-#winner h2 {
-  font-size: 1.5em;
-  color: #e91e63;
-  margin-bottom: 0.5em;
-}
+    #winner h2 {
+      font-size: 1.5em;
+      color: #e91e63;
+      margin-bottom: 0.5em;
+    }
 
-#winnerName {
-  font-size: 1.2em;
-  font-weight: bold;
-  color: #333;
-}
+    #winnerName {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #333;
+    }
 
-@keyframes winnerAnimation {
-  0% {
-    transform: scale(1);
-    color: #e91e63;
-    opacity: 1;
-  }
+    @keyframes winnerAnimation {
+      0% {
+        transform: scale(1);
+        color: #e91e63;
+        opacity: 1;
+      }
 
-  50% {
-    transform: scale(1.3);
-    color: #ff4081;
-    opacity: 1;
-  }
+      50% {
+        transform: scale(1.3);
+        color: #ff4081;
+        opacity: 1;
+      }
 
-  100% {
-    transform: scale(1);
-    color: #e91e63;
-    opacity: 1;
-  }
-}
+      100% {
+        transform: scale(1);
+        color: #e91e63;
+        opacity: 1;
+      }
+    }
 
-.animate-winner {
-  animation: winnerAnimation 1.5s ease-in-out;
-}
+    .animate-winner {
+      animation: winnerAnimation 1.5s ease-in-out;
+    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
+
 <body>
   <h1>きゃたんのPayPayルーレット</h1>
 
@@ -214,43 +237,44 @@
       <canvas id="rouletteCanvas" width="400" height="400"></canvas>
       <div id="pointer"></div>
     </div>
-   <!-- <div id="centerDisplay">
+    <!-- <div id="centerDisplay">
       <p id="currentNameDisplay"></p>
       <p id="rouletteStatus"></p>
     </div> -->
-    
-    <section id="rouletteSection">
-  <div id="winner">
-    <h2>🎉本日の当選者🎉</h2>
-    <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
 
-    <!-- 当選確率バー -->
-    <div id="probabilityBarContainer" style="margin-top: 1em;">
-      <div id="probabilityBarBackground"
-        style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
-        <div id="probabilityBar" style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;">
+    <section id="rouletteSection">
+      <div id="winner">
+        <h2>🎉本日の当選者🎉</h2>
+        <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
+
+        <!-- 当選確率バー -->
+        <div id="probabilityBarContainer" style="margin-top: 1em;">
+          <div id="probabilityBarBackground"
+            style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
+            <div id="probabilityBar"
+              style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;">
+            </div>
+          </div>
+          <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">
+            当選確率: ??%
+          </div>
         </div>
       </div>
-      <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">
-        当選確率: ??%
-      </div>
-    </div>
-  </div>
-</section>
-    
+    </section>
+
     <div id="probabilityTableContainer">
-  <h2>📊 当選確率</h2>
-  <table id="probabilityTable">
-    <thead>
-      <tr>
-        <th>名前</th>
-        <th>倍率</th>
-        <th>当選確率</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+      <h2>📊 当選確率</h2>
+      <table id="probabilityTable">
+        <thead>
+          <tr>
+            <th>名前</th>
+            <th>倍率</th>
+            <th>当選確率</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </section>
 
   <script>
@@ -348,22 +372,22 @@
       drawRoulette();
       updateProbabilityTable();
 
-function updateProbabilityTable() {
-  const tbody = document.querySelector("#probabilityTable tbody");
-  tbody.innerHTML = "";
+      function updateProbabilityTable() {
+        const tbody = document.querySelector("#probabilityTable tbody");
+        tbody.innerHTML = "";
 
-  participants.forEach(p => {
-    const tr = document.createElement("tr");
-    const probability = ((p.multiplier / totalMultiplier) * 100).toFixed(1) + "%";
+        participants.forEach(p => {
+          const tr = document.createElement("tr");
+          const probability = ((p.multiplier / totalMultiplier) * 100).toFixed(1) + "%";
 
-    tr.innerHTML = `
+          tr.innerHTML = `
       <td>${p.name}</td>
       <td>${p.multiplier}</td>
       <td>${probability}</td>
     `;
-    tbody.appendChild(tr);
-  });
-}
+          tbody.appendChild(tr);
+        });
+      }
     });
 
     db.ref("/roulette/angle").on("value", snap => {
@@ -396,56 +420,111 @@ function updateProbabilityTable() {
         currentNameDisplay.classList.add("winner-animated");
       }
     });
-    
-  const winnerEl = document.getElementById("winnerName");
-  const winnerRef = firebase.database().ref("/roulette/winner");
 
-  winnerRef.on("value", (snapshot) => {
-    const winners = snapshot.val();
-    if (winners) {
-      const keys = Object.keys(winners);
-      if (keys.length > 0) {
-        keys.sort();
-        const latestWinner = winners[keys[keys.length - 1]];
-        winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
-        updateProbabilityBar(latestWinner);
 
-        // アニメーション付与
-        winnerEl.classList.remove("animate-winner");
-        void winnerEl.offsetWidth; // 再描画
-        winnerEl.classList.add("animate-winner");
-        return;
+    // 当選者更新
+    const winnerEl = document.getElementById("winnerName");
+    const winnerRef = firebase.database().ref("/roulette/winner");
+    const currentNameRef = firebase.database().ref("/roulette/currentName");
+    const spinningRef = firebase.database().ref("/roulette/spinning");
+
+    function showWinner(name) {
+      winnerEl.textContent = `🎊 ${name} 🎊`;
+      updateProbabilityBar(name);
+      // アニメーション付与
+      winnerEl.classList.remove("animate-winner");
+      void winnerEl.offsetWidth; // リセット用再描画
+      winnerEl.classList.add("animate-winner");
+    }
+
+    function showCurrentName(name) {
+      winnerEl.innerHTML = name ? `🎲 抽選中 🎲<br>${name}` : "🎲 抽選中 🎲";
+      winnerEl.classList.remove("animate-winner");
+    }
+
+    function showNoDraw() {
+      winnerEl.textContent = "まだ抽選が行われていません。";
+      winnerEl.classList.remove("animate-winner");
+    }
+
+    function updateDisplay(spinning, currentName, winnerName) {
+      if (spinning) {
+        showCurrentName(currentName);
+      } else {
+        if (winnerName) {
+          showWinner(winnerName);
+        } else {
+          showNoDraw();
+        }
       }
     }
-    winnerEl.textContent = "まだ抽選が行われていません。";
-  });
 
-  function updateProbabilityBar(winnerName) {
-    firebase.database().ref("/roulette/participants").once("value").then(snapshot => {
-      const participantsObj = snapshot.val() || {};
-      const participants = Object.values(participantsObj);
+    // Firebaseの状態を全部まとめて監視し、表示を切り替える
+    let currentSpinning = false;
+    let currentCurrentName = "";
+    let currentWinnerName = "";
 
-      const winner = participants.find(p => {
-        if (typeof p === "object") return p.name === winnerName;
-        return p === winnerName;
-      });
+    spinningRef.on("value", snap => {
+      currentSpinning = snap.val();
+      updateDisplay(currentSpinning, currentCurrentName, currentWinnerName);
+      // spinning状態に応じて確率バー更新
+      updateProbabilityBar(currentWinnerName, currentSpinning);
+    });
 
-      if (!winner) return;
 
-      const winnerMultiplier = winner.multiplier || 1;
-      const total = participants.reduce((sum, u) => {
-        return sum + (typeof u === "object" ? (u.multiplier || 1) : 1);
-      }, 0);
+    currentNameRef.on("value", snap => {
+      currentCurrentName = snap.val() || "";
+      updateDisplay(currentSpinning, currentCurrentName, currentWinnerName);
+    });
 
-      const percent = (winnerMultiplier / total) * 100;
+    winnerRef.on("value", snap => {
+      const winners = snap.val() || {};
+      const keys = Object.keys(winners).sort();
+      currentWinnerName = keys.length > 0 ? winners[keys[keys.length - 1]] : null;
+      updateDisplay(currentSpinning, currentCurrentName, currentWinnerName);
+    });
 
+
+    function updateProbabilityBar(winnerName, spinning) {
       const bar = document.getElementById("probabilityBar");
       const text = document.getElementById("probabilityPercent");
 
-      bar.style.width = `${percent}%`;
-      text.textContent = `当選確率: ${percent.toFixed(1)}%`;
-    });
-  }
+      if (spinning) {
+        // spinningがtrueなら確率非表示
+        bar.style.width = `0%`;
+        text.textContent = "当選確率: ??%";
+        return;
+      }
+
+      // spinningがfalseのときは通常計算
+      firebase.database().ref("/roulette/participants").once("value").then(snapshot => {
+        const participantsObj = snapshot.val() || {};
+        const participants = Object.values(participantsObj);
+
+        const winner = participants.find(p => {
+          if (typeof p === "object") return p.name === winnerName;
+          return p === winnerName;
+        });
+
+        if (!winner) {
+          bar.style.width = `0%`;
+          text.textContent = "当選確率: ??%";
+          return;
+        }
+
+        const winnerMultiplier = winner.multiplier || 1;
+        const total = participants.reduce((sum, u) => {
+          return sum + (typeof u === "object" ? (u.multiplier || 1) : 1);
+        }, 0);
+
+        const percent = (winnerMultiplier / total) * 100;
+
+        bar.style.width = `${percent}%`;
+        text.textContent = `当選確率: ${percent.toFixed(1)}%`;
+      });
+    }
+
   </script>
 </body>
+
 </html>
