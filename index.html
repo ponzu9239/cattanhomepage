@@ -6,37 +6,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>きゃたんのひみつきち</title>
   <style>
-     body {
+    body {
       margin: 0;
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
       background: #e6f9fd;
       color: #333;
-  }
+    }
 
-  header {
+    header {
       background-color: #97EADB;
       padding: 1rem;
       text-align: center;
-  }
+    }
 
-  header h1 {
+    header h1 {
       margin: 0;
       font-size: 2rem;
       color: #fff;
-  }
+    }
 
-  nav {
+    nav {
       margin-top: 0.5rem;
-  }
+    }
 
-  nav a {
+    nav a {
       margin: 0 1rem;
       text-decoration: none;
       color: #fff;
       font-weight: bold;
-  }
+    }
 
-  .hero {
+    .hero {
       position: relative;
       background: url('https://placekitten.com/1200/400') center/cover no-repeat;
       height: 300px;
@@ -46,9 +46,18 @@
       color: #fff;
       text-shadow: 2px 2px 8px #333;
       overflow: visible;
-  }
 
-  .hero h2 {
+      max-width: 1100px;
+      /* 全体の幅を制限 */
+      margin: 0 auto;
+      /* 中央寄せ */
+      border-radius: 16px;
+      /* 余白を作った分、角丸にしても可愛い */
+    }
+
+
+
+    .hero h2 {
       font-size: 2.8rem;
       font-weight: 900;
       font-family: 'Rounded Mplus 1c', 'Hiragino Maru Gothic ProN', cursive, sans-serif;
@@ -56,8 +65,8 @@
       padding: 1rem 2rem;
       border-radius: 2rem;
       box-shadow:
-          0 4px 10px rgba(255, 105, 180, 0.7),
-          0 0 20px rgba(255, 192, 203, 0.6);
+        0 4px 10px rgba(255, 105, 180, 0.7),
+        0 0 20px rgba(255, 192, 203, 0.6);
       color: #fff;
       user-select: none;
       letter-spacing: 0.1em;
@@ -65,16 +74,16 @@
       z-index: 2;
       transform-style: preserve-3d;
       transition: transform 0.3s ease;
-  }
+    }
 
-  .hero h2:hover {
+    .hero h2:hover {
       transform: scale(1.1) rotate(3deg);
       box-shadow:
-          0 6px 20px rgba(255, 105, 180, 0.9),
-          0 0 30px rgba(255, 192, 203, 0.8);
-  }
+        0 6px 20px rgba(255, 105, 180, 0.9),
+        0 0 30px rgba(255, 192, 203, 0.8);
+    }
 
-  .sparkles {
+    .sparkles {
       position: absolute;
       top: 20px;
       left: 50%;
@@ -84,41 +93,41 @@
       transform: translateX(-50%);
       z-index: 1;
       background:
-          radial-gradient(circle at 10% 20%, #fff0, #fff8 10%, #fff0 20%),
-          radial-gradient(circle at 70% 50%, #fff0, #ffe0f8 8%, #fff0 16%),
-          radial-gradient(circle at 40% 80%, #fff0, #ffc0dc 6%, #fff0 12%);
+        radial-gradient(circle at 10% 20%, #fff0, #fff8 10%, #fff0 20%),
+        radial-gradient(circle at 70% 50%, #fff0, #ffe0f8 8%, #fff0 16%),
+        radial-gradient(circle at 40% 80%, #fff0, #ffc0dc 6%, #fff0 12%);
       animation: sparkleMove 6s linear infinite;
-  }
+    }
 
-  @keyframes sparkleMove {
+    @keyframes sparkleMove {
       0% {
-          background-position: 10% 20%, 70% 50%, 40% 80%;
+        background-position: 10% 20%, 70% 50%, 40% 80%;
       }
 
       50% {
-          background-position: 15% 25%, 75% 45%, 45% 85%;
+        background-position: 15% 25%, 75% 45%, 45% 85%;
       }
 
       100% {
-          background-position: 10% 20%, 70% 50%, 40% 80%;
+        background-position: 10% 20%, 70% 50%, 40% 80%;
       }
-  }
+    }
 
 
 
-  section {
+    section {
       padding: 2rem;
       max-width: 800px;
       margin: auto;
-  }
+    }
 
-  section h3 {
+    section h3 {
       color: #5aa2aa;
       border-bottom: 2px solid #97EADB;
       padding-bottom: 0.3rem;
-  }
+    }
 
-  .code-display {
+    .code-display {
       font-weight: bold;
       font-size: 1.3rem;
       background: #d4f0f4;
@@ -130,9 +139,9 @@
       color: #1b656f;
       user-select: all;
       word-break: break-all;
-  }
+    }
 
-  .sns a {
+    .sns a {
       display: inline-block;
       margin: 0.5rem;
       text-decoration: none;
@@ -141,17 +150,17 @@
       padding: 0.5rem 1rem;
       border-radius: 999px;
       color: white;
-  }
+    }
 
-  footer {
+    footer {
       background: #97EADB;
       text-align: center;
       color: white;
       padding: 1rem;
       margin-top: 2rem;
-  }
+    }
 
-  #winner {
+    #winner {
       text-align: center;
       background-color: #ffeef5;
       border: 2px solid #ffb3c1;
@@ -160,45 +169,45 @@
       border-radius: 10px;
       width: fit-content;
       max-width: 90%;
-  }
+    }
 
-  #winner h2 {
+    #winner h2 {
       font-size: 1.5em;
       color: #e91e63;
       margin-bottom: 0.5em;
-  }
+    }
 
-  #winnerName {
+    #winnerName {
       font-size: 1.2em;
       font-weight: bold;
       color: #333;
-  }
+    }
 
-  @keyframes winnerAnimation {
+    @keyframes winnerAnimation {
       0% {
-          transform: scale(1);
-          color: #e91e63;
-          opacity: 1;
+        transform: scale(1);
+        color: #e91e63;
+        opacity: 1;
       }
 
       50% {
-          transform: scale(1.3);
-          color: #ff4081;
-          opacity: 1;
+        transform: scale(1.3);
+        color: #ff4081;
+        opacity: 1;
       }
 
       100% {
-          transform: scale(1);
-          color: #e91e63;
-          opacity: 1;
+        transform: scale(1);
+        color: #e91e63;
+        opacity: 1;
       }
-  }
+    }
 
-  .animate-winner {
+    .animate-winner {
       animation: winnerAnimation 1.5s ease-in-out;
-  }
+    }
 
-  #lotteryRules {
+    #lotteryRules {
       background: linear-gradient(135deg, #d6faff, #ffffff);
       border-radius: 16px;
       padding: 24px;
@@ -209,18 +218,18 @@
       border: 2px solid #97EADB;
       position: relative;
       overflow: hidden;
-  }
+    }
 
-  #lotteryRules::before {
+    #lotteryRules::before {
       content: "🌴🍧🌞";
       font-size: 3rem;
       position: absolute;
       top: -10px;
       right: 10px;
       opacity: 0.1;
-  }
+    }
 
-  #lotteryRules h2 {
+    #lotteryRules h2 {
       font-size: 1.4em;
       text-align: center;
       color: #00bcd4;
@@ -229,9 +238,9 @@
       background: linear-gradient(90deg, #97EADB, #c4fff9);
       border-radius: 12px;
       padding: 8px;
-  }
+    }
 
-  .lottery-description {
+    .lottery-description {
       background: rgba(255, 255, 255, 0.8);
       padding: 16px;
       border: 2px dashed #97EADB;
@@ -240,38 +249,38 @@
       font-size: 0.95em;
       line-height: 1.7;
       color: #444;
-  }
+    }
 
-  .lottery-description ul {
+    .lottery-description ul {
       margin: 12px 0;
       padding-left: 20px;
-  }
+    }
 
-  .lottery-description li {
+    .lottery-description li {
       margin-bottom: 6px;
-  }
+    }
 
-  .winner-area {
+    .winner-area {
       background: rgba(255, 255, 255, 0.85);
       padding: 16px;
       border: 2px dotted #00bcd4;
       border-radius: 12px;
       text-align: center;
-  }
+    }
 
-  .winner-area h3 {
+    .winner-area h3 {
       color: #0099cc;
       font-size: 1.2em;
       margin-bottom: 10px;
-  }
+    }
 
-  #winners {
+    #winners {
       font-size: 1.1em;
       font-weight: bold;
       color: #0077aa;
-  }
+    }
 
-  #rouletteName {
+    #rouletteName {
       display: inline-block;
       width: 10em;
       text-align: center;
@@ -280,25 +289,25 @@
       font-weight: bold;
       color: #007ACC;
       font-family: 'Rounded Mplus 1c', sans-serif;
-  }
+    }
 
-  body.light-mode {
+    body.light-mode {
       background-color: #fff9f9;
       color: #222;
-  }
+    }
 
-  body {
+    body {
       background-color: #fff;
       color: #000;
       transition: background-color 0.3s, color 0.3s;
-  }
+    }
 
-  body.dark-mode {
+    body.dark-mode {
       background-color: #121212;
       color: #f0f0f0;
-  }
+    }
 
-  .toggle-button {
+    .toggle-button {
       position: fixed;
       top: 1rem;
       right: 1rem;
@@ -308,39 +317,35 @@
       border-radius: 5px;
       cursor: pointer;
       z-index: 1000;
-  }
+    }
 
-  #probabilityPercent {
+    #probabilityPercent {
       color: black !important;
-  }
-  
-  .roulette-banner {
-  text-align: center;
-  margin: 20px auto;
-}
+    }
 
-.roulette-banner a {
-  display: inline-block;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #97EADB, #b8f3e7);
-  color: #fff;
-  font-size: 1.2rem;
-  font-weight: bold;
-  border-radius: 30px;
-  text-decoration: none;
-  box-shadow: 0 4px 10px rgba(151, 234, 219, 0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
+    .roulette-banner {
+      text-align: center;
+      margin: 20px auto;
+    }
 
-.roulette-banner a:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 14px rgba(151, 234, 219, 0.6);
-}
+    .roulette-banner a {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #ea97a6, #f7b8a3, #ff9fae);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(151, 234, 219, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .roulette-banner a:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 14px rgba(151, 234, 219, 0.6);
+    }
   </style>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 
 </head>
 
@@ -405,39 +410,17 @@
     </p>
 
     <ul style="padding-left: 1.2em;">
-      <li>▶︎YouTubeとTwitchどちらもリポストで当選確率2倍</li>
-      <li>▶︎サブスクメンバー当選確率3倍</li>
-      <p>（最大5倍）</p>
+      <p>▶︎YouTubeとTwitchどちらもリポストで当選確率2倍にUP!</p>
+      <p>▶︎サブスクメンバー当選確率3倍UP!</p>
+      <p>▶︎Twitchで20ビッツを送るごとに当選確率1倍UP!(最大5倍)</p>
     </ul>
-
-  </section>
-
-  <!-- 🎉 当選者表示エリア（ルール枠の中に入れた） -->
-  <section id="rouletteSection">
-    <div id="winner">
-      <h2>🎉本日の当選者🎉</h2>
-      <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
-
-      <!-- 当選確率バー -->
-      <div id="probabilityBarContainer" style="margin-top: 1em;">
-        <div id="probabilityBarBackground"
-          style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
-          <div id="probabilityBar" style="height: 100%; width: 0%; background-color: #97EADB; transition: width 0.5s;">
-          </div>
-        </div>
-        <div id="probabilityPercent" style="text-align: center; font-size: 0.9em; margin-top: 0.3em;">当選確率: ??%</div>
-      </div>
+    <div class="roulette-banner">
+      <a href="roulette.html">🎡 新しいルーレットを見に行く 🎡</a>
     </div>
+
+
   </section>
 
-  <!-- 🎯 倍率ごとの当選確率円グラフ（当選者表示とは分けて外に出す） -->
-  <div style="max-width: 400px; margin: 2rem auto;">
-    <canvas id="probabilityPieChart" width="300" height="300" style="margin-top: 1em;"></canvas>
-  </div>
-  
-  <div class="roulette-banner">
-  <a href="roulette.html">🎡 新しいルーレットを見に行く 🎡</a>
-</div>
 
   <section id="sns" class="sns">
 
@@ -457,10 +440,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-      // Firebase初期化設定
+  <script>
+    // Firebase初期化設定
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
       authDomain: "catiffanygame.firebaseapp.com",
@@ -758,7 +739,7 @@
       // 保存
       localStorage.setItem("mode", isDark ? "dark" : "light");
     }
-    </script>
+  </script>
 </body>
 
 </html>
