@@ -261,6 +261,29 @@
         document.getElementById("status").innerText = "❌ エラーが発生しました";
       });
     }
+    
+    // 1. デバイス固有IDを生成 or 取得する関数
+function getDeviceId() {
+  let id = localStorage.getItem("deviceId");
+  if (!id) {
+    id = "device_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+    localStorage.setItem("deviceId", id);
+  }
+  return id;
+}
+
+const deviceId = getDeviceId();
+
+// 2. 名前入力時にFirebaseに保存
+document.getElementById("nameInput").addEventListener("input", () => {
+  const names = document.getElementById("nameInput").value
+    .split("\n")
+    .map(n => n.trim())
+    .filter(n => n);
+
+  // deviceIdをキーにして書き込む
+  db.ref("currentInputPlayers/" + deviceId).set(names);
+});
   </script>
 </body>
 </html>
