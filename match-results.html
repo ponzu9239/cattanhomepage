@@ -160,16 +160,6 @@
       // ✅ 入力中メンバーを Firebase に送信
      db.ref("currentInputPlayers/" + deviceId).set(names);
 
-    function getDeviceId() {
-  let id = localStorage.getItem("deviceId");
-  if (!id) {
-    id = "device_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
-    localStorage.setItem("deviceId", id);
-  }
-  return id;
-}
-const deviceId = getDeviceId();
-
     function renderCards(names) {
       const currentCards = {};
       ["unassigned", "teamA", "teamB"].forEach(id => {
