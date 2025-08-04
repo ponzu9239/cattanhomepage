@@ -217,25 +217,10 @@
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     let matchingPlayers = [];
 
-db.ref("currentInputPlayers").on("value", (snapshot) => {
-  if (!snapshot.exists()) {
-    matchingPlayers = [];
-    renderPlayers();
-    return;
-  }
-
-  const allNames = new Set();
-
-  snapshot.forEach(childSnap => {
-    const data = childSnap.val();
-    if (data.names && Array.isArray(data.names)) {
-      data.names.forEach(name => allNames.add(name));
-    }
-  });
-
-  matchingPlayers = Array.from(allNames);
-  renderPlayers();
-});
+    db.ref("currentInputPlayers").on("value", (snapshot) => {
+      matchingPlayers = snapshot.exists() ? snapshot.val() : [];
+      renderPlayers();
+    });
 
     function calculateScoresAverage(matches) {
       const history = {};
