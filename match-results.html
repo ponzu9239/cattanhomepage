@@ -137,130 +137,86 @@
     <p id="status"></p>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
-      authDomain: "match-result-ea475.firebaseapp.com",
-      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
-      projectId: "match-result-ea475",
-      storageBucket: "match-result-ea475.firebasestorage.app",
-      messagingSenderId: "759877853492",
-      appId: "1:759877853492:web:a10935960bf8230af90561"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+const firebaseConfig = {
+  apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+  authDomain: "match-result-ea475.firebaseapp.com",
+  databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+  projectId: "match-result-ea475",
+  storageBucket: "match-result-ea475.firebasestorage.app",
+  messagingSenderId: "759877853492",
+  appId: "1:759877853492:web:a10935960bf8230af8230af90561"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
-    let preview = null;
+// ユーザー識別IDをlocalStorageから取得or新規作成
+let userId = localStorage.getItem("userId");
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).slice(2);
+  localStorage.setItem("userId", userId);
+}
 
-    document.getElementById("nameInput").addEventListener("input", () => {
-      const names = document.getElementById("nameInput").value.split("\n").map(n => n.trim()).filter(n => n);
-      renderCards(names);
+const nameInput = document.getElementById("nameInput");
+const unassignedDiv = document.getElementById("unassigned");
 
-      // ✅ 入力中メンバーを Firebase に送信
-      db.ref("currentInputPlayers").set(names);
+// 入力のたびにFirebaseへ送信しつつ画面更新
+nameInput.addEventListener("input", () => {
+  const names = nameInput.value
+    .split("\n")
+    .map(n => n.trim())
+    .filter(n => n);
+
+  // Firebaseの自分のノードにセット
+  db.ref(`currentInputPlayers/${userId}`).set({
+    names,
+    timestamp: Date.now()
+  });
+
+  renderCards(names);
+});
+
+// 画面のカード表示を更新
+function renderCards(names) {
+  const existingCards = {};
+  ["unassigned", "teamA", "teamB"].forEach(containerId => {
+    [...document.getElementById(containerId).children].forEach(card => {
+      existingCards[card.textContent] = card;
     });
+  });
 
-    function renderCards(names) {
-      const currentCards = {};
-      ["unassigned", "teamA", "teamB"].forEach(id => {
-        [...document.getElementById(id).children].forEach(card => {
-          currentCards[card.textContent] = card;
-        });
-      });
+  names.forEach(name => {
+    if (!existingCards[name]) {
+      const card = document.createElement("div");
+      card.className = "player-card";
+      card.draggable = true;
+      card.textContent = name;
 
-      names.forEach(name => {
-        if (!currentCards[name]) {
-          const card = document.createElement("div");
-          card.className = "player-card";
-          card.draggable = true;
-          card.textContent = name;
+      card.ondragstart = e => e.dataTransfer.setData("text", name);
 
-          card.ondragstart = e => e.dataTransfer.setData("text", name);
-
-          if (isTouchDevice) {
-            card.addEventListener("touchstart", e => {
-              e.preventDefault();
-              preview = card.cloneNode(true);
-              preview.classList.add("drag-preview");
-              document.body.appendChild(preview);
-            });
-
-            card.addEventListener("touchmove", e => {
-              if (!preview) return;
-              e.preventDefault();
-              const touch = e.touches[0];
-              preview.style.left = touch.clientX - 40 + "px";
-              preview.style.top = touch.clientY - 20 + "px";
-            });
-
-            card.addEventListener("touchend", e => {
-              if (!preview) return;
-              const touch = e.changedTouches[0];
-              const dropTargetBox = document.elementFromPoint(touch.clientX, touch.clientY)?.closest(".team-box");
-              if (dropTargetBox) {
-                const containerDiv = dropTargetBox.querySelector("div");
-                if (containerDiv) containerDiv.appendChild(card);
-              }
-              preview.remove();
-              preview = null;
-            });
-          }
-
-          document.getElementById("unassigned").appendChild(card);
-        }
-      });
-
-      Object.keys(currentCards).forEach(name => {
-        if (!names.includes(name)) currentCards[name].remove();
-      });
+      document.getElementById("unassigned").appendChild(card);
     }
+  });
 
-    function allowDrop(ev) {
-      ev.preventDefault();
+  Object.keys(existingCards).forEach(name => {
+    if (!names.includes(name)) {
+      existingCards[name].remove();
     }
+  });
+}
 
-    function drop(ev, teamId) {
-      ev.preventDefault();
-      const name = ev.dataTransfer.getData("text");
-      const card = [...document.querySelectorAll(".player-card")].find(c => c.textContent === name);
-      if (card) document.getElementById(teamId).appendChild(card);
-    }
+// ドロップ許可
+function allowDrop(ev) {
+  ev.preventDefault();
+}
 
-    async function saveResult() {
-      const teamA = [...document.getElementById("teamA").children].map(c => c.textContent);
-      const teamB = [...document.getElementById("teamB").children].map(c => c.textContent);
-      const teamAKills = Number(document.getElementById("teamAKills").value);
-      const teamBKills = Number(document.getElementById("teamBKills").value);
-
-      if (teamA.length === 0 || teamB.length === 0) {
-        document.getElementById("status").innerText = "⚠️ チームにメンバーを入れてください";
-        return;
-      }
-
-      const snapshot = await db.ref("apex_results").once("value");
-      let nextMatchNumber = 1;
-      if (snapshot.exists()) {
-        const matches = Object.values(snapshot.val());
-        const maxMatch = Math.max(...matches.map(m => m.matchNumber || 0));
-        nextMatchNumber = maxMatch + 1;
-      }
-
-      db.ref("apex_results").push({
-        matchNumber: nextMatchNumber,
-        teamA,
-        teamAKills,
-        teamB,
-        teamBKills
-      })
-      .then(() => {
-        document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
-      })
-      .catch((err) => {
-        console.error(err);
-        document.getElementById("status").innerText = "❌ エラーが発生しました";
-      });
-    }
-  </script>
+// ドロップ時の処理
+function drop(ev, teamId) {
+  ev.preventDefault();
+  const name = ev.dataTransfer.getData("text");
+  const card = [...document.querySelectorAll(".player-card")].find(c => c.textContent === name);
+  if (card) {
+    document.getElementById(teamId).appendChild(card);
+  }
+}
 </body>
 </html>
