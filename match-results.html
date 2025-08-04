@@ -157,8 +157,28 @@
       const names = document.getElementById("nameInput").value.split("\n").map(n => n.trim()).filter(n => n);
       renderCards(names);
 
-      // ✅ 入力中メンバーを Firebase に送信
-     db.ref("currentInputPlayers/" + deviceId).set(names);
+     // デバイス固有IDを取得
+function getDeviceId() {
+  let id = localStorage.getItem("deviceId");
+  if (!id) {
+    id = "device_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+    localStorage.setItem("deviceId", id);
+  }
+  return id;
+}
+const deviceId = getDeviceId();
+
+document.getElementById("nameInput").addEventListener("input", () => {
+  const names = document.getElementById("nameInput").value
+    .split("\n")
+    .map(n => n.trim())
+    .filter(n => n);
+
+  renderCards(names);
+
+  // 🔸 各端末のIDでデータ保存（他の人と混ざらない）
+  db.ref("currentInputPlayers/" + deviceId).set(names);
+});
 
     function renderCards(names) {
       const currentCards = {};
