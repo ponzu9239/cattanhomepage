@@ -137,16 +137,7 @@
     <p id="status"></p>
   </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import {
-    getDatabase,
-    ref,
-    set,
-    onValue,
-    serverTimestamp,
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
+<script>
   const firebaseConfig = {
   apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
   authDomain: "match-result-ea475.firebaseapp.com",
@@ -154,127 +145,86 @@
   projectId: "match-result-ea475",
   storageBucket: "match-result-ea475.firebasestorage.app",
   messagingSenderId: "759877853492",
-  appId: "1:759877853492:web:a10935960bf8230af8230af90561"
+  appId: "1:759877853492:web:a10935960bf8230af90561"
 };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const dbRef = ref(db, "matchResult");
+// ユーザー識別IDをlocalStorageから取得or新規作成
+let userId = localStorage.getItem("userId");
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).slice(2);
+  localStorage.setItem("userId", userId);
+}
 
-  const teamNames = ["team1", "team2"];
-  const nameSet = new Set();
+const nameInput = document.getElementById("nameInput");
+const unassignedDiv = document.getElementById("unassigned");
 
-  function renderCards() {
-    teamNames.forEach(team => {
-      const box = document.getElementById(team);
-      const cards = Array.from(box.getElementsByClassName("player-card"));
-      cards.forEach(card => {
-        const name = card.textContent;
-        nameSet.add(name);
+// 入力のたびにFirebaseへ送信しつつ画面更新
+nameInput.addEventListener("input", () => {
+  const names = nameInput.value
+    .split("\n")
+    .map(n => n.trim())
+    .filter(n => n);
 
-        card.setAttribute("draggable", "true");
-        card.ondragstart = e => {
-          e.dataTransfer.setData("text", name);
-        };
-
-        // タッチ対応
-        card.addEventListener("touchstart", e => {
-          const touch = e.touches[0];
-          card.setAttribute("data-dragging", "true");
-          card.style.position = "absolute";
-          card.style.zIndex = "1000";
-
-          const moveAt = (pageX, pageY) => {
-            card.style.left = pageX - card.offsetWidth / 2 + "px";
-            card.style.top = pageY - card.offsetHeight / 2 + "px";
-          };
-
-          moveAt(touch.pageX, touch.pageY);
-
-          const onTouchMove = e => {
-            const touch = e.touches[0];
-            moveAt(touch.pageX, touch.pageY);
-          };
-
-          document.addEventListener("touchmove", onTouchMove);
-
-          card.addEventListener("touchend", e => {
-            card.removeAttribute("data-dragging");
-            card.style.position = "";
-            card.style.left = "";
-            card.style.top = "";
-            card.style.zIndex = "";
-
-            document.removeEventListener("touchmove", onTouchMove);
-
-            const dropTarget = document.elementFromPoint(
-              e.changedTouches[0].clientX,
-              e.changedTouches[0].clientY
-            );
-            if (dropTarget && dropTarget.closest(".team-box")) {
-              const teamId = dropTarget.closest(".team-box").querySelector("div").id;
-              document.getElementById(teamId).appendChild(card);
-            }
-          }, { once: true });
-        });
-      });
-    });
-  }
-
-  function renderDropZones() {
-    document.querySelectorAll(".team-box > div").forEach(zone => {
-      zone.ondragover = e => e.preventDefault();
-      zone.ondrop = e => {
-        e.preventDefault();
-        const name = e.dataTransfer.getData("text");
-        const card = Array.from(document.querySelectorAll(".player-card")).find(c => c.textContent === name);
-        if (card) {
-          zone.appendChild(card);
-        }
-      };
-    });
-  }
-
-  renderCards();
-  renderDropZones();
-
-  document.getElementById("submitResult").addEventListener("click", () => {
-    const result = {
-      team1: [],
-      team2: []
-    };
-    teamNames.forEach(team => {
-      const box = document.getElementById(team);
-      result[team] = Array.from(box.getElementsByClassName("player-card")).map(card => card.textContent);
-    });
-
-    // タイムスタンプを使いたいならコメントを外す
-    // result.timestamp = serverTimestamp();
-
-    set(dbRef, result)
-      .then(() => alert("試合結果を送信しました。"))
-      .catch(err => alert("エラー: " + err));
+  // Firebaseの自分のノードにセット
+  db.ref(`currentInputPlayers/${userId}`).set({
+    names,
+    timestamp: Date.now() // 更新時刻も入れておくと便利
   });
 
-  onValue(dbRef, snapshot => {
-    const data = snapshot.val();
-    if (data) {
-      nameSet.clear();
-      teamNames.forEach(team => {
-        const box = document.getElementById(team);
-        box.innerHTML = "";
-        if (data[team]) {
-          data[team].forEach(name => {
-            const card = document.createElement("div");
-            card.className = "player-card";
-            card.textContent = name;
-            box.appendChild(card);
-          });
-        }
-      });
-      renderCards();
+  renderCards(names);
+});
+
+// 画面のカード表示を更新
+function renderCards(names) {
+  // 現在画面にあるカードを名前ごとにまとめる
+  const existingCards = {};
+  ["unassigned", "teamA", "teamB"].forEach(containerId => {
+    [...document.getElementById(containerId).children].forEach(card => {
+      existingCards[card.textContent] = card;
+    });
+  });
+
+  // 新しい名前のカードを追加
+  names.forEach(name => {
+    if (!existingCards[name]) {
+      const card = document.createElement("div");
+      card.className = "player-card";
+      card.draggable = true;
+      card.textContent = name;
+
+      card.ondragstart = e => e.dataTransfer.setData("text", name);
+
+      // スマホ用のドラッグも設定（省略可能）
+      // ...
+
+      document.getElementById("unassigned").appendChild(card);
     }
   });
+
+  // もう名前にないカードは削除
+  Object.keys(existingCards).forEach(name => {
+    if (!names.includes(name)) {
+      existingCards[name].remove();
+    }
+  });
+}
+
+// ドロップ許可
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+// ドロップ時の処理（ドラッグした名前を対象チームに移動）
+function drop(ev, teamId) {
+  ev.preventDefault();
+  const name = ev.dataTransfer.getData("text");
+  const card = [...document.querySelectorAll(".player-card")].find(c => c.textContent === name);
+  if (card) {
+    document.getElementById(teamId).appendChild(card);
+  }
+}
 </script>
 </body>
 </html>
