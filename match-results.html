@@ -158,7 +158,7 @@
       renderCards(names);
 
       // ✅ 入力中メンバーを Firebase に送信
-     db.ref("currentInputPlayers/" + deviceId).set(names);
+     db.ref("currentInputPlayers").set(names);
 
     function renderCards(names) {
       const currentCards = {};
