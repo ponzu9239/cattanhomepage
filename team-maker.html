@@ -224,16 +224,16 @@ db.ref("currentInputPlayers").on("value", (snapshot) => {
     return;
   }
 
-  let latestData = null;
+  const allNames = new Set();
 
-  snapshot.forEach((childSnap) => {
+  snapshot.forEach(childSnap => {
     const data = childSnap.val();
-    if (!latestData || data.timestamp > latestData.timestamp) {
-      latestData = data;
+    if (data.names && Array.isArray(data.names)) {
+      data.names.forEach(name => allNames.add(name));
     }
   });
 
-  matchingPlayers = latestData && latestData.names ? latestData.names : [];
+  matchingPlayers = Array.from(allNames);
   renderPlayers();
 });
 
