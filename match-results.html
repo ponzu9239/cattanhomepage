@@ -170,7 +170,7 @@ nameInput.addEventListener("input", () => {
   // Firebaseの自分のノードにセット
   db.ref(`currentInputPlayers/${userId}`).set({
     names,
-    timestamp: Date.now()
+    //timestamp: Date.now()
   });
 
   renderCards(names);
