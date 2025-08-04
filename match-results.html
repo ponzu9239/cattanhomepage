@@ -151,14 +151,23 @@
   const db = firebase.database();
 
   // デバイス固有IDを取得（なければ新規生成）
-  function getDeviceId() {
-    let id = localStorage.getItem("deviceId");
-    if (!id) {
-      id = "device_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
-      localStorage.setItem("deviceId", id);
-    }
-    return id;
+function getDeviceId() {
+  // 端末ごとに保存されるID（同じブラウザなら共通）
+  let baseId = localStorage.getItem("deviceId");
+  if (!baseId) {
+    baseId = "device_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+    localStorage.setItem("deviceId", baseId);
   }
+
+  // タブごとに識別子を追加（sessionStorageはタブ単位で分かれる）
+  let tabId = sessionStorage.getItem("tabId");
+  if (!tabId) {
+    tabId = "_" + Math.floor(Math.random() * 100000);
+    sessionStorage.setItem("tabId", tabId);
+  }
+
+  return baseId + tabId;
+}
   const deviceId = getDeviceId();
 
   const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
