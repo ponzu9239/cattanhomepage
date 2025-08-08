@@ -134,21 +134,19 @@
       margin-top: 50px;
     }
     
-    #saveImageBtn {
-  background: linear-gradient(45deg, #97eadb, #bff6f2);
-  border: none;
-  border-radius: 30px;
-  padding: 14px 24px;
-  font-size: 18px;
+#generateWinnerImageButton {
+  background-color: #97EADB;
   color: white;
   font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0.6rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease;
 }
-#saveImageBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+#generateWinnerImageButton:hover {
+  background-color: #7fcbd5;
 }
   </style>
 
@@ -482,78 +480,63 @@ function getCurrentSegmentName() {
     db.ref("/roulette/status").set("stopped");
   }
   
-  function saveResultImage() {
-  const rouletteCanvas = document.getElementById("rouletteCanvas"); // ルーレット本体
-  const winnerName = document.getElementById("currentWinner").textContent || "???";
+async function generateWinnerImage() {
+  // Firebaseから最新の当選者情報を取得
+  const winnerSnapshot = await db.ref("/roulette/winner").orderByKey().limitToLast(1).once("value");
+  let winnerName = "";
+  winnerSnapshot.forEach(snap => {
+    winnerName = snap.val();
+  });
+  if (!winnerName) {
+    alert("まだ当選者が決まっていません");
+    return;
+  }
 
-  // 合成用キャンバス
-  const finalCanvas = document.createElement("canvas");
-  const ctx = finalCanvas.getContext("2d");
-
-  const width = 800;
-  const height = 1000;
-  finalCanvas.width = width;
-  finalCanvas.height = height;
-
-  // 背景（パステルブルーのグラデーション）
-  const gradient = ctx.createLinearGradient(0, 0, 0, height);
-  gradient.addColorStop(0, "#bff6f2");
-  gradient.addColorStop(1, "#97eadb");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, width, height);
-
-  // 上部リボン
-  ctx.fillStyle = "#fff";
-  ctx.beginPath();
-  ctx.moveTo(0, 100);
-  ctx.quadraticCurveTo(width / 2, 0, width, 100);
-  ctx.lineTo(width, 0);
-  ctx.lineTo(0, 0);
-  ctx.closePath();
-  ctx.fill();
-
-  // タイトル（白抜き文字）
-  ctx.font = "bold 50px 'Hiragino Maru Gothic ProN'";
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.shadowColor = "rgba(0,0,0,0.2)";
-  ctx.shadowBlur = 6;
-  ctx.fillText("🎉 本日の当選者 🎉", width / 2, 80);
-
-  // ルーレット画像読み込み
+  // ルーレットのcanvas画像を取得（現在の描画状態を画像化）
+  const rouletteCanvas = document.getElementById("rouletteCanvas");
+  const rouletteDataUrl = rouletteCanvas.toDataURL("image/png");
+  
+  // 新規Imageオブジェクトに読み込む
   const rouletteImg = new Image();
-  rouletteImg.src = rouletteCanvas.toDataURL("image/png");
+  rouletteImg.src = rouletteDataUrl;
 
   rouletteImg.onload = () => {
-    const rouletteSize = 500;
-    ctx.drawImage(
-      rouletteImg,
-      (width - rouletteSize) / 2,
-      150,
-      rouletteSize,
-      rouletteSize
-    );
+    // 新しいcanvasを作成し、合成する
+    const size = 800;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
 
-    // 当選者名（爽やかなホワイト系）
-    ctx.font = "bold 64px 'Hiragino Maru Gothic ProN'";
-    ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "rgba(0,0,0,0.25)";
-    ctx.shadowBlur = 8;
-    ctx.fillText(winnerName, width / 2, 750);
+    // 背景塗りつぶし（#97EADBベースで綺麗に）
+    ctx.fillStyle = "#97EADB";
+    ctx.fillRect(0, 0, size, size);
 
-    // 下部キラキラ
-    ctx.font = "40px serif";
-    ctx.shadowBlur = 0;
+    // ルーレット画像を中央に配置（600x600）
+    const imgSize = 600;
+    ctx.drawImage(rouletteImg, (size - imgSize) / 2, 50, imgSize, imgSize);
+
+    // 当選者テキストを可愛く表示
     ctx.fillStyle = "#fff";
-    ctx.fillText("✨", width / 2 - 120, 750);
-    ctx.fillText("✨", width / 2 + 120, 750);
+    ctx.font = "bold 48px 'Hiragino Maru Gothic ProN', sans-serif";
+    ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(0,0,0,0.7)";
+    ctx.shadowBlur = 6;
+    ctx.fillText(`🎉 当選者 🎉`, size / 2, 700);
+    ctx.font = "bold 64px 'Hiragino Maru Gothic ProN', sans-serif";
+    ctx.fillText(winnerName, size / 2, 770);
 
-    // 新しいタブで画像を開く（iPhoneなら長押しで保存）
-    const imgData = finalCanvas.toDataURL("image/png");
-    const win = window.open();
-    win.document.write("<img src='" + imgData + "' style='max-width:100%;height:auto;'>");
+    // 画像データを取得
+    const dataURL = canvas.toDataURL("image/png");
+
+    // 画面に表示
+    const container = document.getElementById("winnerImageContainer");
+    container.innerHTML = `<img src="${dataURL}" alt="当選結果画像" style="max-width:100%; border-radius: 1rem; box-shadow: 0 0 20px rgba(0,0,0,0.3);" />`;
   };
 }
+
+// ボタンのクリックイベントに紐づけ
+document.getElementById("generateWinnerImageButton").onclick = generateWinnerImage;
 </script>
 </body>
 </html>
