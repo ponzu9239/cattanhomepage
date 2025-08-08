@@ -481,61 +481,78 @@ function getCurrentSegmentName() {
   }
   
 async function generateWinnerImage() {
-  // Firebaseから最新の当選者情報を取得
+  // Firebaseから最新の当選者を取得
   const winnerSnapshot = await db.ref("/roulette/winner").orderByKey().limitToLast(1).once("value");
   let winnerName = "";
   winnerSnapshot.forEach(snap => {
     winnerName = snap.val();
   });
+  
   if (!winnerName) {
-    alert("まだ当選者が決まっていません");
+    alert("まだ当選者が決まっていません。");
     return;
   }
 
-  // ルーレットのcanvas画像を取得（現在の描画状態を画像化）
+  // 現在描かれているルーレットcanvasを画像化
   const rouletteCanvas = document.getElementById("rouletteCanvas");
-  const rouletteDataUrl = rouletteCanvas.toDataURL("image/png");
-  
-  // 新規Imageオブジェクトに読み込む
-  const rouletteImg = new Image();
-  rouletteImg.src = rouletteDataUrl;
+  const rouletteDataURL = rouletteCanvas.toDataURL("image/png");
 
-  rouletteImg.onload = () => {
-    // 新しいcanvasを作成し、合成する
-    const size = 800;
+  // 新しいImageで読み込み
+  const rouletteImage = new Image();
+  rouletteImage.src = rouletteDataURL;
+
+  rouletteImage.onload = () => {
+    // 新しいcanvasで合成作業
+    const canvasSize = 800;
     const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
     const ctx = canvas.getContext("2d");
 
-    // 背景塗りつぶし（#97EADBベースで綺麗に）
+    // 背景：やわらかくて爽やかな水色（#97EADB）
     ctx.fillStyle = "#97EADB";
-    ctx.fillRect(0, 0, size, size);
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-    // ルーレット画像を中央に配置（600x600）
-    const imgSize = 600;
-    ctx.drawImage(rouletteImg, (size - imgSize) / 2, 50, imgSize, imgSize);
+    // ルーレット画像を大きめに中央配置（600×600）
+    const rouletteImgSize = 600;
+    ctx.drawImage(rouletteImage, (canvasSize - rouletteImgSize) / 2, 50, rouletteImgSize, rouletteImgSize);
 
-    // 当選者テキストを可愛く表示
-    ctx.fillStyle = "#fff";
+    // かわいく当選者テキストを描画
+
+    // 「🎉 当選者 🎉」部分
+    ctx.fillStyle = "#ffffff";
     ctx.font = "bold 48px 'Hiragino Maru Gothic ProN', sans-serif";
     ctx.textAlign = "center";
-    ctx.shadowColor = "rgba(0,0,0,0.7)";
+    ctx.shadowColor = "rgba(0,0,0,0.5)";
     ctx.shadowBlur = 6;
-    ctx.fillText(`🎉 当選者 🎉`, size / 2, 700);
-    ctx.font = "bold 64px 'Hiragino Maru Gothic ProN', sans-serif";
-    ctx.fillText(winnerName, size / 2, 770);
+    ctx.fillText("🎉 当選者 🎉", canvasSize / 2, 700);
 
-    // 画像データを取得
-    const dataURL = canvas.toDataURL("image/png");
+    // 当選者の名前
+    ctx.font = "bold 72px 'Hiragino Maru Gothic ProN', sans-serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "rgba(0,0,0,0.7)";
+    ctx.shadowBlur = 8;
+    ctx.fillText(winnerName, canvasSize / 2, 780);
 
-    // 画面に表示
+    // 仕上げにハートっぽい小さな装飾を散らす（白い小さな星のように）
+    for(let i=0; i<30; i++){
+      ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.7 + 0.3})`;
+      const x = Math.random() * canvasSize;
+      const y = Math.random() * canvasSize;
+      const size = Math.random() * 4 + 2;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 作った画像を画面に表示
+    const resultDataURL = canvas.toDataURL("image/png");
     const container = document.getElementById("winnerImageContainer");
-    container.innerHTML = `<img src="${dataURL}" alt="当選結果画像" style="max-width:100%; border-radius: 1rem; box-shadow: 0 0 20px rgba(0,0,0,0.3);" />`;
+    container.innerHTML = `<img src="${resultDataURL}" alt="当選結果画像" style="max-width: 100%; border-radius: 1rem; box-shadow: 0 0 20px rgba(0,0,0,0.3);" />`;
   };
 }
 
-// ボタンのクリックイベントに紐づけ
+// ボタンに関数をセット
 document.getElementById("generateWinnerImageButton").onclick = generateWinnerImage;
 </script>
 </body>
