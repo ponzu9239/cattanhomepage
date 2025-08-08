@@ -481,7 +481,6 @@ function getCurrentSegmentName() {
   }
   
 async function generateDetailedWinnerImage() {
-  // 1. Firebaseから状態をまとめて取得
   const [angleSnap, participantsSnap, winnerSnap] = await Promise.all([
     db.ref("/roulette/angle").once("value"),
     db.ref("/roulette/participants").once("value"),
@@ -496,14 +495,12 @@ async function generateDetailedWinnerImage() {
   });
 
   if (!winnerName || participants.length === 0) {
-    alert("当選者または参加者情報がまだありません。");
+    alert("当選者または参加者情報がありません。");
     return;
   }
 
-  // 2. 角度計算用とセグメント計算
   let totalMultiplier = participants.reduce((sum, p) => sum + (p.multiplier || 1), 0);
 
-  // セグメント配列作成
   let segments = [];
   let startAngle = 0;
   const colors = [
@@ -525,100 +522,141 @@ async function generateDetailedWinnerImage() {
     startAngle += angleSpan;
   }
 
-  // 3. Canvas作成と描画
   const canvasSize = 900;
   const canvas = document.createElement("canvas");
   canvas.width = canvasSize;
   canvas.height = canvasSize;
   const ctx = canvas.getContext("2d");
 
-  // 背景
-  ctx.fillStyle = "#97EADB";
+  // 背景 - 超薄いパステルブルー
+  ctx.fillStyle = "rgba(151, 234, 219, 0.12)";
   ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-  // 中心点と半径
   const cx = canvasSize / 2;
   const cy = canvasSize / 2;
-  const radius = canvasSize * 0.4;
+  const radius = canvasSize * 0.42;
 
-  // ルーレット描画（回転angle適用）
+  // ルーレット外側の光沢付き円（立体感）
+  const gradOuter = ctx.createRadialGradient(cx, cy, radius * 0.85, cx, cy, radius);
+  gradOuter.addColorStop(0, "rgba(255, 255, 255, 0.7)");
+  gradOuter.addColorStop(1, "rgba(96, 174, 170, 0.7)");
+  ctx.fillStyle = gradOuter;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius + 20, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ルーレット円本体（白地に軽い影）
+  ctx.shadowColor = "rgba(0,0,0,0.15)";
+  ctx.shadowBlur = 15;
+  ctx.shadowOffsetY = 3;
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  // セグメント描画
   segments.forEach(seg => {
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.fillStyle = seg.color;
-    ctx.strokeStyle = "#FFFFFF";
+    ctx.strokeStyle = "#fff";
     ctx.lineWidth = 3;
     ctx.arc(cx, cy, radius, seg.startAngle + angle, seg.endAngle + angle);
     ctx.lineTo(cx, cy);
     ctx.fill();
     ctx.stroke();
 
-    // 名前を描画
+    // 文字位置調整
     const midAngle = (seg.startAngle + seg.endAngle) / 2 + angle;
     const textRadius = radius * 0.65;
-    ctx.fillStyle = "#333";
-    ctx.font = "bold 28px 'Hiragino Maru Gothic ProN', sans-serif";
-    ctx.textAlign = "center";
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(midAngle);
+    ctx.textAlign = "right";
     ctx.textBaseline = "middle";
-    const x = cx + Math.cos(midAngle) * textRadius;
-    const y = cy + Math.sin(midAngle) * textRadius;
-    ctx.fillText(seg.name, x, y);
+
+    // 文字影・色・フォント
+    ctx.fillStyle = "#333";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.12)";
+    ctx.shadowBlur = 3;
+    ctx.font = "600 26px 'Hiragino Maru Gothic ProN', sans-serif";
+
+    // 端っこに余白をつけて名前描画
+    ctx.fillText(seg.name, radius * 0.58, 0);
+    ctx.restore();
   });
 
-  // 4. ルーレットの中心に大きな枠を描画
+  // 中心の大きな光沢ボタン風円
   const centerRadius = radius * 0.3;
+  const gradCenter = ctx.createRadialGradient(cx, cy, centerRadius * 0.2, cx, cy, centerRadius);
+  gradCenter.addColorStop(0, "#ffffff");
+  gradCenter.addColorStop(1, "#c1efec");
+  ctx.fillStyle = gradCenter;
+  ctx.shadowColor = "rgba(0,0,0,0.2)";
+  ctx.shadowBlur = 18;
   ctx.beginPath();
-  ctx.fillStyle = "#FFFFFF";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
-  ctx.shadowBlur = 20;
-  ctx.arc(cx, cy, centerRadius, 0, 2 * Math.PI);
+  ctx.arc(cx, cy, centerRadius, 0, Math.PI * 2);
   ctx.fill();
   ctx.shadowBlur = 0;
 
-  // 5. 当選者テキストを華やかに描く
-  ctx.fillStyle = "#FF6F91";  // ピンク系でかわいい
-  ctx.font = "bold 60px 'Hiragino Maru Gothic ProN', sans-serif";
+  // 当選テキスト - WINNER
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.shadowColor = "rgba(255, 111, 145, 0.9)";
+
+  // WINNER文字 グラデーション＋影で高級感
+  const gradText = ctx.createLinearGradient(cx, cy - 80, cx, cy - 20);
+  gradText.addColorStop(0, "#ff5874");
+  gradText.addColorStop(1, "#ff204a");
+  ctx.fillStyle = gradText;
+  ctx.shadowColor = "rgba(255, 80, 110, 0.8)";
   ctx.shadowBlur = 20;
-  ctx.fillText("🎉 WINNER 🎉", cx, cy - 50);
+  ctx.font = "bold 50px 'Hiragino Maru Gothic ProN', sans-serif";
+  ctx.fillText("🎉 WINNER 🎉", cx, cy - 60);
 
-  ctx.fillStyle = "#333";
-  ctx.font = "bold 72px 'Hiragino Maru Gothic ProN', sans-serif";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+  // 当選者名 - 大きくて陰影・グラデでゴージャスに
+  const gradName = ctx.createLinearGradient(cx, cy - 10, cx, cy + 80);
+  gradName.addColorStop(0, "#333");
+  gradName.addColorStop(1, "#555");
+  ctx.fillStyle = gradName;
+  ctx.shadowColor = "rgba(0,0,0,0.8)";
   ctx.shadowBlur = 15;
-  ctx.fillText(winnerName, cx, cy + 30);
+  ctx.font = "bold 72px 'Hiragino Maru Gothic ProN', sans-serif";
+  ctx.fillText(winnerName, cx, cy + 40);
 
-  // 6. ルーレットの指し示す矢印を描画（上部中央）
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = "#FF6F91";
+  // 矢印（上部中央）
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = "rgba(255, 80, 110, 0.7)";
+  ctx.fillStyle = "#ff5874";
   ctx.beginPath();
-  ctx.moveTo(cx, cy - radius - 40);
-  ctx.lineTo(cx - 30, cy - radius + 30);
-  ctx.lineTo(cx + 30, cy - radius + 30);
+  ctx.moveTo(cx, cy - radius - 50);
+  ctx.lineTo(cx - 35, cy - radius + 35);
+  ctx.lineTo(cx + 35, cy - radius + 35);
   ctx.closePath();
   ctx.fill();
+  ctx.shadowBlur = 0;
 
-  // 7. ライト効果や星の装飾を散りばめる
-  for(let i=0; i<40; i++){
-    ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.6 + 0.4})`;
+  // 星のきらめき（上半分に散らす）
+  for (let i = 0; i < 50; i++) {
+    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.5 + 0.3})`;
     const x = Math.random() * canvasSize;
-    const y = Math.random() * canvasSize;
-    const size = Math.random() * 5 + 2;
+    const y = Math.random() * canvasSize * 0.6;
+    const size = Math.random() * 4 + 1.5;
     ctx.beginPath();
     ctx.arc(x, y, size, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // 8. 表示 or ダウンロード用に画像化して画面に表示
+  // 画像を表示用コンテナに挿入
   const container = document.getElementById("winnerImageContainer");
-  container.innerHTML = "";  // クリア
+  container.innerHTML = "";
   const img = new Image();
   img.src = canvas.toDataURL("image/png");
   img.style.maxWidth = "100%";
-  img.style.borderRadius = "1rem";
-  img.style.boxShadow = "0 0 30px rgba(255,111,145,0.6)";
+  img.style.borderRadius = "20px";
+  img.style.boxShadow = "0 0 40px rgba(255,80,110,0.9)";
   container.appendChild(img);
 }
 document.getElementById("generateWinnerImageButton").onclick = generateDetailedWinnerImage;
