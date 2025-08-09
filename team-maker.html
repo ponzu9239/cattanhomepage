@@ -189,7 +189,7 @@
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均キル</label>
     <label><input type="radio" name="method" value="winrate"> 勝率</label>
-    <label><input type="radio" name="method" value="killdiff"> キル差</label>
+    <label><input type="radio" name="method" value="killdiff"> キル差(開発中)</label>
   </div>
 
   <div class="recent-toggle">
@@ -197,7 +197,7 @@
   </div>
 
   <div id="playerList" class="player-list"></div>
-  <p id="matchCount">過去 試合のデータをもとに生成。</p>
+  <p id="matchCount">過去 試合のカスタムマッチをもとに生成。</p>
 
   <script>
     const firebaseConfig = {
@@ -387,7 +387,7 @@ function makeTeams() {
       playerScoresKillDiff = calculateKillDiff(matches);
       renderPlayers();
       makeTeams();
-      document.getElementById("matchCount").textContent = `過去${matches.length}試合のデータをもとに生成。`;
+      document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
     });
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
