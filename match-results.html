@@ -138,6 +138,7 @@
   </div>
 
 <script>
+  // Firebase 設定
   const firebaseConfig = {
     apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
     authDomain: "match-result-ea475.firebaseapp.com",
@@ -150,28 +151,26 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // デバイス固有IDを取得（なければ新規生成）
-function getDeviceId() {
-  // 端末ごとに保存されるID（同じブラウザなら共通）
-  let baseId = localStorage.getItem("deviceId");
-  if (!baseId) {
-    baseId = "device_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
-    localStorage.setItem("deviceId", baseId);
+  // デバイス固有IDを生成（ブラウザごと固定、タブごと別）
+  function getDeviceId() {
+    let baseId = localStorage.getItem("deviceId");
+    if (!baseId) {
+      baseId = "device_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+      localStorage.setItem("deviceId", baseId);
+    }
+    let tabId = sessionStorage.getItem("tabId");
+    if (!tabId) {
+      tabId = "_" + Math.floor(Math.random() * 100000);
+      sessionStorage.setItem("tabId", tabId);
+    }
+    return baseId + tabId;
   }
-
-  // タブごとに識別子を追加（sessionStorageはタブ単位で分かれる）
-  let tabId = sessionStorage.getItem("tabId");
-  if (!tabId) {
-    tabId = "_" + Math.floor(Math.random() * 100000);
-    sessionStorage.setItem("tabId", tabId);
-  }
-
-  return baseId + tabId;
-}
   const deviceId = getDeviceId();
 
-  const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
-  let preview = null;
+  // タッチ専用端末判定（iPhoneやiPadでマウス非接続の場合）
+  const isTouchOnly = 'ontouchstart' in window && !window.matchMedia("(pointer: fine)").matches;
+
+  let preview = null; // タッチドラッグ用プレビュー要素
 
   // プレイヤーカードを描画
   function renderCards(names) {
@@ -186,50 +185,54 @@ function getDeviceId() {
       if (!currentCards[name]) {
         const card = document.createElement("div");
         card.className = "player-card";
-        card.draggable = true;
         card.textContent = name;
 
-        card.ondragstart = e => e.dataTransfer.setData("text", name);
-
-        if (isTouchDevice) {
-          card.addEventListener("touchstart", e => {
+        // ポインターイベント（タッチ・ペン対応）
+        card.addEventListener("pointerdown", e => {
+          if (e.pointerType === "touch" || e.pointerType === "pen") {
             e.preventDefault();
             preview = card.cloneNode(true);
             preview.classList.add("drag-preview");
             document.body.appendChild(preview);
-          });
+          }
+        });
 
-          card.addEventListener("touchmove", e => {
-            if (!preview) return;
-            e.preventDefault();
-            const touch = e.touches[0];
-            preview.style.left = touch.clientX - 40 + "px";
-            preview.style.top = touch.clientY - 20 + "px";
-          });
+        card.addEventListener("pointermove", e => {
+          if (preview && (e.pointerType === "touch" || e.pointerType === "pen")) {
+            preview.style.left = e.clientX - 40 + "px";
+            preview.style.top = e.clientY - 20 + "px";
+          }
+        });
 
-          card.addEventListener("touchend", e => {
-            if (!preview) return;
-            const touch = e.changedTouches[0];
-            const dropTargetBox = document.elementFromPoint(touch.clientX, touch.clientY)?.closest(".team-box");
+        card.addEventListener("pointerup", e => {
+          if (preview && (e.pointerType === "touch" || e.pointerType === "pen")) {
+            const dropTargetBox = document.elementFromPoint(e.clientX, e.clientY)?.closest(".team-box");
             if (dropTargetBox) {
               const containerDiv = dropTargetBox.querySelector("div");
               if (containerDiv) containerDiv.appendChild(card);
             }
             preview.remove();
             preview = null;
-          });
-        }
+          }
+        });
+
+        // マウス用ドラッグ（PC・マウス接続iPadなど）
+        card.draggable = true;
+        card.addEventListener("dragstart", e => {
+          e.dataTransfer.setData("text", name);
+        });
 
         document.getElementById("unassigned").appendChild(card);
       }
     });
 
+    // 入力から消えたカードは削除
     Object.keys(currentCards).forEach(name => {
       if (!names.includes(name)) currentCards[name].remove();
     });
   }
 
-  // ドラッグ可能領域にドロップを許可
+  // ドロップ可能にする
   function allowDrop(ev) {
     ev.preventDefault();
   }
@@ -242,7 +245,7 @@ function getDeviceId() {
     if (card) document.getElementById(teamId).appendChild(card);
   }
 
-  // 保存ボタンが押された時
+  // 保存処理
   async function saveResult() {
     const teamA = [...document.getElementById("teamA").children].map(c => c.textContent);
     const teamB = [...document.getElementById("teamB").children].map(c => c.textContent);
@@ -278,7 +281,7 @@ function getDeviceId() {
     }
   }
 
-  // 名前入力欄の変更監視
+  // 名前入力欄の監視
   document.getElementById("nameInput").addEventListener("input", () => {
     const names = document.getElementById("nameInput").value
       .split("\n")
@@ -287,7 +290,7 @@ function getDeviceId() {
 
     renderCards(names);
 
-    // Firebaseに端末IDごとに現在の名前リストを保存（ほかの端末と分離）
+    // Firebase に現在の名前リストを保存（端末IDごと）
     db.ref("currentInputPlayers/" + deviceId).set(names);
   });
 </script>
