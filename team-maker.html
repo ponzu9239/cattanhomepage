@@ -332,17 +332,19 @@ function renderPlayers() {
   container.innerHTML = "";
   let names = Object.keys(scores);
 
-  // matchingPlayers かつピン留めでないプレイヤー（五十音順）
-  const matchingOnlyPlayers = names.filter(name => !pinned.includes(name) && matchingPlayers.includes(name))
+  // matchingPlayers はピン留め状態は無視して先に
+  const matchingOnlyPlayers = names.filter(name => matchingPlayers.includes(name))
                                   .sort((a, b) => a.localeCompare(b, "ja"));
-  // ピン留めされたプレイヤー（五十音順）
-  const pinnedPlayers = names.filter(name => pinned.includes(name))
-                             .sort((a, b) => a.localeCompare(b, "ja"));
-  // それ以外のプレイヤー（五十音順）
-  const otherPlayers = names.filter(name => !pinned.includes(name) && !matchingPlayers.includes(name))
+
+  // ピン留めだが matchingPlayers に入っていないプレイヤー
+  const pinnedOnlyPlayers = names.filter(name => pinned.includes(name) && !matchingPlayers.includes(name))
+                                .sort((a, b) => a.localeCompare(b, "ja"));
+
+  // それ以外のプレイヤー
+  const otherPlayers = names.filter(name => !matchingPlayers.includes(name) && !pinned.includes(name))
                             .sort((a, b) => a.localeCompare(b, "ja"));
 
-  const orderedNames = matchingOnlyPlayers.concat(pinnedPlayers, otherPlayers);
+  const orderedNames = matchingOnlyPlayers.concat(pinnedOnlyPlayers, otherPlayers);
 
   orderedNames.forEach(name => {
     const div = document.createElement("div");
