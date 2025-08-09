@@ -167,8 +167,11 @@
   }
   const deviceId = getDeviceId();
 
-  // タッチ専用端末判定（iPhoneやiPadでマウス非接続の場合）
-  const isTouchOnly = 'ontouchstart' in window && !window.matchMedia("(pointer: fine)").matches;
+const hasTouch = 'ontouchstart' in window;
+const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
+
+// iPad + マウスもマウスとして扱う
+const isTouchOnly = hasTouch && !hasFinePointer;
 
   let preview = null; // タッチドラッグ用プレビュー要素
 
