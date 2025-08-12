@@ -566,58 +566,99 @@ function makeTeams() {
   else if (method === "killdiff") scores = playerScoresKillDiff;
   else scores = {};
 
-  // 選択されたプレイヤーと強さデータをセット
-  const players = selected.map(name => ({ name, strength: scores[name] ?? 0 }));
-
-  if (players.length === 0) {
+  if (selected.length === 0) {
     document.getElementById("teamA").innerHTML = "";
     document.getElementById("teamB").innerHTML = "";
     return;
   }
 
+  // 選択プレイヤーの強さ
+  const players = selected.map(name => ({ name, strength: scores[name] ?? 0 }));
+
+  // --- くっつけたいペアをグループ化 ---
+  // union-find(Disjoint Set)でグループ分け
+  class UnionFind {
+    constructor(n) {
+      this.parent = Array(n).fill(0).map((_,i) => i);
+    }
+    find(x) {
+      if (this.parent[x] !== x) this.parent[x] = this.find(this.parent[x]);
+      return this.parent[x];
+    }
+    union(a,b) {
+      const rootA = this.find(a);
+      const rootB = this.find(b);
+      if(rootA !== rootB) this.parent[rootB] = rootA;
+    }
+  }
+
+  const nameToIndex = {};
+  players.forEach((p,i) => { nameToIndex[p.name] = i; });
+  const uf = new UnionFind(players.length);
+
+  togetherPairs.forEach(([n1,n2]) => {
+    if(n1 in nameToIndex && n2 in nameToIndex) {
+      uf.union(nameToIndex[n1], nameToIndex[n2]);
+    }
+  });
+
+  // グループごとにメンバーと強さ合計をまとめる
+  const groupsMap = new Map();
+  players.forEach((p,i) => {
+    const root = uf.find(i);
+    if (!groupsMap.has(root)) groupsMap.set(root, { members: [], totalStrength: 0 });
+    const g = groupsMap.get(root);
+    g.members.push(p.name);
+    g.totalStrength += p.strength;
+  });
+  const groups = Array.from(groupsMap.values());
+
   // 離したいペア
-  const pairs = separatePairs;
+  const separate = separatePairs;
 
-  // 全探索でチーム分けする関数
-  function divideTeams(players, separatePairs) {
-    const playerNames = players.map(p => p.name);
-    const nameToStrength = {};
-    players.forEach(p => nameToStrength[p.name] = p.strength);
-
+  // 全探索でチーム分け
+  // groupsを単位にチーム分け。チームA,Bそれぞれにグループを割り当てていく
+  function divideGroups(groups, separatePairs) {
     const results = [];
-    const maxTeamSize = Math.ceil(players.length / 2);
+    const maxTeamSize = Math.ceil(groups.length / 2);
 
     function dfs(index, teamA) {
-      if (index === players.length) {
-        const teamB = playerNames.filter(n => !teamA.includes(n));
+      if (index === groups.length) {
+        // チームBは残りグループ
+        const teamB = groups.filter((_,i) => !teamA.includes(i));
 
-        // 離したいペアの制約チェック
-        for (const [p1, p2] of separatePairs) {
-          if ((teamA.includes(p1) && teamA.includes(p2)) || (teamB.includes(p1) && teamB.includes(p2))) {
+        // グループのメンバー名配列を取得
+        const teamAMembers = teamA.flatMap(i => groups[i].members);
+        const teamBMembers = teamB.flatMap(g => g.members);
+
+        // 離したいペアが同じチームに居ないかチェック
+        for (const [p1,p2] of separatePairs) {
+          if ((teamAMembers.includes(p1) && teamAMembers.includes(p2)) ||
+              (teamBMembers.includes(p1) && teamBMembers.includes(p2))) {
             return;
           }
         }
 
-        const sumA = teamA.reduce((sum, n) => sum + nameToStrength[n], 0);
-        const sumB = teamB.reduce((sum, n) => sum + nameToStrength[n], 0);
+        const sumA = teamA.reduce((sum,i) => sum + groups[i].totalStrength, 0);
+        const sumB = teamB.reduce((sum,g) => sum + g.totalStrength, 0);
 
-        results.push({ teamA, teamB, diff: Math.abs(sumA - sumB), sumA, sumB });
+        results.push({ teamA: teamAMembers, teamB: teamBMembers, diff: Math.abs(sumA - sumB), sumA, sumB });
         return;
       }
 
       if (teamA.length < maxTeamSize) {
-        dfs(index + 1, [...teamA, playerNames[index]]);
+        dfs(index + 1, [...teamA, index]);
       }
       dfs(index + 1, teamA);
     }
 
     dfs(0, []);
 
-    results.sort((a, b) => a.diff - b.diff);
+    results.sort((a,b) => a.diff - b.diff);
     return results[0];
   }
 
-  const best = divideTeams(players, pairs);
+  const best = divideGroups(groups, separate);
 
   if (!best) {
     document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
