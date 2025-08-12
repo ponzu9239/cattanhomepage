@@ -155,19 +155,21 @@
     }
 
     function updateResults(matches) {
-      const method = document.querySelector('input[name="method"]:checked').value;
-      let scores = [];
+  const method = document.querySelector('input[name="method"]:checked').value;
+  let scores = [];
 
-      if (method === "average") {
-        scores = calculateAverage(matches);
-      } else if (method === "winRate") {
-        scores = calculateWinRate(matches);
-      } else if (method === "diffScore") {
-        scores = calculateDiffScore(matches);
-      }
+  if (method === "average") {
+    scores = calculateAverage(matches);
+  } else if (method === "winRate") {
+    scores = calculateWinRate(matches);
+  } else if (method === "diffScore") {
+    scores = calculateDiffScore(matches);
+  } else if (method === "kdRatio") {
+    scores = calculateKDRatio(matches);
+  }
 
-      renderResults(scores, method);
-    }
+  renderResults(scores, method);
+}
 
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
