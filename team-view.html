@@ -13,16 +13,16 @@
     }
 
 
-    h1 {
-      text-align: center;
-      color: #47b6a2;
-      margin-bottom: 12px;
-      font-size: 26px;
-      font-weight: 800;
-      white-space: nowrap;      /* 改行させない */
-      overflow: hidden;         /* はみ出し隠す */
-      text-overflow: ellipsis;  /* はみ出たら「...」 */
-   }
+h1 {
+  text-align: center;
+  color: #47b6a2;
+  margin-bottom: 12px;
+  font-size: 26px;
+  font-weight: 800;
+  white-space: nowrap;      /* 改行はしない */
+  overflow: visible;        /* はみ出し隠さない */
+  text-overflow: unset;     /* 省略はしない */
+}
   
     .teams {
       display: flex;
