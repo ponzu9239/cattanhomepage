@@ -566,11 +566,12 @@ function makeTeams() {
   else if (method === "killdiff") scores = playerScoresKillDiff;
   else scores = {};
 
-  if (selected.length === 0) {
-    document.getElementById("teamA").innerHTML = "";
-    document.getElementById("teamB").innerHTML = "";
-    return;
-  }
+if (selected.length === 0) {
+  document.getElementById("teamA").innerHTML = "";
+  document.getElementById("teamB").innerHTML = "";
+  db.ref("currentTeamResult").set({ teamA: [], teamB: [], timestamp: Date.now() });
+  return;
+}
 
   // 選択プレイヤーの強さ
   const players = selected.map(name => ({ name, strength: scores[name] ?? 0 }));
@@ -674,7 +675,6 @@ document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`
 db.ref("currentTeamResult").set({
   teamA: best.teamA,
   teamB: best.teamB,
-  timestamp: Date.now()
 });
 }
     // ペアフォーム イベント設定
