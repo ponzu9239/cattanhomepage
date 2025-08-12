@@ -663,7 +663,6 @@ const best = divideGroups(groups, separate);
 if (!best) {
   document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
   document.getElementById("teamB").innerHTML = "";
-  // Firebaseに空結果を送るのもOK
   db.ref(savePath).set({ teamA: [], teamB: [], timestamp: Date.now() });
   return;
 }
@@ -671,7 +670,7 @@ if (!best) {
 document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
 document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
 
-// ここでFirebaseに送信
+// Firebaseに保存
 db.ref(savePath).set({
   teamA: best.teamA,
   teamB: best.teamB,
