@@ -663,13 +663,19 @@ const best = divideGroups(groups, separate);
 if (!best) {
   document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
   document.getElementById("teamB").innerHTML = "";
-  db.ref(savePath).set({ teamA: [], teamB: [], timestamp: Date.now() });
+  db.ref("currentTeamResult").set({ teamA: [], teamB: [], timestamp: Date.now() });
   return;
 }
 
 document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
 document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
-}
+
+// ここでFirebaseに送信
+db.ref("currentTeamResult").set({
+  teamA: best.teamA,
+  teamB: best.teamB,
+  timestamp: Date.now()
+});
 
     // ペアフォーム イベント設定
     document.getElementById("separatePairForm").addEventListener("submit", e => {
