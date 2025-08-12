@@ -162,11 +162,105 @@
       margin-bottom: 10px;
     }
 
+    /* ここからペア設定フォームのCSS */
+    .pair-section {
+      background: #eaf9f8;
+      border: 2px solid #97eadb;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .pair-section h3 {
+      margin-top: 0;
+      color: #47b6a2;
+      font-weight: 700;
+      font-size: 20px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .pair-form {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pair-form input[type="text"] {
+      flex: 1 1 40%;
+      min-width: 100px;
+      padding: 6px 8px;
+      border: 1.5px solid #97eadb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .pair-form button {
+      background: #47b6a2;
+      border: none;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .pair-form button:hover {
+      background: #369482;
+    }
+
+    .pair-list {
+      list-style: none;
+      padding-left: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      margin: 0;
+      border-top: 1px solid #97eadb;
+    }
+
+    .pair-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #b2e2dd;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .pair-list button.delete-btn {
+      background: #ff6b6b;
+      border: none;
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.3s;
+    }
+
+    .pair-list button.delete-btn:hover {
+      background: #e03e3e;
+    }
+
     @media (max-width: 600px) {
       h1 { font-size: 22px; }
       .team-box h2 { font-size: 16px; }
       .team-box li { font-size: 14px; padding: 5px; }
       .player-list { grid-template-columns: repeat(2, 1fr); }
+      .pair-form {
+        flex-direction: column;
+        align-items: center;
+      }
+      .pair-form input[type="text"] {
+        flex: none;
+        width: 80%;
+      }
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -196,6 +290,27 @@
     <label><input type="checkbox" id="recentBiasToggle"> 直前試合重視(勝率除く)</label>
   </div>
 
+  <!-- ここからペア設定UI -->
+  <section class="pair-section" id="separatePairsSection">
+    <h3>離したいペアを追加</h3>
+    <form id="separatePairForm" class="pair-form" onsubmit="return false;">
+      <input type="text" id="separateName1" placeholder="名前1" autocomplete="off" />
+      <input type="text" id="separateName2" placeholder="名前2" autocomplete="off" />
+      <button type="submit">追加</button>
+    </form>
+    <ul id="separatePairList" class="pair-list"></ul>
+  </section>
+
+  <section class="pair-section" id="togetherPairsSection">
+    <h3>くっつけたいペアを追加</h3>
+    <form id="togetherPairForm" class="pair-form" onsubmit="return false;">
+      <input type="text" id="togetherName1" placeholder="名前1" autocomplete="off" />
+      <input type="text" id="togetherName2" placeholder="名前2" autocomplete="off" />
+      <button type="submit">追加</button>
+    </form>
+    <ul id="togetherPairList" class="pair-list"></ul>
+  </section>
+
   <div id="playerList" class="player-list"></div>
   <p id="matchCount">過去 試合のカスタムマッチをもとに生成。</p>
 
@@ -207,7 +322,7 @@
       projectId: "match-result-ea475",
       storageBucket: "match-result-ea475.firebasestorage.app",
       messagingSenderId: "759877853492",
-      appId: "1:759877853492:web:a10935960bf8230af90561"
+      appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -217,18 +332,54 @@
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     let matchingPlayers = [];
 
-    // 離したいペアの定義（例）
-    const separatePairs = [
-      ["○○", "++"]
-      // ここに離したいペアを増やせます
-    ];
+    // ペア設定配列
+    let separatePairs = JSON.parse(localStorage.getItem("separatePairs") || "[]");
+    let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
 
-    // くっつけたいペアの定義（例）
-    const togetherPairs = [
-      // ["Aさん", "Bさん"]
-      // ここにくっつけたいペアを増やせます
-    ];
+    // ペアUI操作関数
+    function addPair(type, name1, name2) {
+      name1 = name1.trim();
+      name2 = name2.trim();
+      if (!name1 || !name2 || name1 === name2) return false;
+      const pair = [name1, name2].sort();
+      let arr = (type === "separate") ? separatePairs : togetherPairs;
 
+      // 重複チェック
+      if (arr.some(p => p[0] === pair[0] && p[1] === pair[1])) return false;
+
+      arr.push(pair);
+      localStorage.setItem(type + "Pairs", JSON.stringify(arr));
+      renderPairList(type);
+      makeTeams();
+      return true;
+    }
+
+    function removePair(type, index) {
+      let arr = (type === "separate") ? separatePairs : togetherPairs;
+      arr.splice(index, 1);
+      localStorage.setItem(type + "Pairs", JSON.stringify(arr));
+      renderPairList(type);
+      makeTeams();
+    }
+
+    function renderPairList(type) {
+      let arr = (type === "separate") ? separatePairs : togetherPairs;
+      const listId = type === "separate" ? "separatePairList" : "togetherPairList";
+      const ul = document.getElementById(listId);
+      ul.innerHTML = "";
+      arr.forEach((pair, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${pair[0]} ＆ ${pair[1]}`;
+        const btn = document.createElement("button");
+        btn.className = "delete-btn";
+        btn.textContent = "×";
+        btn.onclick = () => removePair(type, i);
+        li.appendChild(btn);
+        ul.appendChild(li);
+      });
+    }
+
+    // FirebaseからcurrentInputPlayersの監視（matchingPlayers更新）
     db.ref("currentInputPlayers").on("value", (snapshot) => {
       const data = snapshot.val() || {};
       matchingPlayers = [];
@@ -240,10 +391,10 @@
       });
 
       matchingPlayers = [...new Set(matchingPlayers)];
-
       renderPlayers();
     });
 
+    // スコア計算関数たち
     function calculateScoresAverage(matches) {
       const history = {};
       matches.forEach(match => {
@@ -355,6 +506,7 @@
       return scores;
     }
 
+    // ピン留め切替
     function togglePin(name) {
       if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
       else pinned.push(name);
@@ -363,22 +515,23 @@
       makeTeams();
     }
 
+    // プレイヤー一覧描画
     function renderPlayers() {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
       let scores = method === "average" ? playerScoresAverage :
-                   method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
+                   method === "winrate" ? playerScoresWinRate :
+                   method === "kdratio" ? playerScoresKDRatio :
+                   playerScoresKillDiff;
 
       container.innerHTML = "";
       let names = Object.keys(scores);
 
       const matchingOnlyPlayers = names.filter(name => matchingPlayers.includes(name))
                                       .sort((a, b) => a.localeCompare(b, "ja"));
-
       const pinnedOnlyPlayers = names.filter(name => pinned.includes(name) && !matchingPlayers.includes(name))
                                     .sort((a, b) => a.localeCompare(b, "ja"));
-
       const otherPlayers = names.filter(name => !matchingPlayers.includes(name) && !pinned.includes(name))
                                 .sort((a, b) => a.localeCompare(b, "ja"));
 
@@ -402,6 +555,7 @@
       });
     }
 
+    // チーム分けメイン関数
     function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
@@ -412,63 +566,127 @@
       else if (method === "kdratio") scores = playerScoresKDRatio;
       else scores = {};
 
+      // スコア付きプレイヤー配列
       const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
       players.sort((a, b) => b.score - a.score);
 
-      let teamA = [], teamB = [];
-      const assigned = new Set();
+      // くっつけたいペアはまずチームAに全員入れる（ざっくり優先）
+      const togetherSet = new Set(togetherPairs.flat());
 
-      // くっつけたいペアはチームAにまとめる（ざっくり）
-      togetherPairs.forEach(pair => {
-        pair.forEach(name => {
-          const p = players.find(p => p.name === name);
-          if (p && !assigned.has(name)) {
-            teamA.push(p);
-            assigned.add(name);
-          }
-        });
+      const teamA = [];
+      const teamB = [];
+
+      // チームAにまずくっつけたい全員を入れる
+      togetherSet.forEach(name => {
+        if (selected.includes(name)) {
+          teamA.push({ name, score: scores[name] ?? 0 });
+        }
       });
 
-      // 残りのプレイヤーをスコアバランス考慮して振り分け
-      players.forEach(p => {
-        if (assigned.has(p.name)) return;
-        const sumA = teamA.reduce((acc, p) => acc + p.score, 0);
-        const sumB = teamB.reduce((acc, p) => acc + p.score, 0);
-        if (sumA <= sumB) teamA.push(p);
-        else teamB.push(p);
-        assigned.add(p.name);
+      // くっつけたいペアはチームAで揃えるので、残りはくっつけたいメンバーを除く
+      const remainingPlayers = players.filter(p => !togetherSet.has(p.name));
+
+      // チームBに入れて良い人の候補として残す
+      const teamANames = new Set(teamA.map(p => p.name));
+      const teamBList = [];
+
+      // まずチームBに残りのプレイヤーを振り分ける（バランス考慮しつつ）
+      let sumA = teamA.reduce((sum, p) => sum + p.score, 0);
+      let sumB = 0;
+
+      remainingPlayers.forEach(p => {
+        if (sumA <= sumB) {
+          teamA.push(p);
+          sumA += p.score;
+        } else {
+          teamB.push(p);
+          sumB += p.score;
+          teamBList.push(p.name);
+        }
       });
 
-      // 離したいペアが同じチームにいる場合はp2を反対チームへ移動する簡易処理
-      separatePairs.forEach(pair => {
-        const [p1, p2] = pair;
-        if (teamA.some(p => p.name === p1) && teamA.some(p => p.name === p2)) {
-          const idx = teamA.findIndex(p => p.name === p2);
-          if (idx !== -1) {
-            const moved = teamA.splice(idx, 1)[0];
-            teamB.push(moved);
-          }
-        } else if (teamB.some(p => p.name === p1) && teamB.some(p => p.name === p2)) {
-          const idx = teamB.findIndex(p => p.name === p2);
-          if (idx !== -1) {
-            const moved = teamB.splice(idx, 1)[0];
-            teamA.push(moved);
+      // 離したいペアの調整：同じチームにいたら片方をチーム入れ替え
+      separatePairs.forEach(([p1, p2]) => {
+        const inA1 = teamA.some(p => p.name === p1);
+        const inA2 = teamA.some(p => p.name === p2);
+        const inB1 = teamB.some(p => p.name === p1);
+        const inB2 = teamB.some(p => p.name === p2);
+
+        if ((inA1 && inA2) || (inB1 && inB2)) {
+          // 片方を逆チームへ移動
+          if (inA1) {
+            // p2をBに移す
+            const index = teamA.findIndex(p => p.name === p2);
+            if (index >= 0) {
+              const moved = teamA.splice(index, 1)[0];
+              teamB.push(moved);
+            }
+          } else {
+            // p2をAに移す
+            const index = teamB.findIndex(p => p.name === p2);
+            if (index >= 0) {
+              const moved = teamB.splice(index, 1)[0];
+              teamA.push(moved);
+            }
           }
         }
       });
 
-      // 「きゃたん」強制チームB固定はそのまま
-      if (teamB.some(p => p.name === "きゃたん") && !teamA.some(p => p.name === "きゃたん")) {
-        const tmp = teamA;
-        teamA = teamB;
-        teamB = tmp;
+      // 🔹 きゃたんは必ずチームBに
+      if (teamA.some(p => p.name === "きゃたん") && !teamB.some(p => p.name === "きゃたん")) {
+        const index = teamA.findIndex(p => p.name === "きゃたん");
+        if (index >= 0) {
+          const moved = teamA.splice(index, 1)[0];
+          teamB.push(moved);
+        }
       }
 
+      // 表示反映
       document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
       document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
     }
 
-    // マッチ履歴取得と再描画
+    // ペアフォーム イベント設定
+    document.getElementById("separatePairForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const n1 = document.getElementById("separateName1").value;
+      const n2 = document.getElementById("separateName2").value;
+      if (addPair("separate", n1, n2)) {
+        document.getElementById("separateName1").value = "";
+        document.getElementById("separateName2").value = "";
+      } else {
+        alert("名前が空欄か同じ、もしくは既に登録済みです。");
+      }
+    });
+
+    document.getElementById("togetherPairForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const n1 = document.getElementById("togetherName1").value;
+      const n2 = document.getElementById("togetherName2").value;
+      if (addPair("together", n1, n2)) {
+        document.getElementById("togetherName1").value = "";
+        document.getElementById("togetherName2").value = "";
+      } else {
+        alert("名前が空欄か同じ、もしくは既に登録済みです。");
+      }
+    });
+
+    // Firebase currentInputPlayersの監視（matchingPlayers更新）
+    db.ref("currentInputPlayers").on("value", (snapshot) => {
+      const data = snapshot.val() || {};
+      matchingPlayers = [];
+
+      Object.values(data).forEach(nameList => {
+        if (Array.isArray(nameList)) {
+          matchingPlayers.push(...nameList);
+        }
+      });
+
+      matchingPlayers = [...new Set(matchingPlayers)];
+      renderPlayers();
+    });
+
+    // マッチ履歴取得とスコア計算
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
       matches = Object.values(snapshot.val());
@@ -478,25 +696,30 @@
       playerScoresKDRatio = calculateKDRatio(matches);
       renderPlayers();
       makeTeams();
-
       document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
     });
 
-    // method選択、直前試合重視切替のイベント
+    // ラジオボタンとチェックボックス変化時イベント
     document.querySelectorAll('input[name="method"]').forEach(radio => {
       radio.addEventListener("change", () => {
-        renderPlayers();
         makeTeams();
+        renderPlayers();
       });
     });
 
     document.getElementById("recentBiasToggle").addEventListener("change", () => {
-      playerScoresAverage = calculateScoresAverage(matches);
-      playerScoresKillDiff = calculateKillDiff(matches);
-      renderPlayers();
-      makeTeams();
+      if (document.querySelector('input[name="method"]:checked').value !== "winrate") {
+        // 勝率以外のときのみ再計算
+        playerScoresAverage = calculateScoresAverage(matches);
+        playerScoresKillDiff = calculateKillDiff(matches);
+        renderPlayers();
+        makeTeams();
+      }
     });
 
+    // ペアリスト初期描画
+    renderPairList("separate");
+    renderPairList("together");
   </script>
 </body>
 </html>
