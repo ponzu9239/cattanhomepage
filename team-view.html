@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>いい感じにチーム分けされたやつ</title>
+  <title>APEXきゃたんカスタムチーム分け - 閲覧ページ</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -67,19 +67,17 @@
       text-align: center;
     }
 
-    #lastUpdated,
-    #matchCount {
-      text-align: center;
-      color: #888;
-      font-size: 14px;
-      margin-top: 8px;
-      user-select: none;
-    }
-
     @media (max-width: 600px) {
       h1 { font-size: 22px; }
       .team-box h2 { font-size: 16px; }
       .team-box li { font-size: 14px; padding: 5px; }
+    }
+
+    #matchCount {
+      text-align: center;
+      color: #47b6a2;
+      font-weight: 600;
+      margin-top: 8px;
     }
   </style>
 
@@ -87,7 +85,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>いい感じにチーム分けされたやつ</h1>
+  <h1>APEXきゃたんカスタムチーム分け - 閲覧ページ</h1>
 
   <div class="teams">
     <div class="team-box team1">
@@ -100,8 +98,7 @@
     </div>
   </div>
 
-  <p id="matchCount"></p>
-  <p id="lastUpdated"></p>
+  <div id="matchCount"></div>
 
   <script>
     const firebaseConfig = {
@@ -118,34 +115,25 @@
 
     const teamAul = document.getElementById("teamA");
     const teamBul = document.getElementById("teamB");
-    const lastUpdatedP = document.getElementById("lastUpdated");
-    const matchCountP = document.getElementById("matchCount");
+    const countEl = document.getElementById("matchCount");
 
     db.ref("currentTeamResult").on("value", snapshot => {
-      const data = snapshot.val() || { teamA: [], teamB: [], timestamp: null, matchCount: null };
+      const data = snapshot.val() || { teamA: [], teamB: [] };
 
-      if ((!data.teamA || data.teamA.length === 0) && (!data.teamB || data.teamB.length === 0)) {
+      if (data.teamA.length === 0 && data.teamB.length === 0) {
         teamAul.innerHTML = "";
         teamBul.innerHTML = "";
-        lastUpdatedP.textContent = "";
-        matchCountP.textContent = "";
+        countEl.textContent = "";
         return;
       }
 
-      teamAul.innerHTML = (data.teamA || []).map(name => `<li>${name}</li>`).join("");
-      teamBul.innerHTML = (data.teamB || []).map(name => `<li>${name}</li>`).join("");
+      teamAul.innerHTML = data.teamA.map(name => `<li>${name}</li>`).join("");
+      teamBul.innerHTML = data.teamB.map(name => `<li>${name}</li>`).join("");
 
-      if (data.timestamp) {
-        const date = new Date(data.timestamp);
-        lastUpdatedP.textContent = `最終更新: ${date.toLocaleString()}(日本時間)`;
+      if (data.matchCount) {
+        countEl.textContent = `過去${data.matchCount}試合のカスタムマッチをもとに生成。`;
       } else {
-        lastUpdatedP.textContent = "";
-      }
-
-      if (data.matchCount !== null && !isNaN(data.matchCount)) {
-        matchCountP.textContent = `過去${data.matchCount}試合のカスタムマッチをもとに作成。`;
-      } else {
-        matchCountP.textContent = "";
+        countEl.textContent = "";
       }
     });
   </script>
