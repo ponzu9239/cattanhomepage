@@ -558,7 +558,6 @@
 function makeTeams() {
   const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
   const method = document.querySelector('input[name="method"]:checked').value;
-
   let scores;
   if (method === "average") scores = playerScoresAverage;
   else if (method === "winrate") scores = playerScoresWinRate;
@@ -566,132 +565,60 @@ function makeTeams() {
   else if (method === "kdratio") scores = playerScoresKDRatio;
   else scores = {};
 
-  // スコア付きプレイヤー配列
+  // スコア付きプレイヤーリスト
   const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
+  players.sort((a, b) => b.score - a.score);
 
-  // --- 1. くっつけたいペアからグループ分け（連結成分） ---
-  // Union-Find（または簡易グループ分け）実装
-  const parent = {};
-  function find(x) {
-    if (!parent[x]) parent[x] = x;
-    if (parent[x] === x) return x;
-    parent[x] = find(parent[x]);
-    return parent[x];
-  }
-  function union(a, b) {
-    const pa = find(a);
-    const pb = find(b);
-    if (pa !== pb) parent[pb] = pa;
-  }
+  // きゃたん優先でチームAへ
+  const teamA = players.filter(p => p.name === "きゃたん");
+  const remainingPlayers = players.filter(p => p.name !== "きゃたん");
 
-  togetherPairs.forEach(([a, b]) => {
-    if (selected.includes(a) && selected.includes(b)) union(a, b);
+  // くっつけたいペアは全員チームAに
+  const togetherSet = new Set(togetherPairs.flat());
+  togetherSet.forEach(name => {
+    if (remainingPlayers.some(p => p.name === name) && !teamA.some(p => p.name === name)) {
+      const idx = remainingPlayers.findIndex(p => p.name === name);
+      teamA.push(remainingPlayers.splice(idx, 1)[0]);
+    }
   });
 
-  // グループごとにメンバー集める
-  const groups = {};
-  players.forEach(({name, score}) => {
-    const p = find(name);
-    if (!groups[p]) groups[p] = [];
-    groups[p].push({name, score});
-  });
-
-  // --- 2. グループ単位でソート（スコア合計が高い順） ---
-  let groupList = Object.values(groups);
-  groupList.forEach(g => {
-    g.totalScore = g.reduce((sum, p) => sum + p.score, 0);
-  });
-  groupList.sort((a,b) => b.totalScore - a.totalScore);
-
-  // --- 3. グループを交互にチームに振り分ける（初期振り分け） ---
-  const teamA = [];
+  // 残りはバランスよくチームBに入れる
   const teamB = [];
+  let sumA = teamA.reduce((sum, p) => sum + p.score, 0);
+  let sumB = 0;
 
-  groupList.forEach((group, i) => {
-    if (i % 2 === 0) teamA.push(...group);
-    else teamB.push(...group);
+  remainingPlayers.forEach(p => {
+    if (sumA <= sumB) {
+      teamA.push(p);
+      sumA += p.score;
+    } else {
+      teamB.push(p);
+      sumB += p.score;
+    }
   });
 
-  // --- 4. 離したいペアを別チームに調整 ---
-  separatePairs.forEach(([p1, p2]) => {
+  // 離したいペアを同じチームに入れないように、1回だけ調整する
+  for (const [p1, p2] of separatePairs) {
     const inA1 = teamA.some(p => p.name === p1);
     const inA2 = teamA.some(p => p.name === p2);
     const inB1 = teamB.some(p => p.name === p1);
     const inB2 = teamB.some(p => p.name === p2);
 
     if ((inA1 && inA2) || (inB1 && inB2)) {
-      // 片方をチーム入れ替えする
-      // チームAで両方いるならp2をBに移す
-      if (inA1) {
-        const idx = teamA.findIndex(p => p.name === p2);
-        if (idx >= 0) {
-          const moved = teamA.splice(idx, 1)[0];
-          teamB.push(moved);
-        }
-      } else {
-        // チームBで両方いるならp2をAに移す
-        const idx = teamB.findIndex(p => p.name === p2);
-        if (idx >= 0) {
-          const moved = teamB.splice(idx, 1)[0];
-          teamA.push(moved);
-        }
-      }
-    }
-  });
+      // 片方を逆チームに移動（優先はスコア低い方を移す）
+      const pairPlayers = [p1, p2].map(name => {
+        let fromTeam = teamA.find(p => p.name === name) ? teamA : teamB;
+        return { name, score: scores[name] ?? 0, fromTeam };
+      });
+      pairPlayers.sort((a,b) => a.score - b.score);
+      const toMove = pairPlayers[0];
+      const from = toMove.fromTeam;
+      const to = (from === teamA) ? teamB : teamA;
 
-  // --- 5. 最終的に「きゃたん」がいるチームをチームAにする ---
-  const isKatanInB = teamB.some(p => p.name === "きゃたん");
-  if (isKatanInB) {
-    // チーム入れ替え
-    const tmp = [...teamA];
-    teamA.length = 0;
-    teamA.push(...teamB);
-    teamB.length = 0;
-    teamB.push(...tmp);
-  }
-
-  // --- 6. チームのバランス調整（スコア差を減らす簡易調整） ---
-  // ここはお好みで高度化可能。以下は簡単な差分移動例。
-  function totalScore(team) {
-    return team.reduce((sum, p) => sum + p.score, 0);
-  }
-  let diff = totalScore(teamA) - totalScore(teamB);
-  let changed = true;
-
-  while (changed && Math.abs(diff) > 5) { // 5点差以内に調整
-    changed = false;
-    if (diff > 0) {
-      // Aが強いので、AからBへ移動できるプレイヤーを探す
-      for (let i = 0; i < teamA.length; i++) {
-        const p = teamA[i];
-        // 移動してもペア制約を壊さないか簡易チェック（離したいペアで一緒にいるか）
-        const canMove = !separatePairs.some(([x, y]) => 
-          (x === p.name && teamB.some(q => q.name === y)) || 
-          (y === p.name && teamB.some(q => q.name === x))
-        );
-        if (canMove) {
-          teamA.splice(i,1);
-          teamB.push(p);
-          diff = totalScore(teamA) - totalScore(teamB);
-          changed = true;
-          break;
-        }
-      }
-    } else {
-      // Bが強いので逆に
-      for (let i = 0; i < teamB.length; i++) {
-        const p = teamB[i];
-        const canMove = !separatePairs.some(([x, y]) => 
-          (x === p.name && teamA.some(q => q.name === y)) || 
-          (y === p.name && teamA.some(q => q.name === x))
-        );
-        if (canMove) {
-          teamB.splice(i,1);
-          teamA.push(p);
-          diff = totalScore(teamA) - totalScore(teamB);
-          changed = true;
-          break;
-        }
+      const idx = from.findIndex(p => p.name === toMove.name);
+      if (idx >= 0) {
+        const moved = from.splice(idx, 1)[0];
+        to.push(moved);
       }
     }
   }
