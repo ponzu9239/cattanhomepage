@@ -100,8 +100,8 @@
     </div>
   </div>
 
-  <div id="matchCount">過去0試合のカスタムマッチをもとに生成。</div>
-  <div id="lastUpdated">最終更新日時: --</div>
+  <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
+  <div id="lastUpdated">最終更新: --</div>
 
   <script>
     // Firebase設定
@@ -132,8 +132,8 @@
     // apex_resultsから試合数と最終更新日時を取得
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) {
-        matchCountEl.textContent = "過去0試合のカスタムマッチをもとに生成。";
-        lastUpdatedEl.textContent = "最終更新日時: --";
+        matchCountEl.textContent = "過去 試合のカスタムマッチをもとに生成。";
+        lastUpdatedEl.textContent = "最終更新: --";
         return;
       }
       const matches = Object.values(snapshot.val());
@@ -155,9 +155,9 @@
         const d = new Date(latestTimestamp);
         const formatted = `${d.getFullYear()}年${(d.getMonth()+1).toString().padStart(2,"0")}月${d.getDate().toString().padStart(2,"0")}日 ` +
                           `${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}:${d.getSeconds().toString().padStart(2,"0")}`;
-        lastUpdatedEl.textContent = `最終更新日時: ${formatted}`;
+        lastUpdatedEl.textContent = `最終更新: ${formatted}(日本時間)`;
       } else {
-        lastUpdatedEl.textContent = "最終更新日時: --";
+        lastUpdatedEl.textContent = "最終更新: --";
       }
     });
   </script>
