@@ -1,1 +1,125 @@
-あ
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>APEXきゃたんカスタムチーム分け - 閲覧ページ</title>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      margin: 0;
+      padding: 16px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+      margin-bottom: 12px;
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .teams {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .team-box {
+      width: 100%;
+      background: #eefaff;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #97eadb;
+      text-align: center;
+    }
+
+    .team-box.team2 {
+      background: #fff1f5;
+      border-color: #ffb6c1;
+    }
+
+    .team-box h2 {
+      font-size: 18px;
+      margin: 0 0 8px 0;
+      color: #47b6a2;
+    }
+
+    .team-box ul {
+      list-style: none;
+      padding: 0 8px;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      box-sizing: border-box;
+    }
+
+    .team-box li {
+      background: white;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      .team-box h2 { font-size: 16px; }
+      .team-box li { font-size: 14px; padding: 5px; }
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+  <h1>APEXきゃたんカスタムチーム分け - 閲覧ページ</h1>
+
+  <div class="teams">
+    <div class="team-box team1">
+      <h2>チーム1</h2>
+      <ul id="teamA"></ul>
+    </div>
+    <div class="team-box team2">
+      <h2>チーム2</h2>
+      <ul id="teamB"></ul>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+      authDomain: "match-result-ea475.firebaseapp.com",
+      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+      projectId: "match-result-ea475",
+      storageBucket: "match-result-ea475.firebasestorage.app",
+      messagingSenderId: "759877853492",
+      appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const teamAul = document.getElementById("teamA");
+    const teamBul = document.getElementById("teamB");
+
+    // Firebaseからチーム分け結果をリアルタイム取得
+    db.ref("currentTeamResult").on("value", snapshot => {
+      const data = snapshot.val() || { teamA: [], teamB: [] };
+
+      if (data.teamA.length === 0 && data.teamB.length === 0) {
+        teamAul.innerHTML = "<li>チーム分けのデータがありません</li>";
+        teamBul.innerHTML = "";
+        return;
+      }
+
+      teamAul.innerHTML = data.teamA.map(name => `<li>${name}</li>`).join("");
+      teamBul.innerHTML = data.teamB.map(name => `<li>${name}</li>`).join("");
+    });
+  </script>
+</body>
+</html>
