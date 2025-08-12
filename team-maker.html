@@ -168,6 +168,48 @@
       .team-box li { font-size: 14px; padding: 5px; }
       .player-list { grid-template-columns: repeat(2, 1fr); }
     }
+    
+    label {
+  margin: 0 10px;
+  font-weight: 700;
+  color: #3a8d94;
+  cursor: pointer;
+  user-select: none;
+  background: #e0f7f9;
+  padding: 8px 14px;
+  border-radius: 24px;
+  border: 2px solid #97eadb;
+  font-size: 15px;
+  box-shadow: 0 2px 5px rgba(151, 234, 219, 0.4);
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+label:hover {
+  background-color: #97eadb;
+  color: white;
+  box-shadow: 0 4px 8px rgba(151, 234, 219, 0.7);
+}
+
+.team-box {
+  background: #e6fcfc;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 2.5px solid #97eadb;
+  box-shadow: 0 5px 10px rgba(151, 234, 219, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.team-box.team2 {
+  background: #ffe8f0;
+  border-color: #ffb6c1;
+  box-shadow: 0 5px 10px rgba(255, 182, 193, 0.3);
+}
+
+.team-box h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  font-weight: 900;
+  letter-spacing: 1.1px;
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
