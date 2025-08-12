@@ -558,86 +558,75 @@
 function makeTeams() {
   const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
   const method = document.querySelector('input[name="method"]:checked').value;
+
   let scores;
   if (method === "average") scores = playerScoresAverage;
   else if (method === "winrate") scores = playerScoresWinRate;
-  else if (method === "killdiff") scores = playerScoresKillDiff;
   else if (method === "kdratio") scores = playerScoresKDRatio;
+  else if (method === "killdiff") scores = playerScoresKillDiff;
   else scores = {};
 
-  // ペアをグループにまとめるためのUnion-Find（親管理）を用意
-  const parent = {};
-  function find(x) {
-    if (!parent[x]) parent[x] = x;
-    if (parent[x] !== x) parent[x] = find(parent[x]);
-    return parent[x];
-  }
-  function union(a, b) {
-    const pa = find(a);
-    const pb = find(b);
-    if (pa !== pb) parent[pb] = pa;
+  // 選択されたプレイヤーと強さデータをセット
+  const players = selected.map(name => ({ name, strength: scores[name] ?? 0 }));
+
+  if (players.length === 0) {
+    document.getElementById("teamA").innerHTML = "";
+    document.getElementById("teamB").innerHTML = "";
+    return;
   }
 
-  // くっつけたいペアでグループ化
-  togetherPairs.forEach(([p1, p2]) => {
-    if (selected.includes(p1) && selected.includes(p2)) union(p1, p2);
-  });
+  // 離したいペア
+  const pairs = separatePairs;
 
-  // グループごとのメンバーをまとめる
-  const groups = {};
-  selected.forEach(name => {
-    const p = find(name);
-    if (!groups[p]) groups[p] = [];
-    groups[p].push(name);
-  });
+  // 全探索でチーム分けする関数
+  function divideTeams(players, separatePairs) {
+    const playerNames = players.map(p => p.name);
+    const nameToStrength = {};
+    players.forEach(p => nameToStrength[p.name] = p.strength);
 
-  // グループごとに合計スコアを計算
-  const groupList = Object.values(groups).map(members => {
-    const score = members.reduce((sum, n) => sum + (scores[n] ?? 0), 0);
-    return { members, score };
-  });
+    const results = [];
+    const maxTeamSize = Math.ceil(players.length / 2);
 
-  // スコアの高い順にソート
-  groupList.sort((a, b) => b.score - a.score);
+    function dfs(index, teamA) {
+      if (index === players.length) {
+        const teamB = playerNames.filter(n => !teamA.includes(n));
 
-  // チーム振り分け
-  const teamA = [];
-  const teamB = [];
-  let sumA = 0;
-  let sumB = 0;
+        // 離したいペアの制約チェック
+        for (const [p1, p2] of separatePairs) {
+          if ((teamA.includes(p1) && teamA.includes(p2)) || (teamB.includes(p1) && teamB.includes(p2))) {
+            return;
+          }
+        }
 
-  groupList.forEach(group => {
-    if (sumA <= sumB) {
-      teamA.push(...group.members);
-      sumA += group.score;
-    } else {
-      teamB.push(...group.members);
-      sumB += group.score;
-    }
-  });
+        const sumA = teamA.reduce((sum, n) => sum + nameToStrength[n], 0);
+        const sumB = teamB.reduce((sum, n) => sum + nameToStrength[n], 0);
 
-  // 離したいペアが同じチームになっていたら調整
-  separatePairs.forEach(([p1, p2]) => {
-    const inA1 = teamA.includes(p1);
-    const inA2 = teamA.includes(p2);
-    const inB1 = teamB.includes(p1);
-    const inB2 = teamB.includes(p2);
-
-    if ((inA1 && inA2) || (inB1 && inB2)) {
-      // 片方を逆チームへ移す（今回はp2を移す）
-      if (inA1) {
-        teamA.splice(teamA.indexOf(p2), 1);
-        teamB.push(p2);
-      } else {
-        teamB.splice(teamB.indexOf(p2), 1);
-        teamA.push(p2);
+        results.push({ teamA, teamB, diff: Math.abs(sumA - sumB), sumA, sumB });
+        return;
       }
-    }
-  });
 
-  // 表示更新
-  document.getElementById("teamA").innerHTML = teamA.map(n => `<li>${n}</li>`).join("");
-  document.getElementById("teamB").innerHTML = teamB.map(n => `<li>${n}</li>`).join("");
+      if (teamA.length < maxTeamSize) {
+        dfs(index + 1, [...teamA, playerNames[index]]);
+      }
+      dfs(index + 1, teamA);
+    }
+
+    dfs(0, []);
+
+    results.sort((a, b) => a.diff - b.diff);
+    return results[0];
+  }
+
+  const best = divideTeams(players, pairs);
+
+  if (!best) {
+    document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
+    document.getElementById("teamB").innerHTML = "";
+    return;
+  }
+
+  document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
+  document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
 }
 
     // ペアフォーム イベント設定
