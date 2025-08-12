@@ -28,7 +28,7 @@
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
     <label><input type="radio" name="method" value="winRate"> 勝率</label>
-    <label><input type="radio" name="method" value="diffScore"> キル差スコア（履歴考慮）</label>
+<label><input type="radio" name="method" value="kdRatio"> キルレ</label>
   </div>
 
   <table>
@@ -184,6 +184,41 @@
         });
       });
     });
+    
+    // 新規関数：キルデス比計算
+function calculateKDRatio(matches) {
+  const playerStats = {};
+
+  matches.forEach(match => {
+    if(!match.teamA || !match.teamB) return;
+
+    const teamAKills = match.teamAKills ?? 0;
+    const teamBKills = match.teamBKills ?? 0;
+
+    // チームAのプレイヤーごとにキル数を加算（ここはキル差じゃなく、チームのキル数を単純加算）
+    match.teamA.forEach(p => {
+      if(!playerStats[p]) playerStats[p] = { kills: 0, deaths: 0 };
+      playerStats[p].kills += teamAKills;
+      playerStats[p].deaths += teamBKills;
+    });
+
+    // チームBのプレイヤーごとにキル数を加算
+    match.teamB.forEach(p => {
+      if(!playerStats[p]) playerStats[p] = { kills: 0, deaths: 0 };
+      playerStats[p].kills += teamBKills;
+      playerStats[p].deaths += teamAKills;
+    });
+  });
+
+  return Object.keys(playerStats).map(name => {
+    const stat = playerStats[name];
+    const kills = stat.kills;
+    const deaths = stat.deaths;
+
+    const kd = deaths === 0 ? kills : kills / deaths;
+    return { name, score: kd.toFixed(2) };
+  });
+}
   </script>
 </body>
 </html>
