@@ -67,17 +67,19 @@
       text-align: center;
     }
 
-    @media (max-width: 600px) {
-      h1 { font-size: 22px; }
-      .team-box h2 { font-size: 16px; }
-      .team-box li { font-size: 14px; padding: 5px; }
-    }
-
     #matchCount {
       text-align: center;
       color: #47b6a2;
       font-weight: 600;
       margin-top: 8px;
+    }
+
+    #lastUpdated {
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      margin-top: 4px;
+      user-select: none;
     }
   </style>
 
@@ -98,9 +100,11 @@
     </div>
   </div>
 
-  <div id="matchCount"></div>
+  <div id="matchCount">過去0試合のカスタムマッチをもとに生成。</div>
+  <div id="lastUpdated">最終更新日時: --</div>
 
   <script>
+    // Firebase設定
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -115,27 +119,17 @@
 
     const teamAul = document.getElementById("teamA");
     const teamBul = document.getElementById("teamB");
-    const countEl = document.getElementById("matchCount");
+    const matchCountEl = document.getElementById("matchCount");
+    const lastUpdatedEl = document.getElementById("lastUpdated");
 
+    // currentTeamResultの監視（チームメンバー表示用）
     db.ref("currentTeamResult").on("value", snapshot => {
       const data = snapshot.val() || { teamA: [], teamB: [] };
-
-      if (data.teamA.length === 0 && data.teamB.length === 0) {
-        teamAul.innerHTML = "";
-        teamBul.innerHTML = "";
-        countEl.textContent = "";
-        return;
-      }
-
       teamAul.innerHTML = data.teamA.map(name => `<li>${name}</li>`).join("");
       teamBul.innerHTML = data.teamB.map(name => `<li>${name}</li>`).join("");
-
-      if (data.matchCount) {
-        countEl.textContent = `過去${data.matchCount}試合のカスタムマッチをもとに生成。`;
-      } else {
-        countEl.textContent = "";
-      }
     });
-  </script>
-</body>
-</html>
+
+    // apex_resultsから試合数と最終更新日時を取得
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) {
+        matchCountEl.textContent = "過去
