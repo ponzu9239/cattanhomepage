@@ -670,32 +670,6 @@
         alert("名前が空欄か同じ、もしくは既に登録済みです。");
       }
     });
-    
-    // くっつけたいペアが別チームなら調整（チームBにいる方をチームAに移動）
-togetherPairs.forEach(([p1, p2]) => {
-  const inA1 = teamA.some(p => p.name === p1);
-  const inA2 = teamA.some(p => p.name === p2);
-  const inB1 = teamB.some(p => p.name === p1);
-  const inB2 = teamB.some(p => p.name === p2);
-
-  if ((inA1 && inB2) || (inA2 && inB1)) {
-    // チームBにいる方をチームAに移動
-    if (inB1) {
-      const index = teamB.findIndex(p => p.name === p1);
-      if (index >= 0) {
-        const moved = teamB.splice(index, 1)[0];
-        teamA.push(moved);
-      }
-    }
-    if (inB2) {
-      const index = teamB.findIndex(p => p.name === p2);
-      if (index >= 0) {
-        const moved = teamB.splice(index, 1)[0];
-        teamA.push(moved);
-      }
-    }
-  }
-});
 
     // Firebase currentInputPlayersの監視（matchingPlayers更新）
     db.ref("currentInputPlayers").on("value", (snapshot) => {
