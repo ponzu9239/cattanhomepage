@@ -658,22 +658,20 @@ function makeTeams() {
     return results[0];
   }
 
-  const best = divideGroups(groups, separate);
+const best = divideGroups(groups, separate);
 
-  if (!best) {
-    document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
-    document.getElementById("teamB").innerHTML = "";
-    return;
-  }
-
-  document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
-  document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
+if (!best) {
+  document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
+  document.getElementById("teamB").innerHTML = "";
+  // Firebaseに空結果を送るのもOK
+  db.ref(savePath).set({ teamA: [], teamB: [], timestamp: Date.now() });
+  return;
 }
 
-// 保存用のパスを決める（例：currentTeamResult）
-const savePath = "currentTeamResult";
+document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
+document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
 
-// 結果をFirebaseにセット
+// ここでFirebaseに送信
 db.ref(savePath).set({
   teamA: best.teamA,
   teamB: best.teamB,
