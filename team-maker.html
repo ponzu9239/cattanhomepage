@@ -632,14 +632,6 @@
         }
       });
 
-// 🔹 きゃたんは必ずチームAに
-// きゃたんがチームBにいるなら、チームB全員とチームA全員を入れ替える
-if (teamB.some(p => p.name === "きゃたん") && !teamA.some(p => p.name === "きゃたん")) {
-  const tmp = teamA;
-  teamA = teamB;
-  teamB = tmp;
-}
-
       // 表示反映
       document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
       document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
