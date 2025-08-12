@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>いい感じにチーム分けしてくれるやつをみるやつ</title>
+  <title>いい感じにチーム分けしてくれるやつを見れるやつ</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -67,6 +67,14 @@
       text-align: center;
     }
 
+    #lastUpdated {
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      margin-top: 8px;
+      user-select: none;
+    }
+
     @media (max-width: 600px) {
       h1 { font-size: 22px; }
       .team-box h2 { font-size: 16px; }
@@ -78,7 +86,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>いい感じにチーム分けしてくれるやつをみるやつ</h1>
+  <h1>いい感じにチーム分けしてくれるやつを見れるやつ</h1>
 
   <div class="teams">
     <div class="team-box team1">
@@ -90,6 +98,8 @@
       <ul id="teamB"></ul>
     </div>
   </div>
+
+  <p id="lastUpdated"></p>
 
   <script>
     const firebaseConfig = {
@@ -106,21 +116,30 @@
 
     const teamAul = document.getElementById("teamA");
     const teamBul = document.getElementById("teamB");
+    const lastUpdatedP = document.getElementById("lastUpdated");
 
     // Firebaseからチーム分け結果をリアルタイム取得
-db.ref("currentTeamResult").on("value", snapshot => {
-  const data = snapshot.val();
+    db.ref("currentTeamResult").on("value", snapshot => {
+      const data = snapshot.val() || { teamA: [], teamB: [], timestamp: null };
 
-  if (!data) {
-    // データがnullの場合は両方空にするだけ
-    teamAul.innerHTML = "";
-    teamBul.innerHTML = "";
-    return;
-  }
+      // データがないかtimestampが無ければ空表示
+      if ((!data.teamA || data.teamA.length === 0) && (!data.teamB || data.teamB.length === 0)) {
+        teamAul.innerHTML = "";
+        teamBul.innerHTML = "";
+        lastUpdatedP.textContent = "";
+        return;
+      }
 
-  teamAul.innerHTML = (data.teamA || []).map(name => `<li>${name}</li>`).join("");
-  teamBul.innerHTML = (data.teamB || []).map(name => `<li>${name}</li>`).join("");
-});
-</script>
+      teamAul.innerHTML = (data.teamA || []).map(name => `<li>${name}</li>`).join("");
+      teamBul.innerHTML = (data.teamB || []).map(name => `<li>${name}</li>`).join("");
+
+      if (data.timestamp) {
+        const date = new Date(data.timestamp);
+        lastUpdatedP.textContent = `最終更新: ${date.toLocaleString()}`;
+      } else {
+        lastUpdatedP.textContent = "";
+      }
+    });
+  </script>
 </body>
 </html>
