@@ -18,10 +18,6 @@
     color: #47b6a2;
     margin-bottom: 12px;
     font-weight: 800;
-    white-space: nowrap; /* 改行なし */
-    overflow: visible;
-    font-size: 26px; /* 初期サイズ */
-    transition: font-size 0.2s ease;
   }
   
     .teams {
@@ -147,21 +143,6 @@ db.ref("apex_results").on("value", snapshot => {
   matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
 });
 
-  function fitTitleFontSize() {
-    const title = document.getElementById('title');
-    const parentWidth = title.parentElement.clientWidth;
-    let fontSize = 26;
-    title.style.fontSize = fontSize + "px";
-
-    // 測ってはサイズ下げて、12pxまで
-    while (title.scrollWidth > parentWidth && fontSize > 12) {
-      fontSize -= 1;
-      title.style.fontSize = fontSize + "px";
-    }
-  }
-
-  window.addEventListener('resize', fitTitleFontSize);
-  window.addEventListener('load', fitTitleFontSize);
   </script>
 </body>
 </html>
