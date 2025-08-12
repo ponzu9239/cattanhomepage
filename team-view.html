@@ -119,11 +119,13 @@ const lastUpdatedEl = document.getElementById("lastUpdated");
 
 // チーム分け（currentTeamResult）の監視
 db.ref("currentTeamResult").on("value", snapshot => {
-  const data = snapshot.val() || { teamA: [], teamB: [] };
-  teamAul.innerHTML = data.teamA.map(name => `<li>${name}</li>`).join("");
-  teamBul.innerHTML = data.teamB.map(name => `<li>${name}</li>`).join("");
+  const data = snapshot.val() || {};
+  const teamA = Array.isArray(data.teamA) ? data.teamA : [];
+  const teamB = Array.isArray(data.teamB) ? data.teamB : [];
+  
+  teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
+  teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
 
-  // timestampがあれば最終更新日時表示も更新
   if (data.timestamp && typeof data.timestamp === "number") {
     const d = new Date(data.timestamp);
     const formatted = `${d.getFullYear()}/${(d.getMonth()+1).toString().padStart(2,"0")}/${d.getDate().toString().padStart(2,"0")} ` +
