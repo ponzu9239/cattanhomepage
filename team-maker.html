@@ -670,13 +670,6 @@ if (!best) {
 document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
 document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
 
-// Firebaseに保存
-db.ref(savePath).set({
-  teamA: best.teamA,
-  teamB: best.teamB,
-  timestamp: Date.now()
-});
-
     // ペアフォーム イベント設定
     document.getElementById("separatePairForm").addEventListener("submit", e => {
       e.preventDefault();
@@ -723,7 +716,6 @@ db.ref(savePath).set({
       matches = Object.values(snapshot.val());
       playerScoresAverage = calculateScoresAverage(matches);
       playerScoresWinRate = calculateWinRate(matches);
-      playerScoresKillDiff = calculateKillDiff(matches);
       playerScoresKDRatio = calculateKDRatio(matches);
       renderPlayers();
       makeTeams();
