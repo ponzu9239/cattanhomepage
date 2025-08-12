@@ -631,6 +631,13 @@
           }
         }
       });
+      
+       // 🔹 きゃたんがチームBにいたら、チームを入れ替える
+  if (teamB.some(p => p.name === "きゃたん") && !teamA.some(p => p.name === "きゃたん")) {
+    const tmp = teamA;
+    teamA = teamB;
+    teamB = tmp;
+  }
 
       // 表示反映
       document.getElementById("teamA").innerHTML = teamA.map(p => `<li>${p.name}</li>`).join("");
