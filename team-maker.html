@@ -675,6 +675,7 @@ document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`
 db.ref("currentTeamResult").set({
   teamA: best.teamA,
   teamB: best.teamB,
+  timestamp: Date.now(),
 });
 }
     // ペアフォーム イベント設定
