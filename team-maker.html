@@ -167,6 +167,68 @@
       .team-box h2 { font-size: 16px; }
       .team-box li { font-size: 14px; padding: 5px; }
       .player-list { grid-template-columns: repeat(2, 1fr); }
+      
+      /* 全体のルール設定ボックス */
+.rules-box {
+  background: #e6f9f6; /* 淡い背景 */
+  border: 2px solid #97eadb;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 20px auto;
+  width: 80%;
+  max-width: 500px;
+  box-shadow: 0 4px 10px rgba(151, 234, 219, 0.4);
+  text-align: center;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* 見出し */
+.rules-box h3 {
+  color: #3b6f72;
+  margin-bottom: 10px;
+}
+
+/* 入力フォーム */
+.rules-box input {
+  padding: 8px 10px;
+  margin: 5px;
+  border: 1px solid #97eadb;
+  border-radius: 5px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.rules-box input:focus {
+  border-color: #3b6f72;
+  box-shadow: 0 0 5px rgba(59, 111, 114, 0.4);
+}
+
+/* ボタン */
+.rules-box button {
+  background: #97eadb;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 15px;
+  margin-top: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #3b6f72;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.rules-box button:hover {
+  background: #7ad6c4;
+  transform: scale(1.05);
+}
+
+/* ルール表示テキスト */
+#ruleList {
+  margin-top: 15px;
+  color: #3b6f72;
+  font-size: 14px;
+  line-height: 1.6;
+}
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -185,6 +247,28 @@
       <ul id="teamB"></ul>
     </div>
   </div>
+  
+<div class="rules-box">
+  <h3>チーム分けルール設定</h3>
+  <div>
+    <input id="together1" placeholder="名前1">
+    <input id="together2" placeholder="名前2">
+    <button onclick="addTogether()">同じチームに追加</button>
+  </div>
+  <div>
+    <input id="separate1" placeholder="名前1">
+    <input id="separate2" placeholder="名前2">
+    <button onclick="addSeparate()">別のチームに追加</button>
+  </div>
+  <p id="ruleList"></p>
+</div>
+  <div>
+    <input id="separate1" placeholder="名前1">
+    <input id="separate2" placeholder="名前2">
+    <button onclick="addSeparate()">別のチームに追加</button>
+  </div>
+  <p id="ruleList"></p>
+</div>
 
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均キル</label>
@@ -418,6 +502,38 @@ db.ref("apex_results").on("value", snapshot => {
       makeTeams();
     });
     
+    // 同じチームルール
+mustTogether.forEach(([p1, p2]) => {
+  const inA1 = teamA.some(p => p.name === p1);
+  const inA2 = teamA.some(p => p.name === p2);
+  const inB1 = teamB.some(p => p.name === p1);
+  const inB2 = teamB.some(p => p.name === p2);
+
+  if (inA1 && inB2) {
+    const move = teamB.find(p => p.name === p2);
+    teamB = teamB.filter(p => p.name !== p2);
+    teamA.push(move);
+  } else if (inB1 && inA2) {
+    const move = teamA.find(p => p.name === p2);
+    teamA = teamA.filter(p => p.name !== p2);
+    teamB.push(move);
+  }
+});
+
+// 別チームルール
+mustSeparate.forEach(([p1, p2]) => {
+  if (teamA.some(p => p.name === p1) && teamA.some(p => p.name === p2)) {
+    const move = teamA.find(p => p.name === p2);
+    teamA = teamA.filter(p => p.name !== p2);
+    teamB.push(move);
+  }
+  if (teamB.some(p => p.name === p1) && teamB.some(p => p.name === p2)) {
+    const move = teamB.find(p => p.name === p2);
+    teamB = teamB.filter(p => p.name !== p2);
+    teamA.push(move);
+  }
+});
+    
     function calculateKDRatio(matches) {
   const playerStats = {};
 
@@ -446,6 +562,33 @@ db.ref("apex_results").on("value", snapshot => {
     scores[name] = deaths === 0 ? kills : +(kills / deaths).toFixed(2);
   });
   return scores;
+}
+
+let mustTogether = [];
+let mustSeparate = [];
+
+function addTogether() {
+  const p1 = document.getElementById("together1").value.trim();
+  const p2 = document.getElementById("together2").value.trim();
+  if (p1 && p2 && p1 !== p2) {
+    mustTogether.push([p1, p2]);
+    renderRules();
+  }
+}
+
+function addSeparate() {
+  const p1 = document.getElementById("separate1").value.trim();
+  const p2 = document.getElementById("separate2").value.trim();
+  if (p1 && p2 && p1 !== p2) {
+    mustSeparate.push([p1, p2]);
+    renderRules();
+  }
+}
+
+function renderRules() {
+  const togetherText = mustTogether.map(p => `${p[0]} & ${p[1]} → 同じチーム`).join("<br>");
+  const separateText = mustSeparate.map(p => `${p[0]} & ${p[1]} → 別チーム`).join("<br>");
+  document.getElementById("ruleList").innerHTML = togetherText + "<br>" + separateText;
 }
   </script>
 </body>
