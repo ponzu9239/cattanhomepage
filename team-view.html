@@ -12,13 +12,18 @@
       padding: 16px;
     }
 
-h1 {
-  white-space: nowrap;      /* 改行させない */
-  overflow: hidden;         /* はみ出し部分を隠す */
-  text-overflow: ellipsis;  /* はみ出したら省略記号「...」を表示 */
-  font-size: clamp(16px, 6vw, 26px);  /* 画面幅に応じてフォントサイズを調整 */
-}
 
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+      margin-bottom: 12px;
+      font-size: 26px;
+      font-weight: 800;
+      white-space: nowrap;      /* 改行させない */
+      overflow: hidden;         /* はみ出し隠す */
+      text-overflow: ellipsis;  /* はみ出たら「...」 */
+   }
+  
     .teams {
       display: flex;
       flex-direction: column;
