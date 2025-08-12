@@ -189,7 +189,7 @@
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均キル</label>
     <label><input type="radio" name="method" value="winrate"> 勝率</label>
-    <label><input type="radio" name="method" value="killdiff"> AI(開発中)</label>
+    <label><input type="radio" name="method" value="kdratio"> キルレ</label>
   </div>
 
   <div class="recent-toggle">
@@ -367,8 +367,12 @@ function renderPlayers() {
 function makeTeams() {
   const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
   const method = document.querySelector('input[name="method"]:checked').value;
-  let scores = method === "average" ? playerScoresAverage :
-               method === "winrate" ? playerScoresWinRate : playerScoresKillDiff;
+let scores;
+if (method === "average") scores = playerScoresAverage;
+else if (method === "winrate") scores = playerScoresWinRate;
+else if (method === "killdiff") scores = playerScoresKillDiff;
+else if (method === "kdratio") scores = playerScoresKDRatio;
+else scores = {};
 
   const players = selected.map(name => ({ name, score: scores[name] ?? 0 }));
   players.sort((a, b) => b.score - a.score);
@@ -392,16 +396,17 @@ function makeTeams() {
   document.getElementById("teamB").innerHTML = teamB.map(p => `<li>${p.name}</li>`).join("");
 }
 
-    db.ref("apex_results").on("value", snapshot => {
-      if (!snapshot.exists()) return;
-      matches = Object.values(snapshot.val());
-      playerScoresAverage = calculateScoresAverage(matches);
-      playerScoresWinRate = calculateWinRate(matches);
-      playerScoresKillDiff = calculateKillDiff(matches);
-      renderPlayers();
-      makeTeams();
-      document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
-    });
+db.ref("apex_results").on("value", snapshot => {
+  if (!snapshot.exists()) return;
+  matches = Object.values(snapshot.val());
+  playerScoresAverage = calculateScoresAverage(matches);
+  playerScoresWinRate = calculateWinRate(matches);
+  playerScoresKillDiff = calculateKillDiff(matches);
+  playerScoresKDRatio = calculateKDRatio(matches);  // ← ここを追加
+  renderPlayers();
+  makeTeams();
+  document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
+});
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
       radio.addEventListener("change", () => { renderPlayers(); makeTeams(); });
@@ -412,6 +417,36 @@ function makeTeams() {
       playerScoresKillDiff = calculateKillDiff(matches);
       makeTeams();
     });
+    
+    function calculateKDRatio(matches) {
+  const playerStats = {};
+
+  matches.forEach(match => {
+    if(!match.teamA || !match.teamB) return;
+
+    const teamAKills = match.teamAKills ?? 0;
+    const teamBKills = match.teamBKills ?? 0;
+
+    match.teamA.forEach(p => {
+      if(!playerStats[p]) playerStats[p] = { kills: 0, deaths: 0 };
+      playerStats[p].kills += teamAKills;
+      playerStats[p].deaths += teamBKills;
+    });
+
+    match.teamB.forEach(p => {
+      if(!playerStats[p]) playerStats[p] = { kills: 0, deaths: 0 };
+      playerStats[p].kills += teamBKills;
+      playerStats[p].deaths += teamAKills;
+    });
+  });
+
+  const scores = {};
+  Object.keys(playerStats).forEach(name => {
+    const { kills, deaths } = playerStats[name];
+    scores[name] = deaths === 0 ? kills : +(kills / deaths).toFixed(2);
+  });
+  return scores;
+}
   </script>
 </body>
 </html>
