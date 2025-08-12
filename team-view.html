@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>いい感じにチーム分けしてくれるやつを見れるやつ</title>
+  <title>APEXきゃたんカスタムチーム分け - 閲覧ページ</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -67,7 +67,8 @@
       text-align: center;
     }
 
-    #lastUpdated {
+    #lastUpdated,
+    #matchCount {
       text-align: center;
       color: #888;
       font-size: 14px;
@@ -86,7 +87,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>いい感じにチーム分けしてくれるやつを見れるやつ</h1>
+  <h1>APEXきゃたんカスタムチーム分け - 閲覧ページ</h1>
 
   <div class="teams">
     <div class="team-box team1">
@@ -99,6 +100,7 @@
     </div>
   </div>
 
+  <p id="matchCount"></p>
   <p id="lastUpdated"></p>
 
   <script>
@@ -117,16 +119,16 @@
     const teamAul = document.getElementById("teamA");
     const teamBul = document.getElementById("teamB");
     const lastUpdatedP = document.getElementById("lastUpdated");
+    const matchCountP = document.getElementById("matchCount");
 
-    // Firebaseからチーム分け結果をリアルタイム取得
     db.ref("currentTeamResult").on("value", snapshot => {
-      const data = snapshot.val() || { teamA: [], teamB: [], timestamp: null };
+      const data = snapshot.val() || { teamA: [], teamB: [], timestamp: null, matchCount: null };
 
-      // データがないかtimestampが無ければ空表示
       if ((!data.teamA || data.teamA.length === 0) && (!data.teamB || data.teamB.length === 0)) {
         teamAul.innerHTML = "";
         teamBul.innerHTML = "";
         lastUpdatedP.textContent = "";
+        matchCountP.textContent = "";
         return;
       }
 
@@ -135,9 +137,15 @@
 
       if (data.timestamp) {
         const date = new Date(data.timestamp);
-        lastUpdatedP.textContent = `最終更新: ${date.toLocaleString()}`;
+        lastUpdatedP.textContent = `最終更新: ${date.toLocaleString()}(日本時間)`;
       } else {
         lastUpdatedP.textContent = "";
+      }
+
+      if (data.matchCount !== null && !isNaN(data.matchCount)) {
+        matchCountP.textContent = `過去${data.matchCount}試合のカスタムマッチをもとに作成。`;
+      } else {
+        matchCountP.textContent = "";
       }
     });
   </script>
