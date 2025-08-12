@@ -132,4 +132,34 @@
     // apex_resultsから試合数と最終更新日時を取得
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) {
-        matchCountEl.textContent = "過去
+        matchCountEl.textContent = "過去0試合のカスタムマッチをもとに生成。";
+        lastUpdatedEl.textContent = "最終更新日時: --";
+        return;
+      }
+      const matches = Object.values(snapshot.val());
+
+      // 試合数表示
+      matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
+
+      // 最終更新日時は、apex_resultsの各試合のタイムスタンプを比較して最大値を探す
+      // もしタイムスタンプが無い場合は現在時刻で代用（なければ表示なし）
+      let latestTimestamp = 0;
+      matches.forEach(match => {
+        // 例: match.timestampがある前提
+        if (match.timestamp && typeof match.timestamp === "number") {
+          if (match.timestamp > latestTimestamp) latestTimestamp = match.timestamp;
+        }
+      });
+
+      if (latestTimestamp > 0) {
+        const d = new Date(latestTimestamp);
+        const formatted = `${d.getFullYear()}年${(d.getMonth()+1).toString().padStart(2,"0")}月${d.getDate().toString().padStart(2,"0")}日 ` +
+                          `${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}:${d.getSeconds().toString().padStart(2,"0")}`;
+        lastUpdatedEl.textContent = `最終更新日時: ${formatted}`;
+      } else {
+        lastUpdatedEl.textContent = "最終更新日時: --";
+      }
+    });
+  </script>
+</body>
+</html>
