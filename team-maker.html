@@ -39,21 +39,23 @@
       font-size: 14px;
     }
 
-    .teams {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
+.teams {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: center; /* 中央寄せ */
+}
 
-    .team-box {
-      width: 100%;
-      background: #eefaff;
-      padding: 12px;
-      border-radius: 12px;
-      border: 2px solid #97eadb;
-      text-align: center;
-    }
+.team-box {
+  width: 90%; /* 横幅を画面の90%に制限 */
+  max-width: 500px; /* 最大幅を制限 */
+  background: #eefaff;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #97eadb;
+  text-align: center;
+}
 
     .team-box.team2 {
       background: #fff1f5;
