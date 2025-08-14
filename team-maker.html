@@ -670,6 +670,12 @@ if (!best) {
   return;
 }
 
+if (best.teamB.includes("きゃたん") && !best.teamA.includes("きゃたん")) {
+  const temp = best.teamA;
+  best.teamA = best.teamB;
+  best.teamB = temp;
+}
+
 document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
 document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
 
