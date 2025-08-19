@@ -100,12 +100,12 @@ nav a:hover {
   flex-direction: column;
   gap: 16px;
   margin-bottom: 16px;
-  align-items: center; /* 中央寄せ */
+  align-items: center;
 }
 
 .team-box {
-  width: 90%; /* 横幅を画面の90%に制限 */
-  max-width: 500px; /* 最大幅を制限 */
+  width: 90%;
+  max-width: 500px;
   background: #eefaff;
   padding: 12px;
   border-radius: 12px;
@@ -183,9 +183,13 @@ nav a:hover {
 
   <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
   <div id="lastUpdated">最終更新: --</div>
+  
+  <footer>
+    <p>ド天然のきゃたん</p>
+  </footer>
 
   <script>
-    // Firebase設定
+
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -203,7 +207,6 @@ const teamBul = document.getElementById("teamB");
 const matchCountEl = document.getElementById("matchCount");
 const lastUpdatedEl = document.getElementById("lastUpdated");
 
-// チーム分け（currentTeamResult）の監視
 db.ref("currentTeamResult").on("value", snapshot => {
   const data = snapshot.val() || {};
   const teamA = Array.isArray(data.teamA) ? data.teamA : [];
@@ -222,7 +225,6 @@ db.ref("currentTeamResult").on("value", snapshot => {
   }
 });
 
-// apex_resultsから試合数だけ取得
 db.ref("apex_results").on("value", snapshot => {
   if (!snapshot.exists()) {
     matchCountEl.textContent = "過去 試合のカスタムマッチをもとに生成。";
