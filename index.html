@@ -91,23 +91,26 @@ header {
       margin: 20px auto;
     }
 
-    .roulette-banner a {
-      display: inline-block;
-      padding: 12px 24px;
-      background: linear-gradient(135deg, #ea97a6, #f7b8a3, #ff9fae);
-      color: #fff;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border-radius: 10px;
-      text-decoration: none;
-      box-shadow: 0 4px 10px rgba(151, 234, 219, 0.4);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
+.roulette-banner a {
+  font-weight: bold;
+  font-size: 1.3rem;
+  background: #d4f0f4;
+  border: 2px solid #97EADB;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  margin: 1rem 0;
+  color: #1b656f;
+  user-select: all;
+  word-break: break-all;
+  display: inline-block; /* リンクとして表示するため追加 */
+  text-decoration: none; /* 下線消す */
+}
 
-    .roulette-banner a:hover {
-      transform: scale(1.08);
-      box-shadow: 0 6px 14px rgba(151, 234, 219, 0.6);
-    }
+.roulette-banner a:hover {
+  transform: scale(1.03); /* 少し拡大するくらいに調整可能 */
+  box-shadow: 0 4px 10px rgba(151, 234, 219, 0.4); /* 元のシャドウに合わせて調整 */
+}
     
 /* ハンバーガーアイコン */
 .hamburger {
