@@ -232,6 +232,26 @@ db.ref("apex_results").on("value", snapshot => {
   matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
 });
 
+const hamburger = document.getElementById("hamburger");
+const nav = document.getElementById("nav");
+
+hamburger.addEventListener("click", () => {
+  nav.classList.toggle("show");
+
+  const links = nav.querySelectorAll("a");
+  links.forEach((link, index) => {
+    if (nav.classList.contains("show")) {
+      link.style.opacity = "1";
+      link.style.transform = "translateY(0)";
+      link.style.transitionDelay = `${index * 0.1}s`; // 順番に遅延
+    } else {
+      link.style.opacity = "0";
+      link.style.transform = "translateY(-20px)";
+      link.style.transitionDelay = "0s";
+    }
+  });
+});
+
   </script>
 </body>
 </html>
