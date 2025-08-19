@@ -5,17 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>きゃたん 管理者ページ</title>
   <style>
-  /* ===== 全体 ===== */
-body {
-  font-family: "Hiragino Maru Gothic ProN", sans-serif;
-  background: #f7fcfc;
-  margin: 0;
-  padding-top: 100px; /* ヘッダー分 */
-  color: #000;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-/* ===== ヘッダー ===== */
+    body {
+      margin: 0;
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #white;
+      color: #333;
+      padding-top: 100px;
+    }
+    
 header {
   position: fixed;
   top: 0;
@@ -26,13 +23,14 @@ header {
   text-align: center;
   z-index: 1000;
 }
-header h1 {
-  margin: 0;
-  font-size: 2rem;
-  color: #fff;
-}
 
-/* ===== ハンバーガー ===== */
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+    
+    /* ハンバーガーアイコン */
 .hamburger {
   font-size: 2rem;
   cursor: pointer;
@@ -44,7 +42,6 @@ header h1 {
   z-index: 1100;
 }
 
-/* ===== ナビゲーション ===== */
 nav {
   position: fixed;
   top: -100%;
@@ -54,167 +51,167 @@ nav {
   display: flex;
   flex-direction: column; 
   padding: 0;
-  transition: top 0.3s ease;
-  z-index: 1050;
+  transition: top 0.3s ease; /* スライドアニメーション */
+  z-index: 1050;         /* ハンバーガーより下 */
 }
+
 nav.show {
-  top: 80px;
+  top: 80px; /* ヘッダーの下までスライド */
 }
+
 nav a {
   display: block;
   text-align: center;
   margin: 0;
-  padding: 0.6rem 0;
+  padding: 0.6rem 0;       /* 左右は0に */
   font-size: 1.2rem;
   font-weight: bold;
   color: white;
-  background-color: #97EADB;
+  background-color: #97eadb;
   border-bottom: 1px solid #97EADB;
   text-decoration: none;
   transition: background-color 0.2s, transform 0.2s;
 }
+
 nav a:hover {
   background-color: #0099aa;
   transform: scale(1.03);
 }
 
-/* ===== セクション ===== */
-section {
-  padding: 2rem;
-  max-width: 900px;
-  margin: auto;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
-}
-section h3 {
-  color: #5aa2aa;
-  border-bottom: 2px solid #97EADB;
-  padding-bottom: 0.3rem;
-}
-
-/* ===== フォーム/ボタン ===== */
-label, input, textarea, button {
-  display: block;
-  margin: 1rem 0;
-  width: 100%;
-  font-size: 1rem;
-}
-button {
-  background-color: #97EADB;
-  color: white;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-button:hover {
-  background-color: #7fcbd5;
-}
-button.danger {
-  background-color: #f66;
-}
-
-/* ===== テーブル ===== */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-th, td {
-  border: 1px solid #97EADB;
-  padding: 0.5rem;
-  text-align: center;
-}
-#participantsTable td button {
-  white-space: nowrap;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  line-height: 1.2;
-  max-width: 100%;
-  display: inline-block;
-  word-break: keep-all;
-}
-#participantsTable td {
-  padding: 0px 6px;
-  font-size: 0.75rem;
-  line-height: 1;
-}
-
-/* ===== ルーレット ===== */
-#rouletteCanvas {
-  background-color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 15px #97EADBAA;
-  max-width: 100%;
-  height: auto;
-  user-select: none;
-}
-#rouletteContainer {
-  margin: 1.5rem 0;
-  text-align: center;
-  position: relative;
-}
-#pointer {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: -27px;
-  width: 0;
-  height: 0;
-  border-left: 30px solid transparent;
-  border-right: 30px solid transparent;
-  border-bottom: 50px solid #97EADB;
-}
-#currentNameDisplay {
-  margin-top: 40px;
-  font-weight: bold;
-  font-size: 1.3rem;
-  color: #97EADB;
-  text-shadow: 1px 1px 2px #aaa;
-  text-align: center;
-  display: inline-block;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.4;
-  user-select: none;
-}
-#winnerName {
-  font-weight: bold;
-  font-size: 1.5rem;
-  color: #1b656f;
-  text-align: center;
-  margin-top: 1rem;
-}
-.winner-animated {
-  animation: winnerPop 0.6s ease;
-  display: inline-block;
-  transform-origin: center;
-  font-weight: bold;
-  color: #FFD700;
-  text-shadow: 2px 2px 4px #000000;
-  background-color: rgba(0, 0, 0, 0.6);
-  padding: 8px 16px;
-  border-radius: 10px;
-}
-@keyframes winnerPop {
-  0% { transform: scale(1); opacity: 0.2; }
-  50% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(1); }
-}
-
-/* ===== フッター ===== */
 footer {
   background: #97EADB;
   text-align: center;
   color: white;
   padding: 1rem;
   margin-top: 2rem;
-  width: 100%;
+
+  /* body の padding を打ち消す */
+  margin-left: -20px;
+  margin-right: -20px;
+  width: calc(100% + 40px);
 }
+
+    
+    h1 {
+      text-align: center;
+      color: #97EADB;
+    }
+    label,
+    input,
+    textarea,
+    button {
+      display: block;
+      margin: 1rem 0;
+      width: 100%;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #97EADB;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #7fcbd5;
+    }
+    button.danger {
+      background-color: #f66;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th,
+    td {
+      border: 1px solid #97EADB;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    input[type="text"],
+    input[type="number"] {
+      width: 90%;
+      padding: 0.2rem;
+    }
+    @keyframes winnerPop {
+      0% { transform: scale(1); opacity: 0.2; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .winner-animated {
+      animation: winnerPop 0.6s ease;
+      display: inline-block;
+      transform-origin: center;
+      font-weight: bold;
+      color: #FFD700;
+      text-shadow: 2px 2px 4px #000000;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 8px 16px;
+      border-radius: 10px;
+    }
+    #participantsTable td button {
+      white-space: nowrap;
+      font-size: 0.9rem;
+      padding: 4px 8px;
+      line-height: 1.2;
+      max-width: 100%;
+      display: inline-block;
+      word-break: keep-all;
+    }
+    #participantsTable td {
+      padding: 0px 6px;
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+    #rouletteCanvas {
+      background-color: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #97EADBAA;
+      max-width: 100%;
+      height: auto;
+      user-select: none;
+    }
+    #rouletteContainer {
+      margin: 1.5rem 0;
+      text-align: center;
+      position: relative;
+    }
+    #pointer {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: -27px;
+      width: 0;
+      height: 0;
+      border-left: 30px solid transparent;
+      border-right: 30px solid transparent;
+      border-bottom: 50px solid #97EADB;
+    }
+    #currentNameDisplay {
+      margin-top: 40px;
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: #97EADB;
+      text-shadow: 1px 1px 2px #aaa;
+      text-align: center;
+      display: inline-block;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.4;
+      user-select: none;
+    }
+    #centerDisplay {
+      margin: 0 auto;
+      display: block;
+      text-align: center;
+      width: fit-content;
+      max-width: 100%;
+      margin-top: 50px;
+    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
