@@ -12,7 +12,7 @@
       padding: 16px;
     }
     
-    header {
+header {
   position: fixed;
   top: 0;
   left: 0;
@@ -22,6 +22,69 @@
   text-align: center;
   z-index: 1000;
 }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+    
+    /* ハンバーガーアイコン */
+.hamburger {
+  font-size: 2rem;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  right: 3rem;
+  color: white;
+  transform: translateY(-50%);
+  z-index: 1100;
+}
+
+nav {
+  position: fixed;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  background-color: #97EADB;
+  display: flex;
+  flex-direction: column; 
+  padding: 0;
+  transition: top 0.3s ease; /* スライドアニメーション */
+  z-index: 1050;         /* ハンバーガーより下 */
+}
+
+nav.show {
+  top: 80px; /* ヘッダーの下までスライド */
+}
+
+nav a {
+  display: block;
+  text-align: center;
+  margin: 0;
+  padding: 0.6rem 0;       /* 左右は0に */
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  background-color: #97eadb;
+  border-bottom: 1px solid #97EADB;
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+nav a:hover {
+  background-color: #0099aa;
+  transform: scale(1.03);
+}
+
+    footer {
+      background: #97EADB;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+
 
     h1 {
       text-align: center;
