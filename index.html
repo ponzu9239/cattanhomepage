@@ -11,13 +11,19 @@
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
       background: #e6f9fd;
       color: #333;
+      padding-top: 100px;
     }
 
-    header {
-      background-color: #97EADB;
-      padding: 1rem;
-      text-align: center;
-    }
+header {
+  position: fixed;   /* スクロールしても固定 */
+  top: 0;            /* 上に配置 */
+  left: 0;           /* 左端に配置 */
+  width: 100%;       /* 横幅いっぱい */
+  background-color: #97EADB;
+  padding: 1rem;
+  text-align: center;
+  z-index: 1000;     /* 前面に出す */
+}
 
     header h1 {
       margin: 0;
@@ -330,15 +336,6 @@
 <body>
   <header>
     <h1>ド天然のきゃたん</h1>
-    <nav>
-      <a href="#profile">プロフィール</a>
-      <a href="#liveVideo">配信中の動画</a>
-      <a href="#code">参加型コード</a>
-      <a href="#rules">参加方法</a>
-      <a href="#lotteryRules">イベント</a>
-      <a href="#sns">SNS</a>
-
-    </nav>
   </header>
 
   <div class="hero">
