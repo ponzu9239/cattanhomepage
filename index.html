@@ -307,9 +307,22 @@ nav.show {
 }
 
 nav a {
-  opacity: 0;                 /* 最初は透明 */
-  transform: translateY(-20px); /* 少し上にずらしておく */
-  transition: transform 0.3s ease, opacity 0.3s ease; /* アニメーション設定 */
+  display: block;               /* ブロック化 */
+  text-align: center;           /* 文字中央 */
+  margin: 0;                    /* 外側余白なし */
+  padding: 1rem 0;              /* 上下の余白で押しやすく */
+  font-size: 1.4rem;            /* 文字大きめ */
+  font-weight: bold;
+  color: white;
+  background-color: #00bcd4;    /* 背景色 */
+  border-bottom: 1px solid #97EADB; /* 下線 */
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+nav a:hover {
+  background-color: #0099aa;    /* ホバー時色 */
+  transform: scale(1.03);       /* 少し大きく */
 }
 
   </style>
