@@ -86,13 +86,26 @@ nav a:hover {
   transform: scale(1.03);
 }
 
-    footer {
-      background: #97EADB;
-      text-align: center;
-      color: white;
-      padding: 1rem;
-      margin-top: 50rem;
-    }
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1; /* 空きスペースを埋める */
+}
+
+footer {
+  background: #97EADB;
+  text-align: center;
+  color: white;
+  padding: 1rem;
+}
   
 .teams {
   display: flex;
@@ -166,6 +179,7 @@ nav a:hover {
     <a href="team-view.html">チーム分け</a>
   </nav>
 </header>
+<main>
 <body>
   <h1>いい感じにチーム分けしてくれるやつを見るやつ</h1>
 
@@ -182,6 +196,7 @@ nav a:hover {
 
   <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
   <div id="lastUpdated">最終更新: --</div>
+  </main>
   
   <footer>
     <p>ド天然のきゃたん</p>
