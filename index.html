@@ -283,36 +283,35 @@ header {
   cursor: pointer;
   position: absolute;
   top: 50%;
-  right: 1rem;
+  right: 1.5rem;
+  color: white;
   transform: translateY(-50%);
   z-index: 1100;
 }
 
-/* ナビ初期状態は上に隠す */
 nav {
-  position: fixed;
-  top: -100%;
-  left: 0;
-  width: 100%;
-  background-color: #97EADB;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem 0;
-  transition: top 0.3s ease-in-out;
-  z-index: 1000;
+  position: fixed;       /* 画面固定 */
+  top: -100%;            /* 画面上の外に配置 */
+  right: 0;              /* 右端に揃える */
+  width: 200px;          /* メニュー幅 */
+  background-color: #97EADB; /* 背景色 */
+  display: flex;
+  flex-direction: column; 
+  padding: 1rem;
+  transition: top 0.3s ease; /* スライドアニメーション */
+  z-index: 1050;         /* ハンバーガーより下 */
 }
 
-/* 表示状態 */
 nav.show {
-  top: 0;
+  top: 60px; /* ヘッダーの下までスライド */
 }
 
 nav a {
-  color: white;
-  text-decoration: none;
-  font-size: 1.2rem;
-  margin: 0.8rem 0;
+  opacity: 0;                 /* 最初は透明 */
+  transform: translateY(-20px); /* 少し上にずらしておく */
+  transition: transform 0.3s ease, opacity 0.3s ease; /* アニメーション設定 */
 }
+
   </style>
 
 </head>
@@ -498,6 +497,23 @@ const nav = document.getElementById("nav");
 
 hamburger.addEventListener("click", () => {
   nav.classList.toggle("show");
+});
+
+hamburger.addEventListener("click", () => {
+  nav.classList.toggle("show");
+
+  const links = nav.querySelectorAll("a");
+  links.forEach((link, index) => {
+    if (nav.classList.contains("show")) {
+      link.style.opacity = "1";
+      link.style.transform = "translateY(0)";
+      link.style.transitionDelay = `${index * 0.1}s`; // 順番に遅延
+    } else {
+      link.style.opacity = "0";
+      link.style.transform = "translateY(-20px)";
+      link.style.transitionDelay = "0s";
+    }
+  });
 });
   </script>
 </body>
