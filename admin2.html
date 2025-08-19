@@ -234,6 +234,7 @@ footer {
 </header>
   <h1>管理者ページ</h1>
 
+<section>
   <label for="participantCode">参加型コード：</label>
   <input type="text" id="participantCode" placeholder="コードを入力してください" />
 
@@ -241,6 +242,8 @@ footer {
   <input type="text" id="streamUrl" placeholder="https://www.youtube.com/live/..." />
 
   <button onclick="saveData()">保存</button>
+  
+</section>
 
   <section id="rouletteAdmin">
     <h2>🎰 ルーレット設定</h2>
@@ -254,7 +257,6 @@ footer {
         </tr>
       </thead>
       <tbody id="participantsTbody">
-        <!-- 参加者行ここに追加 -->
       </tbody>
     </table>
 
