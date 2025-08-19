@@ -82,36 +82,32 @@ header {
       transition: background-color 0.3s, color 0.3s;
     }
 
-    #probabilityPercent {
-      color: black !important;
-    }
-
     .roulette-banner {
       text-align: center;
       margin: 20px auto;
     }
 
 .roulette-banner a {
-  display: block; /* 横いっぱいに */
+  display: block;             /* 横いっぱいに */
   width: 100%;
-  max-width: 800px; /* セクション幅に合わせる */
+  max-width: 800px;           /* セクション幅に合わせる */
   margin: 1rem auto;
-  padding: 1.2rem 0;
+  padding: 1rem 0;
   font-weight: bold;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   text-align: center;
   text-decoration: none;
   color: #fff;
   border-radius: 12px;
-  background: linear-gradient(135deg, #fbc7d4, #97EADB);
-  box-shadow: 0 6px 15px rgba(151, 234, 219, 0.4);
+  background: linear-gradient(135deg, #97EADB, #d4f0f4); /* 柔らかいグラデーション */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);           /* 優しい影 */
   transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
 }
 
 .roulette-banner a:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(151, 234, 219, 0.6);
-  background: linear-gradient(135deg, #ff9fae, #00c6d7); /* ホバーで色変化 */
+  transform: scale(1.03);                                     /* 少し拡大 */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);                 /* ホバー時に影を少し強く */
+  background: linear-gradient(135deg, #80d4d6, #bce7ec);      /* ホバー時の柔らかい色変化 */
 }
     
 /* ハンバーガーアイコン */
