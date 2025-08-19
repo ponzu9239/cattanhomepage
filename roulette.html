@@ -286,6 +286,39 @@ nav a:hover {
   background-color: #0099aa;
   transform: scale(1.03);
 }
+
+    #lotteryRules {
+      background: linear-gradient(135deg, #d6faff, #ffffff);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 30px 10px;
+      box-shadow: 0 4px 15px rgba(0, 191, 255, 0.2);
+      font-family: "Rounded Mplus 1c", "Yu Gothic", sans-serif;
+      color: #333;
+      border: 2px solid #97EADB;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #lotteryRules::before {
+      content: "🌴🍧🌞";
+      font-size: 3rem;
+      position: absolute;
+      top: -10px;
+      right: 10px;
+      opacity: 0.1;
+    }
+
+    #lotteryRules h2 {
+      font-size: 1.4em;
+      text-align: center;
+      color: #00bcd4;
+      margin-bottom: 16px;
+      text-shadow: 1px 1px 0 #fff;
+      background: linear-gradient(90deg, #97EADB, #c4fff9);
+      border-radius: 12px;
+      padding: 8px;
+    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -302,7 +335,7 @@ nav a:hover {
 <body>
   <h1>きゃたんのPayPayルーレット</h1>
   
-    <section id="event"
+    <section id="lotteryRules"
     style="text-align: left; margin: 40px auto; padding: 20px; border: 2px dashed #97eadb; border-radius: 12px; background-color: #f9ffff; max-width: 800px; line-height: 1.6;">
     <h2 style="text-align: center;">🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</h2>
 
