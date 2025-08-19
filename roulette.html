@@ -19,6 +19,23 @@
       text-align: center;
       color: #97EADB;
     }
+    
+    header {
+  position: fixed;   /* スクロールしても固定 */
+  top: 0;            /* 上に配置 */
+  left: 0;           /* 左端に配置 */
+  width: 100%;       /* 横幅いっぱい */
+  background-color: #97EADB;
+  padding: 1rem;
+  text-align: center;
+  z-index: 1000;     /* 前面に出す */
+}
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
 
     #rouletteCanvas {
       background-color: #fff;
