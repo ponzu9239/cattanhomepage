@@ -87,8 +87,9 @@ nav a:hover {
 }
 
 html, body {
-  height: 100%;
   margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
 body {
@@ -97,14 +98,17 @@ body {
 }
 
 main {
-  flex: 1; /* 空きスペースを埋める */
+  /* フッターの高さ分を引いた高さを最小にする */
+  min-height: calc(100vh - 60px); /* フッターの高さが60pxなら */
+  flex: 1 0 auto;
 }
 
 footer {
+  height: 60px; /* 固定高さ */
   background: #97EADB;
-  text-align: center;
   color: white;
-  padding: 1rem;
+  text-align: center;
+  line-height: 60px; /* 中央揃え用 */
 }
   
 .teams {
