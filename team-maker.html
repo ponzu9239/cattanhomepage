@@ -715,7 +715,9 @@ if (selected.length === 0) {
 }
 
   // 選択プレイヤーの強さ
-  const players = selected.map(name => ({ name, strength: scores[name] ?? 0 }));
+const players = selected
+  .filter(name => scores[name] !== undefined) // undefined を除外
+  .map(name => ({ name, strength: scores[name] ?? 0 }));
 
   // --- くっつけたいペアをグループ化 ---
   // union-find(Disjoint Set)でグループ分け
