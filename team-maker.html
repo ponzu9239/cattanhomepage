@@ -806,42 +806,6 @@ const players = selected
   return results[0] || null;
 }
 
-    function dfs(index, teamA) {
-      if (index === groups.length) {
-        // チームBは残りグループ
-        const teamB = groups.filter((_,i) => !teamA.includes(i));
-
-        // グループのメンバー名配列を取得
-        const teamAMembers = teamA.flatMap(i => groups[i].members);
-        const teamBMembers = teamB.flatMap(g => g.members);
-
-        // 離したいペアが同じチームに居ないかチェック
-        for (const [p1,p2] of separatePairs) {
-          if ((teamAMembers.includes(p1) && teamAMembers.includes(p2)) ||
-              (teamBMembers.includes(p1) && teamBMembers.includes(p2))) {
-            return;
-          }
-        }
-
-        const sumA = teamA.reduce((sum,i) => sum + groups[i].totalStrength, 0);
-        const sumB = teamB.reduce((sum,g) => sum + g.totalStrength, 0);
-
-        results.push({ teamA: teamAMembers, teamB: teamBMembers, diff: Math.abs(sumA - sumB), sumA, sumB });
-        return;
-      }
-
-      if (teamA.length < maxTeamSize) {
-        dfs(index + 1, [...teamA, index]);
-      }
-      dfs(index + 1, teamA);
-    }
-
-    dfs(0, []);
-
-    results.sort((a,b) => a.diff - b.diff);
-    return results[0];
-  }
-
 const best = divideGroups(groups, separate);
 
 if (!best) {
