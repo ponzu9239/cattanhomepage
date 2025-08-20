@@ -704,7 +704,7 @@ const method = document.querySelector('input[name="method"]:checked').value;
 if (method === "average") scores = playerScoresAverage;
 else if (method === "winrate") scores = playerScoresWinRate;
 else if (method === "kdratio") scores = playerScoresKDRatio;
-else if (method === "expectedKDdiff") scores = playerScoresExpectedKDdiff;
+else if (method === "expectedKDdiff") scores = playerScoresExpectedKDdiff; // ←これ
 else scores = {};
 
 if (selected.length === 0) {
