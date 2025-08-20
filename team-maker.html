@@ -581,6 +581,71 @@ nav a:hover {
       return scores;
     }
 
+function calculateExpectedKDdiff(matches) {
+  const stats = {}; // stats[playerA][playerB] = { asAlly, asEnemy }
+
+  matches.forEach(match => {
+    const teamA = match.teamA || [];
+    const teamB = match.teamB || [];
+    const killsA = match.teamAKills ?? 0;
+    const killsB = match.teamBKills ?? 0;
+    const kdDiffA = killsA - killsB;
+    const kdDiffB = killsB - killsA;
+
+    // teamA内ペア
+    for (let i = 0; i < teamA.length; i++) {
+      const pA = teamA[i];
+      if (!stats[pA]) stats[pA] = {};
+      for (let j = 0; j < teamA.length; j++) {
+        if (i === j) continue;
+        const pB = teamA[j];
+        if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
+        stats[pA][pB].asAlly.push(kdDiffA);
+      }
+      // 敵チームとの関係
+      for (let j = 0; j < teamB.length; j++) {
+        const pB = teamB[j];
+        if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
+        stats[pA][pB].asEnemy.push(kdDiffA);
+      }
+    }
+
+    // teamB内ペア
+    for (let i = 0; i < teamB.length; i++) {
+      const pA = teamB[i];
+      if (!stats[pA]) stats[pA] = {};
+      for (let j = 0; j < teamB.length; j++) {
+        if (i === j) continue;
+        const pB = teamB[j];
+        if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
+        stats[pA][pB].asAlly.push(kdDiffB);
+      }
+      // 敵チームとの関係
+      for (let j = 0; j < teamA.length; j++) {
+        const pB = teamA[j];
+        if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
+        stats[pA][pB].asEnemy.push(kdDiffB);
+      }
+    }
+  });
+
+  // 平均化
+  const expectedScores = {};
+  Object.keys(stats).forEach(pA => {
+    let total = 0, count = 0;
+    Object.keys(stats[pA]).forEach(pB => {
+      const data = stats[pA][pB];
+      const allyAvg = data.asAlly.length ? data.asAlly.reduce((a,b)=>a+b,0)/data.asAlly.length : 0;
+      const enemyAvg = data.asEnemy.length ? data.asEnemy.reduce((a,b)=>a+b,0)/data.asEnemy.length : 0;
+      total += allyAvg - enemyAvg;
+      count++;
+    });
+    expectedScores[pA] = count ? +(total/count).toFixed(2) : 0;
+  });
+
+  return expectedScores;
+}
+
     // ピン留め切替
     function togglePin(name) {
       if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
@@ -595,10 +660,11 @@ nav a:hover {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
-      let scores = method === "average" ? playerScoresAverage :
-                   method === "winrate" ? playerScoresWinRate :
-                   method === "kdratio" ? playerScoresKDRatio :
-                   playerScoresKillDiff;
+let scores = method === "average" ? playerScoresAverage :
+             method === "winrate" ? playerScoresWinRate :
+             method === "kdratio" ? playerScoresKDRatio :
+             method === "expectedKDdiff" ? playerScoresExpectedKDdiff :
+             {};
 
       container.innerHTML = "";
       let names = Object.keys(scores);
@@ -854,70 +920,6 @@ hamburger.addEventListener("click", () => {
   });
 });
 
-function calculateExpectedKDdiff(matches) {
-  const stats = {}; // stats[playerA][playerB] = { asAlly, asEnemy }
-
-  matches.forEach(match => {
-    const teamA = match.teamA || [];
-    const teamB = match.teamB || [];
-    const killsA = match.teamAKills ?? 0;
-    const killsB = match.teamBKills ?? 0;
-    const kdDiffA = killsA - killsB;
-    const kdDiffB = killsB - killsA;
-
-    // teamA内ペア
-    for (let i = 0; i < teamA.length; i++) {
-      const pA = teamA[i];
-      if (!stats[pA]) stats[pA] = {};
-      for (let j = 0; j < teamA.length; j++) {
-        if (i === j) continue;
-        const pB = teamA[j];
-        if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
-        stats[pA][pB].asAlly.push(kdDiffA);
-      }
-      // 敵チームとの関係
-      for (let j = 0; j < teamB.length; j++) {
-        const pB = teamB[j];
-        if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
-        stats[pA][pB].asEnemy.push(kdDiffA);
-      }
-    }
-
-    // teamB内ペア
-    for (let i = 0; i < teamB.length; i++) {
-      const pA = teamB[i];
-      if (!stats[pA]) stats[pA] = {};
-      for (let j = 0; j < teamB.length; j++) {
-        if (i === j) continue;
-        const pB = teamB[j];
-        if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
-        stats[pA][pB].asAlly.push(kdDiffB);
-      }
-      // 敵チームとの関係
-      for (let j = 0; j < teamA.length; j++) {
-        const pB = teamA[j];
-        if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
-        stats[pA][pB].asEnemy.push(kdDiffB);
-      }
-    }
-  });
-
-  // 平均化
-  const expectedScores = {};
-  Object.keys(stats).forEach(pA => {
-    let total = 0, count = 0;
-    Object.keys(stats[pA]).forEach(pB => {
-      const data = stats[pA][pB];
-      const allyAvg = data.asAlly.length ? data.asAlly.reduce((a,b)=>a+b,0)/data.asAlly.length : 0;
-      const enemyAvg = data.asEnemy.length ? data.asEnemy.reduce((a,b)=>a+b,0)/data.asEnemy.length : 0;
-      total += allyAvg - enemyAvg;
-      count++;
-    });
-    expectedScores[pA] = count ? +(total/count).toFixed(2) : 0;
-  });
-
-  return expectedScores;
-}
   </script>
 </body>
 </html>
