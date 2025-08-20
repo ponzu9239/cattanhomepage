@@ -763,8 +763,48 @@ const players = selected
   // 全探索でチーム分け
   // groupsを単位にチーム分け。チームA,Bそれぞれにグループを割り当てていく
   function divideGroups(groups, separatePairs) {
-    const results = [];
-    const maxTeamSize = Math.ceil(groups.length / 2);
+  const results = [];
+  const totalPlayers = groups.reduce((sum, g) => sum + g.members.length, 0);
+  const minTeamSize = Math.floor(totalPlayers / 2);
+  const maxTeamSize = Math.ceil(totalPlayers / 2);
+
+  function dfs(index, teamAIndices, teamACount) {
+    if (index === groups.length) {
+      const teamBIndices = groups.map((_, i) => i).filter(i => !teamAIndices.includes(i));
+      const teamAMembers = teamAIndices.flatMap(i => groups[i].members);
+      const teamBMembers = teamBIndices.flatMap(i => groups[i].members);
+
+      // 離したいペアが同じチームに居ないかチェック
+      for (const [p1, p2] of separatePairs) {
+        if ((teamAMembers.includes(p1) && teamAMembers.includes(p2)) ||
+            (teamBMembers.includes(p1) && teamBMembers.includes(p2))) {
+          return;
+        }
+      }
+
+      // 人数差チェック
+      const diff = Math.abs(teamAMembers.length - teamBMembers.length);
+      if (diff > 1) return;
+
+      const sumA = teamAMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
+      const sumB = teamBMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
+
+      results.push({ teamA: teamAMembers, teamB: teamBMembers, diffScore: Math.abs(sumA - sumB) });
+      return;
+    }
+
+    // チームAに追加
+    dfs(index + 1, [...teamAIndices, index], teamACount + groups[index].members.length);
+    // チームAに追加しない（チームBへ）
+    dfs(index + 1, teamAIndices, teamACount);
+  }
+
+  dfs(0, [], 0);
+
+  // 相性差が最小のものを返す
+  results.sort((a, b) => a.diffScore - b.diffScore);
+  return results[0] || null;
+}
 
     function dfs(index, teamA) {
       if (index === groups.length) {
