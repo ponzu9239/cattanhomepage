@@ -550,35 +550,6 @@ nav a:hover {
       return scores;
     }
 
-    function calculateKillDiff(matches) {
-      const history = {};
-      matches.forEach(match => {
-        if (!match.teamA || !match.teamB) return;
-        const teamASize = match.teamA.length;
-        const teamBSize = match.teamB.length;
-        const diffA = (match.teamAKills - match.teamBKills) * (teamBSize / teamASize);
-        const diffB = (match.teamBKills - match.teamAKills) * (teamASize / teamBSize);
-        match.teamA.forEach(p => { if (!history[p]) history[p] = []; history[p].push(diffA); });
-        match.teamB.forEach(p => { if (!history[p]) history[p] = []; history[p].push(diffB); });
-      });
-
-      const recentBias = document.getElementById("recentBiasToggle").checked;
-      const scores = {};
-      Object.keys(history).forEach(name => {
-        const arr = history[name];
-        if (arr.length === 0) { scores[name] = 0; return; }
-        if (recentBias) {
-          const last = arr[arr.length - 1];
-          const prev = arr.slice(0, -1);
-          const prevAvg = prev.length ? prev.reduce((a, b) => a + b, 0) / prev.length : 0;
-          scores[name] = +(prevAvg + last).toFixed(2);
-        } else {
-          scores[name] = +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
-        }
-      });
-      return scores;
-    }
-
     function calculateKDRatio(matches) {
       const playerStats = {};
 
@@ -666,7 +637,6 @@ function makeTeams() {
   if (method === "average") scores = playerScoresAverage;
   else if (method === "winrate") scores = playerScoresWinRate;
   else if (method === "kdratio") scores = playerScoresKDRatio;
-  else if (method === "killdiff") scores = playerScoresKillDiff;
   else scores = {};
 
 if (selected.length === 0) {
