@@ -667,7 +667,7 @@ let scores = method === "average" ? playerScoresAverage :
              {};
 
       container.innerHTML = "";
-      let names = Object.keys(scores);
+      let names = Object.keys(scores).filter(name => scores[name] !== undefined);
 
       const matchingOnlyPlayers = names.filter(name => matchingPlayers.includes(name))
                                       .sort((a, b) => a.localeCompare(b, "ja"));
