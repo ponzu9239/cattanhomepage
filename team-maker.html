@@ -637,7 +637,7 @@ function calculateExpectedKDdiff(matches) {
       const data = stats[pA][pB];
       const allyAvg = data.asAlly.length ? data.asAlly.reduce((a,b)=>a+b,0)/data.asAlly.length : 0;
       const enemyAvg = data.asEnemy.length ? data.asEnemy.reduce((a,b)=>a+b,0)/data.asEnemy.length : 0;
-      total += allyAvg - enemyAvg;
+      total += - enemyAvg;  //allyAvg
       count++;
     });
     expectedScores[pA] = count ? +(total/count).toFixed(2) : 0;
