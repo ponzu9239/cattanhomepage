@@ -340,8 +340,9 @@ nav a:hover {
     }
     
 section {
-  padding: 0 16px;   /* 左右に16pxの余白 */
-  width: 100%;       /* 横幅いっぱいに広げる */
+  padding: 0 16px;
+  width: 100%;
+  margin: auto;
 }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -388,6 +389,7 @@ section {
   </section>
 
   <!-- ここからペア設定UI -->
+  <section>
   <section class="pair-section" id="separatePairsSection">
     <h3>離したいペアを追加</h3>
     <form id="separatePairForm" class="pair-form" onsubmit="return false;">
@@ -396,6 +398,7 @@ section {
       <button type="submit">追加</button>
     </form>
     <ul id="separatePairList" class="pair-list"></ul>
+  </section>
   </section>
 
   <section class="pair-section" id="togetherPairsSection">
