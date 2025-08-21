@@ -208,14 +208,9 @@
       </div>
     </section>
     
-    <section>
+<section>
   <h2 style="text-align:center; color:#47b6a2;">総当たりキル差表</h2>
-  <div style="overflow-x:auto;">
-    <table id="killDiffTable" border="1" style="border-collapse:collapse; margin:auto; text-align:center;">
-      <thead id="killDiffHead"></thead>
-      <tbody id="killDiffBody"></tbody>
-    </table>
-  </div>
+  <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
 </section>
 
     <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
@@ -291,67 +286,102 @@
     });
   });
 
-db.ref("apex_results").on("value", snapshot => {
-  const tableHead = document.getElementById("killDiffHead");
-  const tableBody = document.getElementById("killDiffBody");
+const killDiffTableContainer = document.getElementById("killDiffTableContainer");
 
-  if (!snapshot.exists()) {
-    tableHead.innerHTML = "";
-    tableBody.innerHTML = "";
-    return;
-  }
+// 現在のチームメンバーが変わるたびに表を作る
+db.ref("currentTeamResult").on("value", snapshot => {
+  const data = snapshot.val() || {};
+  const teamA = Array.isArray(data.teamA) ? data.teamA : [];
+  const teamB = Array.isArray(data.teamB) ? Array.isArray(data.teamB) : [];
+  const players = [...teamA, ...teamB];
 
-  const matches = Object.values(snapshot.val());
+  // 表作成
+  const table = document.createElement("table");
+  table.style.borderCollapse = "collapse";
+  table.style.width = "100%";
 
-  // プレイヤー一覧を取得
-  const playersSet = new Set();
-  matches.forEach(match => {
-    [...(match.teamA || []), ...(match.teamB || [])].forEach(p => playersSet.add(p));
+  // ヘッダー行
+  const headerRow = document.createElement("tr");
+  headerRow.appendChild(document.createElement("th")); // 左上空白
+  players.forEach(p => {
+    const th = document.createElement("th");
+    th.textContent = p;
+    th.style.border = "1px solid #ddd";
+    th.style.padding = "4px";
+    th.style.background = "#eefaff";
+    headerRow.appendChild(th);
   });
-  const players = Array.from(playersSet).sort();
+  table.appendChild(headerRow);
 
-  // テーブルヘッダー作成
-  tableHead.innerHTML = "<tr><th></th>" + players.map(p => `<th>${p}</th>`).join("") + "</tr>";
+  // 過去試合データ取得
+  db.ref("apex_results").once("value").then(snap => {
+    const matches = snap.exists() ? Object.values(snap.val()) : [];
 
-  // ペアごとのキル差集計
-  const stats = {};
-  players.forEach(p1 => {
-    stats[p1] = {};
-    players.forEach(p2 => {
-      stats[p1][p2] = { allyDiffs: [], enemyDiffs: [] };
-    });
-  });
+    players.forEach(playerRow => {
+      const tr = document.createElement("tr");
+      const th = document.createElement("th");
+      th.textContent = playerRow;
+      th.style.border = "1px solid #ddd";
+      th.style.padding = "4px";
+      th.style.background = "#eefaff";
+      tr.appendChild(th);
 
-  matches.forEach(match => {
-    const teamA = match.teamA || [];
-    const teamB = match.teamB || [];
-    const scores = match.scores || {}; // scores: {playerName: キル数}
+      players.forEach(playerCol => {
+        const td = document.createElement("td");
+        td.style.border = "1px solid #ddd";
+        td.style.padding = "4px";
+        td.style.textAlign = "center";
 
-    const allPlayers = [...teamA, ...teamB];
-    allPlayers.forEach(p1 => {
-      allPlayers.forEach(p2 => {
-        if (p1 === p2) return;
-        const diff = (scores[p1] || 0) - (scores[p2] || 0);
-        if ((teamA.includes(p1) && teamA.includes(p2)) || (teamB.includes(p1) && teamB.includes(p2))) {
-          stats[p1][p2].allyDiffs.push(diff);
+        if (playerRow === playerCol) {
+          td.textContent = "-";
         } else {
-          stats[p1][p2].enemyDiffs.push(diff);
-        }
-      });
-    });
-  });
+          // 平均キル差計算
+          let totalDiff = 0;
+          let count = 0;
 
-  // テーブル本体作成
-  tableBody.innerHTML = players.map(p1 => {
-    const row = players.map(p2 => {
-      if (p1 === p2) return "-";
-      const allyAvg = stats[p1][p2].allyDiffs.length ? (stats[p1][p2].allyDiffs.reduce((a,b)=>a+b,0)/stats[p1][p2].allyDiffs.length).toFixed(2) : "-";
-      const enemyAvg = stats[p1][p2].enemyDiffs.length ? (stats[p1][p2].enemyDiffs.reduce((a,b)=>a+b,0)/stats[p1][p2].enemyDiffs.length).toFixed(2) : "-";
-      return `<td title="味方:${allyAvg} / 敵:${enemyAvg}">A:${allyAvg}<br>E:${enemyAvg}</td>`;
-    }).join("");
-    return `<tr><th>${p1}</th>${row}</tr>`;
-  }).join("");
+          matches.forEach(match => {
+            const teamA = match.teamA || [];
+            const teamB = match.teamB || [];
+            const killsA = match.killsA || {};
+            const killsB = match.killsB || {};
+
+            const rowTeam = teamA.includes(playerRow) ? "A" : "B";
+            const colTeam = teamA.includes(playerCol) ? "A" : "B";
+
+            // 味方・敵チェック
+            let sameTeam = rowTeam === colTeam;
+
+            // 過去に同じ試合にいたか確認
+            if ((teamA.includes(playerRow) || teamB.includes(playerRow)) &&
+                (teamA.includes(playerCol) || teamB.includes(playerCol))) {
+
+              let playerTeamKills = rowTeam === "A" ? (killsA[playerRow] || 0) : (killsB[playerRow] || 0);
+              let teamKills = rowTeam === "A" ? sumTeamKills(killsA) : sumTeamKills(killsB);
+              let enemyKills = rowTeam === "A" ? sumTeamKills(killsB) : sumTeamKills(killsA);
+
+              totalDiff += teamKills - enemyKills;
+              count++;
+            }
+          });
+
+          td.textContent = count > 0 ? (totalDiff / count).toFixed(1) : "-";
+        }
+
+        tr.appendChild(td);
+      });
+
+      table.appendChild(tr);
+    });
+
+    killDiffTableContainer.innerHTML = "";
+    killDiffTableContainer.appendChild(table);
+  });
 });
+
+// チームキル合計関数
+function sumTeamKills(killsObj) {
+  return Object.values(killsObj || {}).reduce((a,b)=>a+b, 0);
+}
 
 </script>
 </body>
