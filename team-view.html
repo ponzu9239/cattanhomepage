@@ -176,57 +176,103 @@
       padding: 0 2rem;
       margin: auto;
     }
-    
+
     .info-btn {
-  background: none;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  margin-left: 6px;
-}
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 6px;
+    }
 
-.info-text {
-  background-color: #eefaff;
-  border: 1px solid #97EADB;
-  border-radius: 6px;
-  padding: 8px;
-  margin-top: 6px;
-  color: #333;
-}
+    .info-text {
+      background-color: #eefaff;
+      border: 1px solid #97EADB;
+      border-radius: 6px;
+      padding: 8px;
+      margin-top: 6px;
+      color: #333;
+    }
 
-.info-btn-container {
-  text-align: center;
-  margin-top: 12px;
-}
+    .info-btn-container {
+      text-align: center;
+      margin-top: 12px;
+    }
 
-.info-btn {
-  background-color: #97EADB;
-  border: none;
-  color: #fff;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
+    .info-btn {
+      background: #97EADB;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
 
-.info-btn:hover {
-  background-color: #47b6a2;
-}
+    .info-btn:hover {
+      transform: scale(1.05);
+    }
 
-.info-text {
-  display: none;
-  max-width: 600px;
-  margin: 8px auto 16px auto;
-  background: #eefaff;
-  border: 1px solid #97EADB;
-  border-radius: 6px;
-  padding: 8px;
-  color: #333;
-  line-height: 1.5;
-  font-size: 14px;
-}
+    .info-text {
+      background-color: #eefaff;
+      border: 2px solid #97EADB;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+    }
+
+    /* この説明用の相性表だけにスタイルを当てる */
+    .info-table-wrapper table {
+      border-collapse: collapse;
+      width: 100%;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .info-table-wrapper th,
+    .info-table-wrapper td {
+      border: 1px solid #ddd;
+      padding: 6px;
+    }
+
+    /* 左側の名前列も色分け */
+    .info-table-wrapper th:first-child {
+      width: 40px;
+    }
+
+    /* チーム色分け */
+    .info-table-wrapper th:nth-child(2),
+    .info-table-wrapper th:nth-child(3),
+    .info-table-wrapper th:nth-child(4) {
+      background-color: #eefaff;
+      /* 青：チームA */
+    }
+
+    .info-table-wrapper th:nth-child(5),
+    .info-table-wrapper th:nth-child(6),
+    .info-table-wrapper th:nth-child(7) {
+      background-color: #fff1f5;
+      /* 赤：チームB */
+    }
+
+    .info-table-wrapper tr th:first-child {
+      background-color: #eefaff;
+      /* デフォルトはチームA色 */
+    }
+
+    .info-table-wrapper tr:nth-child(5) th:first-child,
+    .info-table-wrapper tr:nth-child(6) th:first-child,
+    .info-table-wrapper tr:nth-child(7) th:first-child {
+      background-color: #fff1f5;
+      /* チームB色 */
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -258,25 +304,95 @@
         </div>
       </div>
     </section>
-    
-<section>
-  <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
-  <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
 
-  <!-- 説明ボタン -->
-  <div style="text-align:center; margin-top:12px;">
-    <button class="info-btn">▽ 相性表の見方</button>
-  </div>
+    <section>
+      <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
+      <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
+    </section>
 
-  <!-- 説明テキスト -->
-  <div class="info-text" style="display:none; max-width:600px; margin:8px auto; background:#eefaff; border:1px solid #97EADB; border-radius:6px; padding:8px; color:#333;">
-    この相性表は、プレイヤー同士の過去のカスタムマッチの結果から計算した平均キル差を示しています。<br>
-    - 行：参照するプレイヤー<br>
-    - 列：対象となるプレイヤー<br>
-    - 数値：自分のチームで同じチームだった場合はその試合の自チームキル - 敵チームキルの平均、違うチームだった場合は別チームでのキル差の平均<br>
-    - 「-」：自分自身またはデータが存在しない場合
-  </div>
-</section>
+    <section style="text-align:center; margin:2rem 0;">
+      <button class="info-btn">▽ 相性表の見方</button>
+      <div class="info-text" style="display:none; max-width:700px; margin:auto; text-align:left;">
+        <h3>相性表の見方（具体例付き）</h3>
+        <p>この表は、選手同士の「チーム内・チーム間の相性」を数値で表したものです。数値は平均キル差（自チームキル − 敵チームキル）です。正の値は強い組み合わせ、負の値は弱い組み合わせを示します。</p>
+
+        <h4>相性表（例）</h4>
+        <div class="info-table-wrapper">
+          <table>
+            <tr>
+              <th></th>
+              <th>a</th>
+              <th>b</th>
+              <th>c</th>
+              <th>d</th>
+              <th>e</th>
+              <th>f</th>
+            </tr>
+            <tr>
+              <th>a</th>
+              <td>-</td>
+              <td>3.0</td>
+              <td>2.5</td>
+              <td>1.0</td>
+              <td>3.0</td>
+              <td>-1.0</td>
+            </tr>
+            <tr>
+              <th>b</th>
+              <td>1.0</td>
+              <td>-</td>
+              <td>-1.5</td>
+              <td>-1.5</td>
+              <td>1.0</td>
+              <td>2.0</td>
+            </tr>
+            <tr>
+              <th>c</th>
+              <td>3.0</td>
+              <td>-1.5</td>
+              <td>-</td>
+              <td>0.0</td>
+              <td>0.0</td>
+              <td>-2.0</td>
+            </tr>
+            <tr>
+              <th>d</th>
+              <td>2.5</td>
+              <td>-1.5</td>
+              <td>0.0</td>
+              <td>-</td>
+              <td>3.0</td>
+              <td>1.0</td>
+            </tr>
+            <tr>
+              <th>e</th>
+              <td>3.0</td>
+              <td>1.0</td>
+              <td>0.0</td>
+              <td>3.0</td>
+              <td>-</td>
+              <td>1.5</td>
+            </tr>
+            <tr>
+              <th>f</th>
+              <td>-1.0</td>
+              <td>2.0</td>
+              <td>-2.0</td>
+              <td>1.0</td>
+              <td>1.5</td>
+              <td>-</td>
+            </tr>
+          </table>
+        </div>
+
+        <h4>見方の例</h4>
+        <ul>
+          <li><strong>aとc</strong>：同じチーム（青：チームA）で過去の試合1回 → キル差平均 = 3.0</li>
+          <li><strong>aとb</strong>：同じチーム（青：チームA）で過去の試合1回 → キル差平均 = 1.0</li>
+          <li><strong>dとe</strong>：同じチーム（赤：チームB）で過去の試合1回 → キル差平均 = 3.0</li>
+        </ul>
+      </div>
+    </section>
 
     <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
     <div id="lastUpdated">最終更新: --</div>
@@ -351,110 +467,110 @@
     });
   });
 
-db.ref("currentTeamResult").on("value", snapshot => {
-  const data = snapshot.val() || {};
-  const teamA = Array.isArray(data.teamA) ? data.teamA : [];
-  const teamB = Array.isArray(data.teamB) ? data.teamB : [];
-  const players = [...teamA, ...teamB];
+  db.ref("currentTeamResult").on("value", snapshot => {
+    const data = snapshot.val() || {};
+    const teamA = Array.isArray(data.teamA) ? data.teamA : [];
+    const teamB = Array.isArray(data.teamB) ? data.teamB : [];
+    const players = [...teamA, ...teamB];
 
-  const table = document.createElement("table");
-  table.style.borderCollapse = "collapse";
-  table.style.width = "100%";
+    const table = document.createElement("table");
+    table.style.borderCollapse = "collapse";
+    table.style.width = "100%";
 
-  // ヘッダー行
-  const headerRow = document.createElement("tr");
-  headerRow.appendChild(document.createElement("th"));
-  players.forEach(p => {
-    const th = document.createElement("th");
-    th.textContent = p;
-    th.style.border = "1px solid #ddd";
-    th.style.padding = "4px";
-    th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
-    headerRow.appendChild(th);
-  });
-  table.appendChild(headerRow);
-
-  db.ref("apex_results").once("value").then(snap => {
-    const matches = snap.exists() ? Object.values(snap.val()) : [];
-
-    players.forEach(playerRow => {
-      const tr = document.createElement("tr");
+    // ヘッダー行
+    const headerRow = document.createElement("tr");
+    headerRow.appendChild(document.createElement("th"));
+    players.forEach(p => {
       const th = document.createElement("th");
-      th.textContent = playerRow;
+      th.textContent = p;
       th.style.border = "1px solid #ddd";
       th.style.padding = "4px";
-      th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
-      tr.appendChild(th);
+      th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
+      headerRow.appendChild(th);
+    });
+    table.appendChild(headerRow);
 
-      players.forEach(playerCol => {
-        const td = document.createElement("td");
-        td.style.border = "1px solid #ddd";
-        td.style.padding = "4px";
-        td.style.textAlign = "center";
+    db.ref("apex_results").once("value").then(snap => {
+      const matches = snap.exists() ? Object.values(snap.val()) : [];
 
-        if (playerRow === playerCol) {
-          td.textContent = "-";
-        } else {
-          const diffs = [];
+      players.forEach(playerRow => {
+        const tr = document.createElement("tr");
+        const th = document.createElement("th");
+        th.textContent = playerRow;
+        th.style.border = "1px solid #ddd";
+        th.style.padding = "4px";
+        th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
+        tr.appendChild(th);
 
-          matches.forEach(match => {
-            const matchTeamA = match.teamA || [];
-            const matchTeamB = match.teamB || [];
-            const killsA = match.teamAKills || 0;
-            const killsB = match.teamBKills || 0;
+        players.forEach(playerCol => {
+          const td = document.createElement("td");
+          td.style.border = "1px solid #ddd";
+          td.style.padding = "4px";
+          td.style.textAlign = "center";
 
-            const rowInA = matchTeamA.includes(playerRow);
-            const rowInB = matchTeamB.includes(playerRow);
-            const colInA = matchTeamA.includes(playerCol);
-            const colInB = matchTeamB.includes(playerCol);
+          if (playerRow === playerCol) {
+            td.textContent = "-";
+          } else {
+            const diffs = [];
 
-            // 両方が試合に参加している場合のみ
-            if ((rowInA || rowInB) && (colInA || colInB)) {
-              const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
-                                      (teamB.includes(playerRow) && teamB.includes(playerCol));
-              const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
+            matches.forEach(match => {
+              const matchTeamA = match.teamA || [];
+              const matchTeamB = match.teamB || [];
+              const killsA = match.teamAKills || 0;
+              const killsB = match.teamBKills || 0;
 
-              // 現在のチームと過去試合のチーム一致条件
- if (currentSameTeam && matchSameTeam) {
-  // 同チームの試合のキル差（自チームキル - 敵チームキル）
-  const rowTeamKills = rowInA ? killsA : killsB;
-  const enemyTeamKills = rowInA ? killsB : killsA;
-  diffs.push(rowTeamKills - enemyTeamKills);
-} else if (!currentSameTeam && !matchSameTeam) {
-  // 敵チームの試合のキル差（自チームキル - 敵チームキル）
-  const rowTeamKills = rowInA ? killsA : killsB;
-  const enemyTeamKills = rowInA ? killsB : killsA;
-  diffs.push(rowTeamKills - enemyTeamKills);
-}
-            }
-          });
+              const rowInA = matchTeamA.includes(playerRow);
+              const rowInB = matchTeamB.includes(playerRow);
+              const colInA = matchTeamA.includes(playerCol);
+              const colInB = matchTeamB.includes(playerCol);
 
-          td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
-        }
+              // 両方が試合に参加している場合のみ
+              if ((rowInA || rowInB) && (colInA || colInB)) {
+                const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
+                  (teamB.includes(playerRow) && teamB.includes(playerCol));
+                const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
 
-        tr.appendChild(td);
+                // 現在のチームと過去試合のチーム一致条件
+                if (currentSameTeam && matchSameTeam) {
+                  // 同チームの試合のキル差（自チームキル - 敵チームキル）
+                  const rowTeamKills = rowInA ? killsA : killsB;
+                  const enemyTeamKills = rowInA ? killsB : killsA;
+                  diffs.push(rowTeamKills - enemyTeamKills);
+                } else if (!currentSameTeam && !matchSameTeam) {
+                  // 敵チームの試合のキル差（自チームキル - 敵チームキル）
+                  const rowTeamKills = rowInA ? killsA : killsB;
+                  const enemyTeamKills = rowInA ? killsB : killsA;
+                  diffs.push(rowTeamKills - enemyTeamKills);
+                }
+              }
+            });
+
+            td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
+          }
+
+          tr.appendChild(td);
+        });
+
+        table.appendChild(tr);
       });
 
-      table.appendChild(tr);
+      killDiffTableContainer.innerHTML = "";
+      killDiffTableContainer.appendChild(table);
     });
-
-    killDiffTableContainer.innerHTML = "";
-    killDiffTableContainer.appendChild(table);
   });
-});
 
-const btn = document.querySelector(".info-btn");
-const info = document.querySelector(".info-text");
+  const btn = document.querySelector(".info-btn");
+  const info = document.querySelector(".info-text");
 
-btn.addEventListener("click", () => {
-  if (info.style.display === "none") {
-    info.style.display = "block";
-    btn.textContent = "△"; // 閉じるアイコンに変える
-  } else {
-    info.style.display = "none";
-    btn.textContent = "▽"; // 開くアイコンに戻す
-  }
-});
+  btn.addEventListener("click", () => {
+    if (info.style.display === "none") {
+      info.style.display = "block";
+      btn.textContent = "△ 相性表の見方";
+    } else {
+      info.style.display = "none";
+      btn.textContent = "▽ 相性表の見方";
+    }
+  });
 </script>
 </body>
 
