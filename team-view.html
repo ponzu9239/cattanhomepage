@@ -228,6 +228,20 @@
 <section>
   <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
   <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
+
+  <!-- 説明ボタン -->
+  <div style="text-align:center; margin-top:12px;">
+    <button class="info-btn">▽ 相性表の見方</button>
+  </div>
+
+  <!-- 説明テキスト -->
+  <div class="info-text" style="display:none; max-width:600px; margin:8px auto; background:#eefaff; border:1px solid #97EADB; border-radius:6px; padding:8px; color:#333;">
+    この相性表は、プレイヤー同士の過去のカスタムマッチの結果から計算した平均キル差を示しています。<br>
+    - 行：参照するプレイヤー<br>
+    - 列：対象となるプレイヤー<br>
+    - 数値：自分のチームで同じチームだった場合はその試合の自チームキル - 敵チームキルの平均、違うチームだった場合は別チームでのキル差の平均<br>
+    - 「-」：自分自身またはデータが存在しない場合
+  </div>
 </section>
 
     <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
