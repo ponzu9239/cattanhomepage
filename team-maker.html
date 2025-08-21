@@ -722,19 +722,33 @@ function compatibilityScore(player, sameTeam, otherTeam, matches) {
       });
     }
 
-    function makeTeams() {
-      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
-      let scores;
-      const method = document.querySelector('input[name="method"]:checked').value;
+function makeTeams() {
+  const selectedPlayers = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
+  let scores;
+  const method = document.querySelector('input[name="method"]:checked').value;
 
-if (method === "average") scores = playerScoresAverage;
-else if (method === "winrate") scores = playerScoresWinRate;
-else if (method === "kdratio") scores = playerScoresKDRatio;
-else if (method === "compatibility") {
-  // ここで関数を呼び出す
-  scores = makeTeamsByCompatibility(selectedPlayers, pastMatches);
-} else {
-  scores = {};
+  if (method === "average") scores = playerScoresAverage;
+  else if (method === "winrate") scores = playerScoresWinRate;
+  else if (method === "kdratio") scores = playerScoresKDRatio;
+  else if (method === "compatibility") {
+    // 選択されていなければ全員初期値0で表示
+    if (selectedPlayers.length < 2) {
+      scores = {};
+      matchingPlayers.forEach(name => scores[name] = 0);
+    } else {
+      scores = makeTeamsByCompatibility(selectedPlayers, matches);
+      // makeTeamsByCompatibilityは {teamA, teamB, diffScore} を返すので
+      // scores[name] が必要なら以下のように変換
+      const tempScores = {};
+      [...scores.teamA, ...scores.teamB].forEach(name => tempScores[name] = 0);
+      scores = tempScores;
+    }
+  } else {
+    scores = {};
+  }
+
+  // ここでプレイヤーリスト描画
+  renderPlayers();
 }
 
       if (selected.length === 0) {
