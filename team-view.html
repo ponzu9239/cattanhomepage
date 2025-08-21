@@ -347,26 +347,36 @@ db.ref("currentTeamResult").on("value", snapshot => {
         if (playerRow === playerCol) {
           td.textContent = "-";
         } else {
-          let diffs = [];
+          const diffs = [];
+
           matches.forEach(match => {
-            const teamAplayers = match.teamA || [];
-            const teamBplayers = match.teamB || [];
+            const matchTeamA = match.teamA || [];
+            const matchTeamB = match.teamB || [];
             const killsA = match.teamAKills || 0;
             const killsB = match.teamBKills || 0;
 
-            const rowTeam = teamAplayers.includes(playerRow) ? "A" : "B";
-            const colTeam = teamAplayers.includes(playerCol) ? "A" : "B";
+            const rowInA = matchTeamA.includes(playerRow);
+            const rowInB = matchTeamB.includes(playerRow);
+            const colInA = matchTeamA.includes(playerCol);
+            const colInB = matchTeamB.includes(playerCol);
 
             // 両方が試合に参加している場合のみ
-            if ((teamAplayers.includes(playerRow) || teamBplayers.includes(playerRow)) &&
-                (teamAplayers.includes(playerCol) || teamBplayers.includes(playerCol))) {
+            if ((rowInA || rowInB) && (colInA || colInB)) {
+              const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
+                                      (teamB.includes(playerRow) && teamB.includes(playerCol));
+              const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
 
-              // 味方として来た場合のみ計算
-              if (rowTeam === colTeam) {
-                diffs.push((rowTeam === "A" ? killsA : killsB) - (rowTeam === "A" ? killsB : killsA));
-              } else {
-                // 敵として来た場合のみ計算
-                diffs.push((rowTeam === "A" ? killsA : killsB) - (rowTeam === "A" ? killsB : killsA));
+              // 現在のチームと過去試合のチーム一致条件
+              if (currentSameTeam && matchSameTeam) {
+                // 同チームの試合のキル差
+                const rowKills = rowInA ? killsA : killsB;
+                const colKills = colInA ? killsA : killsB;
+                diffs.push(rowKills - colKills);
+              } else if (!currentSameTeam && !matchSameTeam) {
+                // 敵チームの試合のキル差
+                const rowKills = rowInA ? killsA : killsB;
+                const colKills = colInA ? killsA : killsB;
+                diffs.push(rowKills - colKills);
               }
             }
           });
