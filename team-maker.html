@@ -731,19 +731,11 @@ if (method === "average") scores = playerScoresAverage;
 else if (method === "winrate") scores = playerScoresWinRate;
 else if (method === "kdratio") scores = playerScoresKDRatio;
 else if (method === "compatibility") {
-    // 選択されたプレイヤーと過去試合データを渡してチーム分け
-    const best = makeTeamsByCompatibility(selected, matches);
-    if (best) {
-        document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
-        document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
-        db.ref("currentTeamResult").set({
-            teamA: best.teamA,
-            teamB: best.teamB,
-            timestamp: Date.now(),
-        });
-    }
-    return; // ここで通常の scores を使う処理はスキップ
-} else scores = {};
+  // ここで関数を呼び出す
+  scores = makeTeamsByCompatibility(selectedPlayers, pastMatches);
+} else {
+  scores = {};
+}
 
       if (selected.length === 0) {
         document.getElementById("teamA").innerHTML = "";
