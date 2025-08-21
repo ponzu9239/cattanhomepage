@@ -207,6 +207,16 @@
         </div>
       </div>
     </section>
+    
+    <section>
+  <h2 style="text-align:center; color:#47b6a2;">総当たりキル差表</h2>
+  <div style="overflow-x:auto;">
+    <table id="killDiffTable" border="1" style="border-collapse:collapse; margin:auto; text-align:center;">
+      <thead id="killDiffHead"></thead>
+      <tbody id="killDiffBody"></tbody>
+    </table>
+  </div>
+</section>
 
     <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
     <div id="lastUpdated">最終更新: --</div>
@@ -280,6 +290,68 @@
       }
     });
   });
+
+db.ref("apex_results").on("value", snapshot => {
+  const tableHead = document.getElementById("killDiffHead");
+  const tableBody = document.getElementById("killDiffBody");
+
+  if (!snapshot.exists()) {
+    tableHead.innerHTML = "";
+    tableBody.innerHTML = "";
+    return;
+  }
+
+  const matches = Object.values(snapshot.val());
+
+  // プレイヤー一覧を取得
+  const playersSet = new Set();
+  matches.forEach(match => {
+    [...(match.teamA || []), ...(match.teamB || [])].forEach(p => playersSet.add(p));
+  });
+  const players = Array.from(playersSet).sort();
+
+  // テーブルヘッダー作成
+  tableHead.innerHTML = "<tr><th></th>" + players.map(p => `<th>${p}</th>`).join("") + "</tr>";
+
+  // ペアごとのキル差集計
+  const stats = {};
+  players.forEach(p1 => {
+    stats[p1] = {};
+    players.forEach(p2 => {
+      stats[p1][p2] = { allyDiffs: [], enemyDiffs: [] };
+    });
+  });
+
+  matches.forEach(match => {
+    const teamA = match.teamA || [];
+    const teamB = match.teamB || [];
+    const scores = match.scores || {}; // scores: {playerName: キル数}
+
+    const allPlayers = [...teamA, ...teamB];
+    allPlayers.forEach(p1 => {
+      allPlayers.forEach(p2 => {
+        if (p1 === p2) return;
+        const diff = (scores[p1] || 0) - (scores[p2] || 0);
+        if ((teamA.includes(p1) && teamA.includes(p2)) || (teamB.includes(p1) && teamB.includes(p2))) {
+          stats[p1][p2].allyDiffs.push(diff);
+        } else {
+          stats[p1][p2].enemyDiffs.push(diff);
+        }
+      });
+    });
+  });
+
+  // テーブル本体作成
+  tableBody.innerHTML = players.map(p1 => {
+    const row = players.map(p2 => {
+      if (p1 === p2) return "-";
+      const allyAvg = stats[p1][p2].allyDiffs.length ? (stats[p1][p2].allyDiffs.reduce((a,b)=>a+b,0)/stats[p1][p2].allyDiffs.length).toFixed(2) : "-";
+      const enemyAvg = stats[p1][p2].enemyDiffs.length ? (stats[p1][p2].enemyDiffs.reduce((a,b)=>a+b,0)/stats[p1][p2].enemyDiffs.length).toFixed(2) : "-";
+      return `<td title="味方:${allyAvg} / 敵:${enemyAvg}">A:${allyAvg}<br>E:${enemyAvg}</td>`;
+    }).join("");
+    return `<tr><th>${p1}</th>${row}</tr>`;
+  }).join("");
+});
 
 </script>
 </body>
