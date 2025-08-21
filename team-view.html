@@ -294,84 +294,94 @@ db.ref("currentTeamResult").on("value", snapshot => {
   const teamB = Array.isArray(data.teamB) ? data.teamB : [];
   const players = [...teamA, ...teamB];
 
+  // 表作成
+  const table = document.createElement("table");
+  table.style.borderCollapse = "collapse";
+  table.style.width = "100%";
+
+  // ヘッダー行
+  const headerRow = document.createElement("tr");
+  headerRow.appendChild(document.createElement("th")); // 左上空白
+  players.forEach(p => {
+    const th = document.createElement("th");
+    th.textContent = p;
+    th.style.border = "1px solid #ddd";
+    th.style.padding = "4px";
+    th.style.background = "#eefaff";
+    headerRow.appendChild(th);
+  });
+  table.appendChild(headerRow);
+
+  // 過去試合データ取得
   db.ref("apex_results").once("value").then(snap => {
     const matches = snap.exists() ? Object.values(snap.val()) : [];
 
-    // 表作成
-    const table = document.createElement("table");
-    table.style.borderCollapse = "collapse";
-    table.style.width = "100%";
+players.forEach(playerRow => {
+  const tr = document.createElement("tr");
+  
+  const th = document.createElement("th");
+  th.textContent = playerRow;
+  th.style.border = "1px solid #ddd";
+  th.style.padding = "4px";
+  
+  // チームごとの背景色
+  if (teamA.includes(playerRow)) {
+    th.style.background = "#eefaff"; // チームA
+  } else if (teamB.includes(playerRow)) {
+    th.style.background = "#fff1f5"; // チームB
+  }
 
-    // ヘッダー行
-    const headerRow = document.createElement("tr");
-    headerRow.appendChild(document.createElement("th"));
-    players.forEach(p => {
-      const th = document.createElement("th");
-      th.textContent = p;
-      th.style.border = "1px solid #ddd";
-      th.style.padding = "4px";
-      th.style.background = "#eefaff";
-      headerRow.appendChild(th);
-    });
-    table.appendChild(headerRow);
+  tr.appendChild(th);
 
-    // 各プレイヤー行
-    players.forEach(playerRow => {
-      const tr = document.createElement("tr");
-      const th = document.createElement("th");
-      th.textContent = playerRow;
-      th.style.border = "1px solid #ddd";
-      th.style.padding = "4px";
-      th.style.background = "#eefaff";
-      tr.appendChild(th);
+  players.forEach(playerCol => {
+    const td = document.createElement("td");
+    td.style.border = "1px solid #ddd";
+    td.style.padding = "4px";
+    td.style.textAlign = "center";
 
-      players.forEach(playerCol => {
-        const td = document.createElement("td");
-        td.style.border = "1px solid #ddd";
-        td.style.padding = "4px";
-        td.style.textAlign = "center";
+    if (playerRow === playerCol) {
+      td.textContent = "-";
+    } else {
+      let totalDiff = 0;
+      let count = 0;
 
-        if (playerRow === playerCol) {
-          td.textContent = "-";
-        } else {
-          let totalDiff = 0;
-          let count = 0;
+      matches.forEach(match => {
+        const teamAplayers = match.teamA || [];
+        const teamBplayers = match.teamB || [];
+        const killsA = match.teamAKills || 0;
+        const killsB = match.teamBKills || 0;
 
-          matches.forEach(match => {
-            const teamAplayers = match.teamA || [];
-            const teamBplayers = match.teamB || [];
-            const killsA = match.teamAKills || 0;
-            const killsB = match.teamBKills || 0;
+        const rowTeam = teamAplayers.includes(playerRow) ? "A" : "B";
+        const colTeam = teamAplayers.includes(playerCol) ? "A" : "B";
 
-            const rowTeam = teamAplayers.includes(playerRow) ? "A" : "B";
-            const colTeam = teamAplayers.includes(playerCol) ? "A" : "B";
+        if ((teamAplayers.includes(playerRow) || teamBplayers.includes(playerRow)) &&
+            (teamAplayers.includes(playerCol) || teamBplayers.includes(playerCol))) {
 
-            // 過去試合に両方存在するか
-            if ((teamAplayers.includes(playerRow) || teamBplayers.includes(playerRow)) &&
-                (teamAplayers.includes(playerCol) || teamBplayers.includes(playerCol))) {
+          let rowKills = rowTeam === "A" ? killsA : killsB;
+          let enemyKills = rowTeam === "A" ? killsB : killsA;
 
-              let rowKills = rowTeam === "A" ? killsA : killsB;
-              let enemyKills = rowTeam === "A" ? killsB : killsA;
-
-              totalDiff += rowKills - enemyKills;
-              count++;
-            }
-          });
-
-          td.textContent = count > 0 ? (totalDiff / count).toFixed(1) : "-";
+          totalDiff += rowKills - enemyKills;
+          count++;
         }
-
-        tr.appendChild(td);
       });
 
-      table.appendChild(tr);
-    });
+      td.textContent = count > 0 ? (totalDiff / count).toFixed(1) : "-";
+    }
+
+    tr.appendChild(td);
+  });
+
+  table.appendChild(tr);
+});
 
     killDiffTableContainer.innerHTML = "";
     killDiffTableContainer.appendChild(table);
   });
 });
 
+function sumTeamKills(killsObj) {
+  return Object.values(killsObj || {}).reduce((a, b) => a + b, 0);
+}
 </script>
 </body>
 
