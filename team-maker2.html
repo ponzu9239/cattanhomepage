@@ -364,6 +364,19 @@
         <!-- 固定ペアがここに表示されます -->
       </ul>
     </div>
+    
+    <!-- 固定ペアセクションの下に追加 -->
+<div class="pair-section">
+  <h3>離したいペア設定（同じチームにならないように）</h3>
+  <form class="pair-form" id="separateForm">
+    <input type="text" id="sep1" placeholder="プレイヤー1">
+    <input type="text" id="sep2" placeholder="プレイヤー2">
+    <button type="submit">追加</button>
+  </form>
+  <ul class="pair-list" id="separateList">
+    <!-- 離したいペアがここに表示 -->
+  </ul>
+</div>
 
     <button id="balanceBtn" style="display:block; margin:auto; padding:12px 24px; background:#47b6a2; color:white; font-weight:bold; border:none; border-radius:12px; cursor:pointer;">
       チーム分け開始
@@ -494,6 +507,92 @@
         teamBEl.appendChild(li);
       });
     });
+    
+    const separateForm = document.getElementById("separateForm");
+const separateListEl = document.getElementById("separateList");
+let separatePairs = [];
+
+separateForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const s1 = document.getElementById("sep1").value.trim();
+  const s2 = document.getElementById("sep2").value.trim();
+  if (!s1 || !s2) return;
+  separatePairs.push([s1, s2]);
+  renderSeparatePairs();
+  separateForm.reset();
+});
+
+function renderSeparatePairs() {
+  separateListEl.innerHTML = "";
+  separatePairs.forEach((pair, idx) => {
+    const li = document.createElement("li");
+    li.textContent = `${pair[0]} & ${pair[1]}`;
+    const btn = document.createElement("button");
+    btn.textContent = "削除";
+    btn.classList.add("delete-btn");
+    btn.onclick = () => {
+      separatePairs.splice(idx, 1);
+      renderSeparatePairs();
+    };
+    li.appendChild(btn);
+    separateListEl.appendChild(li);
+  });
+}
+
+balanceBtn.addEventListener("click", () => {
+  if (players.length < 2) return alert("プレイヤーが足りません");
+
+  const shuffled = [...players].sort(() => 0.5 - Math.random());
+  const teamA = [];
+  const teamB = [];
+
+  // 1. 固定ペアを同じチームに割り当て
+  pairs.forEach(pair => {
+    const p1 = shuffled.find(p => p.name === pair[0]);
+    const p2 = shuffled.find(p => p.name === pair[1]);
+    if (!p1 || !p2) return;
+    teamA.push(p1);
+    teamB.push(p2);
+    shuffled.splice(shuffled.indexOf(p1), 1);
+    shuffled.splice(shuffled.indexOf(p2), 1);
+  });
+
+  // 2. 離したいペアを別チームに割り当て
+  separatePairs.forEach(pair => {
+    const p1 = shuffled.find(p => p.name === pair[0]);
+    const p2 = shuffled.find(p => p.name === pair[1]);
+    if (!p1 || !p2) return;
+    teamA.push(p1);
+    teamB.push(p2);
+    shuffled.splice(shuffled.indexOf(p1), 1);
+    shuffled.splice(shuffled.indexOf(p2), 1);
+  });
+
+  // 3. 残りプレイヤーを KD 差均等で割り振り
+  shuffled.sort((a, b) => b.kd - a.kd);
+  shuffled.forEach(p => {
+    const sumA = teamA.reduce((acc, x) => acc + x.kd, 0);
+    const sumB = teamB.reduce((acc, x) => acc + x.kd, 0);
+    if (sumA <= sumB) teamA.push(p);
+    else teamB.push(p);
+  });
+
+  // 表示
+  const teamAEl = document.getElementById("teamA");
+  const teamBEl = document.getElementById("teamB");
+  teamAEl.innerHTML = "";
+  teamBEl.innerHTML = "";
+  teamA.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = `${p.name} (KD差: ${p.kd})`;
+    teamAEl.appendChild(li);
+  });
+  teamB.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = `${p.name} (KD差: ${p.kd})`;
+    teamBEl.appendChild(li);
+  });
+});
   </script>
 </body>
 </html>
