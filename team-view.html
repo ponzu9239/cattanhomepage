@@ -288,11 +288,10 @@
 
 const killDiffTableContainer = document.getElementById("killDiffTableContainer");
 
-// 現在のチームメンバーが変わるたびに表を作る
 db.ref("currentTeamResult").on("value", snapshot => {
   const data = snapshot.val() || {};
   const teamA = Array.isArray(data.teamA) ? data.teamA : [];
-  const teamB = Array.isArray(data.teamB) ? Array.isArray(data.teamB) : [];
+  const teamB = Array.isArray(data.teamB) ? data.teamB : [];
   const players = [...teamA, ...teamB];
 
   // 表作成
@@ -335,31 +334,31 @@ db.ref("currentTeamResult").on("value", snapshot => {
         if (playerRow === playerCol) {
           td.textContent = "-";
         } else {
-          // 平均キル差計算
           let totalDiff = 0;
           let count = 0;
 
           matches.forEach(match => {
-            const teamA = match.teamA || [];
-            const teamB = match.teamB || [];
+            const teamA_match = match.teamA || [];
+            const teamB_match = match.teamB || [];
             const killsA = match.killsA || {};
             const killsB = match.killsB || {};
 
-            const rowTeam = teamA.includes(playerRow) ? "A" : "B";
-            const colTeam = teamA.includes(playerCol) ? "A" : "B";
+            if ((teamA_match.includes(playerRow) || teamB_match.includes(playerRow)) &&
+                (teamA_match.includes(playerCol) || teamB_match.includes(playerCol))) {
 
-            // 味方・敵チェック
-            let sameTeam = rowTeam === colTeam;
+              const rowTeam = teamA_match.includes(playerRow) ? "A" : "B";
+              const colTeam = teamA_match.includes(playerCol) ? "A" : "B";
 
-            // 過去に同じ試合にいたか確認
-            if ((teamA.includes(playerRow) || teamB.includes(playerRow)) &&
-                (teamA.includes(playerCol) || teamB.includes(playerCol))) {
+              const sameTeam = rowTeam === colTeam;
 
-              let playerTeamKills = rowTeam === "A" ? (killsA[playerRow] || 0) : (killsB[playerRow] || 0);
-              let teamKills = rowTeam === "A" ? sumTeamKills(killsA) : sumTeamKills(killsB);
-              let enemyKills = rowTeam === "A" ? sumTeamKills(killsB) : sumTeamKills(killsA);
+              // 行プレイヤーのチームキル合計
+              const rowTeamKills = rowTeam === "A" ? sumTeamKills(killsA) : sumTeamKills(killsB);
+              const enemyTeamKills = rowTeam === "A" ? sumTeamKills(killsB) : sumTeamKills(killsA);
 
-              totalDiff += teamKills - enemyKills;
+              // 味方なら同チームキル差、敵なら敵チームキル差
+              const diff = sameTeam ? rowTeamKills - enemyTeamKills : enemyTeamKills - rowTeamKills;
+
+              totalDiff += diff;
               count++;
             }
           });
@@ -378,11 +377,9 @@ db.ref("currentTeamResult").on("value", snapshot => {
   });
 });
 
-// チームキル合計関数
 function sumTeamKills(killsObj) {
-  return Object.values(killsObj || {}).reduce((a,b)=>a+b, 0);
+  return Object.values(killsObj || {}).reduce((a, b) => a + b, 0);
 }
-
 </script>
 </body>
 
