@@ -176,6 +176,23 @@
       padding: 0 2rem;
       margin: auto;
     }
+    
+    .info-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.info-text {
+  background-color: #eefaff;
+  border: 1px solid #97EADB;
+  border-radius: 6px;
+  padding: 8px;
+  margin-top: 6px;
+  color: #333;
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -209,8 +226,15 @@
     </section>
     
 <section>
-  <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
-  <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
+<h2 style="text-align:center; color:#47b6a2;">
+  総当たりキル差表
+  <button class="info-btn">▽</button>
+</h2>
+<div class="info-text" style="display:none;">
+  この表は各プレイヤーごとの平均キル差を示しています。<br>
+  - 同じチームの場合: 味方として来たときの平均キル差<br>
+  - 違うチームの場合: 敵として来たときの平均キル差
+</div>
 </section>
 
     <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
@@ -374,6 +398,19 @@ db.ref("currentTeamResult").on("value", snapshot => {
     killDiffTableContainer.innerHTML = "";
     killDiffTableContainer.appendChild(table);
   });
+});
+
+const btn = document.querySelector(".info-btn");
+const info = document.querySelector(".info-text");
+
+btn.addEventListener("click", () => {
+  if (info.style.display === "none") {
+    info.style.display = "block";
+    btn.textContent = "△"; // 閉じるアイコンに変える
+  } else {
+    info.style.display = "none";
+    btn.textContent = "▽"; // 開くアイコンに戻す
+  }
 });
 </script>
 </body>
