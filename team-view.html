@@ -286,8 +286,6 @@
     });
   });
 
-const killDiffTableContainer = document.getElementById("killDiffTableContainer");
-
 db.ref("currentTeamResult").on("value", snapshot => {
   const data = snapshot.val() || {};
   const teamA = Array.isArray(data.teamA) ? data.teamA : [];
@@ -307,81 +305,76 @@ db.ref("currentTeamResult").on("value", snapshot => {
     th.textContent = p;
     th.style.border = "1px solid #ddd";
     th.style.padding = "4px";
-    th.style.background = "#eefaff";
+    th.style.background = teamA.includes(p) ? "#eefaff" : (teamB.includes(p) ? "#fff1f5" : "#fff");
     headerRow.appendChild(th);
   });
   table.appendChild(headerRow);
 
-  // 過去試合データ取得
   db.ref("apex_results").once("value").then(snap => {
     const matches = snap.exists() ? Object.values(snap.val()) : [];
 
-players.forEach(playerRow => {
-  const tr = document.createElement("tr");
-  
-  const th = document.createElement("th");
-  th.textContent = playerRow;
-  th.style.border = "1px solid #ddd";
-  th.style.padding = "4px";
-  
-  // チームごとの背景色
-  if (teamA.includes(playerRow)) {
-    th.style.background = "#eefaff"; // チームA
-  } else if (teamB.includes(playerRow)) {
-    th.style.background = "#fff1f5"; // チームB
-  }
+    players.forEach(playerRow => {
+      const tr = document.createElement("tr");
+      const th = document.createElement("th");
+      th.textContent = playerRow;
+      th.style.border = "1px solid #ddd";
+      th.style.padding = "4px";
+      th.style.background = teamA.includes(playerRow) ? "#eefaff" : (teamB.includes(playerRow) ? "#fff1f5" : "#fff");
+      tr.appendChild(th);
 
-  tr.appendChild(th);
+      players.forEach(playerCol => {
+        const td = document.createElement("td");
+        td.style.border = "1px solid #ddd";
+        td.style.padding = "4px";
+        td.style.textAlign = "center";
 
-  players.forEach(playerCol => {
-    const td = document.createElement("td");
-    td.style.border = "1px solid #ddd";
-    td.style.padding = "4px";
-    td.style.textAlign = "center";
+        if (playerRow === playerCol) {
+          td.textContent = "-";
+        } else {
+          let totalDiff = 0;
+          let count = 0;
 
-    if (playerRow === playerCol) {
-      td.textContent = "-";
-    } else {
-      let totalDiff = 0;
-      let count = 0;
+          matches.forEach(match => {
+            const teamAplayers = match.teamA || [];
+            const teamBplayers = match.teamB || [];
+            const killsA = match.teamAKills || 0;
+            const killsB = match.teamBKills || 0;
 
-      matches.forEach(match => {
-        const teamAplayers = match.teamA || [];
-        const teamBplayers = match.teamB || [];
-        const killsA = match.teamAKills || 0;
-        const killsB = match.teamBKills || 0;
+            const rowTeam = teamAplayers.includes(playerRow) ? "A" : "B";
+            const colTeam = teamAplayers.includes(playerCol) ? "A" : "B";
 
-        const rowTeam = teamAplayers.includes(playerRow) ? "A" : "B";
-        const colTeam = teamAplayers.includes(playerCol) ? "A" : "B";
+            // 同じ試合に両方いた場合
+            if ((teamAplayers.includes(playerRow) || teamBplayers.includes(playerRow)) &&
+                (teamAplayers.includes(playerCol) || teamBplayers.includes(playerCol))) {
+              
+              let rowKills = rowTeam === "A" ? killsA : killsB;
+              let colKills  = colTeam === "A" ? killsA : killsB;
+              let enemyKills = rowTeam === "A" ? killsB : killsA;
 
-        if ((teamAplayers.includes(playerRow) || teamBplayers.includes(playerRow)) &&
-            (teamAplayers.includes(playerCol) || teamBplayers.includes(playerCol))) {
+              if (rowTeam === colTeam) {
+                // 味方として来たときの差（自分のキル - 味方の平均キル）
+                totalDiff += rowKills - colKills;
+              } else {
+                // 敵として来たときの差（自分のキル - 敵のキル）
+                totalDiff += rowKills - enemyKills;
+              }
+              count++;
+            }
+          });
 
-          let rowKills = rowTeam === "A" ? killsA : killsB;
-          let enemyKills = rowTeam === "A" ? killsB : killsA;
-
-          totalDiff += rowKills - enemyKills;
-          count++;
+          td.textContent = count > 0 ? (totalDiff / count).toFixed(1) : "-";
         }
+
+        tr.appendChild(td);
       });
 
-      td.textContent = count > 0 ? (totalDiff / count).toFixed(1) : "-";
-    }
-
-    tr.appendChild(td);
-  });
-
-  table.appendChild(tr);
-});
+      table.appendChild(tr);
+    });
 
     killDiffTableContainer.innerHTML = "";
     killDiffTableContainer.appendChild(table);
   });
 });
-
-function sumTeamKills(killsObj) {
-  return Object.values(killsObj || {}).reduce((a, b) => a + b, 0);
-}
 </script>
 </body>
 
