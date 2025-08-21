@@ -387,6 +387,8 @@
         <ul id="teamB"></ul>
       </div>
     </div>
+    <div>チームAスコア: <span id="teamAScore"></span></div>
+　　　<div>チームBスコア: <span id="teamBScore"></span></div>
   </section>
 
   <section>
@@ -940,6 +942,8 @@
         }
       });
     });
+    document.getElementById("teamAScore").textContent = sumA;
+　　　document.getElementById("teamBScore").textContent = sumB;
 
   </script>
 </body>
