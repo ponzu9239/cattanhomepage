@@ -394,6 +394,7 @@
   <section>
     <div class="method-select">
       <label><input type="radio" name="method" value="average" checked> 平均キル</label>
+      <label><input type="radio" name="method" value="compatibility"> 相性スコア</label>
       <label><input type="radio" name="method" value="kdratio"> キルレ</label>
       <label><input type="radio" name="method" value="winrate"> 勝率</label>
     </div>
@@ -597,6 +598,79 @@
       });
       return scores;
     }
+    
+    function makeTeamsByCompatibility(selectedPlayers, matches) {
+  if (selectedPlayers.length < 2) return null;
+
+  const n = selectedPlayers.length;
+  const half = Math.floor(n / 2);
+
+  // 選択プレイヤーの全組み合わせを生成
+  // 組み合わせの順列は、チームAのメンバーだけ決めればOK
+  function combinations(arr, k) {
+    const result = [];
+    function dfs(start, path) {
+      if (path.length === k) {
+        result.push([...path]);
+        return;
+      }
+      for (let i = start; i < arr.length; i++) {
+        path.push(arr[i]);
+        dfs(i + 1, path);
+        path.pop();
+      }
+    }
+    dfs(0, []);
+    return result;
+  }
+
+  const teamACombs = combinations(selectedPlayers, half);
+  let best = null;
+
+  teamACombs.forEach(teamA => {
+    const teamB = selectedPlayers.filter(p => !teamA.includes(p));
+
+    // チームAの各プレイヤー相性スコア
+    const scoreA = teamA.reduce((sum, p) => sum + compatibilityScore(p, teamA, teamB, matches), 0);
+    // チームBの各プレイヤー相性スコア
+    const scoreB = teamB.reduce((sum, p) => sum + compatibilityScore(p, teamB, teamA, matches), 0);
+
+    const diff = Math.abs(scoreA - scoreB);
+
+    if (!best || diff < best.diffScore) {
+      best = { teamA, teamB, diffScore: diff };
+    }
+  });
+
+  return best;
+}
+
+// 選択プレイヤーの相性スコア計算
+function compatibilityScore(player, sameTeam, otherTeam, matches) {
+  let score = 0;
+
+  matches.forEach(match => {
+    const teamA = match.teamA || [];
+    const teamB = match.teamB || [];
+    const matchScoreA = match.teamAScore ?? 0;
+    const matchScoreB = match.teamBScore ?? 0;
+
+    sameTeam.forEach(p => {
+      if (p === player) return;
+      if (teamA.includes(player) && teamA.includes(p)) score += matchScoreA - matchScoreB;
+      if (teamB.includes(player) && teamB.includes(p)) score += matchScoreB - matchScoreA;
+    });
+
+    otherTeam.forEach(p => {
+      if (teamA.includes(player) && teamB.includes(p)) score += matchScoreA - matchScoreB;
+      if (teamB.includes(player) && teamA.includes(p)) score += matchScoreB - matchScoreA;
+    });
+  });
+
+  // 平均化
+  const count = (sameTeam.length - 1) + otherTeam.length;
+  return count > 0 ? score / count : 0;
+}
 
     // ピン留め切替
     function togglePin(name) {
@@ -653,10 +727,23 @@
       let scores;
       const method = document.querySelector('input[name="method"]:checked').value;
 
-      if (method === "average") scores = playerScoresAverage;
-      else if (method === "winrate") scores = playerScoresWinRate;
-      else if (method === "kdratio") scores = playerScoresKDRatio;
-      else scores = {};
+if (method === "average") scores = playerScoresAverage;
+else if (method === "winrate") scores = playerScoresWinRate;
+else if (method === "kdratio") scores = playerScoresKDRatio;
+else if (method === "compatibility") {
+    // 選択されたプレイヤーと過去試合データを渡してチーム分け
+    const best = makeTeamsByCompatibility(selected, matches);
+    if (best) {
+        document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
+        document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
+        db.ref("currentTeamResult").set({
+            teamA: best.teamA,
+            teamB: best.teamB,
+            timestamp: Date.now(),
+        });
+    }
+    return; // ここで通常の scores を使う処理はスキップ
+} else scores = {};
 
       if (selected.length === 0) {
         document.getElementById("teamA").innerHTML = "";
