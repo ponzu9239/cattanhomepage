@@ -309,14 +309,13 @@ db.ref("currentTeamResult").on("value", snapshot => {
   const teamB = Array.isArray(data.teamB) ? data.teamB : [];
   const players = [...teamA, ...teamB];
 
-  // 表作成
   const table = document.createElement("table");
   table.style.borderCollapse = "collapse";
   table.style.width = "100%";
 
   // ヘッダー行
   const headerRow = document.createElement("tr");
-  headerRow.appendChild(document.createElement("th")); // 左上空白
+  headerRow.appendChild(document.createElement("th"));
   players.forEach(p => {
     const th = document.createElement("th");
     th.textContent = p;
@@ -329,42 +328,6 @@ db.ref("currentTeamResult").on("value", snapshot => {
 
   db.ref("apex_results").once("value").then(snap => {
     const matches = snap.exists() ? Object.values(snap.val()) : [];
-
-    // チーム間キル差をあらかじめ計算しておく
-    const pairDiffs = {}; // key: "playerRow|playerCol" -> diff
-
-    matches.forEach(match => {
-      const teamAplayers = match.teamA || [];
-      const teamBplayers = match.teamB || [];
-      const killsA = match.teamAKills || 0;
-      const killsB = match.teamBKills || 0;
-
-      // チーム内平均キル
-      const avgKillsA = killsA / Math.max(teamAplayers.length, 1);
-      const avgKillsB = killsB / Math.max(teamBplayers.length, 1);
-
-      [...teamAplayers, ...teamBplayers].forEach(p1 => {
-        [...teamAplayers, ...teamBplayers].forEach(p2 => {
-          if (p1 === p2) return;
-          const rowTeam = teamAplayers.includes(p1) ? "A" : "B";
-          const colTeam = teamAplayers.includes(p2) ? "A" : "B";
-
-          let diff;
-          if (rowTeam === colTeam) {
-            // 同チームの場合はチーム内平均との差
-            diff = (rowTeam === "A" ? killsA - avgKillsA : killsB - avgKillsB) - 
-                   (colTeam === "A" ? killsA - avgKillsA : killsB - avgKillsB);
-          } else {
-            // 敵チームの場合は行チームキル - 列チームキル
-            diff = (rowTeam === "A" ? killsA : killsB) - (colTeam === "A" ? killsA : killsB);
-          }
-
-          const key = [p1, p2].sort().join("|"); // 行列を入れ替えても同じキー
-          if (!pairDiffs[key]) pairDiffs[key] = [];
-          pairDiffs[key].push(diff);
-        });
-      });
-    });
 
     players.forEach(playerRow => {
       const tr = document.createElement("tr");
@@ -384,10 +347,31 @@ db.ref("currentTeamResult").on("value", snapshot => {
         if (playerRow === playerCol) {
           td.textContent = "-";
         } else {
-          const key = [playerRow, playerCol].sort().join("|");
-          const diffs = pairDiffs[key] || [];
-          const avg = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
-          td.textContent = avg;
+          let diffs = [];
+          matches.forEach(match => {
+            const teamAplayers = match.teamA || [];
+            const teamBplayers = match.teamB || [];
+            const killsA = match.teamAKills || 0;
+            const killsB = match.teamBKills || 0;
+
+            const rowTeam = teamAplayers.includes(playerRow) ? "A" : "B";
+            const colTeam = teamAplayers.includes(playerCol) ? "A" : "B";
+
+            // 両方が試合に参加している場合のみ
+            if ((teamAplayers.includes(playerRow) || teamBplayers.includes(playerRow)) &&
+                (teamAplayers.includes(playerCol) || teamBplayers.includes(playerCol))) {
+
+              // 味方として来た場合のみ計算
+              if (rowTeam === colTeam) {
+                diffs.push((rowTeam === "A" ? killsA : killsB) - (rowTeam === "A" ? killsB : killsA));
+              } else {
+                // 敵として来た場合のみ計算
+                diffs.push((rowTeam === "A" ? killsA : killsB) - (rowTeam === "A" ? killsB : killsA));
+              }
+            }
+          });
+
+          td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
         }
 
         tr.appendChild(td);
