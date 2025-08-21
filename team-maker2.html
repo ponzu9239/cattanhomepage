@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>相性スコア専用チーム分け</title>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      margin: 0;
+      padding-top: 100px;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .hamburger {
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
+
+    nav {
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      transition: top 0.3s ease;
+      z-index: 1050;
+    }
+
+    nav.show {
+      top: 75px;
+    }
+
+    nav a {
+      display: block;
+      text-align: center;
+      margin: 0;
+      padding: 0.6rem 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background-color: #97eadb;
+      border-bottom: 1px solid #97EADB;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    nav a:hover {
+      background-color: #0099aa;
+      transform: scale(1.03);
+    }
+
+    footer {
+      background: #97EADB;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+      margin-bottom: 12px;
+    }
+
+    .teams {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .team-box {
+      width: 90%;
+      max-width: 500px;
+      background: #eefaff;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #97eadb;
+      text-align: center;
+    }
+
+    .team-box.team2 {
+      background: #fff1f5;
+      border-color: #ffb6c1;
+    }
+
+    .team-box h2 {
+      font-size: 18px;
+      margin: 0 0 8px 0;
+      color: #47b6a2;
+    }
+
+    .team-box ul {
+      list-style: none;
+      padding: 0 8px;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      box-sizing: border-box;
+    }
+
+    .team-box li {
+      background: white;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .player-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .player {
+      background: #fff;
+      border: 2px solid #97eadb;
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+      font-size: 14px;
+    }
+
+    .player:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .player.selected {
+      background: #97eadb;
+      color: white;
+    }
+
+    .player.matching {
+      background: #e0f7f3;
+      border-color: #97eadb;
+    }
+
+    .pin-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 20px;
+      height: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .pin-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #bbb;
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%,
+          79% 91%, 50% 70%, 21% 91%, 32% 57%,
+          2% 35%, 39% 35%);
+      transition: background 0.3s;
+    }
+
+    .pin-btn.pinned::before {
+      background: gold;
+    }
+
+    .pair-section {
+      background: #eaf9f8;
+      border: 2px solid #97eadb;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .pair-section h3 {
+      margin-top: 0;
+      color: #47b6a2;
+      font-weight: 700;
+      font-size: 20px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .pair-form {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pair-form input[type="text"] {
+      flex: 1 1 40%;
+      min-width: 100px;
+      padding: 6px 8px;
+      border: 1.5px solid #97eadb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .pair-form button {
+      background: #47b6a2;
+      border: none;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .pair-form button:hover {
+      background: #369482;
+    }
+
+    .pair-list {
+      list-style: none;
+      padding-left: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      margin: 0;
+      border-top: 1px solid #97eadb;
+    }
+
+    .pair-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #b2e2dd;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .pair-list button.delete-btn {
+      background: #ff6b6b;
+      border: none;
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.3s;
+    }
+
+    .pair-list button.delete-btn:hover {
+      background: #e03e3e;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 22px;
+      }
+
+      .team-box h2 {
+        font-size: 16px;
+      }
+
+      .team-box li {
+        font-size: 14px;
+        padding: 5px;
+      }
+
+      .player-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pair-form {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .pair-form input[type="text"] {
+        flex: none;
+        width: 80%;
+      }
+    }
+
+    section {
+      padding: 0 2rem;
+      margin: auto;
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>相性スコアチーム分け</h1>
+    <div class="hamburger" id="hamburger">☰</div>
+    <nav id="nav">
+      <a href="index.html">ホーム</a>
+      <a href="roulette.html">イベント</a>
+      <a href="team-view.html">チーム分けを見る</a>
+      <a href="admin2.html">管理画面</a>
+      <a href="team-maker.html">チーム分けする</a>
+    </nav>
+  </header>
+
+  <section>
+    <div class="teams">
+      <div class="team-box team1">
+        <h2>チーム1</h2>
+        <ul id="teamA"></ul>
+      </div>
+      <div class="team-box team2">
+        <h2>チーム2</h2>
+        <ul id="teamB        </ul>
+      </div>
+    </div>
+
+    <div class="player-list" id="playerList">
+      <!-- プレイヤー要素がここに追加されます -->
+    </div>
+
+    <div class="pair-section">
+      <h3>固定ペア設定（希望があれば）</h3>
+      <form class="pair-form" id="pairForm">
+        <input type="text" id="pair1" placeholder="プレイヤー1">
+        <input type="text" id="pair2" placeholder="プレイヤー2">
+        <button type="submit">追加</button>
+      </form>
+      <ul class="pair-list" id="pairList">
+        <!-- 固定ペアがここに表示されます -->
+      </ul>
+    </div>
+
+    <button id="balanceBtn" style="display:block; margin:auto; padding:12px 24px; background:#47b6a2; color:white; font-weight:bold; border:none; border-radius:12px; cursor:pointer;">
+      チーム分け開始
+    </button>
+  </section>
+
+  <footer>
+    © 2025 チーム分けツール
+  </footer>
+
+  <script>
+    // ハンバーガーメニュー
+    const hamburger = document.getElementById("hamburger");
+    const nav = document.getElementById("nav");
+    hamburger.addEventListener("click", () => {
+      nav.classList.toggle("show");
+    });
+
+    // Firebase 初期化（自分の設定に置き換える）
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const playerListEl = document.getElementById("playerList");
+    let players = [];
+    let pairs = [];
+
+    // プレイヤー読み込み
+    db.ref("players").on("value", snapshot => {
+      players = [];
+      snapshot.forEach(child => {
+        players.push({ name: child.key, kd: child.val().expectedKDdiff || 0 });
+      });
+      renderPlayers();
+    });
+
+    function renderPlayers() {
+      playerListEl.innerHTML = "";
+      players.forEach(p => {
+        const div = document.createElement("div");
+        div.classList.add("player");
+        div.textContent = `${p.name} (KD差: ${p.kd})`;
+        playerListEl.appendChild(div);
+      });
+    }
+
+    // ペア管理
+    const pairForm = document.getElementById("pairForm");
+    const pairListEl = document.getElementById("pairList");
+
+    pairForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const p1 = document.getElementById("pair1").value.trim();
+      const p2 = document.getElementById("pair2").value.trim();
+      if (!p1 || !p2) return;
+      pairs.push([p1, p2]);
+      renderPairs();
+      pairForm.reset();
+    });
+
+    function renderPairs() {
+      pairListEl.innerHTML = "";
+      pairs.forEach((pair, idx) => {
+        const li = document.createElement("li");
+        li.textContent = `${pair[0]} & ${pair[1]}`;
+        const btn = document.createElement("button");
+        btn.textContent = "削除";
+        btn.classList.add("delete-btn");
+        btn.onclick = () => {
+          pairs.splice(idx, 1);
+          renderPairs();
+        };
+        li.appendChild(btn);
+        pairListEl.appendChild(li);
+      });
+    }
+
+    // チーム分けロジック
+    const balanceBtn = document.getElementById("balanceBtn");
+    balanceBtn.addEventListener("click", () => {
+      if (players.length < 2) return alert("プレイヤーが足りません");
+
+      const shuffled = [...players].sort(() => 0.5 - Math.random());
+
+      // ペアを先に割り当て
+      const teamA = [];
+      const teamB = [];
+      pairs.forEach(pair => {
+        const p1 = shuffled.find(p => p.name === pair[0]);
+        const p2 = shuffled.find(p => p.name === pair[1]);
+        if (!p1 || !p2) return;
+        teamA.push(p1);
+        teamB.push(p2);
+        shuffled.splice(shuffled.indexOf(p1), 1);
+        shuffled.splice(shuffled.indexOf(p2), 1);
+      });
+
+      // 残りをKD差が均等になるよう割り当て
+      shuffled.sort((a, b) => b.kd - a.kd);
+      shuffled.forEach(p => {
+        const sumA = teamA.reduce((acc, x) => acc + x.kd, 0);
+        const sumB = teamB.reduce((acc, x) => acc + x.kd, 0);
+        if (sumA <= sumB) teamA.push(p);
+        else teamB.push(p);
+      });
+
+      // 表示
+      const teamAEl = document.getElementById("teamA");
+      const teamBEl = document.getElementById("teamB");
+      teamAEl.innerHTML = "";
+      teamBEl.innerHTML = "";
+      teamA.forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = `${p.name} (KD差: ${p.kd})`;
+        teamAEl.appendChild(li);
+      });
+      teamB.forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = `${p.name} (KD差: ${p.kd})`;
+        teamBEl.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>
