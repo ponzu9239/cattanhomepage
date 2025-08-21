@@ -807,6 +807,10 @@
             const sumA = teamAMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
             const sumB = teamBMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
 
+    document.getElementById("teamAScore").textContent = sumA;
+　　　document.getElementById("teamBScore").textContent = sumB;
+
+
             results.push({ teamA: teamAMembers, teamB: teamBMembers, diffScore: Math.abs(sumA - sumB) });
             return;
           }
@@ -942,9 +946,6 @@
         }
       });
     });
-    document.getElementById("teamAScore").textContent = sumA;
-　　　document.getElementById("teamBScore").textContent = sumB;
-
   </script>
 </body>
 
