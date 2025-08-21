@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>コメントビューワー | Twitch & YouTube</title>
+  <style>
+    :root{
+      --brand:#97EADB;
+      --bg:#f7fcfc;
+      --ink:#234;
+      --card:#ffffff;
+      --line:#cfeff0;
+      --muted:#5b7a7a;
+      --radius:16px;
+      --shadow:0 8px 24px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: "Hiragino Maru Gothic ProN", "Rounded Mplus 1c", system-ui, -apple-system, sans-serif;
+      color:var(--ink);
+      background: radial-gradient(1200px 600px at 10% -10%, #e8fbfb 0, transparent 60%) no-repeat,
+                  radial-gradient(800px 600px at 110% 0%, #e8fbfb 0, transparent 60%) no-repeat,
+                  var(--bg);
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      background:rgba(255,255,255,.8);
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{max-width:1100px; margin:auto; padding:16px;}
+    .brand{
+      display:flex; align-items:center; gap:10px; margin:6px 0 14px;
+    }
+    .logo{
+      width:36px; height:36px; border-radius:10px;
+      background:linear-gradient(135deg, var(--brand), #c6f4f1);
+      box-shadow: var(--shadow);
+    }
+    h1{font-size:1.12rem; margin:0; letter-spacing:.02em}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px; 
+    }
+    .grid{
+      display:grid; gap:12px;
+      grid-template-columns: 1fr;
+    }
+    @media(min-width:860px){
+      .grid{grid-template-columns: 1fr 1fr;}
+    }
+    label{font-size:.86rem; color:var(--muted)}
+    input[type="text"]{
+      width:100%; padding:10px 12px; border-radius:12px;
+      border:1.5px solid var(--line); outline:none;
+      background:#fbffff; font-size:1rem;
+    }
+    .hint{font-size:.8rem; color:var(--muted); margin-top:6px}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .btn{
+      appearance:none; border:none; cursor:pointer;
+      border-radius:999px; padding:10px 16px;
+      background:var(--brand); color:#034; font-weight:700;
+      box-shadow:var(--shadow);
+    }
+    .btn.ghost{background:#e9fbfb}
+    .tabs{display:flex; gap:8px; flex-wrap:wrap}
+    .tab{
+      padding:8px 12px; border-radius:999px; background:#e6faf8;
+      border:1px solid var(--line); cursor:pointer; font-weight:700; color:#044;
+    }
+    .tab.active{background:var(--brand)}
+    .ifr-wrap{
+      height:70vh; min-height:420px; display:flex; gap:12px;
+    }
+    iframe{
+      flex:1 1 0; width:100%; height:100%;
+      border:none; border-radius:14px; background:#fff;
+      box-shadow:var(--shadow);
+    }
+    footer{padding:24px; text-align:center; color:var(--muted); font-size:.85rem}
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      background:#e9fbfb; border:1px solid var(--line);
+      padding:6px 10px; border-radius:999px; font-size:.82rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo"></div>
+        <h1>コメントビューワー（Twitch & YouTube）</h1>
+      </div>
+
+      <div class="card">
+        <div class="grid">
+          <div>
+            <label for="twitch">Twitch チャンネル名</label>
+            <input id="twitch" type="text" placeholder="例）shroud（@は不要）">
+            <div class="hint">埋め込みには <code>?parent=YOUR_DOMAIN_HERE</code> が必要です（ローカルなら <code>localhost</code>）。</div>
+          </div>
+          <div>
+            <label for="youtube">YouTube ライブURL または 動画ID</label>
+            <input id="youtube" type="text" placeholder="例）https://www.youtube.com/watch?v=XXXXXXXX、または ID">
+            <div class="hint">埋め込みには <code>&embed_domain=YOUR_DOMAIN_HERE</code> が必要です（ローカルなら <code>localhost</code>）。</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <button class="btn" id="apply">反映する</button>
+          <button class="btn ghost" id="swap">左右入れ替え</button>
+          <span class="badge">設定は自動保存されます</span>
+        </div>
+
+        <div class="tabs" style="margin-top:10px">
+          <button class="tab active" data-mode="both">並べて表示</button>
+          <button class="tab" data-mode="twitch">Twitchだけ</button>
+          <button class="tab" data-mode="youtube">YouTubeだけ</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" style="margin-top:14px">
+    <div class="ifr-wrap" id="ifrWrap">
+      <iframe id="ifrA" title="左"></iframe>
+      <iframe id="ifrB" title="右"></iframe>
+    </div>
+  </main>
+
+  <footer>
+    <div>Base color <strong>#97EADB</strong> / かわいく・綺麗に ✨</div>
+  </footer>
+
+  <script>
+    // ====== 設定（あなたのドメインに変更！）======
+    const DOMAIN = "YOUR_DOMAIN_HERE"; // 例) "localhost" or "example.com"
+
+    // ====== ユーティリティ ======
+    const $ = (s)=>document.querySelector(s);
+    const tabs = [...document.querySelectorAll(".tab")];
+
+    function parseYouTubeId(input){
+      if(!input) return "";
+      try{
+        const url = new URL(input);
+        // 通常URL
+        if(url.hostname.includes("youtube.com")){
+          if(url.pathname.startsWith("/live/")){
+            return url.pathname.split("/").pop();
+          }
+          return url.searchParams.get("v") || "";
+        }
+        // 短縮URL
+        if(url.hostname==="youtu.be"){
+          return url.pathname.replace("/","");
+        }
+      }catch(e){
+        // 単なるIDとみなす
+        return input.trim();
+      }
+      return "";
+    }
+
+    function twitchChatSrc(channel){
+      const base = `https://www.twitch.tv/embed/${encodeURIComponent(channel)}/chat`;
+      // parent は複数指定可。ここでは同一を2回指定してもOK。
+      return `${base}?parent=${DOMAIN}&parent=${DOMAIN}`;
+    }
+
+    function youtubeChatSrc(videoId){
+      return `https://www.youtube.com/live_chat?v=${encodeURIComponent(videoId)}&embed_domain=${DOMAIN}`;
+    }
+
+    function applyIframes(){
+      const tw = $("#twitch").value.trim();
+      const ytRaw = $("#youtube").value.trim();
+      const yt = parseYouTubeId(ytRaw);
+
+      localStorage.setItem("tw", tw);
+      localStorage.setItem("yt", ytRaw);
+      localStorage.setItem("mode", currentMode);
+
+      const ifrA = $("#ifrA");
+      const ifrB = $("#ifrB");
+
+      if(currentMode==="twitch"){
+        ifrA.src = tw ? twitchChatSrc(tw) : "about:blank";
+        ifrB.src = "about:blank";
+        ifrB.style.display="none"; ifrA.style.display="";
+      }else if(currentMode==="youtube"){
+        ifrA.src = yt ? youtubeChatSrc(yt) : "about:blank";
+        ifrB.src = "about:blank";
+        ifrB.style.display="none"; ifrA.style.display="";
+      }else{
+        // both
+        // 左右の割当は swap 状態に応じて変える
+        const leftIsTwitch = (localStorage.getItem("swap")==="1") ? false : true;
+        if(leftIsTwitch){
+          ifrA.src = tw ? twitchChatSrc(tw) : "about:blank";
+          ifrB.src = yt ? youtubeChatSrc(yt) : "about:blank";
+        }else{
+          ifrA.src = yt ? youtubeChatSrc(yt) : "about:blank";
+          ifrB.src = tw ? twitchChatSrc(tw) : "about:blank";
+        }
+        ifrA.style.display=""; ifrB.style.display="";
+      }
+    }
+
+    // ====== モード切り替え ======
+    let currentMode = localStorage.getItem("mode") || "both";
+    function updateTabs(){
+      tabs.forEach(t=>{
+        t.classList.toggle("active", t.dataset.mode===currentMode);
+      });
+      applyIframes();
+    }
+    tabs.forEach(t=>{
+      t.addEventListener("click", ()=>{
+        currentMode = t.dataset.mode;
+        updateTabs();
+      });
+    });
+
+    // ====== 初期化 ======
+    window.addEventListener("DOMContentLoaded", ()=>{
+      const tw = localStorage.getItem("tw") || "";
+      const yt = localStorage.getItem("yt") || "";
+      $("#twitch").value = tw;
+      $("#youtube").value = yt;
+
+      if(localStorage.getItem("swap")==="1"){
+        // ただの見た目反映（実際の入替は applyIframes 内で）
+      }
+      updateTabs();
+    });
+
+    // ====== ボタン ======
+    $("#apply").addEventListener("click", applyIframes);
+    $("#swap").addEventListener("click", ()=>{
+      const cur = localStorage.getItem("swap")==="1";
+      localStorage.setItem("swap", cur ? "0" : "1");
+      applyIframes();
+    });
+  </script>
+</body>
+</html>
