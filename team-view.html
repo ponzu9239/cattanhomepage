@@ -329,7 +329,7 @@ db.ref("currentTeamResult").on("value", snapshot => {
     th.textContent = p;
     th.style.border = "1px solid #ddd";
     th.style.padding = "4px";
-    th.style.background = teamA.includes(p) ? "#eefaff" : (teamB.includes(p) ? "#fff1f5" : "#fff");
+    th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
     headerRow.appendChild(th);
   });
   table.appendChild(headerRow);
@@ -337,13 +337,49 @@ db.ref("currentTeamResult").on("value", snapshot => {
   db.ref("apex_results").once("value").then(snap => {
     const matches = snap.exists() ? Object.values(snap.val()) : [];
 
+    // チーム間キル差をあらかじめ計算しておく
+    const pairDiffs = {}; // key: "playerRow|playerCol" -> diff
+
+    matches.forEach(match => {
+      const teamAplayers = match.teamA || [];
+      const teamBplayers = match.teamB || [];
+      const killsA = match.teamAKills || 0;
+      const killsB = match.teamBKills || 0;
+
+      // チーム内平均キル
+      const avgKillsA = killsA / Math.max(teamAplayers.length, 1);
+      const avgKillsB = killsB / Math.max(teamBplayers.length, 1);
+
+      [...teamAplayers, ...teamBplayers].forEach(p1 => {
+        [...teamAplayers, ...teamBplayers].forEach(p2 => {
+          if (p1 === p2) return;
+          const rowTeam = teamAplayers.includes(p1) ? "A" : "B";
+          const colTeam = teamAplayers.includes(p2) ? "A" : "B";
+
+          let diff;
+          if (rowTeam === colTeam) {
+            // 同チームの場合はチーム内平均との差
+            diff = (rowTeam === "A" ? killsA - avgKillsA : killsB - avgKillsB) - 
+                   (colTeam === "A" ? killsA - avgKillsA : killsB - avgKillsB);
+          } else {
+            // 敵チームの場合は行チームキル - 列チームキル
+            diff = (rowTeam === "A" ? killsA : killsB) - (colTeam === "A" ? killsA : killsB);
+          }
+
+          const key = [p1, p2].sort().join("|"); // 行列を入れ替えても同じキー
+          if (!pairDiffs[key]) pairDiffs[key] = [];
+          pairDiffs[key].push(diff);
+        });
+      });
+    });
+
     players.forEach(playerRow => {
       const tr = document.createElement("tr");
       const th = document.createElement("th");
       th.textContent = playerRow;
       th.style.border = "1px solid #ddd";
       th.style.padding = "4px";
-      th.style.background = teamA.includes(playerRow) ? "#eefaff" : (teamB.includes(playerRow) ? "#fff1f5" : "#fff");
+      th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
       tr.appendChild(th);
 
       players.forEach(playerCol => {
@@ -355,38 +391,10 @@ db.ref("currentTeamResult").on("value", snapshot => {
         if (playerRow === playerCol) {
           td.textContent = "-";
         } else {
-          let totalDiff = 0;
-          let count = 0;
-
-          matches.forEach(match => {
-            const teamAplayers = match.teamA || [];
-            const teamBplayers = match.teamB || [];
-            const killsA = match.teamAKills || 0;
-            const killsB = match.teamBKills || 0;
-
-            const rowTeam = teamAplayers.includes(playerRow) ? "A" : "B";
-            const colTeam = teamAplayers.includes(playerCol) ? "A" : "B";
-
-            // 同じ試合に両方いた場合
-            if ((teamAplayers.includes(playerRow) || teamBplayers.includes(playerRow)) &&
-                (teamAplayers.includes(playerCol) || teamBplayers.includes(playerCol))) {
-              
-              let rowKills = rowTeam === "A" ? killsA : killsB;
-              let colKills  = colTeam === "A" ? killsA : killsB;
-              let enemyKills = rowTeam === "A" ? killsB : killsA;
-
-              if (rowTeam === colTeam) {
-                // 味方として来たときの差（自分のキル - 味方の平均キル）
-                totalDiff += rowKills - colKills;
-              } else {
-                // 敵として来たときの差（自分のキル - 敵のキル）
-                totalDiff += rowKills - enemyKills;
-              }
-              count++;
-            }
-          });
-
-          td.textContent = count > 0 ? (totalDiff / count).toFixed(1) : "-";
+          const key = [playerRow, playerCol].sort().join("|");
+          const diffs = pairDiffs[key] || [];
+          const avg = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
+          td.textContent = avg;
         }
 
         tr.appendChild(td);
