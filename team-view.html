@@ -367,17 +367,17 @@ db.ref("currentTeamResult").on("value", snapshot => {
               const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
 
               // 現在のチームと過去試合のチーム一致条件
-              if (currentSameTeam && matchSameTeam) {
-                // 同チームの試合のキル差
-                const rowKills = rowInA ? killsA : killsB;
-                const colKills = colInA ? killsA : killsB;
-                diffs.push(rowKills - colKills);
-              } else if (!currentSameTeam && !matchSameTeam) {
-                // 敵チームの試合のキル差
-                const rowKills = rowInA ? killsA : killsB;
-                const colKills = colInA ? killsA : killsB;
-                diffs.push(rowKills - colKills);
-              }
+ if (currentSameTeam && matchSameTeam) {
+  // 同チームの試合のキル差（自チームキル - 敵チームキル）
+  const rowTeamKills = rowInA ? killsA : killsB;
+  const enemyTeamKills = rowInA ? killsB : killsA;
+  diffs.push(rowTeamKills - enemyTeamKills);
+} else if (!currentSameTeam && !matchSameTeam) {
+  // 敵チームの試合のキル差（自チームキル - 敵チームキル）
+  const rowTeamKills = rowInA ? killsA : killsB;
+  const enemyTeamKills = rowInA ? killsB : killsA;
+  diffs.push(rowTeamKills - enemyTeamKills);
+}
             }
           });
 
