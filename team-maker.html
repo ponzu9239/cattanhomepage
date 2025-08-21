@@ -394,7 +394,6 @@
   <section>
     <div class="method-select">
       <label><input type="radio" name="method" value="average" checked> 平均キル</label>
-      <label><input type="radio" name="method" value="expectedKDdiff"> 相性</label>
       <label><input type="radio" name="method" value="kdratio"> キルレ</label>
       <label><input type="radio" name="method" value="winrate"> 勝率</label>
     </div>
@@ -599,49 +598,6 @@
       return scores;
     }
 
-function calculateExpectedKDdiff(matches) {
-  const stats = {}; // stats[playerA][playerB] = { asAlly: [], asEnemy: [] }
-
-  // 過去試合データから統計作成
-  matches.forEach(match => {
-    const teamA = match.teamA || [];
-    const teamB = match.teamB || [];
-    const scoreA = match.teamScoreA ?? 0;
-    const scoreB = match.teamScoreB ?? 0;
-    const diffA = scoreA - scoreB;
-    const diffB = scoreB - scoreA;
-
-    function addStats(player, others, diff, type) {
-      if (!stats[player]) stats[player] = {};
-      others.forEach(other => {
-        if (player === other) return;
-        if (!stats[player][other]) stats[player][other] = { asAlly: [], asEnemy: [] };
-        stats[player][other][type].push(diff);
-      });
-    }
-
-    teamA.forEach(p => addStats(p, teamA, diffA, "asAlly"));
-    teamA.forEach(p => addStats(p, teamB, diffA, "asEnemy"));
-    teamB.forEach(p => addStats(p, teamB, diffB, "asAlly"));
-    teamB.forEach(p => addStats(p, teamA, diffB, "asEnemy"));
-  });
-
-  function average(arr) {
-    return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-  }
-
-  // プレイヤーごとのスコア計算
-  const players = [...new Set(matches.flatMap(m => [...(m.teamA||[]), ...(m.teamB||[])]))];
-  const expectedScores = {};
-  players.forEach(p => {
-    const allies = Object.values(stats[p] || {}).map(s => average(s.asAlly));
-    const enemies = Object.values(stats[p] || {}).map(s => average(s.asEnemy));
-    expectedScores[p] = (allies.length ? allies.reduce((a,b)=>a+b,0)/allies.length : 0)
-                      - (enemies.length ? enemies.reduce((a,b)=>a+b,0)/enemies.length : 0);
-  });
-
-  return expectedScores;
-}
     // ピン留め切替
     function togglePin(name) {
       if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
@@ -700,7 +656,6 @@ function calculateExpectedKDdiff(matches) {
       if (method === "average") scores = playerScoresAverage;
       else if (method === "winrate") scores = playerScoresWinRate;
       else if (method === "kdratio") scores = playerScoresKDRatio;
-      else if (method === "expectedKDdiff") scores = playerScoresExpectedKDdiff; // ←これ
       else scores = {};
 
       if (selected.length === 0) {
