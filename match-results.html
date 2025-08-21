@@ -128,6 +128,16 @@
       opacity: 0.8;
       z-index: 9999;
     }
+    
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #97eadb;
+      margin-top: 4px;
+      box-sizing: border-box;
+    }
+
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -139,7 +149,7 @@
     <h1>試合結果入力</h1>
 
     <label>メンバー名を1行ごとに入力：</label>
-    <textarea id="nameInput" rows="4" placeholder="もねこ&#10;きゃたん&#10;ぽんず"></textarea>
+    <textarea id="nameInput" rows="12"></textarea>
 
     <div class="teams">
       <div class="team-box unassigned" ondragover="allowDrop(event)" ondrop="drop(event, 'unassigned')">
