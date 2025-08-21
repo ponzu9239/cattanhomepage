@@ -602,7 +602,7 @@
 function calculateExpectedKDdiff(matches) {
   const stats = {}; // stats[playerA][playerB] = { asAlly: [], asEnemy: [] }
 
-  // --- 過去試合データから統計作成 ---
+  // 過去試合データから統計作成
   matches.forEach(match => {
     const teamA = match.teamA || [];
     const teamB = match.teamB || [];
@@ -630,48 +630,14 @@ function calculateExpectedKDdiff(matches) {
     return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
   }
 
-  const teamSize = Math.floor(players.length / 2);
-  let bestTeams = null;
-  let bestDiff = Infinity;
-
-  // --- 任意人数の組み合わせ生成 ---
-  function combinations(arr, k) {
-    if (k === 0) return [[]];
-    if (arr.length < k) return [];
-    const [first, ...rest] = arr;
-    const combsWithFirst = combinations(rest, k - 1).map(c => [first, ...c]);
-    const combsWithoutFirst = combinations(rest, k);
-    return [...combsWithFirst, ...combsWithoutFirst];
-  }
-
-  const team1Combos = combinations(players, teamSize);
-
-  team1Combos.forEach(team1 => {
-    const team2 = players.filter(p => !team1.includes(p));
-
-    function teamScore(team, otherTeam) {
-      return team.reduce((sum, player) => {
-        let playerScore = 0;
-        team.forEach(teammate => {
-          if (teammate !== player) {
-            playerScore += average(stats[player]?.[teammate]?.asAlly || []);
-          }
-        });
-        otherTeam.forEach(enemy => {
-          playerScore += average(stats[player]?.[enemy]?.asEnemy || []);
-        });
-        return sum + playerScore;
-      }, 0);
-    }
-
-    const score1 = teamScore(team1, team2);
-    const score2 = teamScore(team2, team1);
-    const diff = Math.abs(score1 - score2);
-
-    if (diff < bestDiff) {
-      bestDiff = diff;
-      bestTeams = { team1, team2, diff };
-    }
+  // プレイヤーごとのスコア計算
+  const players = [...new Set(matches.flatMap(m => [...(m.teamA||[]), ...(m.teamB||[])]))];
+  const expectedScores = {};
+  players.forEach(p => {
+    const allies = Object.values(stats[p] || {}).map(s => average(s.asAlly));
+    const enemies = Object.values(stats[p] || {}).map(s => average(s.asEnemy));
+    expectedScores[p] = (allies.length ? allies.reduce((a,b)=>a+b,0)/allies.length : 0)
+                      - (enemies.length ? enemies.reduce((a,b)=>a+b,0)/enemies.length : 0);
   });
 
   return expectedScores;
