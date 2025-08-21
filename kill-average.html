@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,28 +12,69 @@
       padding: 20px;
       margin: 0;
     }
-    h1 { text-align: center; color: #47b6a2; }
-    .method-select { text-align: center; margin-bottom: 15px; }
-    label { margin: 0 12px; font-weight: bold; color: #47b6a2; cursor: pointer; }
-    table { width: 90%; margin: 20px auto; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
-    th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: center; }
-    th { background: #97eadb; color: white; }
-    tr:hover { background: #f0faf9; }
+
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+    }
+
+    .method-select {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    label {
+      margin: 0 12px;
+      font-weight: bold;
+      color: #47b6a2;
+      cursor: pointer;
+    }
+
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background: #97eadb;
+      color: white;
+    }
+
+    tr:hover {
+      background: #f0faf9;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
+
 <body>
   <h1>プレイヤースコア計算</h1>
 
   <div class="method-select">
     <label><input type="radio" name="method" value="average" checked> 平均チームキル</label>
     <label><input type="radio" name="method" value="winRate"> 勝率</label>
-<label><input type="radio" name="method" value="kdRatio"> キルレ</label>
+    <label><input type="radio" name="method" value="kdRatio"> キルレ</label>
   </div>
 
   <table>
-    <thead><tr><th>プレイヤー名</th><th>スコア</th></tr></thead>
+    <thead>
+      <tr>
+        <th>プレイヤー名</th>
+        <th>スコア</th>
+      </tr>
+    </thead>
     <tbody id="resultTable"></tbody>
   </table>
 
@@ -53,16 +95,16 @@
     function calculateAverage(matches) {
       const playerStats = {};
       matches.forEach(match => {
-        if(match.teamA && match.teamAKills !== undefined){
+        if (match.teamA && match.teamAKills !== undefined) {
           match.teamA.forEach(p => {
-            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
             playerStats[p].total += match.teamAKills;
             playerStats[p].count++;
           });
         }
-        if(match.teamB && match.teamBKills !== undefined){
+        if (match.teamB && match.teamBKills !== undefined) {
           match.teamB.forEach(p => {
-            if(!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
+            if (!playerStats[p]) playerStats[p] = { total: 0, count: 0 };
             playerStats[p].total += match.teamBKills;
             playerStats[p].count++;
           });
@@ -107,29 +149,29 @@
     function renderResults(scores, method) {
       const tbody = document.getElementById("resultTable");
       tbody.innerHTML = "";
-      scores.sort((a,b) => b.score - a.score).forEach(player => {
+      scores.sort((a, b) => b.score - a.score).forEach(player => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${player.name}</td><td>${player.score}${method==="winRate"?"%":""}</td>`;
+        tr.innerHTML = `<td>${player.name}</td><td>${player.score}${method === "winRate" ? "%" : ""}</td>`;
         tbody.appendChild(tr);
       });
     }
 
     function updateResults(matches) {
-  const method = document.querySelector('input[name="method"]:checked').value;
-  let scores = [];
+      const method = document.querySelector('input[name="method"]:checked').value;
+      let scores = [];
 
-  if (method === "average") {
-    scores = calculateAverage(matches);
-  } else if (method === "winRate") {
-    scores = calculateWinRate(matches);
-  } else if (method === "diffScore") {
-    scores = calculateDiffScore(matches);
-  } else if (method === "kdRatio") {
-    scores = calculateKDRatio(matches);
-  }
+      if (method === "average") {
+        scores = calculateAverage(matches);
+      } else if (method === "winRate") {
+        scores = calculateWinRate(matches);
+      } else if (method === "diffScore") {
+        scores = calculateDiffScore(matches);
+      } else if (method === "kdRatio") {
+        scores = calculateKDRatio(matches);
+      }
 
-  renderResults(scores, method);
-}
+      renderResults(scores, method);
+    }
 
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
@@ -146,41 +188,42 @@
         });
       });
     });
-    
+
     // 新規関数：キルデス比計算
-function calculateKDRatio(matches) {
-  const playerStats = {};
+    function calculateKDRatio(matches) {
+      const playerStats = {};
 
-  matches.forEach(match => {
-    if(!match.teamA || !match.teamB) return;
+      matches.forEach(match => {
+        if (!match.teamA || !match.teamB) return;
 
-    const teamAKills = match.teamAKills ?? 0;
-    const teamBKills = match.teamBKills ?? 0;
+        const teamAKills = match.teamAKills ?? 0;
+        const teamBKills = match.teamBKills ?? 0;
 
-    // チームAのプレイヤーごとにキル数を加算（ここはキル差じゃなく、チームのキル数を単純加算）
-    match.teamA.forEach(p => {
-      if(!playerStats[p]) playerStats[p] = { kills: 0, deaths: 0 };
-      playerStats[p].kills += teamAKills;
-      playerStats[p].deaths += teamBKills;
-    });
+        // チームAのプレイヤーごとにキル数を加算（ここはキル差じゃなく、チームのキル数を単純加算）
+        match.teamA.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = { kills: 0, deaths: 0 };
+          playerStats[p].kills += teamAKills;
+          playerStats[p].deaths += teamBKills;
+        });
 
-    // チームBのプレイヤーごとにキル数を加算
-    match.teamB.forEach(p => {
-      if(!playerStats[p]) playerStats[p] = { kills: 0, deaths: 0 };
-      playerStats[p].kills += teamBKills;
-      playerStats[p].deaths += teamAKills;
-    });
-  });
+        // チームBのプレイヤーごとにキル数を加算
+        match.teamB.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = { kills: 0, deaths: 0 };
+          playerStats[p].kills += teamBKills;
+          playerStats[p].deaths += teamAKills;
+        });
+      });
 
-  return Object.keys(playerStats).map(name => {
-    const stat = playerStats[name];
-    const kills = stat.kills;
-    const deaths = stat.deaths;
+      return Object.keys(playerStats).map(name => {
+        const stat = playerStats[name];
+        const kills = stat.kills;
+        const deaths = stat.deaths;
 
-    const kd = deaths === 0 ? kills : kills / deaths;
-    return { name, score: kd.toFixed(2) };
-  });
-}
+        const kd = deaths === 0 ? kills : kills / deaths;
+        return { name, score: kd.toFixed(2) };
+      });
+    }
   </script>
 </body>
+
 </html>

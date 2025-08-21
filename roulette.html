@@ -9,21 +9,21 @@
     body {
       margin: 0;
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background: #white;
+      background: #f7fcfc;
       color: #333;
       padding-top: 100px;
     }
-    
+
     header {
-  position: fixed;   /* スクロールしても固定 */
-  top: 0;            /* 上に配置 */
-  left: 0;           /* 左端に配置 */
-  width: 100%;       /* 横幅いっぱい */
-  background-color: #97EADB;
-  padding: 1rem;
-  text-align: center;
-  z-index: 1000;     /* 前面に出す */
-}
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
+    }
 
     header h1 {
       margin: 0;
@@ -234,53 +234,53 @@
     .animate-winner {
       animation: winnerAnimation 1.5s ease-in-out;
     }
-    
+
     .hamburger {
-  font-size: 2rem;
-  cursor: pointer;
-  position: absolute;
-  top: 50%;
-  right: 3rem;
-  color: white;
-  transform: translateY(-50%);
-  z-index: 1100;
-}
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
 
-nav {
-  position: fixed;
-  top: -100%;
-  left: 0;
-  width: 100%;
-  background-color: #97EADB;
-  display: flex;
-  flex-direction: column; 
-  padding: 0;
-  transition: top 0.3s ease; /* スライドアニメーション */
-  z-index: 1050;         /* ハンバーガーより下 */
-}
+    nav {
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      transition: top 0.3s ease;
+      z-index: 1050;
+    }
 
-nav.show {
-  top: 80px; /* ヘッダーの下までスライド */
-}
+    nav.show {
+      top: 75px;
+    }
 
-nav a {
-  display: block;
-  text-align: center;
-  margin: 0;
-  padding: 0.6rem 0;       /* 左右は0に */
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: white;
-  background-color: #97eadb;
-  border-bottom: 1px solid #97EADB;
-  text-decoration: none;
-  transition: background-color 0.2s, transform 0.2s;
-}
+    nav a {
+      display: block;
+      text-align: center;
+      margin: 0;
+      padding: 0.6rem 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background-color: #97eadb;
+      border-bottom: 1px solid #97EADB;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.2s;
+    }
 
-nav a:hover {
-  background-color: #0099aa;
-  transform: scale(1.03);
-}
+    nav a:hover {
+      background-color: #0099aa;
+      transform: scale(1.03);
+    }
 
     #lotteryRules {
       background: linear-gradient(135deg, #d6faff, #ffffff);
@@ -295,15 +295,6 @@ nav a:hover {
       overflow: hidden;
     }
 
-    #lotteryRules::before {
-      content: "🌴🍧🌞";
-      font-size: 3rem;
-      position: absolute;
-      top: -10px;
-      right: 10px;
-      opacity: 0.1;
-    }
-
     #lotteryRules h2 {
       font-size: 1.4em;
       text-align: center;
@@ -314,8 +305,8 @@ nav a:hover {
       border-radius: 12px;
       padding: 8px;
     }
-    
-        footer {
+
+    footer {
       background: #97EADB;
       text-align: center;
       color: white;
@@ -336,21 +327,22 @@ nav a:hover {
     <a href="team-view.html">チーム分けを見る</a>
   </nav>
 </header>
-<body>
-  
-    <section id="lotteryRules">
-    <h2 style="text-align: center;">きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</h2>
 
-    <p>
-      YouTube、Twitch、Xをフォローして配信告知ツイートをリポストするだけ！<br>
-      ☆当選者にはPayPay100円💰<br>
-      参加条件を満たせば毎日抽選参加可能‼️
+<body>
+
+  <section id="lotteryRules">
+    <h2 style="text-align: center;"><b>きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</b></h2>
+
+    <p style="padding-left: 1.5rem">
+      YouTube、Twitch、Xをフォローして配信告知ツイートを<b>リポストするだけ！</b><br>
+      ☆当選者には<b>PayPay100円💰</b><br>
+      参加条件を満たせば<b>毎日抽選参加可能</b>‼️
     </p>
 
-    <ul style="padding-left: 1.2em;">
-      <p>▶︎YouTubeとTwitchどちらもリポストで当選確率2倍にUP!</p>
-      <p>▶︎サブスクメンバー当選確率3倍UP!</p>
-      <p>▶︎Twitchで20ビッツを送るごとに当選確率1倍UP!(最大5倍)</p>
+    <ul style="padding-left: 1.5em;">
+      <p>▶︎YouTubeとTwitchどちらもリポストで<b>当選確率2倍にUP!</b></p>
+      <p>▶︎サブスクメンバー<b>当選確率3倍UP!</b></p>
+      <p>▶︎Twitchで20ビッツを送るごとに<b>当選確率1倍UP!(最大5倍)</b></p>
     </ul>
 
 
@@ -401,7 +393,7 @@ nav a:hover {
       </table>
     </div>
   </section>
-  
+
   <footer>
     <p>ド天然のきゃたん</p>
   </footer>
@@ -432,15 +424,15 @@ nav a:hover {
     let spinning = false;
     let decelerating = false;
 
-const colors = [
-  "#A0E7E5", "#B4F8C8", "#FBE7C6",
-  "#FFAEBC", "#A0CED9", "#FFC6FF",
-  "#FFB5A7", "#D0F4DE",
+    const colors = [
+      "#A0E7E5", "#B4F8C8", "#FBE7C6",
+      "#FFAEBC", "#A0CED9", "#FFC6FF",
+      "#FFB5A7", "#D0F4DE",
 
-  "#C1E9E7", "#D3F0D9", "#FFF0D9",
-  "#FFC9D1", "#B2DCE6", "#FFD6FF",
-  "#FFD1BF", "#E3F5E8"
-];
+      "#C1E9E7", "#D3F0D9", "#FFF0D9",
+      "#FFC9D1", "#B2DCE6", "#FFD6FF",
+      "#FFD1BF", "#E3F5E8"
+    ];
 
     function calculateSegments() {
       segments = [];
@@ -657,25 +649,24 @@ const colors = [
       });
     }
 
-const hamburger = document.getElementById("hamburger");
-const nav = document.getElementById("nav");
+    const hamburger = document.getElementById("hamburger");
+    const nav = document.getElementById("nav");
 
-hamburger.addEventListener("click", () => {
-  nav.classList.toggle("show");
+    hamburger.addEventListener("click", () => {
+      nav.classList.toggle("show");
 
-  const links = nav.querySelectorAll("a");
-  links.forEach((link, index) => {
-    if (nav.classList.contains("show")) {
-      link.style.opacity = "1";
-      link.style.transform = "translateY(0)";
-      link.style.transitionDelay = `${index * 0.1}s`; // 順番に遅延
-    } else {
-      link.style.opacity = "0";
-      link.style.transform = "translateY(-20px)";
-      link.style.transitionDelay = "0s";
-    }
-  });
-});
+      const links = nav.querySelectorAll("a");
+      links.forEach((link, index) => {
+        if (nav.classList.contains("show")) {
+          link.style.opacity = "1";
+          link.style.transform = "translateY(0)";
+        } else {
+          link.style.opacity = "0";
+          link.style.transform = "translateY(-20px)";
+          link.style.transitionDelay = "0s";
+        }
+      });
+    });
   </script>
 </body>
 

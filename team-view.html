@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -18,110 +19,116 @@
       color: #47b6a2;
       margin-bottom: 12px;
     }
-  
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: #97EADB;
-  padding: 1rem;
-  text-align: center;
-  z-index: 1000;
-}
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
+    }
 
     header h1 {
       margin: 0;
       font-size: 2rem;
       color: #fff;
     }
-    
-        /* ハンバーガーアイコン */
-.hamburger {
-  font-size: 2rem;
-  cursor: pointer;
-  position: absolute;
-  top: 50%;
-  right: 3rem;
-  color: white;
-  transform: translateY(-50%);
-  z-index: 1100;
-}
 
-nav {
-  position: fixed;
-  top: -100%;
-  left: 0;
-  width: 100%;
-  background-color: #97EADB;
-  display: flex;
-  flex-direction: column; 
-  padding: 0;
-  transition: top 0.3s ease; /* スライドアニメーション */
-  z-index: 1050;         /* ハンバーガーより下 */
-}
+    /* ハンバーガーアイコン */
+    .hamburger {
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
 
-nav.show {
-  top: 80px; /* ヘッダーの下までスライド */
-}
+    nav {
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      transition: top 0.3s ease;
+      /* スライドアニメーション */
+      z-index: 1050;
+      /* ハンバーガーより下 */
+    }
 
-nav a {
-  display: block;
-  text-align: center;
-  margin: 0;
-  padding: 0.6rem 0;       /* 左右は0に */
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: white;
-  background-color: #97eadb;
-  border-bottom: 1px solid #97EADB;
-  text-decoration: none;
-  transition: background-color 0.2s, transform 0.2s;
-}
+    nav.show {
+      top: 80px;
+      /* ヘッダーの下までスライド */
+    }
 
-nav a:hover {
-  background-color: #0099aa;
-  transform: scale(1.03);
-}
+    nav a {
+      display: block;
+      text-align: center;
+      margin: 0;
+      padding: 0.6rem 0;
+      /* 左右は0に */
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background-color: #97eadb;
+      border-bottom: 1px solid #97EADB;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.2s;
+    }
 
-html, body {
-  height: 100%;
-  margin: 0;
-}
+    nav a:hover {
+      background-color: #0099aa;
+      transform: scale(1.03);
+    }
 
-body {
-  display: flex;
-  flex-direction: column;
-}
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
 
-main {
-  flex: 1; /* 空きスペースを埋める */
-}
+    body {
+      display: flex;
+      flex-direction: column;
+    }
 
-footer {
-  background: #97EADB;
-  text-align: center;
-  color: white;
-  padding: 1rem;
-}
-  
-.teams {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 16px;
-  align-items: center;
-}
+    main {
+      flex: 1;
+      /* 空きスペースを埋める */
+    }
 
-.team-box {
-  width: 90%;
-  max-width: 500px;
-  background: #eefaff;
-  padding: 12px;
-  border-radius: 12px;
-  border: 2px solid #97eadb;
-  text-align: center;
-}
+    footer {
+      background: #97EADB;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+    }
+
+    .teams {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .team-box {
+      width: 90%;
+      max-width: 500px;
+      background: #eefaff;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #97eadb;
+      text-align: center;
+    }
 
     .team-box.team2 {
       background: #fff1f5;
@@ -154,7 +161,8 @@ footer {
       text-align: center;
     }
 
-    #matchCount, #lastUpdated {
+    #matchCount,
+    #lastUpdated {
       text-align: center;
       color: #888;
       font-weight: 600;
@@ -163,7 +171,7 @@ footer {
       font-size: 14px;
       letter-spacing: 0.05em;
     }
-    
+
     section {
       padding: 0 2rem;
       margin: auto;
@@ -183,96 +191,97 @@ footer {
   </nav>
 </header>
 <main>
-<body>
-  <h1>チーム分け</h1>
 
-<section>
-  <div class="teams">
-    <div class="team-box team1">
-      <h2>チーム1</h2>
-      <ul id="teamA"></ul>
-    </div>
-    <div class="team-box team2">
-      <h2>チーム2</h2>
-      <ul id="teamB"></ul>
-    </div>
-  </div>
-</section>
+  <body>
+    <h1>チーム分け</h1>
 
-  <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
-  <div id="lastUpdated">最終更新: --</div>
-  </main>
-  
-  <footer>
-    <p>ド天然のきゃたん</p>
-  </footer>
+    <section>
+      <div class="teams">
+        <div class="team-box team1">
+          <h2>チーム1</h2>
+          <ul id="teamA"></ul>
+        </div>
+        <div class="team-box team2">
+          <h2>チーム2</h2>
+          <ul id="teamB"></ul>
+        </div>
+      </div>
+    </section>
 
-  <script>
+    <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
+    <div id="lastUpdated">最終更新: --</div>
+</main>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
-      authDomain: "match-result-ea475.firebaseapp.com",
-      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
-      projectId: "match-result-ea475",
-      storageBucket: "match-result-ea475.firebasestorage.app",
-      messagingSenderId: "759877853492",
-      appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+<footer>
+  <p>ド天然のきゃたん</p>
+</footer>
 
-const teamAul = document.getElementById("teamA");
-const teamBul = document.getElementById("teamB");
-const matchCountEl = document.getElementById("matchCount");
-const lastUpdatedEl = document.getElementById("lastUpdated");
+<script>
 
-db.ref("currentTeamResult").on("value", snapshot => {
-  const data = snapshot.val() || {};
-  const teamA = Array.isArray(data.teamA) ? data.teamA : [];
-  const teamB = Array.isArray(data.teamB) ? data.teamB : [];
-  
-  teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
-  teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
+  const firebaseConfig = {
+    apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+    authDomain: "match-result-ea475.firebaseapp.com",
+    databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+    projectId: "match-result-ea475",
+    storageBucket: "match-result-ea475.firebasestorage.app",
+    messagingSenderId: "759877853492",
+    appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-  if (data.timestamp && typeof data.timestamp === "number") {
-    const d = new Date(data.timestamp);
-    const formatted = `${d.getFullYear()}/${(d.getMonth()+1).toString().padStart(2,"0")}/${d.getDate().toString().padStart(2,"0")} ` +
-                      `${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}:${d.getSeconds().toString().padStart(2,"0")}`;
-    lastUpdatedEl.textContent = `最終更新: ${formatted}(日本時間)`;
-  } else {
-    lastUpdatedEl.textContent = "最終更新: --";
-  }
-});
+  const teamAul = document.getElementById("teamA");
+  const teamBul = document.getElementById("teamB");
+  const matchCountEl = document.getElementById("matchCount");
+  const lastUpdatedEl = document.getElementById("lastUpdated");
 
-db.ref("apex_results").on("value", snapshot => {
-  if (!snapshot.exists()) {
-    matchCountEl.textContent = "過去 試合のカスタムマッチをもとに生成。";
-    return;
-  }
-  const matches = Object.values(snapshot.val());
-  matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
-});
+  db.ref("currentTeamResult").on("value", snapshot => {
+    const data = snapshot.val() || {};
+    const teamA = Array.isArray(data.teamA) ? data.teamA : [];
+    const teamB = Array.isArray(data.teamB) ? data.teamB : [];
 
-const hamburger = document.getElementById("hamburger");
-const nav = document.getElementById("nav");
+    teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
+    teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
 
-hamburger.addEventListener("click", () => {
-  nav.classList.toggle("show");
-
-  const links = nav.querySelectorAll("a");
-  links.forEach((link, index) => {
-    if (nav.classList.contains("show")) {
-      link.style.opacity = "1";
-      link.style.transform = "translateY(0)";
-      link.style.transitionDelay = `${index * 0.1}s`; // 順番に遅延
+    if (data.timestamp && typeof data.timestamp === "number") {
+      const d = new Date(data.timestamp);
+      const formatted = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")} ` +
+        `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
+      lastUpdatedEl.textContent = `最終更新: ${formatted}(日本時間)`;
     } else {
-      link.style.opacity = "0";
-      link.style.transform = "translateY(-20px)";
-      link.style.transitionDelay = "0s";
+      lastUpdatedEl.textContent = "最終更新: --";
     }
   });
-});
 
-  </script>
+  db.ref("apex_results").on("value", snapshot => {
+    if (!snapshot.exists()) {
+      matchCountEl.textContent = "過去 試合のカスタムマッチをもとに生成。";
+      return;
+    }
+    const matches = Object.values(snapshot.val());
+    matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
+  });
+
+  const hamburger = document.getElementById("hamburger");
+  const nav = document.getElementById("nav");
+
+  hamburger.addEventListener("click", () => {
+    nav.classList.toggle("show");
+
+    const links = nav.querySelectorAll("a");
+    links.forEach((link, index) => {
+      if (nav.classList.contains("show")) {
+        link.style.opacity = "1";
+        link.style.transform = "translateY(0)";
+      } else {
+        link.style.opacity = "0";
+        link.style.transform = "translateY(-20px)";
+        link.style.transitionDelay = "0s";
+      }
+    });
+  });
+
+</script>
 </body>
+
 </html>

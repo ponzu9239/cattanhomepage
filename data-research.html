@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,11 +12,17 @@
       padding: 20px;
       margin: 0;
     }
-    h1 { text-align: center; color: #47b6a2; }
+
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+    }
+
     .box {
       text-align: center;
       margin-bottom: 20px;
     }
+
     input {
       padding: 8px;
       border: 1px solid #97eadb;
@@ -24,6 +31,7 @@
       margin: 5px;
       width: 150px;
     }
+
     button {
       padding: 8px 16px;
       background: #97eadb;
@@ -32,6 +40,7 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
     table {
       width: 95%;
       margin: 20px auto;
@@ -40,11 +49,14 @@
       border-radius: 10px;
       overflow: hidden;
     }
-    th, td {
+
+    th,
+    td {
       padding: 10px;
       border-bottom: 1px solid #ddd;
       text-align: center;
     }
+
     th {
       background: #97eadb;
       color: white;
@@ -53,6 +65,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
+
 <body>
   <h1>プレイヤー試合履歴検索＆置換</h1>
 
@@ -68,7 +81,7 @@
     →
     <input type="text" id="newName" placeholder="新プレイヤー名" />
   </div>
-  
+
   <!-- 範囲指定 -->
   <div class="box">
     <input type="number" id="startMatch" placeholder="開始試合番号" />
@@ -149,7 +162,7 @@
         return;
       }
 
-      results.sort((a,b) => a.match - b.match).forEach(r => {
+      results.sort((a, b) => a.match - b.match).forEach(r => {
         const tr = document.createElement("tr");
         tr.innerHTML = `<td>${r.match}</td><td>${r.kills}</td><td>${r.score}</td>`;
         tbody.appendChild(tr);
@@ -206,4 +219,5 @@
     }
   </script>
 </body>
+
 </html>

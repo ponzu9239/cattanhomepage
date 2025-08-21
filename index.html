@@ -13,70 +13,69 @@
       padding-top: 100px;
     }
 
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: #97EADB;
-  padding: 1rem;
-  text-align: center;
-  z-index: 1000;
-}
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
+    }
 
     header h1 {
       margin: 0;
       font-size: 2rem;
       color: #fff;
     }
-    
-    /* ハンバーガーアイコン */
-.hamburger {
-  font-size: 2rem;
-  cursor: pointer;
-  position: absolute;
-  top: 50%;
-  right: 3rem;
-  color: white;
-  transform: translateY(-50%);
-  z-index: 1100;
-}
 
-nav {
-  position: fixed;
-  top: -100%;
-  left: 0;
-  width: 100%;
-  background-color: #97EADB;
-  display: flex;
-  flex-direction: column; 
-  padding: 0;
-  transition: top 0.3s ease; /* スライドアニメーション */
-  z-index: 1050;         /* ハンバーガーより下 */
-}
+    .hamburger {
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
 
-nav.show {
-  top: 80px; /* ヘッダーの下までスライド */
-}
+    nav {
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      transition: top 0.3s ease;
+      z-index: 1050;
+    }
 
-nav a {
-  display: block;
-  text-align: center;
-  margin: 0;
-  padding: 0.6rem 0;       /* 左右は0に */
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: white;
-  background-color: #97eadb;
-  border-bottom: 1px solid #97EADB;
-  text-decoration: none;
-  transition: background-color 0.2s, transform 0.2s;
-}
+    nav.show {
+      top: 75px;
+    }
 
-nav a:hover {
-  background-color: #0099aa;
-  transform: scale(1.03);
-}
+    nav a {
+      display: block;
+      text-align: center;
+      margin: 0;
+      padding: 0.6rem 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background-color: #97eadb;
+      border-bottom: 1px solid #97EADB;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    nav a:hover {
+      background-color: #0099aa;
+      transform: scale(1.03);
+    }
 
     footer {
       background: #97EADB;
@@ -135,51 +134,55 @@ nav a:hover {
       margin: 20px auto;
     }
 
-.roulette-banner a {
-  display: block;
-  width: 100%;
-  max-width: 800px;
-  margin: 1rem auto;
-  padding: 1rem 0;
-  font-weight: bold;
-  font-size: 1.3rem;
-  text-align: center;
-  text-decoration: none;
-  color: #004d66; /* 背景とコントラストがある爽やかブルー */
-  border-radius: 2px;
-  background: linear-gradient(135deg, #97EADB, #d4f0f4);
-  box-shadow: 0 4px 12px rgba(0, 77, 102, 0.25); /* 文字色に合わせて少し濃い影 */
-  transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
-  border: 2px solid #1bb0c9; /* スッキリ見える枠線 */
-}
+    .roulette-banner a {
+      display: block;
+      width: 100%;
+      max-width: 800px;
+      margin: 1rem auto;
+      padding: 1rem 0;
+      font-weight: bold;
+      font-size: 1.3rem;
+      text-align: center;
+      text-decoration: none;
+      color: #004d66;
+      border-radius: 2px;
+      background: linear-gradient(135deg, #97EADB, #d4f0f4);
+      box-shadow: 0 4px 12px rgba(0, 77, 102, 0.25);
+      transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+      border: 2px solid #1bb0c9;
+    }
 
-.roulette-banner a:hover {
-  transform: scale(1.03);
-  box-shadow: 0 6px 18px rgba(0, 77, 102, 0.35); /* 少し強めの影 */
-  background: linear-gradient(135deg, #80d4d6, #bce7ec); /* ホバー時に爽やかグラデーション */
-  color: #002b3c; /* ホバー時に文字を濃くして視認性UP */
-}
+    .roulette-banner a:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 18px rgba(0, 77, 102, 0.35);
+      background: linear-gradient(135deg, #80d4d6, #bce7ec);
+      color: #002b3c;
+    }
 
-.banner-note {
-  font-size: 0.8rem;        /* 小さめの文字 */
-  color: #555;              /* 落ち着いたグレー */
-  text-align: center;       /* バナー下中央に配置 */
-  margin-top: 0.3rem;       /* バナーとの隙間 */
-}
+    .banner-note {
+      font-size: 0.8rem;
+      /* 小さめの文字 */
+      color: #555;
+      /* 落ち着いたグレー */
+      text-align: center;
+      /* バナー下中央に配置 */
+      margin-top: 0.3rem;
+      /* バナーとの隙間 */
+    }
   </style>
 
 </head>
 
 <body>
-<header>
-  <h1>ド天然のきゃたん</h1>
-  <div class="hamburger" id="hamburger">☰</div>
-  <nav id="nav">
-    <a href="index.html">ホーム</a>
-    <a href="roulette.html">イベント</a>
-    <a href="team-view.html">チーム分けを見る</a>
-  </nav>
-</header>
+  <header>
+    <h1>ド天然のきゃたん</h1>
+    <div class="hamburger" id="hamburger">☰</div>
+    <nav id="nav">
+      <a href="index.html">ホーム</a>
+      <a href="roulette.html">イベント</a>
+      <a href="team-view.html">チーム分けを見る</a>
+    </nav>
+  </header>
 
   <section id="profile">
     <h3>🐱 プロフィール</h3>
@@ -210,13 +213,13 @@ nav a:hover {
     </ul>
   </section>
 
-　<section id="event">
-   <h3>🌟イベント</h3>
+  　<section id="event">
+    <h3>🌟イベント</h3>
     <div class="roulette-banner">
       <a href="roulette.html">きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</a>
     </div>
-      <p class="banner-note">※クリックするとページに移動します</p>
- </section>
+    <p class="banner-note">※クリックするとページに移動します</p>
+  </section>
 
   <section id="sns" class="sns">
 
@@ -326,26 +329,25 @@ nav a:hover {
 
       container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
     });
-    
-const hamburger = document.getElementById("hamburger");
-const nav = document.getElementById("nav");
 
-hamburger.addEventListener("click", () => {
-  nav.classList.toggle("show");
+    const hamburger = document.getElementById("hamburger");
+    const nav = document.getElementById("nav");
 
-  const links = nav.querySelectorAll("a");
-  links.forEach((link, index) => {
-    if (nav.classList.contains("show")) {
-      link.style.opacity = "1";
-      link.style.transform = "translateY(0)";
-      link.style.transitionDelay = `${index * 0.1}s`; // 順番に遅延
-    } else {
-      link.style.opacity = "0";
-      link.style.transform = "translateY(-20px)";
-      link.style.transitionDelay = "0s";
-    }
-  });
-});
+    hamburger.addEventListener("click", () => {
+      nav.classList.toggle("show");
+
+      const links = nav.querySelectorAll("a");
+      links.forEach((link, index) => {
+        if (nav.classList.contains("show")) {
+          link.style.opacity = "1";
+          link.style.transform = "translateY(0)";
+        } else {
+          link.style.opacity = "0";
+          link.style.transform = "translateY(-20px)";
+          link.style.transitionDelay = "0s";
+        }
+      });
+    });
   </script>
 </body>
 
