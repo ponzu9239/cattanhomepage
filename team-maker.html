@@ -599,7 +599,7 @@
       return scores;
     }
 
-function makeBestTeams(players, matches) {
+function calculateExpectedKDdiff(matches) {
   const stats = {}; // stats[playerA][playerB] = { asAlly: [], asEnemy: [] }
 
   // --- 過去試合データから統計作成 ---
@@ -674,7 +674,7 @@ function makeBestTeams(players, matches) {
     }
   });
 
-  return bestTeams;
+  return expectedScores;
 }
     // ピン留め切替
     function togglePin(name) {
