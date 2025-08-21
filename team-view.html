@@ -294,28 +294,28 @@ db.ref("currentTeamResult").on("value", snapshot => {
   const teamB = Array.isArray(data.teamB) ? data.teamB : [];
   const players = [...teamA, ...teamB];
 
-  // 表作成
-  const table = document.createElement("table");
-  table.style.borderCollapse = "collapse";
-  table.style.width = "100%";
-
-  // ヘッダー行
-  const headerRow = document.createElement("tr");
-  headerRow.appendChild(document.createElement("th")); // 左上空白
-  players.forEach(p => {
-    const th = document.createElement("th");
-    th.textContent = p;
-    th.style.border = "1px solid #ddd";
-    th.style.padding = "4px";
-    th.style.background = "#eefaff";
-    headerRow.appendChild(th);
-  });
-  table.appendChild(headerRow);
-
-  // 過去試合データ取得
   db.ref("apex_results").once("value").then(snap => {
     const matches = snap.exists() ? Object.values(snap.val()) : [];
 
+    // 表作成
+    const table = document.createElement("table");
+    table.style.borderCollapse = "collapse";
+    table.style.width = "100%";
+
+    // ヘッダー行
+    const headerRow = document.createElement("tr");
+    headerRow.appendChild(document.createElement("th"));
+    players.forEach(p => {
+      const th = document.createElement("th");
+      th.textContent = p;
+      th.style.border = "1px solid #ddd";
+      th.style.padding = "4px";
+      th.style.background = "#eefaff";
+      headerRow.appendChild(th);
+    });
+    table.appendChild(headerRow);
+
+    // 各プレイヤー行
     players.forEach(playerRow => {
       const tr = document.createElement("tr");
       const th = document.createElement("th");
@@ -338,27 +338,22 @@ db.ref("currentTeamResult").on("value", snapshot => {
           let count = 0;
 
           matches.forEach(match => {
-            const teamA_match = match.teamA || [];
-            const teamB_match = match.teamB || [];
-            const killsA = match.killsA || {};
-            const killsB = match.killsB || {};
+            const teamAplayers = match.teamA || [];
+            const teamBplayers = match.teamB || [];
+            const killsA = match.teamAKills || 0;
+            const killsB = match.teamBKills || 0;
 
-            if ((teamA_match.includes(playerRow) || teamB_match.includes(playerRow)) &&
-                (teamA_match.includes(playerCol) || teamB_match.includes(playerCol))) {
+            const rowTeam = teamAplayers.includes(playerRow) ? "A" : "B";
+            const colTeam = teamAplayers.includes(playerCol) ? "A" : "B";
 
-              const rowTeam = teamA_match.includes(playerRow) ? "A" : "B";
-              const colTeam = teamA_match.includes(playerCol) ? "A" : "B";
+            // 過去試合に両方存在するか
+            if ((teamAplayers.includes(playerRow) || teamBplayers.includes(playerRow)) &&
+                (teamAplayers.includes(playerCol) || teamBplayers.includes(playerCol))) {
 
-              const sameTeam = rowTeam === colTeam;
+              let rowKills = rowTeam === "A" ? killsA : killsB;
+              let enemyKills = rowTeam === "A" ? killsB : killsA;
 
-              // 行プレイヤーのチームキル合計
-              const rowTeamKills = rowTeam === "A" ? sumTeamKills(killsA) : sumTeamKills(killsB);
-              const enemyTeamKills = rowTeam === "A" ? sumTeamKills(killsB) : sumTeamKills(killsA);
-
-              // 味方なら同チームキル差、敵なら敵チームキル差
-              const diff = sameTeam ? rowTeamKills - enemyTeamKills : enemyTeamKills - rowTeamKills;
-
-              totalDiff += diff;
+              totalDiff += rowKills - enemyKills;
               count++;
             }
           });
@@ -377,9 +372,6 @@ db.ref("currentTeamResult").on("value", snapshot => {
   });
 });
 
-function sumTeamKills(killsObj) {
-  return Object.values(killsObj || {}).reduce((a, b) => a + b, 0);
-}
 </script>
 </body>
 
