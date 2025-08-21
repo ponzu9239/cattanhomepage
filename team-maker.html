@@ -662,11 +662,7 @@ function makeTeams() {
   if (method === "average") scores = playerScoresAverage;
   else if (method === "winrate") scores = playerScoresWinRate;
   else if (method === "kdratio") scores = playerScoresKDRatio;
-  else scores = {}; // それ以外
-
-  // ここから通常のチーム分け処理
-  ...
-}
+  else scores = {};
 
       if (selected.length === 0) {
         document.getElementById("teamA").innerHTML = "";
