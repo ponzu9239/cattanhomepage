@@ -364,6 +364,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   </head>
+
   <body>
     <header>
       <h1>ド天然のきゃたん</h1>
@@ -947,8 +948,6 @@
             }
         });
       
-        displayCandidates(candidates);
-      
         if (!bestTeams) {
             document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
             document.getElementById("teamB").innerHTML = "";
@@ -976,15 +975,7 @@
         return combsWithFirst.concat(combsWithoutFirst);
       }
       
-      function displayCandidates(candidates) {
-        const ul = document.getElementById("candidateList");
-        ul.innerHTML = "";
-        candidates.forEach(c => {
-          const li = document.createElement("li");
-          li.textContent = `A: ${c.teams.A.join(", ")} | B: ${c.teams.B.join(", ")} | 差: ${c.scoreDiff.toFixed(1)}`;
-          ul.appendChild(li);
-        });
-      }
+      // displayCandidates関数は不要なので削除
       
       // ペアフォーム イベント設定
       document.getElementById("separatePairForm").addEventListener("submit", e => {
