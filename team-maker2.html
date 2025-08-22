@@ -1060,14 +1060,56 @@ document.querySelectorAll('input[name="method"]').forEach(radio => {
 });
 
 function displayCandidates(candidates) {
-  const list = document.getElementById("candidateList");
-  list.innerHTML = ""; // 既存のリストをクリア
+  const container = document.getElementById("candidateList");
+  container.innerHTML = "";
 
-  candidates.forEach((candidate, index) => {
+  candidates.forEach((cand, idx) => {
     const li = document.createElement("li");
-    li.textContent = `候補${index + 1}：チームA [${candidate.teams.A.join(", ")}], チームB [${candidate.teams.B.join(", ")}], スコア差 ${candidate.scoreDiff}`;
-    list.appendChild(li);
+
+    // チームAとBのメンバー名＋スコア
+    const teamAScores = cand.teams.A.map(name => {
+      const score = calcPlayerScore(name, cand.teams.A, cand.teams.B);
+      return `${name} (${score})`;
+    }).join(", ");
+
+    const teamBScores = cand.teams.B.map(name => {
+      const score = calcPlayerScore(name, cand.teams.B, cand.teams.A);
+      return `${name} (${score})`;
+    }).join(", ");
+
+    li.innerHTML = `<strong>候補${idx+1}:</strong><br>
+                    チームA: ${teamAScores}<br>
+                    チームB: ${teamBScores}<br>
+                    差: ${cand.scoreDiff.toFixed(1)}`;
+    container.appendChild(li);
   });
+}
+
+// 各プレイヤーのスコア計算（チーム内＋敵チームとの平均差）
+function calcPlayerScore(player, team, opposingTeam) {
+  let total = 0;
+  let count = 0;
+
+  team.forEach(ally => {
+    if (ally === player) return;
+    matches.forEach(match => {
+      const teamA = match.teamA || [];
+      const teamB = match.teamB || [];
+      if (teamA.includes(player) && teamA.includes(ally)) total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0), count++;
+      if (teamB.includes(player) && teamB.includes(ally)) total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0), count++;
+    });
+  });
+
+  opposingTeam.forEach(enemy => {
+    matches.forEach(match => {
+      const teamA = match.teamA || [];
+      const teamB = match.teamB || [];
+      if (teamA.includes(player) && teamB.includes(enemy)) total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0), count++;
+      if (teamB.includes(player) && teamA.includes(enemy)) total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0), count++;
+    });
+  });
+
+  return count ? +(total / count).toFixed(1) : 0;
 }
 
   </script>
