@@ -1086,30 +1086,56 @@ function displayCandidates(candidates) {
 }
 
 // 各プレイヤーのスコア計算（チーム内＋敵チームとの平均差）
-function calcPlayerScore(player, team, opposingTeam) {
-  let total = 0;
+function calcPlayerScore(playerName, selectedPlayers, matches) {
+  let score = 0;
   let count = 0;
 
-  team.forEach(ally => {
-    if (ally === player) return;
+  // 選択プレイヤーの中での味方関係
+  selectedPlayers.forEach(ally => {
+    if (ally === playerName) return;
     matches.forEach(match => {
       const teamA = match.teamA || [];
       const teamB = match.teamB || [];
-      if (teamA.includes(player) && teamA.includes(ally)) total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0), count++;
-      if (teamB.includes(player) && teamB.includes(ally)) total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0), count++;
+
+      // 味方だった場合
+      if ((teamA.includes(playerName) && teamA.includes(ally)) || 
+          (teamB.includes(playerName) && teamB.includes(ally))) {
+        const diff = teamA.includes(playerName) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
+                                               : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+        score += diff;
+        count++;
+      }
     });
   });
 
-  opposingTeam.forEach(enemy => {
+  // 選択プレイヤーの中での敵関係
+  selectedPlayers.forEach(enemy => {
+    if (enemy === playerName) return;
     matches.forEach(match => {
       const teamA = match.teamA || [];
       const teamB = match.teamB || [];
-      if (teamA.includes(player) && teamB.includes(enemy)) total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0), count++;
-      if (teamB.includes(player) && teamA.includes(enemy)) total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0), count++;
+
+      // 敵だった場合
+      if ((teamA.includes(playerName) && teamB.includes(enemy)) ||
+          (teamB.includes(playerName) && teamA.includes(enemy))) {
+        const diff = teamA.includes(playerName) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
+                                               : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+        score += diff;
+        count++;
+      }
     });
   });
 
-  return count ? +(total / count).toFixed(1) : 0;
+  return count > 0 ? Number((score / count).toFixed(1)) : 0;
+}
+
+// 例：全選択プレイヤーのスコア配列を作る
+function calculatePlayerScores(selectedPlayers, matches) {
+  const scores = {};
+  selectedPlayers.forEach(p => {
+    scores[p] = calcPlayerScore(p, selectedPlayers, matches);
+  });
+  return scores;
 }
   </script>
 </body>
