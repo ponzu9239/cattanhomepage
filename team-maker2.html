@@ -889,7 +889,7 @@ async function makeBalancedTeams() {
     const teamB = selectedPlayers.filter(p => !teamA.includes(p));
     const scoreA = calcTeamScore(teamA, teamB, matches);
     const scoreB = calcTeamScore(teamB, teamA, matches);
-    const diff = Math.abs(scoreA - scoreB);
+    const diff = scoreA - scoreB;
 
     candidates.push({ teams: { A: teamA, B: teamB }, scoreDiff: diff });
 
