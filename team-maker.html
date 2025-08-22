@@ -104,7 +104,12 @@
     .method-select {
       text-align: center;
       margin: 18px 0 12px 0;
-      white-space: nowrap;
+      /* --- 変更箇所 --- */
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      /* 改行を有効にする */
+      /* --- ここまで --- */
     }
 
     label {
@@ -359,19 +364,6 @@
         flex: none;
         width: 80%;
       }
-    }
-
-    main {
-      flex: 1;
-      margin: 0 auto;
-      max-width: 800px;
-      width: 100%;
-      padding: 0 1rem;
-    }
-
-    section {
-      padding: 0;
-      margin: auto;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
