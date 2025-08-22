@@ -924,49 +924,47 @@ function getCombinations(array, size) {
 }
 
 function calcTeamScore(team, opposingTeam, matches) {
-  let score = 0;
+  let totalScore = 0;
 
-  team.forEach(p => {
-    let total = 0;
+  team.forEach(player => {
+    let playerScore = 0;
     let count = 0;
 
-    // 味方との過去試合
+    // 味方との相性
     team.forEach(ally => {
-      if (ally === p) return; // 自分自身はスキップ
+      if (player === ally) return;
       matches.forEach(match => {
         const teamA = match.teamA || [];
         const teamB = match.teamB || [];
 
-        // 現在の味方なら過去も味方だった試合のみ
-        if ((teamA.includes(p) && teamA.includes(ally)) || (teamB.includes(p) && teamB.includes(ally))) {
-          const diff = teamA.includes(p) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) 
-                                        : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
-          total += diff;
+        if ((teamA.includes(player) && teamA.includes(ally)) || (teamB.includes(player) && teamB.includes(ally))) {
+          const diff = teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
+                                             : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+          playerScore += diff;
           count++;
         }
       });
     });
 
-    // 敵との過去試合
+    // 敵との相性
     opposingTeam.forEach(enemy => {
       matches.forEach(match => {
         const teamA = match.teamA || [];
         const teamB = match.teamB || [];
 
-        // 現在の敵なら過去も敵だった試合のみ
-        if ((teamA.includes(p) && teamB.includes(enemy)) || (teamB.includes(p) && teamA.includes(enemy))) {
-          const diff = teamA.includes(p) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
-                                        : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
-          total += diff;
+        if ((teamA.includes(player) && teamB.includes(enemy)) || (teamB.includes(player) && teamA.includes(enemy))) {
+          const diff = teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
+                                             : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+          playerScore += diff;
           count++;
         }
       });
     });
 
-    if (count > 0) score += Number((total / count).toFixed(1));
+    if (count > 0) totalScore += playerScore / count; // ← ここで1人ごとの平均を加算
   });
 
-  return score;
+  return totalScore;
 }
 
 // 使う時は呼び出すだけ
