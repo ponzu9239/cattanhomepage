@@ -9,25 +9,72 @@
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
       background: #f7fcfc;
+      /* 元の背景色を維持 */
       margin: 0;
       padding-top: 100px;
     }
+
+    /* --- ここから修正・追加 --- */
+    /* 誕生日仕様のスタイル */
+    body.birthday-mode {
+      background-color: #ffe8f4;
+      /* 背景を華やかなピンクに */
+      color: #7a1548;
+      /* 文字色を濃い赤紫に */
+    }
+
+    body.birthday-mode header,
+    body.birthday-mode nav {
+      background-color: #ff99cc;
+      /* ヘッダーとナビゲーションの色を変更 */
+    }
+
+    body.birthday-mode header h1,
+    body.birthday-mode .hamburger,
+    body.birthday-mode nav a {
+      color: #fff;
+    }
+
+    body.birthday-mode footer {
+      background-color: #ff99cc;
+      /* フッターの色を変更 */
+    }
+
+    body.birthday-mode .code-display {
+      background: #fff0f5;
+      border-color: #ff99cc;
+      color: #c71585;
+    }
+
+    body.birthday-mode .roulette-banner a {
+      background: linear-gradient(135deg, #ffb6c1, #ff69b4);
+      border: 2px solid #ff1493;
+      color: #fff;
+    }
+
+    body.birthday-mode .roulette-banner a:hover {
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+    }
+    /* --- ここまで修正・追加 --- */
 
     header {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      background-color: #97EADB;
+      /* 豪華なグラデーションとシャドウを追加 */
+      background: linear-gradient(135deg, #97EADB, #66CDAA);
       padding: 1rem;
       text-align: center;
       z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     header h1 {
       margin: 0;
       font-size: 2rem;
       color: #fff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
     }
 
     .hamburger {
@@ -46,7 +93,7 @@
       top: -100%;
       left: 0;
       width: 100%;
-      background-color: #97EADB;
+      background: linear-gradient(135deg, #97EADB, #66CDAA);
       display: flex;
       flex-direction: column;
       padding: 0;
@@ -66,23 +113,25 @@
       font-size: 1.2rem;
       font-weight: bold;
       color: white;
-      background-color: #97eadb;
-      border-bottom: 1px solid #97EADB;
+      background-color: transparent;
+      border-bottom: 1px solid #73b3a2;
+      /* 線の色を調整 */
       text-decoration: none;
       transition: background-color 0.2s, transform 0.2s;
     }
 
     nav a:hover {
-      background-color: #0099aa;
+      background-color: rgba(255, 255, 255, 0.2);
       transform: scale(1.03);
     }
 
     footer {
-      background: #97EADB;
+      background: linear-gradient(135deg, #97EADB, #66CDAA);
       text-align: center;
       color: white;
       padding: 1rem;
       margin-top: 2rem;
+      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
     }
 
 
@@ -93,7 +142,7 @@
     }
 
     section h3 {
-      color: #5aa2aa;
+      color: #47b6a2;
       border-bottom: 2px solid #97EADB;
       padding-bottom: 0.3rem;
     }
@@ -101,15 +150,18 @@
     .code-display {
       font-weight: bold;
       font-size: 1.3rem;
-      background: #d4f0f4;
-      border: 2px solid #97EADB;
+      /* 背景色を淡いピンクとゴールドに */
+      background: linear-gradient(145deg, #f0e6e6, #fffde6);
+      border: 2px solid #FFD700;
       border-radius: 10px;
       padding: 1rem;
       text-align: center;
       margin: 1rem 0;
-      color: #1b656f;
+      color: #DAA520;
+      /* ゴールデンロッド色 */
       user-select: all;
       word-break: break-all;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     .sns a {
@@ -117,16 +169,18 @@
       margin: 0.5rem;
       text-decoration: none;
       font-size: 1.2rem;
-      background: #97EADB;
+      /* 可愛らしいピンク色に */
+      background: #F08080;
       padding: 0.5rem 1rem;
       border-radius: 999px;
       color: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, background 0.2s;
     }
 
-    body {
-      background-color: #fff;
-      color: #000;
-      transition: background-color 0.3s, color 0.3s;
+    .sns a:hover {
+      transform: translateY(-2px);
+      background: #e06464;
     }
 
     .roulette-banner {
@@ -144,30 +198,28 @@
       font-size: 1.3rem;
       text-align: center;
       text-decoration: none;
-      color: #004d66;
-      border-radius: 2px;
-      background: linear-gradient(135deg, #97EADB, #d4f0f4);
-      box-shadow: 0 4px 12px rgba(0, 77, 102, 0.25);
+      color: #DAA520;
+      border-radius: 12px;
+      /* 角を丸く */
+      background: linear-gradient(135deg, #f7d853, #FFD700);
+      /* 豪華なゴールドのグラデーション */
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
-      border: 2px solid #1bb0c9;
+      border: 2px solid #DAA520;
     }
 
     .roulette-banner a:hover {
-      transform: scale(1.03);
-      box-shadow: 0 6px 18px rgba(0, 77, 102, 0.35);
-      background: linear-gradient(135deg, #80d4d6, #bce7ec);
-      color: #002b3c;
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(135deg, #FFD700, #f7d853);
+      color: #8B4513;
     }
 
     .banner-note {
       font-size: 0.8rem;
-      /* 小さめの文字 */
       color: #555;
-      /* 落ち着いたグレー */
       text-align: center;
-      /* バナー下中央に配置 */
       margin-top: 0.3rem;
-      /* バナーとの隙間 */
     }
   </style>
 
@@ -213,7 +265,7 @@
     </ul>
   </section>
 
-  　<section id="event">
+  <section id="event">
     <h3>🌟イベント</h3>
     <div class="roulette-banner">
       <a href="roulette.html">きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</a>
@@ -235,12 +287,22 @@
     <p>ド天然のきゃたん</p>
   </footer>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <script>
-    // Firebase初期化設定
+    function checkBirthday() {
+      const today = new Date();
+      const month = today.getMonth() + 1; // getMonth()は0から始まるため+1
+      const day = today.getDate();
+
+      if (month === 8 && day === 23) {
+        document.body.classList.add("birthday-mode");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", checkBirthday);
+
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
       authDomain: "catiffanygame.firebaseapp.com",
@@ -255,7 +317,6 @@
 
     const dbRef = firebase.database().ref("/cattan");
 
-    // 🎉 当選者の名前を読み込んで表示（← ここを外に出す）
     const winnerEl = document.getElementById("winnerName");
     const winnerRef = firebase.database().ref("/roulette/winner");
 
@@ -269,10 +330,8 @@
           winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
           updateProbabilityBar(latestWinner);
 
-
-          // アニメーション付与
-          winnerEl.classList.remove("animate-winner"); // 一旦リセット
-          void winnerEl.offsetWidth; // リセット用の強制再描画トリガー
+          winnerEl.classList.remove("animate-winner");
+          void winnerEl.offsetWidth;
           winnerEl.classList.add("animate-winner");
 
           return;
@@ -281,16 +340,13 @@
       winnerEl.textContent = "まだ抽選が行われていません。";
     });
 
-    // 🔽 これはそのままでOK
     dbRef.on("value", (snapshot) => {
       const data = snapshot.val() || {};
 
-      // 参加コード表示
       const code = data.code || "現在、参加型カスタムは行われておりません。";
       const codeEl = document.getElementById("participantCodeDisplay");
       codeEl.textContent = code;
 
-      // 配信動画表示
       const url = data.stream || "現在、配信は行われていません。";
       const container = document.getElementById("videoContainer");
 
