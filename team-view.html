@@ -266,31 +266,64 @@
         <button class="info-btn">▽ 相性表の見方</button>
         <div class="info-text"
           style="display:none; text-align:left; max-width:700px; margin:1rem auto; border:1px solid #ccc; padding:1rem; border-radius:8px; background:#f9f9f9;">
-          <h3 style="text-align:center;">相性表の見方</h3>
-          <p style="text-align:center; color:red; font-weight:bold;">
-            ⚠️ この表は、<b>個人の強さ</b>ではなく、<b>チームとしての相性</b>を示しています。
+          <h3>相性表の見方</h3>
+          <p>
+            この表は、プレイヤー同士が<b>「チームを組むとどうなるか？」</b>を過去の試合データから予測するものです。
           </p>
-          <hr style="border:0; border-top:1px dashed #ccc; margin:1rem 0;">
-          <h4>表のルール</h4>
+
+          <h4>表の読み方</h4>
+          <p>
+            <b>横の列（相手）</b> と <b>縦の行（自分）</b> が交わるところにある数字が <b>「相性スコア」</b> です。<br>
+            このスコアは、同じ色同士の場合は <b>味方</b>、違う色同士の場合は <b>敵</b> として戦った時のチームのスコアを表しています。
+          </p>
+
+          <h4>スコアの意味</h4>
+          <p>
+            スコアの数字は、<b>「どれだけチームが勝つ力を持っていたか」</b> を示します。
+          </p>
+
           <ul>
-            <li>
-              <b>数字は「KO（ノックアウト）の差」</b>を表しています。<br>
-              プラスの数字（例: +5.0）は、**相手より平均で5回多くKOできた**ことを意味します。<br>
-              マイナスの数字（例: -5.0）は、**相手より平均で5回少なくKOされた**ことを意味します。
+            <li><b><span style="color: green;">プラス (+) の数字</span></b><br>
+              <ul style="margin:0; padding-left: 20px;">
+                <li><b>味方とのスコア</b>: この人と組むと、チームのキル数が相手より多くなる傾向にあります。<b>「良い組み合わせ」</b>です。</li>
+                <li><b>敵とのスコア</b>: この人を敵に回すと、あなたのチームのキル数が相手チームより多くなる傾向にあります。<b>「相性の良い敵」</b>です。</li>
+              </ul>
             </li>
-            <li>
-              **色がついたマス**は、過去に<b>味方</b>だった時のKO差です。
-            </li>
-            <li>
-              **白いマス**は、過去に<b>敵</b>だった時のKO差です。
+            <li><b><span style="color: red;">マイナス (-) の数字</span></b><br>
+              <ul style="margin:0; padding-left: 20px;">
+                <li><b>味方とのスコア</b>: この人と組むと、チームのキル数が相手より少なくなる傾向にあります。<b>「悪い組み合わせ」</b>です。</li>
+                <li><b>敵とのスコア</b>: この人を敵に回すと、あなたのチームのキル数が相手チームより少なくなる傾向にあります。<b>「苦手な敵」</b>です。</li>
+              </ul>
             </li>
           </ul>
 
-          <h4>どう使う？</h4>
-          <p>
-            この表は、**「誰と組んだらKO数を増やせるか」**、**「誰を敵にしたら勝てるか」** を考えるためのヒントです。<br>
-            チーム分けの参考にしてみましょう！
-          </p>
+          <h4>具体例</h4>
+          <p>現在のチーム分けが「<b>チーム1（水色）</b>」と「<b>チーム2（ピンク色）</b>」だったとします。</p>
+          <table style="border-collapse:collapse; width:100%; text-align:center; margin: 12px 0;">
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">d (敵)</th>
+            </tr>
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">b (自分)</th>
+              <td>+14<br>→ 過去にaさんと組んだ時、<br>あなたのチームが平均14キル差をつけて勝ってたよ！</td>
+              <td>+14<br>→ 過去にdさんを敵にした時、<br>あなたのチームが平均14キル差をつけて勝ってたよ！</td>
+            </tr>
+          </table>
+          <table style="border-collapse:collapse; width:100%; text-align:center;">
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">e (敵)</th>
+            </tr>
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">c (自分)</th>
+              <td>-4<br>→ 過去にaさんと組んだ時、<br>あなたのチームか平均4キル差で負けてたよ...</td>
+              <td>+8<br>→ 過去にeさんを敵にした時、<br>あなたのチームが平均8キル差をつけて勝ってたよ！</td>
+            </tr>
+          </table>
+          <p>この表は、プレイヤー間の相性を一目でわかるようにするためのものです。個人間の強さの関係を表すものではありません。</p>
         </div>
       </section>
 
