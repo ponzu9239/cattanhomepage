@@ -270,29 +270,66 @@
           style="display:none; text-align:left; max-width:700px; margin:1rem auto; border:1px solid #ccc; padding:1rem; border-radius:8px; background:#f9f9f9;">
           <h3>相性表の見方</h3>
           <p>
-            この表は、選手同士の「チーム内・チーム間の相性」を数値で表したものです。
-            数値は平均キル差（自チームキル − 敵チームキル）です。正の値は強く、負の値は弱いことを示します。
+            この表は、プレイヤー同士が**「チームを組むとどうなるか？」**を過去の試合データから予測するものです。
           </p>
 
-          <h4>表の構造</h4>
+          <h4>表の読み方</h4>
+          <p>
+            **横の列（相手）** と **縦の行（自分）** が交わるところにある数字が **「相性スコア」** です。<br>
+            このスコアは、あなたとその相手が同じチームだった時、どれくらいキル数に貢献したかの平均値です。<br>
+            色が塗られているところが **味方**、色が塗られていないところが **敵** と戦った時のスコアを表しています。
+          </p>
+          
+
+          <h4>スコアの意味</h4>
+          <p>
+            スコアの数字は、**「どれだけチームが勝つ力を持っていたか」** を示します。
+          </p>
+
           <ul>
-            <li>行：参照する選手</li>
-            <li>列：比較対象の選手</li>
-            <li>数値：味方なら同チームの試合のキル差平均、敵なら敵として戦った試合のキル差平均</li>
+            <li>**<span style="color: green;">プラス (+) の数字</span>**<br>
+              <ul style="margin:0; padding-left: 20px;">
+                <li>**味方とのスコア**: この人と組むと、チームのキル数が相手より多くなる傾向にあります。**「良い組み合わせ」**です。</li>
+                <li>**敵とのスコア**: この人を敵に回すと、あなたのチームのキル数が相手チームより多くなる傾向にあります。**「相性の良い敵」**です。</li>
+              </ul>
+            </li>
+            <li>**<span style="color: red;">マイナス (-) の数字</span>**<br>
+              <ul style="margin:0; padding-left: 20px;">
+                <li>**味方とのスコア**: この人と組むと、チームのキル数が相手より少なくなる傾向にあります。**「悪い組み合わせ」**です。</li>
+                <li>**敵とのスコア**: この人を敵に回すと、あなたのチームのキル数が相手チームより少なくなる傾向にあります。**「苦手な敵」**です。</li>
+              </ul>
+            </li>
           </ul>
 
-          <h4>色の意味</h4>
-          <div style="display:flex; justify-content:center; gap:1rem; margin:0.5rem 0;">
-            <div
-              style="width:50px; height:30px; background:#eefaff; border:1px solid #97EADB; text-align:center; line-height:30px;">
-              1</div>
-            <div
-              style="width:50px; height:30px; background:#fff1f5; border:1px solid #ffb6c1; text-align:center; line-height:30px;">
-              2</div>
-          </div>
-
           <h4>具体例</h4>
-          <p>現在のチーム：チーム1 = a, b, c / チーム2 = d, e, f</p>
+          <p>現在のチーム分けが「**チーム1（水色）**」と「**チーム2（ピンク色）**」だったとします。</p>
+          <table style="border-collapse:collapse; width:100%; text-align:center; margin: 12px 0;">
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">d (敵)</th>
+            </tr>
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">b (自分)</th>
+              <td>+14<br>→ 過去にaさんと組んだ時、<br>平均14キル差をつけて勝ってたよ！</td>
+              <td>+14<br>→ 過去にdさんを敵にした時、<br>平均14キル差をつけて勝ってたよ！</td>
+            </tr>
+          </table>
+          <table style="border-collapse:collapse; width:100%; text-align:center;">
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">e (敵)</th>
+            </tr>
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">c (自分)</th>
+              <td>-4<br>→ 過去にaさんと組んだ時、<br>平均4キル差で負けてたよ...</td>
+              <td>+8<br>→ 過去にeさんを敵にした時、<br>平均8キル差をつけて勝ってたよ！</td>
+            </tr>
+          </table>
+          <p>この表は、プレイヤー間の相性を一目でわかるようにするためのものです。この情報を活用して、よりバランスの取れた、楽しいチーム分けを見つけてみてください！</p>
+        </div>
+      </section>
 
           <h4>相性表</h4>
           <table style="border-collapse:collapse; width:100%; text-align:center;">
