@@ -909,8 +909,6 @@ combinations.forEach(teamA => {
   }
 });
 
-displayCandidates(allCandidates);
-
   document.getElementById("teamA").innerHTML = bestTeams.teamA.map(n => `<li>${n}</li>`).join("");
   document.getElementById("teamB").innerHTML = bestTeams.teamB.map(n => `<li>${n}</li>`).join("");
   db.ref("currentTeamResult").set({
