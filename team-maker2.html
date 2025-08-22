@@ -89,7 +89,6 @@
         margin-top: 2rem;
       }
 
-
       h1 {
         text-align: center;
         color: #47b6a2;
@@ -364,7 +363,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   </head>
-
   <body>
     <header>
       <h1>ド天然のきゃたん</h1>
@@ -551,13 +549,13 @@
       function calculateWinRate(matches) {
         const stats = {};
         matches.forEach(match => {
-          const teamAWins = match.teamAKills > match.teamBKills;
-          match.teamA.forEach(p => {
+          const teamAWins = (match.teamAKills ?? 0) > (match.teamBKills ?? 0);
+          match.teamA?.forEach(p => {
             if (!stats[p]) stats[p] = { win: 0, total: 0 };
             stats[p].total++;
             if (teamAWins) stats[p].win++;
           });
-          match.teamB.forEach(p => {
+          match.teamB?.forEach(p => {
             if (!stats[p]) stats[p] = { win: 0, total: 0 };
             stats[p].total++;
             if (!teamAWins) stats[p].win++;
@@ -660,22 +658,22 @@
         let scores;
         const method = document.querySelector('input[name="method"]:checked').value;
 
-        if (method === "balanced") {
-          makeBalancedTeams();
-          return;
-        }
-
-        if (method === "average") scores = playerScoresAverage;
-        else if (method === "winrate") scores = playerScoresWinRate;
-        else if (method === "kdratio") scores = playerScoresKDRatio;
-        else scores = {};
-
         if (selected.length === 0) {
           document.getElementById("teamA").innerHTML = "";
           document.getElementById("teamB").innerHTML = "";
           db.ref("currentTeamResult").set({ teamA: [], teamB: [], timestamp: Date.now() });
           return;
         }
+
+        if (method === "balanced") {
+          makeBalancedTeams();
+          return;
+        }
+        
+        if (method === "average") scores = playerScoresAverage;
+        else if (method === "winrate") scores = playerScoresWinRate;
+        else if (method === "kdratio") scores = playerScoresKDRatio;
+        else scores = {};
 
         // 選択プレイヤーの強さ
         const players = selected
@@ -724,18 +722,17 @@
         const separate = separatePairs;
 
         // 全探索でチーム分け
-        // groupsを単位にチーム分け。チームA,Bそれぞれにグループを割り当てていく
         function divideGroups(groups, separatePairs) {
           const results = [];
           const totalPlayers = groups.reduce((sum, g) => sum + g.members.length, 0);
-          const minTeamSize = Math.floor(totalPlayers / 2);
-          const maxTeamSize = Math.ceil(totalPlayers / 2);
 
           function dfs(index, teamAIndices, teamACount) {
             if (index === groups.length) {
               const teamBIndices = groups.map((_, i) => i).filter(i => !teamAIndices.includes(i));
               const teamAMembers = teamAIndices.flatMap(i => groups[i].members);
               const teamBMembers = teamBIndices.flatMap(i => groups[i].members);
+              
+              if (Math.abs(teamAMembers.length - teamBMembers.length) > 1) return;
 
               // 離したいペアが同じチームに居ないかチェック
               for (const [p1, p2] of separatePairs) {
@@ -745,14 +742,9 @@
                 }
               }
 
-              // 人数差チェック
-              const diff = Math.abs(teamAMembers.length - teamBMembers.length);
-              if (diff > 1) return;
-
               const sumA = teamAMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
               const sumB = teamBMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
-
-              results.push({ teamA: teamAMembers, teamB: teamBMembers, diffScore: sumA - sumB });
+              results.push({ teamA: teamAMembers, teamB: teamBMembers, diffScore: Math.abs(sumA - sumB) });
               return;
             }
 
@@ -764,7 +756,6 @@
 
           dfs(0, [], 0);
 
-          // 相性差が最小のものを返す
           results.sort((a, b) => a.diffScore - b.diffScore);
           return results[0] || null;
         }
@@ -787,7 +778,6 @@
         document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
         document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
 
-        // ここでFirebaseに送信
         db.ref("currentTeamResult").set({
           teamA: best.teamA,
           teamB: best.teamB,
@@ -795,55 +785,7 @@
         });
       }
       
-      // 正しい相性スコア計算関数
-      function calcPlayerScore(player, allPlayers, matches) {
-        let totalScore = 0;
-      
-        // プレイヤーの組み合わせを生成
-        const combinations = getCombinations(allPlayers, 2);
-      
-        combinations.forEach(pair => {
-            const p1 = pair[0];
-            const p2 = pair[1];
-      
-            if (p1 === player) {
-                const other = p2;
-                let interactionScore = 0;
-                let interactionCount = 0;
-                matches.forEach(match => {
-                    const teamA = match.teamA || [];
-                    const teamB = match.teamB || [];
-                    const diff = teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
-      
-                    // 同じチームだった場合
-                    if ((teamA.includes(player) && teamA.includes(other)) || (teamB.includes(player) && teamB.includes(other))) {
-                        interactionScore += diff;
-                        interactionCount++;
-                    } 
-                    // 敵チームだった場合
-                    else if ((teamA.includes(player) && teamB.includes(other)) || (teamB.includes(player) && teamA.includes(other))) {
-                        interactionScore += diff;
-                        interactionCount++;
-                    }
-                });
-                if (interactionCount > 0) {
-                    totalScore += interactionScore / interactionCount;
-                }
-            }
-        });
-        return +totalScore.toFixed(1);
-      }
-      
-      // 全組み合わせ生成
-      function getCombinations(array, size) {
-        if (size === 0) return [[]];
-        if (array.length < size) return [];
-        const [first, ...rest] = array;
-        const combsWithFirst = getCombinations(rest, size - 1).map(c => [first, ...c]);
-        const combsWithoutFirst = getCombinations(rest, size);
-        return combsWithFirst.concat(combsWithoutFirst);
-      }
-      
+      // 相性モードのチーム分け関数
       async function makeBalancedTeams() {
         const selectedPlayers = Array.from(document.querySelectorAll(".player.selected")).map(p => p.dataset.name);
         if (selectedPlayers.length < 2) return;
@@ -852,97 +794,40 @@
         if (!snapshot.exists()) return;
         const matches = Object.values(snapshot.val());
       
-        // 各プレイヤーの相性スコアを計算
-        const playerScores = {};
         const teamSize = Math.floor(selectedPlayers.length / 2);
-      
-        // 全組み合わせ生成
         const combinations = getCombinations(selectedPlayers, teamSize);
       
         let bestDiff = Infinity;
         let bestTeams = null;
-        const candidates = [];
       
         combinations.forEach(teamA => {
             const teamB = selectedPlayers.filter(p => !teamA.includes(p));
             
-            // チームAの相性スコアを計算
-            const sumA = teamA.reduce((sum, player) => {
-                const teamScore = teamA.reduce((subSum, ally) => {
-                    if (player === ally) return subSum;
-                    let interactionScore = 0;
-                    let interactionCount = 0;
-                    matches.forEach(match => {
-                        const teamM = match.teamA || [];
-                        const teamO = match.teamB || [];
-                        const diff = teamM.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
-                        if ((teamM.includes(player) && teamM.includes(ally)) || (teamO.includes(player) && teamO.includes(ally))) {
-                            interactionScore += diff;
-                            interactionCount++;
-                        }
-                    });
-                    return subSum + (interactionCount > 0 ? interactionScore / interactionCount : 0);
-                }, 0);
+            let sumA = 0;
+            teamA.forEach(p1 => {
+                teamA.forEach(p2 => {
+                    if (p1 === p2) return;
+                    sumA += calcInteractionScore(p1, p2, matches);
+                });
+                teamB.forEach(p2 => {
+                    sumA -= calcInteractionScore(p1, p2, matches);
+                });
+            });
       
-                const opposingScore = teamB.reduce((subSum, enemy) => {
-                    let interactionScore = 0;
-                    let interactionCount = 0;
-                    matches.forEach(match => {
-                        const teamM = match.teamA || [];
-                        const teamO = match.teamB || [];
-                        const diff = teamM.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
-                        if ((teamM.includes(player) && teamO.includes(enemy)) || (teamO.includes(player) && teamM.includes(enemy))) {
-                            interactionScore += diff;
-                            interactionCount++;
-                        }
-                    });
-                    return subSum + (interactionCount > 0 ? interactionScore / interactionCount : 0);
-                }, 0);
+            let sumB = 0;
+            teamB.forEach(p1 => {
+                teamB.forEach(p2 => {
+                    if (p1 === p2) return;
+                    sumB += calcInteractionScore(p1, p2, matches);
+                });
+                teamA.forEach(p2 => {
+                    sumB -= calcInteractionScore(p1, p2, matches);
+                });
+            });
+            
+            const diff = Math.abs(sumA - sumB);
       
-                return sum + teamScore + opposingScore;
-            }, 0);
-      
-            // チームBの相性スコアを計算
-            const sumB = teamB.reduce((sum, player) => {
-                const teamScore = teamB.reduce((subSum, ally) => {
-                    if (player === ally) return subSum;
-                    let interactionScore = 0;
-                    let interactionCount = 0;
-                    matches.forEach(match => {
-                        const teamM = match.teamA || [];
-                        const teamO = match.teamB || [];
-                        const diff = teamM.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
-                        if ((teamM.includes(player) && teamM.includes(ally)) || (teamO.includes(player) && teamO.includes(ally))) {
-                            interactionScore += diff;
-                            interactionCount++;
-                        }
-                    });
-                    return subSum + (interactionCount > 0 ? interactionScore / interactionCount : 0);
-                }, 0);
-      
-                const opposingScore = teamA.reduce((subSum, enemy) => {
-                    let interactionScore = 0;
-                    let interactionCount = 0;
-                    matches.forEach(match => {
-                        const teamM = match.teamA || [];
-                        const teamO = match.teamB || [];
-                        const diff = teamM.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
-                        if ((teamM.includes(player) && teamO.includes(enemy)) || (teamO.includes(player) && teamM.includes(enemy))) {
-                            interactionScore += diff;
-                            interactionCount++;
-                        }
-                    });
-                    return subSum + (interactionCount > 0 ? interactionScore / interactionCount : 0);
-                }, 0);
-      
-                return sum + teamScore + opposingScore;
-            }, 0);
-      
-            const diff = sumA - sumB;
-      
-            candidates.push({ teams: { A: teamA, B: teamB }, scoreDiff: diff });
-      
-            if (Math.abs(diff) < Math.abs(bestDiff)) {
+            if (diff < bestDiff) {
                 bestDiff = diff;
                 bestTeams = { teamA, teamB };
             }
@@ -964,6 +849,30 @@
             timestamp: Date.now(),
         });
       }
+
+      function calcInteractionScore(player1, player2, matches) {
+        let interactionScore = 0;
+        let interactionCount = 0;
+        matches.forEach(match => {
+            const teamA = match.teamA || [];
+            const teamB = match.teamB || [];
+            const p1InA = teamA.includes(player1);
+            const p2InA = teamA.includes(player2);
+            const p1InB = teamB.includes(player1);
+            const p2InB = teamB.includes(player2);
+
+            if ((p1InA && p2InA) || (p1InB && p2InB)) { // 同じチーム
+                const diff = (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
+                interactionScore += diff > 0 ? 1 : (diff < 0 ? -1 : 0);
+                interactionCount++;
+            } else if ((p1InA && p2InB) || (p1InB && p2InA)) { // 敵チーム
+                const diff = (p1InA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
+                interactionScore += diff > 0 ? 1 : (diff < 0 ? -1 : 0);
+                interactionCount++;
+            }
+        });
+        return interactionCount > 0 ? interactionScore / interactionCount : 0;
+      }
       
       // 補助関数
       function getCombinations(array, size) {
@@ -974,8 +883,6 @@
         const combsWithoutFirst = getCombinations(rest, size);
         return combsWithFirst.concat(combsWithoutFirst);
       }
-      
-      // displayCandidates関数は不要なので削除
       
       // ペアフォーム イベント設定
       document.getElementById("separatePairForm").addEventListener("submit", e => {
