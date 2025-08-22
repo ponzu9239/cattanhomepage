@@ -11,6 +11,7 @@
       background: #f7fcfc;
       margin: 0;
       padding-top: 100px;
+      transition: background-color 0.5s ease;
     }
 
 
@@ -20,6 +21,7 @@
       margin-bottom: 12px;
     }
 
+    /* 通常時のスタイル */
     header {
       position: fixed;
       top: 0;
@@ -59,14 +61,11 @@
       flex-direction: column;
       padding: 0;
       transition: top 0.3s ease;
-      /* スライドアニメーション */
       z-index: 1050;
-      /* ハンバーガーより下 */
     }
 
     nav.show {
       top: 75px;
-      /* ヘッダーの下までスライド */
     }
 
     nav a {
@@ -74,7 +73,6 @@
       text-align: center;
       margin: 0;
       padding: 0.6rem 0;
-      /* 左右は0に */
       font-size: 1.2rem;
       font-weight: bold;
       color: white;
@@ -102,7 +100,6 @@
 
     main {
       flex: 1;
-      /* 空きスペースを埋める */
     }
 
     footer {
@@ -227,6 +224,100 @@
       line-height: 1.5;
       font-size: 14px;
     }
+
+
+    /* 誕生日仕様のスタイル */
+    body.birthday-mode {
+      background-color: #ffe8f4;
+      background-image:
+        radial-gradient(circle, #ff69b4 1px, transparent 1px),
+        radial-gradient(circle, #ffd700 1.5px, transparent 1.5px),
+        linear-gradient(to bottom, #ffe8f4, #ffc0cb);
+      background-size: 100px 100px, 120px 120px, cover;
+      background-position: 0 0, 60px 60px, 0 0;
+      animation: confetti 5s linear infinite;
+    }
+
+    @keyframes confetti {
+      from {
+        background-position: 0 0, 60px 60px, 0 0;
+      }
+
+      to {
+        background-position: 100px 100px, 160px 160px, 0 200%;
+      }
+    }
+
+    .birthday-banner {
+      background: linear-gradient(135deg, #ffc0cb, #ff69b4);
+      color: #fff;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      animation: sparkle 1s ease-in-out infinite alternate;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      display: none;
+      margin-top: 75px;
+      white-space: nowrap;
+      font-size: 7vw;
+      min-font-size: 1.5rem;
+    }
+
+    body.birthday-mode .birthday-banner {
+      display: block;
+    }
+
+    @keyframes sparkle {
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.03);
+      }
+    }
+
+
+    body.birthday-mode h1,
+    body.birthday-mode .team-box h2,
+    body.birthday-mode #lastUpdated {
+      color: #c71585;
+    }
+
+    body.birthday-mode .team-box.team1 {
+      background: #fff0f5;
+      border-color: #ff69b4;
+    }
+
+    body.birthday-mode .team-box.team2 {
+      background: #fff0f5;
+      border-color: #ff69b4;
+    }
+
+    body.birthday-mode .team-box li {
+      background: #ffe6f0;
+      border-color: #ffb6c1;
+      color: #c71585;
+    }
+
+    body.birthday-mode .info-btn {
+      background-color: #ff69b4;
+    }
+
+    body.birthday-mode .info-btn:hover {
+      background-color: #ff1493;
+    }
+
+    body.birthday-mode .info-text {
+      background: #fff0f5;
+      border-color: #ff69b4;
+    }
+
+    body.birthday-mode .info-text h3,
+    body.birthday-mode .info-text h4 {
+      color: #c71585;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -242,6 +333,11 @@
       <a href="team-view.html">チーム分けを見る</a>
     </nav>
   </header>
+
+  <div class="birthday-banner">
+    🎉 HAPPY BIRTH DAY 🎉
+  </div>
+
   <main>
     <h1>チーム分け</h1>
 
@@ -335,6 +431,27 @@
   </footer>
 
   <script>
+    function checkBirthday() {
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const day = today.getDate();
+      const birthdayBanner = document.querySelector('.birthday-banner');
+
+      if (month === 8 && day === 22) {
+        document.body.classList.add("birthday-mode");
+        if (birthdayBanner) {
+          birthdayBanner.style.display = 'block';
+        }
+      } else {
+        document.body.classList.remove("birthday-mode");
+        if (birthdayBanner) {
+          birthdayBanner.style.display = 'none';
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", checkBirthday);
+
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -370,7 +487,6 @@
         lastUpdatedEl.textContent = "最終更新: --";
       }
 
-      // 相性表の表示を更新する関数をここで呼び出す
       updateKillDiffTable(teamA, teamB);
     });
 
@@ -402,11 +518,9 @@
       });
     });
 
-    // 相性表を生成する関数を定義
     function updateKillDiffTable(teamA, teamB) {
       const players = [...teamA, ...teamB];
 
-      // プレイヤーが1人以下になったら表を消す
       if (players.length <= 1) {
         killDiffTableContainer.innerHTML = "";
         return;
@@ -416,9 +530,8 @@
       table.style.borderCollapse = "collapse";
       table.style.width = "100%";
 
-      // ヘッダー行
       const headerRow = document.createElement("tr");
-      headerRow.appendChild(document.createElement("th")); // 左上の空セル
+      headerRow.appendChild(document.createElement("th"));
 
       players.forEach(p => {
         const th = document.createElement("th");
@@ -429,12 +542,11 @@
         headerRow.appendChild(th);
       });
 
-      // ここで「合計」列を追加
       const thTotal = document.createElement("th");
       thTotal.textContent = "合計";
       thTotal.style.border = "1px solid #ddd";
       thTotal.style.padding = "4px";
-      thTotal.style.background = "#ccc"; // 任意の色
+      thTotal.style.background = "#ccc";
       headerRow.appendChild(thTotal);
 
       table.appendChild(headerRow);
@@ -451,7 +563,7 @@
           th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
           tr.appendChild(th);
 
-          let rowSum = 0; // ← 行合計初期化
+          let rowSum = 0;
 
           players.forEach(playerCol => {
             const td = document.createElement("td");
@@ -494,7 +606,6 @@
 
               td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
 
-              // ← 合計に加算
               if (td.textContent !== "-") {
                 rowSum += parseFloat(td.textContent);
               }
@@ -503,7 +614,6 @@
             tr.appendChild(td);
           });
 
-          // 行の最後に合計セルを追加
           const tdTotal = document.createElement("td");
           tdTotal.textContent = rowSum.toFixed(1);
           tdTotal.style.border = "1px solid #ddd";
@@ -526,10 +636,10 @@
     btn.addEventListener("click", () => {
       if (info.style.display === "none") {
         info.style.display = "block";
-        btn.textContent = "△ 相性表の見方"; // 閉じるアイコンに変える
+        btn.textContent = "△ 相性表の見方";
       } else {
         info.style.display = "none";
-        btn.textContent = "▽ 相性表の見方"; // 開くアイコンに戻す
+        btn.textContent = "▽ 相性表の見方";
       }
     });
   </script>
