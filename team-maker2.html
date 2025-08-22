@@ -1084,34 +1084,6 @@ function displayCandidates(candidates) {
     container.appendChild(li);
   });
 }
-
-// 各プレイヤーのスコア計算（チーム内＋敵チームとの平均差）
-function calcPlayerScore(player, team, opposingTeam) {
-  let total = 0;
-  let count = 0;
-
-  team.forEach(ally => {
-    if (ally === player) return;
-    matches.forEach(match => {
-      const teamA = match.teamA || [];
-      const teamB = match.teamB || [];
-      if (teamA.includes(player) && teamA.includes(ally)) total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0), count++;
-      if (teamB.includes(player) && teamB.includes(ally)) total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0), count++;
-    });
-  });
-
-  opposingTeam.forEach(enemy => {
-    matches.forEach(match => {
-      const teamA = match.teamA || [];
-      const teamB = match.teamB || [];
-      if (teamA.includes(player) && teamB.includes(enemy)) total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0), count++;
-      if (teamB.includes(player) && teamA.includes(enemy)) total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0), count++;
-    });
-  });
-
-  return count ? +(total / count).toFixed(1) : 0;
-}
-
   </script>
 </body>
 
