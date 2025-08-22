@@ -869,7 +869,7 @@ else if (method === "balanced") {
       });
     }
     
-    async function makeBalancedTeams() {
+async function makeBalancedTeams() {
   const selectedPlayers = Array.from(document.querySelectorAll(".player.selected")).map(p => p.dataset.name);
   if (selectedPlayers.length < 2) return;
 
@@ -880,6 +880,8 @@ else if (method === "balanced") {
   const teamSize = Math.floor(selectedPlayers.length / 2);
   const combinations = getCombinations(selectedPlayers, teamSize);
 
+  const candidates = [];
+
   let bestDiff = Infinity;
   let bestTeams = null;
 
@@ -889,25 +891,15 @@ else if (method === "balanced") {
     const scoreB = calcTeamScore(teamB, teamA, matches);
     const diff = Math.abs(scoreA - scoreB);
 
+    candidates.push({ teams: { A: teamA, B: teamB }, scoreDiff: diff });
+
     if (diff < bestDiff) {
       bestDiff = diff;
       bestTeams = { teamA, teamB };
     }
-    const allCandidates = [];
+  });
 
-combinations.forEach(teamA => {
-  const teamB = selectedPlayers.filter(p => !teamA.includes(p));
-  const scoreA = calcTeamScore(teamA, teamB, matches);
-  const scoreB = calcTeamScore(teamB, teamA, matches);
-  const diff = Math.abs(scoreA - scoreB);
-
-  allCandidates.push({ teams: { A: teamA, B: teamB }, scoreDiff: diff });
-
-  if (diff < bestDiff) {
-    bestDiff = diff;
-    bestTeams = { teamA, teamB };
-  }
-});
+  displayCandidates(candidates); // ←ここで全候補リストを表示
 
   document.getElementById("teamA").innerHTML = bestTeams.teamA.map(n => `<li>${n}</li>`).join("");
   document.getElementById("teamB").innerHTML = bestTeams.teamB.map(n => `<li>${n}</li>`).join("");
