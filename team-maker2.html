@@ -722,6 +722,12 @@
       let scores;
       const method = document.querySelector('input[name="method"]:checked').value;
 
+        if (method === "balanced") {
+    makeBalancedTeams();
+    return;
+  }
+
+      
       if (method === "average") scores = playerScoresAverage;
       else if (method === "winrate") scores = playerScoresWinRate;
       else if (method === "kdratio") scores = playerScoresKDRatio;
@@ -888,8 +894,27 @@
 }
 
 // 他の補助関数も上で書いたものをそのまま利用
-function getCombinations(array, size) { /* ... */ }
-function calcTeamScore(team, opponent, matches) { /* ... */ }
+function getCombinations(array, size) {
+  if (size === 0) return [[]];
+  if (array.length < size) return [];
+  const [first, ...rest] = array;
+  const combsWithFirst = getCombinations(rest, size - 1).map(c => [first, ...c]);
+  const combsWithoutFirst = getCombinations(rest, size);
+  return combsWithFirst.concat(combsWithoutFirst);
+}
+
+function calcTeamScore(team, opponent, matches) {
+  // 過去の KD 差の平均を返す例
+  let score = 0;
+  team.forEach(p => {
+    matches.forEach(match => {
+      const kdA = match.teamA.includes(p) ? match.teamAKills - match.teamBKills : 0;
+      const kdB = match.teamB.includes(p) ? match.teamBKills - match.teamAKills : 0;
+      score += kdA + kdB;
+    });
+  });
+  return score;
+}
 
 // 使う時は呼び出すだけ
 document.getElementById("makeBalancedTeamsBtn")?.addEventListener("click", makeBalancedTeams);
