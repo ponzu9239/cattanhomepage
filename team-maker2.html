@@ -920,7 +920,7 @@ function getCombinations(array, size) {
   return combsWithFirst.concat(combsWithoutFirst);
 }
 
-function calcTeamScore(team, matches) {
+function calcTeamScore(team, opposingTeam, matches) {
   let score = 0;
   team.forEach(p => {
     matches.forEach(match => {
