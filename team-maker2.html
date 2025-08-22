@@ -893,7 +893,23 @@ else if (method === "balanced") {
       bestDiff = diff;
       bestTeams = { teamA, teamB };
     }
-  });
+    const allCandidates = [];
+
+combinations.forEach(teamA => {
+  const teamB = selectedPlayers.filter(p => !teamA.includes(p));
+  const scoreA = calcTeamScore(teamA, teamB, matches);
+  const scoreB = calcTeamScore(teamB, teamA, matches);
+  const diff = Math.abs(scoreA - scoreB);
+
+  allCandidates.push({ teams: { A: teamA, B: teamB }, scoreDiff: diff });
+
+  if (diff < bestDiff) {
+    bestDiff = diff;
+    bestTeams = { teamA, teamB };
+  }
+});
+
+displayCandidates(allCandidates);
 
   document.getElementById("teamA").innerHTML = bestTeams.teamA.map(n => `<li>${n}</li>`).join("");
   document.getElementById("teamB").innerHTML = bestTeams.teamB.map(n => `<li>${n}</li>`).join("");
