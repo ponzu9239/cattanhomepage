@@ -943,21 +943,6 @@ document.getElementById("makeBalancedTeamsBtn")?.addEventListener("click", makeB
       }
     });
 
-    // Firebase currentInputPlayersの監視（matchingPlayers更新）
-    db.ref("currentInputPlayers").on("value", (snapshot) => {
-      const data = snapshot.val() || {};
-      matchingPlayers = [];
-
-      Object.values(data).forEach(nameList => {
-        if (Array.isArray(nameList)) {
-          matchingPlayers.push(...nameList);
-        }
-      });
-
-      matchingPlayers = [...new Set(matchingPlayers)];
-      renderPlayers();
-    });
-
     // マッチ履歴取得とスコア計算
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
