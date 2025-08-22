@@ -12,8 +12,10 @@
       background: #f7fcfc;
       color: #333;
       padding-top: 100px;
+      transition: background-color 0.5s ease;
     }
 
+    /* 通常時のスタイル */
     header {
       position: fixed;
       top: 0;
@@ -130,14 +132,12 @@
       margin: auto;
       border-collapse: separate;
       border-spacing: 0 8px;
-      /* 行間にスペース */
       width: 100%;
       max-width: 420px;
       box-shadow: 0 4px 10px rgba(151, 234, 219, 0.4);
       border-radius: 12px;
       overflow: hidden;
       background: #e0f7f9;
-      /* 薄い水色背景 */
     }
 
     #probabilityTable thead tr {
@@ -313,22 +313,129 @@
       padding: 1rem;
       margin-top: 2rem;
     }
+
+    /* 誕生日仕様のスタイル */
+    body.birthday-mode {
+      background-color: #ffe8f4;
+      background-image:
+        radial-gradient(circle, #ff69b4 1px, transparent 1px),
+        radial-gradient(circle, #ffd700 1.5px, transparent 1.5px),
+        linear-gradient(to bottom, #ffe8f4, #ffc0cb);
+      background-size: 100px 100px, 120px 120px, cover;
+      background-position: 0 0, 60px 60px, 0 0;
+      animation: confetti 5s linear infinite;
+    }
+
+    @keyframes confetti {
+      from {
+        background-position: 0 0, 60px 60px, 0 0;
+      }
+
+      to {
+        background-position: 100px 100px, 160px 160px, 0 200%;
+      }
+    }
+
+    .birthday-banner {
+      background: linear-gradient(135deg, #ffc0cb, #ff69b4);
+      color: #fff;
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      animation: sparkle 1s ease-in-out infinite alternate;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      display: none;
+      margin-top: 75px;
+    }
+
+    body.birthday-mode .birthday-banner {
+      display: block;
+    }
+
+    @keyframes sparkle {
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.03);
+      }
+    }
+
+    body.birthday-mode #rouletteCanvas {
+      box-shadow: 0 0 15px #FF69B4AA;
+    }
+
+    body.birthday-mode #pointer {
+      border-bottom-color: #ff69b4;
+    }
+
+    body.birthday-mode #currentNameDisplay {
+      color: #ff69b4;
+      text-shadow: 1px 1px 2px #ffc0cb;
+    }
+
+    body.birthday-mode #probabilityTableContainer h2 {
+      color: #ff69b4;
+      text-shadow: 1px 1px 2px #ffc0cb;
+    }
+
+    body.birthday-mode #probabilityTable {
+      box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4);
+      background: #fff0f5;
+    }
+
+    body.birthday-mode #probabilityTable thead tr {
+      background-color: #ff69b4;
+      text-shadow: 0 0 3px #e91e63;
+    }
+
+    body.birthday-mode #probabilityTable tbody tr:hover {
+      background-color: #ffd6e0;
+    }
+
+    body.birthday-mode #probabilityTable tbody td {
+      color: #c71585;
+    }
+
+    body.birthday-mode #probabilityTable tbody td:nth-child(3) {
+      color: #99004d;
+      text-shadow: 0 0 2px #ffc0cb;
+    }
+
+    body.birthday-mode #lotteryRules {
+      background: linear-gradient(135deg, #fff0f5, #ffebcd);
+      box-shadow: 0 4px 15px rgba(255, 105, 180, 0.2);
+      border: 2px solid #ff69b4;
+    }
+
+    body.birthday-mode #lotteryRules h2 {
+      color: #ff1493;
+      text-shadow: 1px 1px 0 #fff;
+      background: linear-gradient(90deg, #ffc0cb, #ffb6c1);
+    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
-<header>
-  <h1>ド天然のきゃたん</h1>
-  <div class="hamburger" id="hamburger">☰</div>
-  <nav id="nav">
-    <a href="index.html">ホーム</a>
-    <a href="roulette.html">イベント</a>
-    <a href="team-view.html">チーム分けを見る</a>
-  </nav>
-</header>
 
 <body>
+  <header>
+    <h1>ド天然のきゃたん</h1>
+    <div class="hamburger" id="hamburger">☰</div>
+    <nav id="nav">
+      <a href="index.html">ホーム</a>
+      <a href="roulette.html">イベント</a>
+      <a href="team-view.html">チーム分けを見る</a>
+    </nav>
+  </header>
+
+  <div class="birthday-banner">
+    🎉 HAPPY BIRTH DAY 🎉
+  </div>
 
   <section id="lotteryRules">
     <h2 style="text-align: center;"><b>きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</b></h2>
@@ -354,17 +461,11 @@
       <canvas id="rouletteCanvas" width="400" height="400"></canvas>
       <div id="pointer"></div>
     </div>
-    <!-- <div id="centerDisplay">
-      <p id="currentNameDisplay"></p>
-      <p id="rouletteStatus"></p>
-    </div> -->
-
     <section id="rouletteSection">
       <div id="winner">
         <h2>🎉本日の当選者🎉</h2>
         <div id="winnerName" style="font-size: 1.6em; margin-top: 10px;"></div>
 
-        <!-- 当選確率バー -->
         <div id="probabilityBarContainer" style="margin-top: 1em;">
           <div id="probabilityBarBackground"
             style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
@@ -399,6 +500,28 @@
   </footer>
 
   <script>
+    function checkBirthday() {
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const day = today.getDate();
+      const birthdayBanner = document.querySelector('.birthday-banner');
+
+      if (month === 8 && day === 23) {
+        document.body.classList.add("birthday-mode");
+        if (birthdayBanner) {
+          birthdayBanner.style.display = 'block';
+        }
+      } else {
+        document.body.classList.remove("birthday-mode");
+        if (birthdayBanner) {
+          birthdayBanner.style.display = 'none';
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", checkBirthday);
+
+
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
       authDomain: "catiffanygame.firebaseapp.com",
@@ -414,7 +537,6 @@
     const canvas = document.getElementById("rouletteCanvas");
     const ctx = canvas.getContext("2d");
     const currentNameDisplay = document.getElementById("currentNameDisplay");
-    const statusEl = document.getElementById("rouletteStatus");
 
     let participants = [];
     let totalMultiplier = 0;
@@ -489,7 +611,6 @@
       });
     }
 
-    // 🔽 Firebaseからリアルタイム受信
     db.ref("/roulette/participants").on("value", snap => {
       participants = snap.val() || [];
       totalMultiplier = participants.reduce((acc, p) => acc + p.multiplier, 0);
@@ -506,10 +627,10 @@
           const probability = ((p.multiplier / totalMultiplier) * 100).toFixed(1) + "%";
 
           tr.innerHTML = `
-      <td>${p.name}</td>
-      <td>${p.multiplier}</td>
-      <td>${probability}</td>
-    `;
+            <td>${p.name}</td>
+            <td>${p.multiplier}</td>
+            <td>${probability}</td>
+          `;
           tbody.appendChild(tr);
         });
       }
@@ -546,7 +667,6 @@
       }
     });
 
-
     // 当選者更新
     const winnerEl = document.getElementById("winnerName");
     const winnerRef = firebase.database().ref("/roulette/winner");
@@ -556,9 +676,8 @@
     function showWinner(name) {
       winnerEl.textContent = `🎊 ${name} 🎊`;
       updateProbabilityBar(name);
-      // アニメーション付与
       winnerEl.classList.remove("animate-winner");
-      void winnerEl.offsetWidth; // リセット用再描画
+      void winnerEl.offsetWidth;
       winnerEl.classList.add("animate-winner");
     }
 
@@ -584,7 +703,6 @@
       }
     }
 
-    // Firebaseの状態を全部まとめて監視し、表示を切り替える
     let currentSpinning = false;
     let currentCurrentName = "";
     let currentWinnerName = "";
@@ -592,7 +710,6 @@
     spinningRef.on("value", snap => {
       currentSpinning = snap.val();
       updateDisplay(currentSpinning, currentCurrentName, currentWinnerName);
-      // spinning状態に応じて確率バー更新
       updateProbabilityBar(currentWinnerName, currentSpinning);
     });
 
@@ -615,13 +732,11 @@
       const text = document.getElementById("probabilityPercent");
 
       if (spinning) {
-        // spinningがtrueなら確率非表示
         bar.style.width = `0%`;
         text.textContent = "当選確率: ??%";
         return;
       }
 
-      // spinningがfalseのときは通常計算
       firebase.database().ref("/roulette/participants").once("value").then(snapshot => {
         const participantsObj = snapshot.val() || {};
         const participants = Object.values(participantsObj);
