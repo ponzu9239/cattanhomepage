@@ -1086,26 +1086,46 @@ function displayCandidates(candidates) {
 }
 
 // 各プレイヤーのスコア計算（チーム内＋敵チームとの平均差）
-function calcPlayerScore(player, team, opposingTeam) {
+function calcPlayerScore(player, team, opposingTeam, matches) {
   let total = 0;
   let count = 0;
 
+  // 味方との過去試合を計算
   team.forEach(ally => {
-    if (ally === player) return;
+    if (ally === player) return; // 自分自身はスキップ
     matches.forEach(match => {
       const teamA = match.teamA || [];
       const teamB = match.teamB || [];
-      if (teamA.includes(player) && teamA.includes(ally)) total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0), count++;
-      if (teamB.includes(player) && teamB.includes(ally)) total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0), count++;
+
+      // 現在味方なので、過去も味方だった場合のみ
+      if (
+        (teamA.includes(player) && teamA.includes(ally)) ||
+        (teamB.includes(player) && teamB.includes(ally))
+      ) {
+        const kills = teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
+                                             : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+        total += kills;
+        count++;
+      }
     });
   });
 
+  // 敵との過去試合を計算
   opposingTeam.forEach(enemy => {
     matches.forEach(match => {
       const teamA = match.teamA || [];
       const teamB = match.teamB || [];
-      if (teamA.includes(player) && teamB.includes(enemy)) total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0), count++;
-      if (teamB.includes(player) && teamA.includes(enemy)) total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0), count++;
+
+      // 現在敵なので、過去も敵だった場合のみ
+      if (
+        (teamA.includes(player) && teamB.includes(enemy)) ||
+        (teamB.includes(player) && teamA.includes(enemy))
+      ) {
+        const kills = teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
+                                             : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+        total += kills;
+        count++;
+      }
     });
   });
 
