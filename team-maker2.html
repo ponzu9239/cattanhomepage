@@ -893,10 +893,10 @@ async function makeBalancedTeams() {
 
     candidates.push({ teams: { A: teamA, B: teamB }, scoreDiff: diff });
 
-    if (diff < bestDiff) {
-      bestDiff = diff;
-      bestTeams = { teamA, teamB };
-    }
+if (Math.abs(diff) < Math.abs(bestDiff)) {
+  bestDiff = diff;  // ← diff は符号付きのまま保持
+  bestTeams = { teamA, teamB };
+}
   });
 
   displayCandidates(candidates); // ←ここで全候補リストを表示
