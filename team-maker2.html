@@ -903,14 +903,18 @@ function getCombinations(array, size) {
   return combsWithFirst.concat(combsWithoutFirst);
 }
 
-function calcTeamScore(team, opponent, matches) {
-  // 過去の KD 差の平均を返す例
+function calcTeamScore(team, matches) {
   let score = 0;
   team.forEach(p => {
     matches.forEach(match => {
-      const kdA = match.teamA.includes(p) ? match.teamAKills - match.teamBKills : 0;
-      const kdB = match.teamB.includes(p) ? match.teamBKills - match.teamAKills : 0;
-      score += kdA + kdB;
+      const teamA = match.teamA || [];
+      const teamB = match.teamB || [];
+      if (teamA.includes(p)) {
+        score += (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
+      }
+      if (teamB.includes(p)) {
+        score += (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+      }
     });
   });
   return score;
@@ -998,6 +1002,16 @@ document.getElementById("makeBalancedTeamsBtn")?.addEventListener("click", makeB
       });
     });
 
+document.querySelectorAll('input[name="method"]').forEach(radio => {
+  radio.addEventListener("change", async () => {  // asyncを付ける
+    if (radio.value === "balanced") {
+      await makeBalancedTeams();  // 非同期で呼ぶ
+    } else {
+      makeTeams();       // 他のモードは普通に呼ぶ
+      renderPlayers();   // 表示も更新
+    }
+  });
+});
   </script>
 </body>
 
