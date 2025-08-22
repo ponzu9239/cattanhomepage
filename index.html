@@ -14,7 +14,7 @@
       transition: background-color 0.5s ease;
     }
 
-    /* 通常時のスタイル（元のデザイン） */
+    /* 通常時のスタイル */
     header {
       position: fixed;
       top: 0;
@@ -191,21 +191,17 @@
     }
 
     .birthday-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: linear-gradient(135deg, #FFD700, #ffc0cb);
+      background: linear-gradient(135deg, #ffc0cb, #ff69b4);
       color: #fff;
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: bold;
       text-align: center;
-      padding: 15px 0;
-      z-index: 1001;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      padding: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       animation: sparkle 1s ease-in-out infinite alternate;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
       display: none;
+      margin-top: 75px;
     }
 
     body.birthday-mode .birthday-banner {
@@ -221,14 +217,49 @@
         transform: scale(1.03);
       }
     }
+
+    body.birthday-mode .code-display {
+      background: linear-gradient(145deg, #fff0f5, #ffebcd);
+      border-color: #f778a1;
+      color: #c71585;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    body.birthday-mode .sns a {
+      background: #ff69b4;
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+      border-radius: 999px;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    body.birthday-mode .sns a:hover {
+      background: #ff1493;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    body.birthday-mode .roulette-banner a {
+      background: linear-gradient(135deg, #ffb6c1, #ff69b4);
+      border: 2px solid #ff1493;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    body.birthday-mode .roulette-banner a:hover {
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      color: #fff;
+    }
+
+    body.birthday-mode footer {
+      background-color: #ff99cc;
+      color: #fff;
+    }
   </style>
 
 </head>
 
 <body>
-  <div class="birthday-banner">
-    🎉 HAPPY BIRTH DAY 🎉
-  </div>
   <header>
     <h1>ド天然のきゃたん</h1>
     <div class="hamburger" id="hamburger">☰</div>
@@ -238,6 +269,10 @@
       <a href="team-view.html">チーム分けを見る</a>
     </nav>
   </header>
+
+  <div class="birthday-banner">
+    🎉 HAPPY BIRTH DAY 🎉
+  </div>
 
   <section id="profile">
     <h3>🐱 プロフィール</h3>
