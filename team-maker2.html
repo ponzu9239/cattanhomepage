@@ -850,6 +850,48 @@
         timestamp: Date.now(),
       });
     }
+    
+    async function makeBalancedTeams() {
+  const selectedPlayers = Array.from(document.querySelectorAll(".player.selected")).map(p => p.dataset.name);
+  if (selectedPlayers.length < 2) return;
+
+  const snapshot = await db.ref("apex_results").once("value");
+  if (!snapshot.exists()) return;
+  const matches = Object.values(snapshot.val());
+
+  const teamSize = Math.floor(selectedPlayers.length / 2);
+  const combinations = getCombinations(selectedPlayers, teamSize);
+
+  let bestDiff = Infinity;
+  let bestTeams = null;
+
+  combinations.forEach(teamA => {
+    const teamB = selectedPlayers.filter(p => !teamA.includes(p));
+    const scoreA = calcTeamScore(teamA, teamB, matches);
+    const scoreB = calcTeamScore(teamB, teamA, matches);
+    const diff = Math.abs(scoreA - scoreB);
+
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      bestTeams = { teamA, teamB };
+    }
+  });
+
+  document.getElementById("teamA").innerHTML = bestTeams.teamA.map(n => `<li>${n}</li>`).join("");
+  document.getElementById("teamB").innerHTML = bestTeams.teamB.map(n => `<li>${n}</li>`).join("");
+  db.ref("currentTeamResult").set({
+    teamA: bestTeams.teamA,
+    teamB: bestTeams.teamB,
+    timestamp: Date.now(),
+  });
+}
+
+// 他の補助関数も上で書いたものをそのまま利用
+function getCombinations(array, size) { /* ... */ }
+function calcTeamScore(team, opponent, matches) { /* ... */ }
+
+// 使う時は呼び出すだけ
+document.getElementById("makeBalancedTeamsBtn")?.addEventListener("click", makeBalancedTeams);
     // ペアフォーム イベント設定
     document.getElementById("separatePairForm").addEventListener("submit", e => {
       e.preventDefault();
