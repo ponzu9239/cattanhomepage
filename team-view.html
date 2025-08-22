@@ -232,18 +232,17 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 
-<header>
-  <h1>ド天然のきゃたん</h1>
-  <div class="hamburger" id="hamburger">☰</div>
-  <nav id="nav">
-    <a href="index.html">ホーム</a>
-    <a href="roulette.html">イベント</a>
-    <a href="team-view.html">チーム分けを見る</a>
-  </nav>
-</header>
-<main>
-
-  <body>
+<body>
+  <header>
+    <h1>ド天然のきゃたん</h1>
+    <div class="hamburger" id="hamburger">☰</div>
+    <nav id="nav">
+      <a href="index.html">ホーム</a>
+      <a href="roulette.html">イベント</a>
+      <a href="team-view.html">チーム分けを見る</a>
+    </nav>
+  </header>
+  <main>
     <h1>チーム分け</h1>
 
     <section>
@@ -331,204 +330,211 @@
 
       <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
       <div id="lastUpdated">最終更新: --</div>
-</main>
+  </main>
 
-<footer>
-  <p>ド天然のきゃたん</p>
-</footer>
+  <footer>
+    <p>ド天然のきゃたん</p>
+  </footer>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
-    authDomain: "match-result-ea475.firebaseapp.com",
-    databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
-    projectId: "match-result-ea475",
-    storageBucket: "match-result-ea475.firebasestorage.app",
-    messagingSenderId: "759877853492",
-    appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+      authDomain: "match-result-ea475.firebaseapp.com",
+      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+      projectId: "match-result-ea475",
+      storageBucket: "match-result-ea475.firebasestorage.app",
+      messagingSenderId: "759877853492",
+      appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  const teamAul = document.getElementById("teamA");
-  const teamBul = document.getElementById("teamB");
-  const matchCountEl = document.getElementById("matchCount");
-  const lastUpdatedEl = document.getElementById("lastUpdated");
-  const killDiffTableContainer = document.getElementById("killDiffTableContainer");
+    const teamAul = document.getElementById("teamA");
+    const teamBul = document.getElementById("teamB");
+    const matchCountEl = document.getElementById("matchCount");
+    const lastUpdatedEl = document.getElementById("lastUpdated");
+    const killDiffTableContainer = document.getElementById("killDiffTableContainer");
 
-  db.ref("currentTeamResult").on("value", snapshot => {
-    const data = snapshot.val() || {};
-    const teamA = Array.isArray(data.teamA) ? data.teamA : [];
-    const teamB = Array.isArray(data.teamB) ? data.teamB : [];
+    db.ref("currentTeamResult").on("value", snapshot => {
+      const data = snapshot.val() || {};
+      const teamA = Array.isArray(data.teamA) ? data.teamA : [];
+      const teamB = Array.isArray(data.teamB) ? data.teamB : [];
 
-    teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
-    teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
+      teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
+      teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
 
-    if (data.timestamp && typeof data.timestamp === "number") {
-      const d = new Date(data.timestamp);
-      const formatted = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")} ` +
-        `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
-      lastUpdatedEl.textContent = `最終更新: ${formatted}(日本時間)`;
-    } else {
-      lastUpdatedEl.textContent = "最終更新: --";
-    }
-  });
-
-  db.ref("apex_results").on("value", snapshot => {
-    if (!snapshot.exists()) {
-      matchCountEl.textContent = "過去 試合のカスタムマッチをもとに生成。";
-      return;
-    }
-    const matches = Object.values(snapshot.val());
-    matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
-  });
-
-  const hamburger = document.getElementById("hamburger");
-  const nav = document.getElementById("nav");
-
-  hamburger.addEventListener("click", () => {
-    nav.classList.toggle("show");
-
-    const links = nav.querySelectorAll("a");
-    links.forEach((link, index) => {
-      if (nav.classList.contains("show")) {
-        link.style.opacity = "1";
-        link.style.transform = "translateY(0)";
+      if (data.timestamp && typeof data.timestamp === "number") {
+        const d = new Date(data.timestamp);
+        const formatted = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")} ` +
+          `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
+        lastUpdatedEl.textContent = `最終更新: ${formatted}(日本時間)`;
       } else {
-        link.style.opacity = "0";
-        link.style.transform = "translateY(-20px)";
-        link.style.transitionDelay = "0s";
+        lastUpdatedEl.textContent = "最終更新: --";
       }
-    });
-  });
 
-  db.ref("currentTeamResult").on("value", snapshot => {
-    const data = snapshot.val() || {};
-    const teamA = Array.isArray(data.teamA) ? data.teamA : [];
-    const teamB = Array.isArray(data.teamB) ? data.teamB : [];
-    const players = [...teamA, ...teamB];
-
-    const table = document.createElement("table");
-    table.style.borderCollapse = "collapse";
-    table.style.width = "100%";
-
-    // ヘッダー行
-    const headerRow = document.createElement("tr");
-    headerRow.appendChild(document.createElement("th")); // 左上の空セル
-
-    players.forEach(p => {
-      const th = document.createElement("th");
-      th.textContent = p;
-      th.style.border = "1px solid #ddd";
-      th.style.padding = "4px";
-      th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
-      headerRow.appendChild(th);
+      // 相性表の表示を更新する関数をここで呼び出す
+      updateKillDiffTable(teamA, teamB);
     });
 
-    // ここで「合計」列を追加
-    const thTotal = document.createElement("th");
-    thTotal.textContent = "合計";
-    thTotal.style.border = "1px solid #ddd";
-    thTotal.style.padding = "4px";
-    thTotal.style.background = "#ccc"; // 任意の色
-    headerRow.appendChild(thTotal);
+    db.ref("apex_results").on("value", snapshot => {
+      if (!snapshot.exists()) {
+        matchCountEl.textContent = "過去 試合のカスタムマッチをもとに生成。";
+        return;
+      }
+      const matches = Object.values(snapshot.val());
+      matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
+    });
 
-    table.appendChild(headerRow);
+    const hamburger = document.getElementById("hamburger");
+    const nav = document.getElementById("nav");
 
-    db.ref("apex_results").once("value").then(snap => {
-      const matches = snap.exists() ? Object.values(snap.val()) : [];
+    hamburger.addEventListener("click", () => {
+      nav.classList.toggle("show");
 
-      players.forEach(playerRow => {
-        const tr = document.createElement("tr");
+      const links = nav.querySelectorAll("a");
+      links.forEach((link, index) => {
+        if (nav.classList.contains("show")) {
+          link.style.opacity = "1";
+          link.style.transform = "translateY(0)";
+        } else {
+          link.style.opacity = "0";
+          link.style.transform = "translateY(-20px)";
+          link.style.transitionDelay = "0s";
+        }
+      });
+    });
+
+    // 相性表を生成する関数を定義
+    function updateKillDiffTable(teamA, teamB) {
+      const players = [...teamA, ...teamB];
+
+      // プレイヤーが1人以下になったら表を消す
+      if (players.length <= 1) {
+        killDiffTableContainer.innerHTML = "";
+        return;
+      }
+
+      const table = document.createElement("table");
+      table.style.borderCollapse = "collapse";
+      table.style.width = "100%";
+
+      // ヘッダー行
+      const headerRow = document.createElement("tr");
+      headerRow.appendChild(document.createElement("th")); // 左上の空セル
+
+      players.forEach(p => {
         const th = document.createElement("th");
-        th.textContent = playerRow;
+        th.textContent = p;
         th.style.border = "1px solid #ddd";
         th.style.padding = "4px";
-        th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
-        tr.appendChild(th);
+        th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
+        headerRow.appendChild(th);
+      });
 
-        let rowSum = 0; // ← 行合計初期化
+      // ここで「合計」列を追加
+      const thTotal = document.createElement("th");
+      thTotal.textContent = "合計";
+      thTotal.style.border = "1px solid #ddd";
+      thTotal.style.padding = "4px";
+      thTotal.style.background = "#ccc"; // 任意の色
+      headerRow.appendChild(thTotal);
 
-        players.forEach(playerCol => {
-          const td = document.createElement("td");
-          td.style.border = "1px solid #ddd";
-          td.style.padding = "4px";
-          td.style.textAlign = "center";
+      table.appendChild(headerRow);
 
-          if (playerRow === playerCol) {
-            td.textContent = "-";
-          } else {
-            const diffs = [];
+      db.ref("apex_results").once("value").then(snap => {
+        const matches = snap.exists() ? Object.values(snap.val()) : [];
 
-            matches.forEach(match => {
-              const matchTeamA = match.teamA || [];
-              const matchTeamB = match.teamB || [];
-              const killsA = match.teamAKills || 0;
-              const killsB = match.teamBKills || 0;
+        players.forEach(playerRow => {
+          const tr = document.createElement("tr");
+          const th = document.createElement("th");
+          th.textContent = playerRow;
+          th.style.border = "1px solid #ddd";
+          th.style.padding = "4px";
+          th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
+          tr.appendChild(th);
 
-              const rowInA = matchTeamA.includes(playerRow);
-              const rowInB = matchTeamB.includes(playerRow);
-              const colInA = matchTeamA.includes(playerCol);
-              const colInB = matchTeamB.includes(playerCol);
+          let rowSum = 0; // ← 行合計初期化
 
-              if ((rowInA || rowInB) && (colInA || colInB)) {
-                const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
-                  (teamB.includes(playerRow) && teamB.includes(playerCol));
-                const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
+          players.forEach(playerCol => {
+            const td = document.createElement("td");
+            td.style.border = "1px solid #ddd";
+            td.style.padding = "4px";
+            td.style.textAlign = "center";
 
-                if (currentSameTeam && matchSameTeam) {
-                  const rowTeamKills = rowInA ? killsA : killsB;
-                  const enemyTeamKills = rowInA ? killsB : killsA;
-                  diffs.push(rowTeamKills - enemyTeamKills);
-                } else if (!currentSameTeam && !matchSameTeam) {
-                  const rowTeamKills = rowInA ? killsA : killsB;
-                  const enemyTeamKills = rowInA ? killsB : killsA;
-                  diffs.push(rowTeamKills - enemyTeamKills);
+            if (playerRow === playerCol) {
+              td.textContent = "-";
+            } else {
+              const diffs = [];
+
+              matches.forEach(match => {
+                const matchTeamA = match.teamA || [];
+                const matchTeamB = match.teamB || [];
+                const killsA = match.teamAKills || 0;
+                const killsB = match.teamBKills || 0;
+
+                const rowInA = matchTeamA.includes(playerRow);
+                const rowInB = matchTeamB.includes(playerRow);
+                const colInA = matchTeamA.includes(playerCol);
+                const colInB = matchTeamB.includes(playerCol);
+
+                if ((rowInA || rowInB) && (colInA || colInB)) {
+                  const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
+                    (teamB.includes(playerRow) && teamB.includes(playerCol));
+                  const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
+
+                  if (currentSameTeam && matchSameTeam) {
+                    const rowTeamKills = rowInA ? killsA : killsB;
+                    const enemyTeamKills = rowInA ? killsB : killsA;
+                    diffs.push(rowTeamKills - enemyTeamKills);
+                  } else if (!currentSameTeam && !matchSameTeam) {
+                    const rowTeamKills = rowInA ? killsA : killsB;
+                    const enemyTeamKills = rowInA ? killsB : killsA;
+                    diffs.push(rowTeamKills - enemyTeamKills);
+                  }
                 }
+              });
+
+              td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
+
+              // ← 合計に加算
+              if (td.textContent !== "-") {
+                rowSum += parseFloat(td.textContent);
               }
-            });
-
-            td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
-
-            // ← 合計に加算
-            if (td.textContent !== "-") {
-              rowSum += parseFloat(td.textContent);
             }
-          }
 
-          tr.appendChild(td);
+            tr.appendChild(td);
+          });
+
+          // 行の最後に合計セルを追加
+          const tdTotal = document.createElement("td");
+          tdTotal.textContent = rowSum.toFixed(1);
+          tdTotal.style.border = "1px solid #ddd";
+          tdTotal.style.padding = "4px";
+          tdTotal.style.textAlign = "center";
+          tdTotal.style.fontWeight = "bold";
+          tr.appendChild(tdTotal);
+
+          table.appendChild(tr);
         });
-
-        // 行の最後に合計セルを追加
-        const tdTotal = document.createElement("td");
-        tdTotal.textContent = rowSum.toFixed(1);
-        tdTotal.style.border = "1px solid #ddd";
-        tdTotal.style.padding = "4px";
-        tdTotal.style.textAlign = "center";
-        tdTotal.style.fontWeight = "bold";
-        tr.appendChild(tdTotal);
-
-        table.appendChild(tr);
 
         killDiffTableContainer.innerHTML = "";
         killDiffTableContainer.appendChild(table);
       });
-    });
-  });
-
-  const btn = document.querySelector(".info-btn");
-  const info = document.querySelector(".info-text");
-
-  btn.addEventListener("click", () => {
-    if (info.style.display === "none") {
-      info.style.display = "block";
-      btn.textContent = "△ 相性表の見方"; // 閉じるアイコンに変える
-    } else {
-      info.style.display = "none";
-      btn.textContent = "▽ 相性表の見方"; // 開くアイコンに戻す
     }
-  });
-</script>
+
+    const btn = document.querySelector(".info-btn");
+    const info = document.querySelector(".info-text");
+
+    btn.addEventListener("click", () => {
+      if (info.style.display === "none") {
+        info.style.display = "block";
+        btn.textContent = "△ 相性表の見方"; // 閉じるアイコンに変える
+      } else {
+        info.style.display = "none";
+        btn.textContent = "▽ 相性表の見方"; // 開くアイコンに戻す
+      }
+    });
+  </script>
 </body>
 
 </html>
