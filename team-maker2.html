@@ -877,35 +877,75 @@ async function makeBalancedTeams() {
   if (!snapshot.exists()) return;
   const matches = Object.values(snapshot.val());
 
+  // --- 相性スコア計算（以前のcalculateExpectedKDdiffと同じ方式） ---
+  const stats = {};
+  matches.forEach(match => {
+    const teamA = match.teamA || [];
+    const teamB = match.teamB || [];
+    const killsA = match.teamAKills ?? 0;
+    const killsB = match.teamBKills ?? 0;
+    const kdDiffA = killsA - killsB;
+    const kdDiffB = killsB - killsA;
+
+    [ [teamA, teamB, kdDiffA], [teamB, teamA, kdDiffB] ].forEach(([team, enemyTeam, diff]) => {
+      team.forEach(pA => {
+        if (!stats[pA]) stats[pA] = {};
+        team.forEach(pB => {
+          if (pA === pB) return;
+          if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
+          stats[pA][pB].asAlly.push(diff);
+        });
+        enemyTeam.forEach(pB => {
+          if (!stats[pA][pB]) stats[pA][pB] = { asAlly: [], asEnemy: [] };
+          stats[pA][pB].asEnemy.push(diff);
+        });
+      });
+    });
+  });
+
+  // プレイヤーごとの期待相性スコアを計算
+  const playerScores = {};
+  selectedPlayers.forEach(pA => {
+    let total = 0, count = 0;
+    Object.keys(stats[pA] || {}).forEach(pB => {
+      const { asAlly, asEnemy } = stats[pA][pB];
+      const allyAvg = asAlly.length ? asAlly.reduce((a,b)=>a+b,0)/asAlly.length : 0;
+      const enemyAvg = asEnemy.length ? asEnemy.reduce((a,b)=>a+b,0)/asEnemy.length : 0;
+      total += allyAvg - enemyAvg;
+      count++;
+    });
+    playerScores[pA] = count ? total / count : 0;
+  });
+
+  // チームサイズ
   const teamSize = Math.floor(selectedPlayers.length / 2);
+
+  // 全組み合わせ生成
   const combinations = getCombinations(selectedPlayers, teamSize);
 
-  const candidates = [];
   let bestDiff = Infinity;
   let bestTeams = null;
+  const candidates = [];
 
   combinations.forEach(teamA => {
     const teamB = selectedPlayers.filter(p => !teamA.includes(p));
-    const scoreA = calcTeamScore(teamA, teamB, matches);
-    const scoreB = calcTeamScore(teamB, teamA, matches);
-    const diff = scoreA - scoreB;
+    const sumA = teamA.reduce((sum, p) => sum + (playerScores[p] || 0), 0);
+    const sumB = teamB.reduce((sum, p) => sum + (playerScores[p] || 0), 0);
+    const diff = sumA - sumB;
 
     candidates.push({ teams: { A: teamA, B: teamB }, scoreDiff: diff });
 
     if (Math.abs(diff) < Math.abs(bestDiff)) {
-      bestDiff = diff; 
+      bestDiff = diff;
       bestTeams = { teamA, teamB };
     }
   });
 
-  // 全候補表示
   displayCandidates(candidates);
 
-  // 最適チーム表示
   document.getElementById("teamA").innerHTML = bestTeams.teamA.map(n => `<li>${n}</li>`).join("");
   document.getElementById("teamB").innerHTML = bestTeams.teamB.map(n => `<li>${n}</li>`).join("");
 
-  // Firebaseに送信
   db.ref("currentTeamResult").set({
     teamA: bestTeams.teamA,
     teamB: bestTeams.teamB,
