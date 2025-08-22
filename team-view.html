@@ -177,55 +177,50 @@
       margin: auto;
     }
 
-    .info-btn {
-      background: none;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      margin-left: 6px;
+    .info-box {
+        max-width: 600px;
+        margin: 1rem auto;
+        background: #eefaff;
+        border: 1px solid #97EADB;
+        border-radius: 8px;
+        padding: 12px;
+        color: #333;
+        line-height: 1.5;
+        font-size: 14px;
+        text-align: left;
     }
 
-    .info-text {
-      background-color: #eefaff;
-      border: 1px solid #97EADB;
-      border-radius: 6px;
-      padding: 8px;
-      margin-top: 6px;
-      color: #333;
+    .info-box h3 {
+        color: #47b6a2;
+        margin: 0 0 8px 0;
+        text-align: center;
     }
 
-    .info-btn-container {
-      text-align: center;
-      margin-top: 12px;
+    .info-box ul {
+        margin: 0;
+        padding-left: 20px;
     }
 
-    .info-btn {
-      background-color: #97EADB;
-      border: none;
-      color: #fff;
-      font-size: 16px;
-      font-weight: bold;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
+    .info-box li {
+        margin-bottom: 5px;
+    }
+    
+    .kill-diff-table {
+        border-collapse: collapse;
+        width: 100%;
+        text-align: center;
+        border-radius: 8px;
+        overflow: hidden;
     }
 
-    .info-btn:hover {
-      background-color: #47b6a2;
+    .kill-diff-table th, .kill-diff-table td {
+        border: 1px solid #ddd;
+        padding: 6px;
     }
 
-    .info-text {
-      display: none;
-      max-width: 600px;
-      margin: 8px auto 16px auto;
-      background: #eefaff;
-      border: 1px solid #97EADB;
-      border-radius: 6px;
-      padding: 8px;
-      color: #333;
-      line-height: 1.5;
-      font-size: 14px;
+    .kill-diff-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -261,73 +256,32 @@
 
     <section>
       <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
-      <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
 
-      <section style="text-align:center; margin:2rem 0;">
-        <button class="info-btn">▽ 相性表の見方</button>
-        <div class="info-text"
-          style="display:none; text-align:left; max-width:700px; margin:1rem auto; border:1px solid #ccc; padding:1rem; border-radius:8px; background:#f9f9f9;">
-          <h3>相性表の見方</h3>
-          <p>
-            この表は、プレイヤー同士が**「チームを組むとどうなるか？」**を過去の試合データから予測するものです。
-          </p>
-
-          <h4>表の読み方</h4>
-          <p>
-            **横の列（相手）** と **縦の行（自分）** が交わるところにある数字が **「相性スコア」** です。<br>
-            このスコアは、あなたとその相手が同じチームだった時、どれくらいキル数に貢献したかの平均値です。<br>
-            色が塗られているところが **味方**、色が塗られていないところが **敵** と戦った時のスコアを表しています。
-          </p>
-
-          <h4>スコアの意味</h4>
-          <p>
-            スコアの数字は、**「どれだけチームが勝つ力を持っていたか」** を示します。
-          </p>
-
-          <ul>
-            <li>**<span style="color: green;">プラス (+) の数字</span>**<br>
-              <ul style="margin:0; padding-left: 20px;">
-                <li>**味方とのスコア**: この人と組むと、チームのキル数が相手より多くなる傾向にあります。**「良い組み合わせ」**です。</li>
-                <li>**敵とのスコア**: この人を敵に回すと、あなたのチームのキル数が相手チームより多くなる傾向にあります。**「相性の良い敵」**です。</li>
-              </ul>
-            </li>
-            <li>**<span style="color: red;">マイナス (-) の数字</span>**<br>
-              <ul style="margin:0; padding-left: 20px;">
-                <li>**味方とのスコア**: この人と組むと、チームのキル数が相手より少なくなる傾向にあります。**「悪い組み合わせ」**です。</li>
-                <li>**敵とのスコア**: この人を敵に回すと、あなたのチームのキル数が相手チームより少なくなる傾向にあります。**「苦手な敵」**です。</li>
-              </ul>
-            </li>
-          </ul>
-
-          <h4>具体例</h4>
-          <p>現在のチーム分けが「**チーム1（水色）**」と「**チーム2（ピンク色）**」だったとします。</p>
-          <table style="border-collapse:collapse; width:100%; text-align:center; margin: 12px 0;">
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">d (敵)</th>
-            </tr>
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">b (自分)</th>
-              <td>+14<br>→ 過去にaさんと組んだ時、<br>平均14キル差をつけて勝ってたよ！</td>
-              <td>+14<br>→ 過去にdさんを敵にした時、<br>平均14キル差をつけて勝ってたよ！</td>
-            </tr>
-          </table>
-          <table style="border-collapse:collapse; width:100%; text-align:center;">
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">e (敵)</th>
-            </tr>
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">c (自分)</th>
-              <td>-4<br>→ 過去にaさんと組んだ時、<br>平均4キル差で負けてたよ...</td>
-              <td>+8<br>→ 過去にeさんを敵にした時、<br>平均8キル差をつけて勝ってたよ！</td>
-            </tr>
-          </table>
-          <p>この表は、プレイヤー間の相性を一目でわかるようにするためのものです。この情報を活用して、よりバランスの取れた、楽しいチーム分けを見つけてみてください！</p>
+      <div class="info-box">
+        <p style="text-align:center; margin-top:0;">
+          この表は、プレイヤー同士の**「相性スコア」**をまとめたものです。
+        </p>
+        <ul style="list-style-type: none; padding: 0;">
+          <li>**プラスの数字**: その相手と一緒にいると、チームのキル数が相手より多くなる傾向にあります。</li>
+          <li>**マイナスの数字**: その相手と一緒にいると、チームのキル数が相手より少なくなる傾向にあります。</li>
+        </ul>
+        <div style="display:flex; justify-content:space-around; align-items:center; margin-top:10px; font-size:12px;">
+            <div style="text-align:center;">
+                <div style="width:30px; height:20px; background-color:#eefaff; border:1px solid #97EADB; margin:auto;"></div>
+                <p style="margin:2px 0 0 0;">チーム1</p>
+            </div>
+            <div style="text-align:center;">
+                <div style="width:30px; height:20px; background-color:#fff1f5; border:1px solid #ffb6c1; margin:auto;"></div>
+                <p style="margin:2px 0 0 0;">チーム2</p>
+            </div>
+            <div style="text-align:center;">
+                <div style="width:30px; height:20px; background-color:white; border:1px solid #ddd; margin:auto;"></div>
+                <p style="margin:2px 0 0 0;">自分 vs 敵</p>
+            </div>
         </div>
-      </section>
+      </div>
+
+      <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
 
       <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
       <div id="lastUpdated">最終更新: --</div>
@@ -338,6 +292,7 @@
 </footer>
 
 <script>
+
   const firebaseConfig = {
     apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
     authDomain: "match-result-ea475.firebaseapp.com",
@@ -354,6 +309,7 @@
   const teamBul = document.getElementById("teamB");
   const matchCountEl = document.getElementById("matchCount");
   const lastUpdatedEl = document.getElementById("lastUpdated");
+  const killDiffTableContainer = document.getElementById("killDiffTableContainer");
 
   db.ref("currentTeamResult").on("value", snapshot => {
     const data = snapshot.val() || {};
@@ -361,7 +317,7 @@
     const teamB = Array.isArray(data.teamB) ? data.teamB : [];
 
     teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
-    teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
+    teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name></li>`).join("") : "";
 
     if (data.timestamp && typeof data.timestamp === "number") {
       const d = new Date(data.timestamp);
@@ -371,6 +327,8 @@
     } else {
       lastUpdatedEl.textContent = "最終更新: --";
     }
+
+    updateKillDiffTable(teamA, teamB);
   });
 
   db.ref("apex_results").on("value", snapshot => {
@@ -401,15 +359,16 @@
     });
   });
 
-  db.ref("currentTeamResult").on("value", snapshot => {
-    const data = snapshot.val() || {};
-    const teamA = Array.isArray(data.teamA) ? data.teamA : [];
-    const teamB = Array.isArray(data.teamB) ? data.teamB : [];
+  function updateKillDiffTable(teamA, teamB) {
     const players = [...teamA, ...teamB];
 
+    if (players.length === 0) {
+      killDiffTableContainer.innerHTML = "";
+      return;
+    }
+
     const table = document.createElement("table");
-    table.style.borderCollapse = "collapse";
-    table.style.width = "100%";
+    table.className = "kill-diff-table";
 
     // ヘッダー行
     const headerRow = document.createElement("tr");
@@ -418,8 +377,6 @@
     players.forEach(p => {
       const th = document.createElement("th");
       th.textContent = p;
-      th.style.border = "1px solid #ddd";
-      th.style.padding = "4px";
       th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
       headerRow.appendChild(th);
     });
@@ -427,8 +384,6 @@
     // ここで「合計」列を追加
     const thTotal = document.createElement("th");
     thTotal.textContent = "合計";
-    thTotal.style.border = "1px solid #ddd";
-    thTotal.style.padding = "4px";
     thTotal.style.background = "#ccc"; // 任意の色
     headerRow.appendChild(thTotal);
 
@@ -441,8 +396,6 @@
         const tr = document.createElement("tr");
         const th = document.createElement("th");
         th.textContent = playerRow;
-        th.style.border = "1px solid #ddd";
-        th.style.padding = "4px";
         th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
         tr.appendChild(th);
 
@@ -450,12 +403,10 @@
 
         players.forEach(playerCol => {
           const td = document.createElement("td");
-          td.style.border = "1px solid #ddd";
-          td.style.padding = "4px";
-          td.style.textAlign = "center";
+          td.style.backgroundColor = (teamA.includes(playerRow) && teamA.includes(playerCol)) || (teamB.includes(playerRow) && teamB.includes(playerCol)) ? (teamA.includes(playerRow) ? "#eefaff" : "#fff1f5") : "white";
 
           if (playerRow === playerCol) {
-              td.textContent = "-";
+            td.textContent = "-";
           } else {
             const diffs = [];
 
@@ -471,18 +422,12 @@
               const colInB = matchTeamB.includes(playerCol);
 
               if ((rowInA || rowInB) && (colInA || colInB)) {
-                const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
-                  (teamB.includes(playerRow) && teamB.includes(playerCol));
-                const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
+                const isSameTeamInMatch = (rowInA && colInA) || (rowInB && colInB);
 
-                if (currentSameTeam && matchSameTeam) {
-                  const rowTeamKills = rowInA ? killsA : killsB;
-                  const enemyTeamKills = rowInA ? killsB : killsA;
-                  diffs.push(rowTeamKills - enemyTeamKills);
-                } else if (!currentSameTeam && !matchSameTeam) {
-                  const rowTeamKills = rowInA ? killsA : killsB;
-                  const enemyTeamKills = rowInA ? killsB : killsA;
-                  diffs.push(rowTeamKills - enemyTeamKills);
+                if (isSameTeamInMatch) {
+                    const myTeamKills = rowInA ? killsA : killsB;
+                    const enemyTeamKills = rowInA ? killsB : killsA;
+                    diffs.push(myTeamKills - enemyTeamKills);
                 }
               }
             });
@@ -513,20 +458,8 @@
         killDiffTableContainer.appendChild(table);
       });
     });
-  });
-
-  const btn = document.querySelector(".info-btn");
-  const info = document.querySelector(".info-text");
-
-  btn.addEventListener("click", () => {
-    if (info.style.display === "none") {
-      info.style.display = "block";
-      btn.textContent = "△ 相性表の見方"; // 閉じるアイコンに変える
-    } else {
-      info.style.display = "none";
-      btn.textContent = "▽ 相性表の見方"; // 開くアイコンに戻す
-    }
-  });
+  }
 </script>
 </body>
+
 </html>
