@@ -1041,6 +1041,8 @@ function displayCandidates(candidates) {
   });
 }
 
+const result = makeBalancedTeams(players); // 総当たり計算
+displayCandidates(result.allCandidates);    // HTMLに表示
   </script>
 </body>
 
