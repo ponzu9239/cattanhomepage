@@ -1087,41 +1087,54 @@ function displayCandidates(candidates) {
 
 // 各プレイヤーのスコア計算（チーム内＋敵チームとの平均差）
 function calcPlayerScore(player, allies, enemies, matches) {
-  let total = 0;
-  let count = 0;
+  let score = 0;
 
   // 味方との過去試合
   allies.forEach(ally => {
     if (ally === player) return; // 自分自身はスキップ
+    let total = 0;
+    let count = 0;
+
     matches.forEach(match => {
       const teamA = match.teamA || [];
       const teamB = match.teamB || [];
 
+      // 現在の味方なら過去も味方だった試合のみ
       if ((teamA.includes(player) && teamA.includes(ally)) || (teamB.includes(player) && teamB.includes(ally))) {
-        const diff = teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
-                                            : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+        const diff = teamA.includes(player) 
+                     ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
+                     : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
         total += diff;
         count++;
       }
     });
+
+    if (count > 0) score += total / count;
   });
 
   // 敵との過去試合
   enemies.forEach(enemy => {
+    let total = 0;
+    let count = 0;
+
     matches.forEach(match => {
       const teamA = match.teamA || [];
       const teamB = match.teamB || [];
 
+      // 現在の敵なら過去も敵だった試合のみ
       if ((teamA.includes(player) && teamB.includes(enemy)) || (teamB.includes(player) && teamA.includes(enemy))) {
-        const diff = teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
-                                            : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+        const diff = teamA.includes(player) 
+                     ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
+                     : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
         total += diff;
         count++;
       }
     });
+
+    if (count > 0) score += total / count;
   });
 
-  return count > 0 ? Number((total / count).toFixed(1)) : 0;
+  return Number(score.toFixed(1));
 }
 
 // 例：全選択プレイヤーのスコア配列を作る
