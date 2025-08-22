@@ -57,7 +57,7 @@
       }
 
       nav.show {
-        top: 80px;
+        top: 75px;
         /* ヘッダーの下までスライド */
       }
 
@@ -394,9 +394,9 @@
     <section>
       <div class="method-select">
         <label><input type="radio" name="method" value="average" checked> 平均キル</label>
-        <label><input type="radio" name="method" value="winrate"> 勝率</label>
-        <label><input type="radio" name="method" value="kdratio"> キルレ</label>
         <label><input type="radio" name="method" value="balanced"> 相性</label>
+        <label><input type="radio" name="method" value="kdratio"> キルレ</label>
+        <label><input type="radio" name="method" value="winrate"> 勝率</label>
       </div>
 
       <div class="recent-toggle">
@@ -895,7 +895,6 @@
           if (nav.classList.contains("show")) {
             link.style.opacity = "1";
             link.style.transform = "translateY(0)";
-            link.style.transitionDelay = `${index * 0.1}s`;
           } else {
             link.style.opacity = "0";
             link.style.transform = "translateY(-20px)";
