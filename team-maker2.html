@@ -881,7 +881,6 @@ async function makeBalancedTeams() {
   const combinations = getCombinations(selectedPlayers, teamSize);
 
   const candidates = [];
-
   let bestDiff = Infinity;
   let bestTeams = null;
 
@@ -893,16 +892,20 @@ async function makeBalancedTeams() {
 
     candidates.push({ teams: { A: teamA, B: teamB }, scoreDiff: diff });
 
-if (Math.abs(diff) < Math.abs(bestDiff)) {
-  bestDiff = diff;  // ← diff は符号付きのまま保持
-  bestTeams = { teamA, teamB };
-}
+    if (Math.abs(diff) < Math.abs(bestDiff)) {
+      bestDiff = diff; 
+      bestTeams = { teamA, teamB };
+    }
   });
 
-  displayCandidates(candidates); // ←ここで全候補リストを表示
+  // 全候補表示
+  displayCandidates(candidates);
 
+  // 最適チーム表示
   document.getElementById("teamA").innerHTML = bestTeams.teamA.map(n => `<li>${n}</li>`).join("");
   document.getElementById("teamB").innerHTML = bestTeams.teamB.map(n => `<li>${n}</li>`).join("");
+
+  // Firebaseに送信
   db.ref("currentTeamResult").set({
     teamA: bestTeams.teamA,
     teamB: bestTeams.teamB,
@@ -1060,30 +1063,16 @@ document.querySelectorAll('input[name="method"]').forEach(radio => {
 });
 
 function displayCandidates(candidates) {
-  const container = document.getElementById("candidateList");
-  container.innerHTML = "";
-
-  candidates.forEach((cand, idx) => {
+  const ul = document.getElementById("candidateList");
+  ul.innerHTML = "";
+  candidates.forEach(c => {
     const li = document.createElement("li");
-
-    // チームAとBのメンバー名＋スコア
-    const teamAScores = cand.teams.A.map(name => {
-      const score = calcPlayerScore(name, cand.teams.A, cand.teams.B);
-      return `${name} (${score})`;
-    }).join(", ");
-
-    const teamBScores = cand.teams.B.map(name => {
-      const score = calcPlayerScore(name, cand.teams.B, cand.teams.A);
-      return `${name} (${score})`;
-    }).join(", ");
-
-    li.innerHTML = `<strong>候補${idx+1}:</strong><br>
-                    チームA: ${teamAScores}<br>
-                    チームB: ${teamBScores}<br>
-                    差: ${cand.scoreDiff.toFixed(1)}`;
-    container.appendChild(li);
+    li.textContent = `A: ${c.teams.A.join(", ")} | B: ${c.teams.B.join(", ")} | 差: ${c.scoreDiff.toFixed(1)}`;
+    ul.appendChild(li);
   });
 }
+
+
 
 function calcPlayerScore(player, team, opposingTeam) {
   let total = 0;
