@@ -839,7 +839,14 @@
             db.ref("currentTeamResult").set({ teamA: [], teamB: [], timestamp: Date.now() });
             return;
         }
-      
+
+        // ここから新しい追加ロジック
+        if (bestTeams.teamB.includes("きゃたん") && !bestTeams.teamA.includes("きゃたん")) {
+          const temp = bestTeams.teamA;
+          bestTeams.teamA = bestTeams.teamB;
+          bestTeams.teamB = temp;
+        }
+
         document.getElementById("teamA").innerHTML = bestTeams.teamA.map(n => `<li>${n}</li>`).join("");
         document.getElementById("teamB").innerHTML = bestTeams.teamB.map(n => `<li>${n}</li>`).join("");
       
