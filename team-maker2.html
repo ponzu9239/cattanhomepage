@@ -687,11 +687,11 @@ function renderPlayers() {
   if (method === "average") scores = playerScoresAverage;
   else if (method === "winrate") scores = playerScoresWinRate;
   else if (method === "kdratio") scores = playerScoresKDRatio;
-  else if (method === "balanced") {
-    // 相性モードの場合、選択されているプレイヤーとmatchingPlayersをベースにする
+else if (method === "balanced") {
     scores = {};
-    matchingPlayers.forEach(name => { scores[name] = 0; }); 
-  } else scores = {};
+    const source = matchingPlayers.length ? matchingPlayers : Object.keys(playerScoresAverage);
+    source.forEach(name => { scores[name] = 0; });
+}
 
   container.innerHTML = "";
   let names = Object.keys(scores).filter(name => scores[name] !== undefined);
