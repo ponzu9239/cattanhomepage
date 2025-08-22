@@ -960,7 +960,7 @@ function calcTeamScore(team, opposingTeam, matches) {
       });
     });
 
-    if (count > 0) score += total / count; // 平均を足す
+    if (count > 0) score += Number((total / count).toFixed(1)); // 平均を少数第一位まで
   });
 
   return score;
