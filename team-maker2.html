@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -919,7 +920,7 @@ function getCombinations(array, size) {
   return combsWithFirst.concat(combsWithoutFirst);
 }
 
-function calcTeamScore(team, opposingTeam, matches) {
+function calcTeamScore(team, matches) {
   let score = 0;
   team.forEach(p => {
     matches.forEach(match => {
