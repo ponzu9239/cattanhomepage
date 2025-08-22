@@ -694,7 +694,7 @@ function renderPlayers() {
   else if (method === "kdratio") scores = playerScoresKDRatio;
 else if (method === "balanced") {
     scores = {};
-    const source = matchingPlayers.length ? matchingPlayers : Object.keys(playerScoresAverage);
+    const source = Object.keys(playerScoresAverage); // 全プレイヤーを表示対象にする
     source.forEach(name => { scores[name] = 0; });
 }
 
