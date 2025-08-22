@@ -394,6 +394,11 @@
       </div>
     </div>
   </section>
+  
+  <div id="allCandidatesContainer">
+  <h2>全候補の組み合わせ</h2>
+  <ul id="candidateList"></ul>
+</div>
 
   <section>
     <div class="method-select">
@@ -1018,6 +1023,20 @@ document.querySelectorAll('input[name="method"]').forEach(radio => {
     }
   });
 });
+
+function displayCandidates(candidates) {
+  const list = document.getElementById("candidateList");
+  list.innerHTML = ""; // 既存のリストをクリア
+
+  candidates.forEach((candidate, index) => {
+    const li = document.createElement("li");
+    li.textContent = `候補${index + 1}：チームA [${candidate.teams.A.join(", ")}], チームB [${candidate.teams.B.join(", ")}], スコア差 ${candidate.scoreDiff}`;
+    list.appendChild(li);
+  });
+}
+
+const result = makeBalancedTeams(players); // 総当たり計算
+displayCandidates(result.allCandidates);    // HTMLに表示
   </script>
 </body>
 
