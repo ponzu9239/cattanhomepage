@@ -887,9 +887,9 @@ async function makeBalancedTeams() {
 
   combinations.forEach(teamA => {
     const teamB = selectedPlayers.filter(p => !teamA.includes(p));
-const scoreA = calcTeamScoreWithAllyEnemy(teamA, teamB, matches);
-const scoreB = calcTeamScoreWithAllyEnemy(teamB, teamA, matches);
-const diff = Math.abs(scoreA - scoreB);
+    const scoreA = calcTeamScore(teamA, teamB, matches);
+    const scoreB = calcTeamScore(teamB, teamA, matches);
+    const diff = Math.abs(scoreA - scoreB);
 
     candidates.push({ teams: { A: teamA, B: teamB }, scoreDiff: diff });
 
@@ -920,48 +920,23 @@ function getCombinations(array, size) {
   return combsWithFirst.concat(combsWithoutFirst);
 }
 
-function calcTeamScore(team, opposingTeam, matches) {
+function calcTeamScore(team, matches) {
   let score = 0;
-
-  team.forEach(player => {
-    let playerScore = 0;
-
-    // 味方とのスコア
-    team.forEach(ally => {
-      if (ally === player) return;
-      let diffs = [];
-      matches.forEach(match => {
-        const teamA = match.teamA || [];
-        const teamB = match.teamB || [];
-        const killsA = match.teamAKills ?? 0;
-        const killsB = match.teamBKills ?? 0;
-
-        if (teamA.includes(player) && teamA.includes(ally)) diffs.push(killsA - killsB);
-        if (teamB.includes(player) && teamB.includes(ally)) diffs.push(killsB - killsA);
-      });
-      if (diffs.length) playerScore += diffs.reduce((a, b) => a + b, 0) / diffs.length;
+  team.forEach(p => {
+    matches.forEach(match => {
+      const teamA = match.teamA || [];
+      const teamB = match.teamB || [];
+      if (teamA.includes(p)) {
+        score += (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
+      }
+      if (teamB.includes(p)) {
+        score += (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+      }
     });
-
-    // 敵とのスコア
-    opposingTeam.forEach(enemy => {
-      let diffs = [];
-      matches.forEach(match => {
-        const teamA = match.teamA || [];
-        const teamB = match.teamB || [];
-        const killsA = match.teamAKills ?? 0;
-        const killsB = match.teamBKills ?? 0;
-
-        if (teamA.includes(player) && teamB.includes(enemy)) diffs.push(killsA - killsB);
-        if (teamB.includes(player) && teamA.includes(enemy)) diffs.push(killsB - killsA);
-      });
-      if (diffs.length) playerScore += diffs.reduce((a, b) => a + b, 0) / diffs.length;
-    });
-
-    score += playerScore;
   });
-
   return score;
 }
+
 // 使う時は呼び出すだけ
 document.getElementById("makeBalancedTeamsBtn")?.addEventListener("click", makeBalancedTeams);
     // ペアフォーム イベント設定
