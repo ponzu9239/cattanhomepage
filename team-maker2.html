@@ -826,7 +826,7 @@ else if (method === "balanced") {
             const sumA = teamAMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
             const sumB = teamBMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
 
-            results.push({ teamA: teamAMembers, teamB: teamBMembers, diffScore: Math.abs(sumA - sumB) });
+            results.push({ teamA: teamAMembers, teamB: teamBMembers, diffScore: sumA - sumB });
             return;
           }
 
