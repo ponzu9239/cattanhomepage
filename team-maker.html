@@ -18,6 +18,15 @@
       /* ページの高さを確保 */
     }
 
+    /* 新しいコンテナのスタイル */
+    .container {
+      flex: 1;
+      margin: 0 auto;
+      max-width: 800px;
+      width: 100%;
+      padding: 0 1rem;
+    }
+
     header {
       position: fixed;
       top: 0;
@@ -104,12 +113,9 @@
     .method-select {
       text-align: center;
       margin: 18px 0 12px 0;
-      /* --- 変更箇所 --- */
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      /* 改行を有効にする */
-      /* --- ここまで --- */
     }
 
     label {
@@ -258,7 +264,6 @@
       border-radius: 12px;
       padding: 12px 16px;
       margin-bottom: 20px;
-      /* max-width: 480px; */
       margin-left: auto;
       margin-right: auto;
     }
@@ -384,61 +389,59 @@
   </header>
 
   <main>
-    <h1>いい感じにチーム分けしてくれるやつ</h1>
+    <div class="container">
+      <h1>いい感じにチーム分けしてくれるやつ</h1>
 
-    <section>
-      <div class="teams">
-        <div class="team-box team1">
-          <h2>チーム1</h2>
-          <ul id="teamA"></ul>
+      <section>
+        <div class="teams">
+          <div class="team-box team1">
+            <h2>チーム1</h2>
+            <ul id="teamA"></ul>
+          </div>
+          <div class="team-box team2">
+            <h2>チーム2</h2>
+            <ul id="teamB"></ul>
+          </div>
         </div>
-        <div class="team-box team2">
-          <h2>チーム2</h2>
-          <ul id="teamB"></ul>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="method-select">
-        <label><input type="radio" name="method" value="average" checked> 平均キル</label>
-        <label><input type="radio" name="method" value="balanced"> 相性</label>
-        <label><input type="radio" name="method" value="kdratio"> キルレ</label>
-        <label><input type="radio" name="method" value="winrate"> 勝率</label>
-      </div>
-
-      <div class="recent-toggle">
-        <label><input type="checkbox" id="recentBiasToggle"> 直前試合重視(勝率除く)</label>
-      </div>
-    </section>
-
-    <section>
-      <section class="pair-section" id="separatePairsSection">
-        <h3>離したいペアを追加</h3>
-        <form id="separatePairForm" class="pair-form" onsubmit="return false;">
-          <input type="text" id="separateName1" placeholder="名前1" autocomplete="off" />
-          <input type="text" id="separateName2" placeholder="名前2" autocomplete="off" />
-          <button type="submit">追加</button>
-        </form>
-        <ul id="separatePairList" class="pair-list"></ul>
       </section>
 
-      <section class="pair-section" id="togetherPairsSection">
-        <h3>くっつけたいペアを追加</h3>
-        <form id="togetherPairForm" class="pair-form" onsubmit="return false;">
-          <input type="text" id="togetherName1" placeholder="名前1" autocomplete="off" />
-          <input type="text" id="togetherName2" placeholder="名前2" autocomplete="off" />
-          <button type="submit">追加</button>
-        </form>
-        <ul id="togetherPairList" class="pair-list"></ul>
+      <section>
+        <div class="method-select">
+          <label><input type="radio" name="method" value="average" checked> 平均キル</label>
+          <label><input type="radio" name="method" value="balanced"> 相性</label>
+          <label><input type="radio" name="method" value="kdratio"> キルレ</label>
+          <label><input type="checkbox" id="recentBiasToggle"> 直前試合重視(勝率除く)</label>
+          <label><input type="radio" name="method" value="winrate"> 勝率</label>
+        </div>
       </section>
-    </section>
 
-    <section>
-      <div id="playerList" class="player-list"></div>
-    </section>
-    <p id="matchCount">過去 試合のカスタムマッチをもとに生成。</p>
+      <section>
+        <section class="pair-section" id="separatePairsSection">
+          <h3>離したいペアを追加</h3>
+          <form id="separatePairForm" class="pair-form" onsubmit="return false;">
+            <input type="text" id="separateName1" placeholder="名前1" autocomplete="off" />
+            <input type="text" id="separateName2" placeholder="名前2" autocomplete="off" />
+            <button type="submit">追加</button>
+          </form>
+          <ul id="separatePairList" class="pair-list"></ul>
+        </section>
 
+        <section class="pair-section" id="togetherPairsSection">
+          <h3>くっつけたいペアを追加</h3>
+          <form id="togetherPairForm" class="pair-form" onsubmit="return false;">
+            <input type="text" id="togetherName1" placeholder="名前1" autocomplete="off" />
+            <input type="text" id="togetherName2" placeholder="名前2" autocomplete="off" />
+            <button type="submit">追加</button>
+          </form>
+          <ul id="togetherPairList" class="pair-list"></ul>
+        </section>
+      </section>
+
+      <section>
+        <div id="playerList" class="player-list"></div>
+      </section>
+      <p id="matchCount">過去 試合のカスタムマッチをもとに生成。</p>
+    </div>
   </main>
 
   <footer>
