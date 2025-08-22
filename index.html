@@ -190,23 +190,36 @@
       }
     }
 
-.birthday-banner {
-  background: linear-gradient(135deg, #ffc0cb, #ff69b4);
-  color: #fff;
-  font-weight: bold;
-  text-align: center;
-  padding: 10px 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  animation: sparkle 1s ease-in-out infinite alternate;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  display: none;
-  margin-top: 75px;
-  white-space: nowrap; /* 改行を禁止 */
-  font-size: 7vw; /* 画面幅の5%のフォントサイズ */
-  min-font-size: 1.5rem; /* 最小フォントサイズ */
-}
+    .birthday-banner {
+      background: linear-gradient(135deg, #ffc0cb, #ff69b4);
+      color: #fff;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      animation: sparkle 1s ease-in-out infinite alternate;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      display: none;
+      margin-top: 75px;
+      white-space: nowrap;
+      font-size: 7vw;
+      min-font-size: 1.5rem;
+    }
 
+    .birthday-image-container {
+      margin-top: 2rem;
+      text-align: center;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
+    .birthday-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
 
     body.birthday-mode .birthday-banner {
       display: block;
@@ -254,7 +267,6 @@
       background: linear-gradient(135deg, #ff69b4, #ff1493);
       color: #fff;
     }
-
   </style>
 
 </head>
@@ -272,6 +284,10 @@
 
   <div class="birthday-banner">
     🎉 HAPPY BIRTHDAY 🎉
+  </div>
+
+  <div class="birthday-image-container">
+    <img src="https://lh3.googleusercontent.com/u/0/d/1X5X6yN-P-g2Y2s4D4jF4jF8fQ8p2j6yQ=w1200-h630-p-k-no" alt="きゃたん誕生日イラスト" class="birthday-image">
   </div>
 
   <section id="profile">
@@ -312,7 +328,6 @@
   </section>
 
   <section id="sns" class="sns">
-
     <h3>🐾 SNSリンク</h3>
     <a href="https://www.youtube.com/@catiffanygame">YouTube</a>
     <a href="https://x.com/catiffanygame">X（旧Twitter）</a>
