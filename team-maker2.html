@@ -963,53 +963,75 @@ function getCombinations(array, size) {
   return combsWithFirst.concat(combsWithoutFirst);
 }
 
+/**
+ * チームの総合相性スコアを計算します。
+ * @param {string[]} team - スコアを計算するチームのプレイヤー配列
+ * @param {string[]} opposingTeam - 対戦相手のチームのプレイヤー配列
+ * @param {Array<Object>} matches - 過去の全試合データ
+ * @returns {number} - チームの総合相性スコア
+ */
 function calcTeamScore(team, opposingTeam, matches) {
-  let totalScore = 0;
+  let totalTeamScore = 0;
 
   team.forEach(player => {
     let playerScore = 0;
     
-    // 評価対象のプレイヤーと関係のある全プレイヤーのリストを作成
-    const allPlayersInvolved = [...team, ...opposingTeam];
-    
-    // 各プレイヤーとの関係を個別に評価
-    allPlayersInvolved.forEach(otherPlayer => {
+    // 1. 味方との相性スコアを計算
+    team.forEach(ally => {
       // 自分自身はスキップ
-      if (player === otherPlayer) return;
+      if (player === ally) return;
 
       let interactionScore = 0;
       let interactionCount = 0;
 
-      // 過去の試合をすべてチェック
       matches.forEach(match => {
         const teamA = match.teamA || [];
         const teamB = match.teamB || [];
-        const diff = (teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
 
-        // 同じチームだった場合
-        if ((teamA.includes(player) && teamA.includes(otherPlayer)) || (teamB.includes(player) && teamB.includes(otherPlayer))) {
-          interactionScore += diff;
-          interactionCount++;
-        } 
-        // 敵チームだった場合
-        else if ((teamA.includes(player) && teamB.includes(otherPlayer)) || (teamB.includes(player) && teamA.includes(otherPlayer))) {
+        // 過去に同じチームだった場合のみ加算
+        if ((teamA.includes(player) && teamA.includes(ally)) || (teamB.includes(player) && teamB.includes(ally))) {
+          const diff = teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
           interactionScore += diff;
           interactionCount++;
         }
       });
       
-      // 他のプレイヤーとの平均KD差を計算して加算
+      // 味方との平均KD差を合計に加算
+      if (interactionCount > 0) {
+        playerScore += interactionScore / interactionCount;
+      }
+    });
+
+    // 2. 敵との相性スコアを計算
+    opposingTeam.forEach(enemy => {
+      let interactionScore = 0;
+      let interactionCount = 0;
+
+      matches.forEach(match => {
+        const teamA = match.teamA || [];
+        const teamB = match.teamB || [];
+
+        // 過去に敵チームだった場合のみ加算
+        if ((teamA.includes(player) && teamB.includes(enemy)) || (teamB.includes(player) && teamA.includes(enemy))) {
+          const diff = teamA.includes(player) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+          interactionScore += diff;
+          interactionCount++;
+        }
+      });
+
+      // 敵との平均KD差を合計に加算
       if (interactionCount > 0) {
         playerScore += interactionScore / interactionCount;
       }
     });
 
     // プレイヤーごとの合計相性スコアを、チーム全体の合計に加算
-    totalScore += playerScore;
+    totalTeamScore += playerScore;
   });
 
-  return totalScore;
+  return +totalTeamScore.toFixed(1);
 }
+
 
 // 使う時は呼び出すだけ
 document.getElementById("makeBalancedTeamsBtn")?.addEventListener("click", makeBalancedTeams);
