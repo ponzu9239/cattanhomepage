@@ -922,21 +922,30 @@ function getCombinations(array, size) {
 
 function calcTeamScore(team, opposingTeam, matches) {
   let score = 0;
+
   team.forEach(p => {
+    let total = 0;
+    let count = 0;
+
     matches.forEach(match => {
       const teamA = match.teamA || [];
       const teamB = match.teamB || [];
-      
-      // プレイヤーがチームAにいる場合
+
       if (teamA.includes(p)) {
-        score += (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
-      }
-      // プレイヤーがチームBにいる場合
-      else if (teamB.includes(p)) {
-        score += (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+        total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
+        count++;
+      } else if (teamB.includes(p)) {
+        total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
+        count++;
       }
     });
+
+    // 試合数で割って平均を出す
+    if (count > 0) {
+      score += total / count;
+    }
   });
+
   return score;
 }
 
