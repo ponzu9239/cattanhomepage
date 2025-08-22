@@ -927,40 +927,40 @@ function calcTeamScore(team, opposingTeam, matches) {
     let total = 0;
     let count = 0;
 
-    // 味方との過去試合
     team.forEach(ally => {
       if (ally === p) return; // 自分自身はスキップ
       matches.forEach(match => {
         const teamA = match.teamA || [];
         const teamB = match.teamB || [];
 
-        // 現在の味方なら過去も味方だった試合のみ
-        if ((teamA.includes(p) && teamA.includes(ally)) || (teamB.includes(p) && teamB.includes(ally))) {
-          const diff = teamA.includes(p) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) 
-                                        : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
-          total += diff;
+        if (teamA.includes(p) && teamA.includes(ally)) {
+          total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
+          count++;
+        }
+        if (teamB.includes(p) && teamB.includes(ally)) {
+          total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
           count++;
         }
       });
     });
 
-    // 敵との過去試合
     opposingTeam.forEach(enemy => {
       matches.forEach(match => {
         const teamA = match.teamA || [];
         const teamB = match.teamB || [];
 
-        // 現在の敵なら過去も敵だった試合のみ
-        if ((teamA.includes(p) && teamB.includes(enemy)) || (teamB.includes(p) && teamA.includes(enemy))) {
-          const diff = teamA.includes(p) ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0)
-                                        : (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
-          total += diff;
+        if (teamA.includes(p) && teamB.includes(enemy)) {
+          total += (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
+          count++;
+        }
+        if (teamB.includes(p) && teamA.includes(enemy)) {
+          total += (match.teamBKills ?? 0) - (match.teamAKills ?? 0);
           count++;
         }
       });
     });
 
-    if (count > 0) score += Number((total / count).toFixed(1));
+    if (count > 0) score += Number((total / count).toFixed(1)); // 平均を少数第一位まで
   });
 
   return score;
