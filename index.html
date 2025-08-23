@@ -505,11 +505,9 @@
       }
     }
 
-    // 誕生日モードの場合のみ経過時間を表示・更新
-    if (document.body.classList.contains("birthday-mode")) {
-      updateElapsedTime();
-      setInterval(updateElapsedTime, 1000);
-    }
+    // 誕生日モードかどうかに関わらず常に表示
+    updateElapsedTime();
+    setInterval(updateElapsedTime, 1000);
   </script>
 </body>
 
