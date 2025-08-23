@@ -3,25 +3,15 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>チーム分け</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>きゃたんのひみつきち</title>
   <style>
     body {
-      overflow-x: hidden;
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
       background: #f7fcfc;
       margin: 0;
       padding-top: 100px;
       transition: background-color 0.5s ease;
-      display: flex;
-      flex-direction: column;
-    }
-
-    h1 {
-      text-align: center;
-      color: #47b6a2;
-      margin-bottom: 12px;
     }
 
     /* 通常時のスタイル */
@@ -42,7 +32,6 @@
       color: #fff;
     }
 
-    /* ハンバーガーアイコン */
     .hamburger {
       font-size: 2rem;
       cursor: pointer;
@@ -90,143 +79,98 @@
       transform: scale(1.03);
     }
 
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-    }
-
-    main {
-      flex: 1;
-    }
-
     footer {
       background: #97EADB;
       text-align: center;
       color: white;
       padding: 1rem;
-    }
-
-    .teams {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-bottom: 16px;
-      align-items: center;
-    }
-
-    .team-box {
-      width: 90%;
-      max-width: 500px;
-      background: #eefaff;
-      padding: 12px;
-      border-radius: 12px;
-      border: 2px solid #97eadb;
-      text-align: center;
-    }
-
-    .team-box.team2 {
-      background: #fff1f5;
-      border-color: #ffb6c1;
-    }
-
-    .team-box h2 {
-      font-size: 18px;
-      margin: 0 0 8px 0;
-      color: #47b6a2;
-    }
-
-    .team-box ul {
-      list-style: none;
-      padding: 0 8px;
-      margin: 0;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      box-sizing: border-box;
-    }
-
-    .team-box li {
-      background: white;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      padding: 6px;
-      font-size: 15px;
-      font-weight: 500;
-      text-align: center;
-    }
-
-    #matchCount,
-    #lastUpdated {
-      text-align: center;
-      color: #888;
-      font-weight: 600;
-      margin-top: 8px;
-      user-select: none;
-      font-size: 14px;
-      letter-spacing: 0.05em;
+      margin-top: 2rem;
     }
 
     section {
-      padding: 0 2rem;
+      padding: 2rem;
+      max-width: 800px;
       margin: auto;
     }
 
-    .info-btn {
-      background: none;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      margin-left: 6px;
+    section h3 {
+      color: #5aa2aa;
+      border-bottom: 2px solid #97EADB;
+      padding-bottom: 0.3rem;
     }
 
-    .info-text {
-      background-color: #eefaff;
-      border: 1px solid #97EADB;
-      border-radius: 6px;
-      padding: 8px;
-      margin-top: 6px;
-      color: #333;
-    }
-
-    .info-btn-container {
-      text-align: center;
-      margin-top: 12px;
-    }
-
-    .info-btn {
-      background-color: #97EADB;
-      border: none;
-      color: #fff;
-      font-size: 16px;
+    .code-display {
       font-weight: bold;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
+      font-size: 1.3rem;
+      background: #d4f0f4;
+      border: 2px solid #97EADB;
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+      margin: 1rem 0;
+      color: #1b656f;
+      user-select: all;
+      word-break: break-all;
     }
 
-    .info-btn:hover {
-      background-color: #47b6a2;
+    .sns a {
+      display: inline-block;
+      margin: 0.5rem;
+      text-decoration: none;
+      font-size: 1.2rem;
+      background: #97EADB;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      color: white;
     }
 
-    .info-text {
-      display: none;
-      max-width: 600px;
-      margin: 8px auto 16px auto;
-      background: #eefaff;
-      border: 1px solid #97EADB;
-      border-radius: 6px;
-      padding: 8px;
-      color: #333;
-      line-height: 1.5;
-      font-size: 14px;
+    body {
+      background-color: #fff;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s;
     }
 
+    .roulette-banner {
+      text-align: center;
+      margin: 20px auto;
+    }
+
+    .roulette-banner a {
+      display: block;
+      width: 100%;
+      max-width: 800px;
+      margin: 1rem auto;
+      padding: 1rem 0;
+      font-weight: bold;
+      font-size: 1.3rem;
+      text-align: center;
+      text-decoration: none;
+      color: #004d66;
+      border-radius: 2px;
+      background: linear-gradient(135deg, #97EADB, #d4f0f4);
+      box-shadow: 0 4px 12px rgba(0, 77, 102, 0.25);
+      transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+      border: 2px solid #1bb0c9;
+    }
+
+    .roulette-banner a:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 18px rgba(0, 77, 102, 0.35);
+      background: linear-gradient(135deg, #80d4d6, #bce7ec);
+      color: #002b3c;
+    }
+
+    .banner-note {
+      font-size: 0.8rem;
+      color: #555;
+      text-align: center;
+      margin-top: 0.3rem;
+    }
 
     /* 誕生日仕様のスタイル */
     body.birthday-mode {
       background-color: #ffe8f4;
+      color: #7a1548;
       background-image:
         radial-gradient(circle, #ff69b4 1px, transparent 1px),
         radial-gradient(circle, #ffd700 1.5px, transparent 1.5px),
@@ -234,7 +178,6 @@
       background-size: 100px 100px, 120px 120px, cover;
       background-position: 0 0, 60px 60px, 0 0;
       animation: confetti 5s linear infinite;
-      background-attachment: fixed;
     }
 
     @keyframes confetti {
@@ -263,6 +206,29 @@
       min-font-size: 1.5rem;
     }
 
+    .birthday-image-container {
+      margin-top: 2rem;
+      text-align: center;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .birthday-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .elapsed-time-container {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #333;
+      margin: 1.5rem 0;
+    }
+
     body.birthday-mode .birthday-banner {
       display: block;
     }
@@ -277,41 +243,44 @@
       }
     }
 
-
-    body.birthday-mode .team-box h2 {
+    body.birthday-mode .elapsed-time-container {
       color: #c71585;
     }
 
-    body.birthday-mode .info-btn {
-      background-color: #ff69b4;
-    }
-
-    body.birthday-mode .info-btn:hover {
-      background-color: #ff1493;
-    }
-
-    body.birthday-mode .info-text {
-      background: #fff0f5;
-      border-color: #ff69b4;
-    }
-
-    body.birthday-mode .info-text h3,
-    body.birthday-mode .info-text h4 {
+    body.birthday-mode .code-display {
+      background: linear-gradient(145deg, #fff0f5, #ffebcd);
+      border-color: #f778a1;
       color: #c71585;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
     }
 
-    /* 相性表の文字色を誕生日カラーにする */
-    #killDiffTableContainer table {
-      color: #c71585;
+    body.birthday-mode .sns a {
+      background: #ff69b4;
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+      border-radius: 999px;
+      transition: transform 0.2s, background 0.2s;
     }
 
-    #killDiffTableContainer th,
-    #killDiffTableContainer td {
-      color: inherit;
+    body.birthday-mode .sns a:hover {
+      background: #ff1493;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    body.birthday-mode .roulette-banner a {
+      background: linear-gradient(135deg, #ffb6c1, #ff69b4);
+      border: 2px solid #ff1493;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    body.birthday-mode .roulette-banner a:hover {
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      color: #fff;
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 </head>
 
 <body>
@@ -329,97 +298,66 @@
     🎉 HAPPY BIRTHDAY 🎉
   </div>
 
-  <main>
-    <h1>チーム分け</h1>
+  <div class="birthday-image-container">
+    <img src="IMG_4607.JPG" alt="きゃたん誕生日イラスト" class="birthday-image">
+  </div>
 
-    <section>
-      <div class="teams">
-        <div class="team-box team1">
-          <h2>チーム1</h2>
-          <ul id="teamA"></ul>
-        </div>
-        <div class="team-box team2">
-          <h2>チーム2</h2>
-          <ul id="teamB"></ul>
-        </div>
-      </div>
-    </section>
+  <div class="elapsed-time-container">
+    <div id="elapsedTime"></div>
+  </div>
 
-    <section>
-      <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
-      <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
+  <section id="profile">
+    <h3>🐱 プロフィール</h3>
+    <p>
+      猫botです。(ストリーマー)APEXカスタムのオーガナイザー🐾参加型を中心にYouTubeで配信中│最高同時視聴915人│配信総視聴者数80万人OVER|TOP配信者になる│game￤│APEX│Minecraft│原神│プロセカ│第五人格│雀魂│PUBG│フォールガイズ│スマブラ│ディスコサーバー開設🐾
+    </p>
+  </section>
 
-      <section style="text-align:center; margin:2rem 0;">
-        <button class="info-btn">▽ 相性表の見方</button>
-        <div class="info-text"
-          style="display:none; text-align:left; max-width:700px; margin:1rem auto; border:1px solid #ccc; padding:1rem; border-radius:8px; background:#f9f9f9;">
-          <h3>相性表の見方</h3>
-          <p>
-            この表は、プレイヤー同士が<b>「チームを組むとどうなるか？」</b>を過去の試合データから予測するものです。
-          </p>
+  <section id="liveVideo" style="max-width: 800px; margin: auto;">
+    <h3>🎥 配信中の動画</h3>
+    <div id="videoContainer">
+      読み込み中...
+    </div>
+  </section>
 
-          <h4>表の読み方</h4>
-          <p>
-            <b>横の列（相手）</b> と <b>縦の行（自分）</b> が交わるところにある数字が <b>「相性スコア」</b> です。<br>
-            このスコアは、同じ色同士の場合は <b>味方</b>、違う色同士の場合は <b>敵</b> として戦った時のチームのスコアを表しています。
-          </p>
+  <section id="code">
+    <h3>🆔 参加型コード</h3>
+    <p id="participantCodeDisplay" class="code-display">読み込み中...</p>
+  </section>
 
-          <h4>スコアの意味</h4>
-          <p>
-            スコアの数字は、<b>「どれだけチームが勝つ力を持っていたか」</b> を示します。
-          </p>
+  <section id="rules">
+    <h3>🎮 参加型配信のルール</h3>
+    <ul>
+      <li>チャンネル登録＆高評価ポチッとな( ｡･ω･｡)ﾉ凸</li>
+      <li>discordに入るのも必須です！リンクはプロフィールにあります🔗</li>
+      <li>参加者のみVCでしゃべるのOKです🙆‍♀️聞き専でも️⭕️</li>
+      <li>VCあがって配信閉じることはしないでください❌</li>
+    </ul>
+  </section>
 
-          <ul>
-            <li><b><span style="color: green;">プラス (+) の数字</span></b><br>
-              <ul style="margin:0; padding-left: 20px;">
-                <li><b>味方とのスコア</b>: この人と組むと、チームのキル数が相手より多くなる傾向にあります。<b>「相性の良い味方」</b>です。</li>
-                <li><b>敵とのスコア</b>: この人を敵に回すと、あなたのチームのキル数が相手チームより多くなる傾向にあります。<b>「得意な敵」</b>です。</li>
-              </ul>
-            </li>
-            <li><b><span style="color: red;">マイナス (-) の数字</span></b><br>
-              <ul style="margin:0; padding-left: 20px;">
-                <li><b>味方とのスコア</b>: この人と組むと、チームのキル数が相手より少なくなる傾向にあります。<b>「相性の悪い味方」</b>です。</li>
-                <li><b>敵とのスコア</b>: この人を敵に回すと、あなたのチームのキル数が相手チームより少なくなる傾向にあります。<b>「苦手な敵」</b>です。</li>
-              </ul>
-            </li>
-          </ul>
+  <section id="event">
+    <h3>🌟イベント</h3>
+    <div class="roulette-banner">
+      <a href="roulette.html">きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</a>
+    </div>
+    <p class="banner-note">※クリックするとページに移動します</p>
+  </section>
 
-          <h4>具体例</h4>
-          <table style="border-collapse:collapse; width:100%; text-align:center; margin: 12px 0;">
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">d (敵)</th>
-            </tr>
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">b (自分)</th>
-              <td>+14<br>→ 過去にaさんと組んだ時、<br>あなたのチームが平均14キル差をつけて勝ってたよ！</td>
-              <td>+14<br>→ 過去にdさんを敵にした時、<br>あなたのチームが平均14キル差をつけて勝ってたよ！</td>
-            </tr>
-          </table>
-          <table style="border-collapse:collapse; width:100%; text-align:center;">
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">e (敵)</th>
-            </tr>
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">c (自分)</th>
-              <td>-4<br>→ 過去にaさんと組んだ時、<br>あなたのチームか平均4キル差で負けてたよ...</td>
-              <td>+8<br>→ 過去にeさんを敵にした時、<br>あなたのチームが平均8キル差をつけて勝ってたよ！</td>
-            </tr>
-          </table>
-          <p>この表は、プレイヤー間の相性を一目でわかるようにするためのものです。個人間の強さの関係を表すものではありません。</p>
-        </div>
-      </section>
-
-      <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
-      <div id="lastUpdated">最終更新: --</div>
-  </main>
+  <section id="sns" class="sns">
+    <h3>🐾 SNSリンク</h3>
+    <a href="https://www.youtube.com/@catiffanygame">YouTube</a>
+    <a href="https://x.com/catiffanygame">X（旧Twitter）</a>
+    <a href="https://discord.com/invite/hhF9xhMaJc">Discord</a>
+    <a href="https://www.twitch.tv/catkungame">Twitch</a>
+    <a href="https://www.tiktok.com/@catiffanygame?_t=ZS-8xKiPhVrRxq&_r=1">TikTok</a>
+  </section>
 
   <footer>
     <p>ド天然のきゃたん</p>
   </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <script>
     function checkBirthday() {
@@ -444,50 +382,86 @@
     document.addEventListener("DOMContentLoaded", checkBirthday);
 
     const firebaseConfig = {
-      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
-      authDomain: "match-result-ea475.firebaseapp.com",
-      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
-      projectId: "match-result-ea475",
-      storageBucket: "match-result-ea475.firebasestorage.app",
-      messagingSenderId: "759877853492",
-      appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.appspot.com",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+      measurementId: "G-ZNGEZZWMTP"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
 
-    const teamAul = document.getElementById("teamA");
-    const teamBul = document.getElementById("teamB");
-    const matchCountEl = document.getElementById("matchCount");
-    const lastUpdatedEl = document.getElementById("lastUpdated");
-    const killDiffTableContainer = document.getElementById("killDiffTableContainer");
+    const dbRef = firebase.database().ref("/cattan");
 
-    db.ref("currentTeamResult").on("value", snapshot => {
-      const data = snapshot.val() || {};
-      const teamA = Array.isArray(data.teamA) ? data.teamA : [];
-      const teamB = Array.isArray(data.teamB) ? data.teamB : [];
+    const winnerEl = document.getElementById("winnerName");
+    const winnerRef = firebase.database().ref("/roulette/winner");
 
-      teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
-      teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
+    winnerRef.on("value", (snapshot) => {
+      const winners = snapshot.val();
+      if (winners) {
+        const keys = Object.keys(winners);
+        if (keys.length > 0) {
+          keys.sort();
+          const latestWinner = winners[keys[keys.length - 1]];
+          winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
+          updateProbabilityBar(latestWinner);
 
-      if (data.timestamp && typeof data.timestamp === "number") {
-        const d = new Date(data.timestamp);
-        const formatted = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")} ` +
-          `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
-        lastUpdatedEl.textContent = `最終更新: ${formatted}(日本時間)`;
-      } else {
-        lastUpdatedEl.textContent = "最終更新: --";
+          winnerEl.classList.remove("animate-winner");
+          void winnerEl.offsetWidth;
+          winnerEl.classList.add("animate-winner");
+
+          return;
+        }
       }
-
-      updateKillDiffTable(teamA, teamB);
+      winnerEl.textContent = "まだ抽選が行われていません。";
     });
 
-    db.ref("apex_results").on("value", snapshot => {
-      if (!snapshot.exists()) {
-        matchCountEl.textContent = "過去 試合のカスタムマッチをもとに生成。";
+    dbRef.on("value", (snapshot) => {
+      const data = snapshot.val() || {};
+
+      const code = data.code || "現在、参加型カスタムは行われておりません。";
+      const codeEl = document.getElementById("participantCodeDisplay");
+      codeEl.textContent = code;
+
+      const url = data.stream || "現在、配信は行われていません。";
+      const container = document.getElementById("videoContainer");
+
+      if (!url || url === "現在、配信は行われていません。") {
+        container.textContent = "現在、配信は行われていません。";
         return;
       }
-      const matches = Object.values(snapshot.val());
-      matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
+
+      let iframeSrc = "";
+      if (url.includes("youtube.com") || url.includes("youtu.be")) {
+        let videoId = "";
+        const ytMatch = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
+        if (ytMatch) {
+          videoId = ytMatch[1];
+        } else {
+          const liveMatch = url.match(/live\/([a-zA-Z0-9_-]+)/);
+          if (liveMatch) videoId = liveMatch[1];
+        }
+        if (videoId) {
+          iframeSrc = `https://www.youtube.com/embed/${videoId}`;
+        } else {
+          iframeSrc = url;
+        }
+      } else if (url.includes("twitch.tv")) {
+        const twitchMatch = url.match(/twitch.tv\/([^\/]+)/);
+        const channelName = twitchMatch ? twitchMatch[1] : null;
+        if (channelName) {
+          const parentDomain = location.hostname;
+          iframeSrc = `https://player.twitch.tv/?channel=${channelName}&parent=${parentDomain}`;
+        } else {
+          iframeSrc = url;
+        }
+      } else {
+        iframeSrc = url;
+      }
+
+      container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
     });
 
     const hamburger = document.getElementById("hamburger");
@@ -509,130 +483,33 @@
       });
     });
 
-    function updateKillDiffTable(teamA, teamB) {
-      const players = [...teamA, ...teamB];
+    // 経過時間表示のスクリプト
+    const birthday = new Date("2025-08-23T14:23:30+09:00"); // ISO 8601形式で日本時間(JST)を指定
+    const timeDisplay = document.getElementById("elapsedTime");
 
-      if (players.length <= 1) {
-        killDiffTableContainer.innerHTML = "";
-        return;
+    function updateElapsedTime() {
+      const now = new Date();
+      const elapsedMilliseconds = now - birthday;
+      const seconds = Math.floor(elapsedMilliseconds / 1000);
+
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = seconds % 60;
+
+      const formattedHours = String(hours).padStart(2, '0');
+      const formattedMinutes = String(minutes).padStart(2, '0');
+      const formattedSeconds = String(remainingSeconds).padStart(2, '0');
+
+      if (timeDisplay) {
+        timeDisplay.textContent = `2025/08/23 14:23:30 から ${formattedHours}時間 ${formattedMinutes}分 ${formattedSeconds}秒 経過`;
       }
-
-      const table = document.createElement("table");
-      table.style.borderCollapse = "collapse";
-      table.style.width = "100%";
-
-      const headerRow = document.createElement("tr");
-      headerRow.appendChild(document.createElement("th"));
-
-      players.forEach(p => {
-        const th = document.createElement("th");
-        th.textContent = p;
-        th.style.border = "1px solid #ddd";
-        th.style.padding = "4px";
-        th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
-        headerRow.appendChild(th);
-      });
-
-      const thTotal = document.createElement("th");
-      thTotal.textContent = "合計";
-      thTotal.style.border = "1px solid #ddd";
-      thTotal.style.padding = "4px";
-      thTotal.style.background = "#ccc";
-      headerRow.appendChild(thTotal);
-
-      table.appendChild(headerRow);
-
-      db.ref("apex_results").once("value").then(snap => {
-        const matches = snap.exists() ? Object.values(snap.val()) : [];
-
-        players.forEach(playerRow => {
-          const tr = document.createElement("tr");
-          const th = document.createElement("th");
-          th.textContent = playerRow;
-          th.style.border = "1px solid #ddd";
-          th.style.padding = "4px";
-          th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
-          tr.appendChild(th);
-
-          let rowSum = 0;
-
-          players.forEach(playerCol => {
-            const td = document.createElement("td");
-            td.style.border = "1px solid #ddd";
-            td.style.padding = "4px";
-            td.style.textAlign = "center";
-
-            if (playerRow === playerCol) {
-              td.textContent = "-";
-            } else {
-              const diffs = [];
-
-              matches.forEach(match => {
-                const matchTeamA = match.teamA || [];
-                const matchTeamB = match.teamB || [];
-                const killsA = match.teamAKills || 0;
-                const killsB = match.teamBKills || 0;
-
-                const rowInA = matchTeamA.includes(playerRow);
-                const rowInB = matchTeamB.includes(playerRow);
-                const colInA = matchTeamA.includes(playerCol);
-                const colInB = matchTeamB.includes(playerCol);
-
-                if ((rowInA || rowInB) && (colInA || colInB)) {
-                  const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
-                    (teamB.includes(playerRow) && teamB.includes(playerCol));
-                  const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
-
-                  if (currentSameTeam && matchSameTeam) {
-                    const rowTeamKills = rowInA ? killsA : killsB;
-                    const enemyTeamKills = rowInA ? killsB : killsA;
-                    diffs.push(rowTeamKills - enemyTeamKills);
-                  } else if (!currentSameTeam && !matchSameTeam) {
-                    const rowTeamKills = rowInA ? killsA : killsB;
-                    const enemyTeamKills = rowInA ? killsB : killsA;
-                    diffs.push(rowTeamKills - enemyTeamKills);
-                  }
-                }
-              });
-
-              td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
-
-              if (td.textContent !== "-") {
-                rowSum += parseFloat(td.textContent);
-              }
-            }
-
-            tr.appendChild(td);
-          });
-
-          const tdTotal = document.createElement("td");
-          tdTotal.textContent = rowSum.toFixed(1);
-          tdTotal.style.border = "1px solid #ddd";
-          tdTotal.style.padding = "4px";
-          tdTotal.style.textAlign = "center";
-          tdTotal.style.fontWeight = "bold";
-          tr.appendChild(tdTotal);
-
-          table.appendChild(tr);
-        });
-
-        killDiffTableContainer.innerHTML = "";
-        killDiffTableContainer.appendChild(table);
-      });
     }
 
-    const btn = document.querySelector(".info-btn");
-    const info = document.querySelector(".info-text");
-
-    btn.addEventListener("click", () => {
-      if (info.style.display === "none") {
-        info.style.display = "block";
-        btn.textContent = "△ 相性表の見方";
-      } else {
-        info.style.display = "none";
-        btn.textContent = "▽ 相性表の見方";
-      }
-    });
+    // 誕生日モードの場合のみ経過時間を表示・更新
+    if (document.body.classList.contains("birthday-mode")) {
+      updateElapsedTime();
+      setInterval(updateElapsedTime, 1000);
+    }
   </script>
 </body>
 
