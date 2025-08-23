@@ -6,15 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>チーム分け</title>
 
+
+
+
+
 <style>
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+  }
+
   body {
     font-family: "Hiragino Maru Gothic ProN", sans-serif;
     background: #f7fcfc;
-    margin: 0;
     padding-top: 100px;
     transition: background-color 0.5s ease;
+    display: flex;
+    flex-direction: column;
   }
-
 
   h1 {
     text-align: center;
@@ -86,17 +96,6 @@
   nav a:hover {
     background-color: #0099aa;
     transform: scale(1.03);
-  }
-
-  html,
-  body {
-    height: 100%;
-    margin: 0;
-  }
-
-  body {
-    display: flex;
-    flex-direction: column;
   }
 
   main {
@@ -237,6 +236,7 @@
     background-size: 100px 100px, 120px 120px, cover;
     background-position: 0 0, 60px 60px, 0 0;
     animation: confetti 5s linear infinite;
+    background-attachment: fixed; /* 背景を固定してスクロールに対応 */
   }
 
   @keyframes confetti {
