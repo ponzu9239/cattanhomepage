@@ -221,6 +221,14 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
+    .elapsed-time-container {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #333;
+      margin: 1.5rem 0;
+    }
+
     body.birthday-mode .birthday-banner {
       display: block;
     }
@@ -233,6 +241,10 @@
       to {
         transform: scale(1.03);
       }
+    }
+
+    body.birthday-mode .elapsed-time-container {
+      color: #c71585;
     }
 
     body.birthday-mode .code-display {
@@ -286,9 +298,13 @@
     🎉 HAPPY BIRTHDAY 🎉
   </div>
 
-<div class="birthday-image-container">
+  <div class="birthday-image-container">
     <img src="IMG_4607.JPG" alt="きゃたん誕生日イラスト" class="birthday-image">
-</div>
+  </div>
+
+  <div class="elapsed-time-container">
+    <div id="elapsedTime"></div>
+  </div>
 
   <section id="profile">
     <h3>🐱 プロフィール</h3>
@@ -466,6 +482,34 @@
         }
       });
     });
+
+    // ここから新しく追加するコード
+    const birthday = new Date("2025/08/23 14:23:30");
+    const timeDisplay = document.getElementById("elapsedTime");
+
+    function updateElapsedTime() {
+      const now = new Date();
+      const elapsedMilliseconds = now - birthday;
+      const seconds = Math.floor(elapsedMilliseconds / 1000);
+
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = seconds % 60;
+
+      const formattedHours = String(hours).padStart(2, '0');
+      const formattedMinutes = String(minutes).padStart(2, '0');
+      const formattedSeconds = String(remainingSeconds).padStart(2, '0');
+
+      if (timeDisplay) {
+        timeDisplay.textContent = `2025/08/23 14:23:30 から ${formattedHours}時間 ${formattedMinutes}分 ${formattedSeconds}秒 経過`;
+      }
+    }
+
+    if (document.body.classList.contains("birthday-mode")) {
+      updateElapsedTime();
+      setInterval(updateElapsedTime, 1000);
+    }
+    // ここまで新しく追加するコード
   </script>
 </body>
 
