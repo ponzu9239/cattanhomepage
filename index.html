@@ -6,17 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>きゃたんのひみつきち</title>
   <style>
-body {
- overflow-x: hidden; /* この行を追加 */
- font-family: "Hiragino Maru Gothic ProN", sans-serif;
- background: #f7fcfc;
- margin: 0;
- padding-top: 100px;
- transition: background-color 0.5s ease;
-}
+    /* 全体に適用されるスタイル */
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      margin: 0;
+      padding-top: 100px;
+      transition: background-color 0.5s ease;
+      overflow-x: hidden; /* この行で横方向の余白を強制的に非表示にする */
+    }
 
-
-    /* 通常時のスタイル */
+    /* ヘッダーのスタイル */
     header {
       position: fixed;
       top: 0;
@@ -34,6 +34,7 @@ body {
       color: #fff;
     }
 
+    /* ハンバーガーメニューのスタイル */
     .hamburger {
       font-size: 2rem;
       cursor: pointer;
@@ -81,6 +82,7 @@ body {
       transform: scale(1.03);
     }
 
+    /* フッターのスタイル */
     footer {
       background: #97EADB;
       text-align: center;
@@ -89,6 +91,7 @@ body {
       margin-top: 2rem;
     }
 
+    /* セクションの共通スタイル */
     section {
       padding: 2rem;
       max-width: 800px;
@@ -101,6 +104,7 @@ body {
       padding-bottom: 0.3rem;
     }
 
+    /* 参加型コードのスタイル */
     .code-display {
       font-weight: bold;
       font-size: 1.3rem;
@@ -115,6 +119,7 @@ body {
       word-break: break-all;
     }
 
+    /* SNSリンクのスタイル */
     .sns a {
       display: inline-block;
       margin: 0.5rem;
@@ -124,12 +129,6 @@ body {
       padding: 0.5rem 1rem;
       border-radius: 999px;
       color: white;
-    }
-
-    body {
-      background-color: #fff;
-      color: #000;
-      transition: background-color 0.3s, color 0.3s;
     }
 
     .roulette-banner {
@@ -296,63 +295,65 @@ body {
     </nav>
   </header>
 
-  <div class="birthday-banner">
-    🎉 HAPPY BIRTHDAY 🎉
-  </div>
-
-  <div class="birthday-image-container">
-    <img src="IMG_4607.JPG" alt="きゃたん誕生日イラスト" class="birthday-image">
-  </div>
-
-  <div class="elapsed-time-container">
-    <div id="elapsedTime"></div>
-  </div>
-
-  <section id="profile">
-    <h3>🐱 プロフィール</h3>
-    <p>
-      猫botです。(ストリーマー)APEXカスタムのオーガナイザー🐾参加型を中心にYouTubeで配信中│最高同時視聴915人│配信総視聴者数80万人OVER|TOP配信者になる│game￤│APEX│Minecraft│原神│プロセカ│第五人格│雀魂│PUBG│フォールガイズ│スマブラ│ディスコサーバー開設🐾
-    </p>
-  </section>
-
-  <section id="liveVideo" style="max-width: 800px; margin: auto;">
-    <h3>🎥 配信中の動画</h3>
-    <div id="videoContainer">
-      読み込み中...
+  <main>
+    <div class="birthday-banner">
+      🎉 HAPPY BIRTHDAY 🎉
     </div>
-  </section>
 
-  <section id="code">
-    <h3>🎮　現在プレイ中のゲーム</h3>
-    <p id="participantCodeDisplay" class="code-display">読み込み中...</p>
-  </section>
-
-  <section id="rules">
-    <h3>📝 参加型配信のルール</h3>
-    <ul>
-      <li>チャンネル登録＆高評価ポチッとな( ｡･ω･｡)ﾉ凸</li>
-      <li>discordに入るのも必須です！リンクはプロフィールにあります🔗</li>
-      <li>参加者のみVCでしゃべるのOKです🙆‍♀️聞き専でも️⭕️</li>
-      <li>VCあがって配信閉じることはしないでください❌</li>
-    </ul>
-  </section>
-
-  <section id="event">
-    <h3>🌟イベント</h3>
-    <div class="roulette-banner">
-      <a href="roulette.html">きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</a>
+    <div class="birthday-image-container">
+      <img src="IMG_4607.JPG" alt="きゃたん誕生日イラスト" class="birthday-image">
     </div>
-    <p class="banner-note">※クリックするとページに移動します</p>
-  </section>
 
-  <section id="sns" class="sns">
-    <h3>🐾 SNSリンク</h3>
-    <a href="https://www.youtube.com/@catiffanygame">YouTube</a>
-    <a href="https://x.com/catiffanygame">X（旧Twitter）</a>
-    <a href="https://discord.com/invite/hhF9xhMaJc">Discord</a>
-    <a href="https://www.twitch.tv/catkungame">Twitch</a>
-    <a href="https://www.tiktok.com/@catiffanygame?_t=ZS-8xKiPhVrRxq&_r=1">TikTok</a>
-  </section>
+    <div class="elapsed-time-container">
+      <div id="elapsedTime"></div>
+    </div>
+
+    <section id="profile">
+      <h3>🐱 プロフィール</h3>
+      <p>
+        猫botです。(ストリーマー)APEXカスタムのオーガナイザー🐾参加型を中心にYouTubeで配信中│最高同時視聴915人│配信総視聴者数80万人OVER|TOP配信者になる│game￤│APEX│Minecraft│原神│プロセカ│第五人格│雀魂│PUBG│フォールガイズ│スマブラ│ディスコサーバー開設🐾
+      </p>
+    </section>
+
+    <section id="liveVideo" style="max-width: 800px; margin: auto;">
+      <h3>🎥 配信中の動画</h3>
+      <div id="videoContainer">
+        読み込み中...
+      </div>
+    </section>
+
+    <section id="code">
+      <h3>🆔 参加型コード</h3>
+      <p id="participantCodeDisplay" class="code-display">読み込み中...</p>
+    </section>
+
+    <section id="rules">
+      <h3>🎮 参加型配信のルール</h3>
+      <ul>
+        <li>チャンネル登録＆高評価ポチッとな( ｡･ω･｡)ﾉ凸</li>
+        <li>discordに入るのも必須です！リンクはプロフィールにあります🔗</li>
+        <li>参加者のみVCでしゃべるのOKです🙆‍♀️聞き専でも️⭕️</li>
+        <li>VCあがって配信閉じることはしないでください❌</li>
+      </ul>
+    </section>
+
+    <section id="event">
+      <h3>🌟イベント</h3>
+      <div class="roulette-banner">
+        <a href="roulette.html">きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</a>
+      </div>
+      <p class="banner-note">※クリックするとページに移動します</p>
+    </section>
+
+    <section id="sns" class="sns">
+      <h3>🐾 SNSリンク</h3>
+      <a href="https://www.youtube.com/@catiffanygame">YouTube</a>
+      <a href="https://x.com/catiffanygame">X（旧Twitter）</a>
+      <a href="https://discord.com/invite/hhF9xhMaJc">Discord</a>
+      <a href="https://www.twitch.tv/catkungame">Twitch</a>
+      <a href="https://www.tiktok.com/@catiffanygame?_t=ZS-8xKiPhVrRxq&_r=1">TikTok</a>
+    </section>
+  </main>
 
   <footer>
     <p>ド天然のきゃたん</p>
@@ -486,7 +487,7 @@ body {
     });
 
     // 経過時間表示のスクリプト
-    const birthday = new Date("2025-08-23T14:23:30+09:00"); // ISO 8601形式で日本時間(JST)を指定
+    const birthday = new Date("2025-08-23T14:23:30+09:00");
     const timeDisplay = document.getElementById("elapsedTime");
 
     function updateElapsedTime() {
@@ -507,7 +508,6 @@ body {
       }
     }
 
-    // 誕生日モードかどうかに関わらず常に表示
     updateElapsedTime();
     setInterval(updateElapsedTime, 1000);
   </script>
