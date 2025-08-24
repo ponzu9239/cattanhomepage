@@ -305,7 +305,7 @@
     </div>
 
     <div class="elapsed-time-container">
-      <div id="elapsedTime"></div>
+      <div>24時間配信完走！</div>
     </div>
 
     <section id="profile">
@@ -323,7 +323,7 @@
     </section>
 
     <section id="code">
-      <h3>🎮　現在プレイ中のゲーム</h3>
+      <h3>🆔 参加コード</h3>
       <p id="participantCodeDisplay" class="code-display">読み込み中...</p>
     </section>
 
@@ -486,30 +486,6 @@
       });
     });
 
-    // 経過時間表示のスクリプト
-    const birthday = new Date("2025-08-23T14:23:30+09:00");
-    const timeDisplay = document.getElementById("elapsedTime");
-
-    function updateElapsedTime() {
-      const now = new Date();
-      const elapsedMilliseconds = now - birthday;
-      const seconds = Math.floor(elapsedMilliseconds / 1000);
-
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const remainingSeconds = seconds % 60;
-
-      const formattedHours = String(hours).padStart(2, '0');
-      const formattedMinutes = String(minutes).padStart(2, '0');
-      const formattedSeconds = String(remainingSeconds).padStart(2, '0');
-
-      if (timeDisplay) {
-        timeDisplay.textContent = `現在 ${formattedHours}時間 ${formattedMinutes}分 ${formattedSeconds}秒 配信中！`;
-      }
-    }
-
-    updateElapsedTime();
-    setInterval(updateElapsedTime, 1000);
   </script>
 </body>
 
