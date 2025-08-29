@@ -812,19 +812,19 @@
           if (!isValid) continue;
 
           let scoreA, scoreB, diffScore;
-          let scores;
+          let individualScores;
           if (method === "balanced") {
-            scores = calculateBalancedScores(teamAMembers, teamBMembers, matches);
-            scoreA = teamAMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
-            scoreB = teamBMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
+            individualScores = calculateBalancedScores(teamAMembers, teamBMembers, matches);
+            scoreA = teamAMembers.reduce((sum, name) => sum + (individualScores[name] || 0), 0);
+            scoreB = teamBMembers.reduce((sum, name) => sum + (individualScores[name] || 0), 0);
             diffScore = Math.abs(scoreA - scoreB);
           } else {
-            if (method === "average") scores = playerScoresAverage;
-            else if (method === "winrate") scores = playerScoresWinRate;
-            else scores = playerScoresKDRatio;
+            if (method === "average") individualScores = playerScoresAverage;
+            else if (method === "winrate") individualScores = playerScoresWinRate;
+            else individualScores = playerScoresKDRatio;
 
-            scoreA = teamAMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
-            scoreB = teamBMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
+            scoreA = teamAMembers.reduce((sum, name) => sum + (individualScores[name] || 0), 0);
+            scoreB = teamBMembers.reduce((sum, name) => sum + (individualScores[name] || 0), 0);
             diffScore = Math.abs(scoreA - scoreB);
           }
 
@@ -833,7 +833,8 @@
             teamB: teamBMembers,
             diffScore,
             scoreA,
-            scoreB
+            scoreB,
+            individualScores
           });
 
           if (diffScore < bestDiff) {
@@ -843,7 +844,8 @@
               teamB: teamBMembers,
               diffScore,
               scoreA,
-              scoreB
+              scoreB,
+              individualScores
             };
           }
         }
@@ -880,8 +882,8 @@
         bestResult.scoreB = tempScore;
       }
 
-      document.getElementById("teamA").innerHTML = bestResult.teamA.map(n => `<li>${n}</li>`).join("");
-      document.getElementById("teamB").innerHTML = bestResult.teamB.map(n => `<li>${n}</li>`).join("");
+      document.getElementById("teamA").innerHTML = bestResult.teamA.map(n => `<li>${n} (${bestResult.individualScores[n].toFixed(2)})</li>`).join("");
+      document.getElementById("teamB").innerHTML = bestResult.teamB.map(n => `<li>${n} (${bestResult.individualScores[n].toFixed(2)})</li>`).join("");
 
       teamAScoreEl.textContent = bestResult.scoreA.toFixed(2);
       teamBScoreEl.textContent = bestResult.scoreB.toFixed(2);
@@ -896,9 +898,12 @@
       allCombinations.forEach(combination => {
         const li = document.createElement("li");
         const diffText = `スコア差: ${combination.diffScore.toFixed(2)}`;
+        const teamAPlayers = combination.teamA.map(n => `${n}(${combination.individualScores[n].toFixed(2)})`).join(", ");
+        const teamBPlayers = combination.teamB.map(n => `${n}(${combination.individualScores[n].toFixed(2)})`).join(", ");
+
         li.innerHTML = `
-          <strong>チームA</strong>: ${combination.teamA.join(", ")}<br>
-          <strong>チームB</strong>: ${combination.teamB.join(", ")}<br>
+          <strong>チームA</strong>: ${teamAPlayers}<br>
+          <strong>チームB</strong>: ${teamBPlayers}<br>
           ${diffText}
         `;
         allCombinationsList.appendChild(li);
@@ -912,14 +917,11 @@
 
       allPlayers.forEach(p1 => {
         const p1IsA = teamA.includes(p1);
-        const p1IsB = teamB.includes(p1);
         let p1Score = 0;
 
         allPlayers.forEach(p2 => {
           if (p1 === p2) return;
-
           const p2IsA = teamA.includes(p2);
-          const p2IsB = teamB.includes(p2);
           let interactionScore = 0;
           let interactionCount = 0;
 
@@ -929,17 +931,17 @@
             const p1InMatchA = matchTeamA.includes(p1);
             const p2InMatchA = matchTeamA.includes(p2);
 
-            // 同じチームだった場合
+            // Same team in the past
             if ((p1InMatchA && p2InMatchA) || (!p1InMatchA && !p2InMatchA)) {
-              if (p1IsA === p2IsA) { // 現在も味方
+              if (p1IsA === p2IsA) { // Same team now
                 const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
                 interactionScore += diff;
                 interactionCount++;
               }
             }
-            // 敵チームだった場合
+            // Different teams in the past
             else {
-              if (p1IsA !== p2IsA) { // 現在も敵
+              if (p1IsA !== p2IsA) { // Different teams now
                 const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
                 interactionScore += diff;
                 interactionCount++;
