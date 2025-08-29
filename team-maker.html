@@ -345,6 +345,13 @@
       background: #e03e3e;
     }
 
+    .score-display {
+      font-size: 1rem;
+      font-weight: bold;
+      margin: 8px 0 0;
+      color: #555;
+    }
+
     @media (max-width: 600px) {
       h1 {
         font-size: 22px;
@@ -400,10 +407,12 @@
           <div class="team-box team1">
             <h2>チーム1</h2>
             <ul id="teamA"></ul>
+            <p class="score-display">合計スコア: <span id="teamAScore">0</span></p>
           </div>
           <div class="team-box team2">
             <h2>チーム2</h2>
             <ul id="teamB"></ul>
+            <p class="score-display">合計スコア: <span id="teamBScore">0</span></p>
           </div>
         </div>
       </section>
@@ -682,7 +691,7 @@
         else if (matchingPlayers.includes(name)) div.classList.add("matching");
 
         div.dataset.name = name;
-        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}"></button>`;
+        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}">`;
         div.querySelector(".pin-btn").onclick = e => {
           e.stopPropagation();
           togglePin(name);
@@ -699,9 +708,12 @@
     async function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
+
       if (selected.length === 0) {
         document.getElementById("teamA").innerHTML = "";
         document.getElementById("teamB").innerHTML = "";
+        document.getElementById("teamAScore").textContent = "0";
+        document.getElementById("teamBScore").textContent = "0";
         db.ref("currentTeamResult").set({
           teamA: [],
           teamB: [],
@@ -781,7 +793,7 @@
           if (!isValid) continue;
 
           let scoreA, scoreB, diffScore;
-
+          let scores;
           if (method === "balanced") {
             // 相性スコア計算
             scoreA = teamAMembers.reduce((sum, p1) =>
@@ -799,7 +811,6 @@
             diffScore = Math.abs(scoreA - scoreB);
           } else {
             // 通常モードのスコア計算
-            let scores;
             if (method === "average") scores = playerScoresAverage;
             else if (method === "winrate") scores = playerScoresWinRate;
             else scores = playerScoresKDRatio;
@@ -814,40 +825,55 @@
             bestResult = {
               teamA: teamAMembers,
               teamB: teamBMembers,
-              diffScore
+              diffScore,
+              scoreA,
+              scoreB
             };
           }
         }
         return bestResult;
       }
 
-      divideGroups().then(best => {
-        if (!best) {
-          document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
-          document.getElementById("teamB").innerHTML = "";
-          db.ref("currentTeamResult").set({
-            teamA: [],
-            teamB: [],
-            timestamp: Date.now()
-          });
-          return;
-        }
+      const best = await divideGroups();
 
-        // 「きゃたん」がチームBにいる場合にチームを入れ替え
-        if (best.teamB.includes("きゃたん") && !best.teamA.includes("きゃたん")) {
-          const temp = best.teamA;
-          best.teamA = best.teamB;
-          best.teamB = temp;
-        }
-
-        document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
-        document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
-
+      if (!best) {
+        document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
+        document.getElementById("teamB").innerHTML = "";
+        document.getElementById("teamAScore").textContent = "0";
+        document.getElementById("teamBScore").textContent = "0";
         db.ref("currentTeamResult").set({
-          teamA: best.teamA,
-          teamB: best.teamB,
-          timestamp: Date.now(),
+          teamA: [],
+          teamB: [],
+          timestamp: Date.now()
         });
+        return;
+      }
+
+      // 「きゃたん」がチームBにいる場合にチームを入れ替え
+      if (best.teamB.includes("きゃたん") && !best.teamA.includes("きゃたん")) {
+        const temp = best.teamA;
+        best.teamA = best.teamB;
+        best.teamB = temp;
+        const tempScore = best.scoreA;
+        best.scoreA = best.scoreB;
+        best.scoreB = tempScore;
+      }
+
+      document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
+      document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
+
+      if (method !== "balanced") {
+        document.getElementById("teamAScore").textContent = best.scoreA.toFixed(2);
+        document.getElementById("teamBScore").textContent = best.scoreB.toFixed(2);
+      } else {
+        document.getElementById("teamAScore").textContent = "N/A";
+        document.getElementById("teamBScore").textContent = "N/A";
+      }
+
+      db.ref("currentTeamResult").set({
+        teamA: best.teamA,
+        teamB: best.teamB,
+        timestamp: Date.now(),
       });
     }
 
