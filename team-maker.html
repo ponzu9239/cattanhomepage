@@ -346,16 +346,19 @@
       border-radius: 12px;
       border: 2px solid #87ceeb;
     }
+
     #allCombinationsSection h2 {
       margin-top: 0;
       color: #4682b4;
     }
+
     #allCombinationsList {
       list-style-type: none;
       padding: 0;
       font-size: 14px;
       line-height: 1.6;
     }
+
     #allCombinationsList li {
       margin-bottom: 0.5rem;
       padding: 0.5rem;
@@ -363,7 +366,7 @@
       border-radius: 8px;
       border: 1px solid #add8e6;
     }
-    
+
     @media (max-width: 600px) {
       h1 {
         font-size: 22px;
@@ -723,7 +726,7 @@
       const teamAScoreEl = document.getElementById("teamAScore");
       const teamBScoreEl = document.getElementById("teamBScore");
       const allCombinationsList = document.getElementById("allCombinationsList");
-      
+
       teamAScoreEl.textContent = "0";
       teamBScoreEl.textContent = "0";
       allCombinationsList.innerHTML = "";
@@ -833,13 +836,13 @@
             scoreB = teamBMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
             diffScore = Math.abs(scoreA - scoreB);
           }
-          
+
           allCombinations.push({
-              teamA: teamAMembers,
-              teamB: teamBMembers,
-              diffScore,
-              scoreA,
-              scoreB
+            teamA: teamAMembers,
+            teamB: teamBMembers,
+            diffScore,
+            scoreA,
+            scoreB
           });
 
           if (diffScore < bestDiff) {
@@ -853,10 +856,16 @@
             };
           }
         }
-        return { bestResult, allCombinations };
+        return {
+          bestResult,
+          allCombinations
+        };
       }
 
-      const { bestResult, allCombinations } = await divideGroups();
+      const {
+        bestResult,
+        allCombinations
+      } = await divideGroups();
 
       if (!bestResult) {
         document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
@@ -897,7 +906,6 @@
         timestamp: Date.now(),
       });
 
-      // 全候補を表示する処理
       allCombinations.sort((a, b) => a.diffScore - b.diffScore);
       allCombinations.forEach(combination => {
         const li = document.createElement("li");
@@ -924,11 +932,11 @@
 
         if ((p1InA && p2InA) || (p1InB && p2InB)) {
           const diff = (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
-          interactionScore += diff > 0 ? 1 : (diff < 0 ? -1 : 0);
+          interactionScore += diff;
           interactionCount++;
         } else if ((p1InA && p2InB) || (p1InB && p2InA)) {
           const diff = (p1InA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
-          interactionScore += diff > 0 ? 1 : (diff < 0 ? -1 : 0);
+          interactionScore += diff;
           interactionCount++;
         }
       });
