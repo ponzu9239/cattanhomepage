@@ -11,14 +11,11 @@
       background: #f7fcfc;
       margin: 0;
       padding-top: 100px;
-      /* ヘッダーの高さ分 */
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      /* ページの高さを確保 */
     }
 
-    /* 新しいコンテナのスタイル */
     .container {
       flex: 1;
       margin: 0 auto;
@@ -44,7 +41,6 @@
       color: #fff;
     }
 
-    /* ハンバーガーアイコン */
     .hamburger {
       font-size: 2rem;
       cursor: pointer;
@@ -66,14 +62,11 @@
       flex-direction: column;
       padding: 0;
       transition: top 0.3s ease;
-      /* スライドアニメーション */
       z-index: 1050;
-      /* ハンバーガーより下 */
     }
 
     nav.show {
       top: 75px;
-      /* ヘッダーの下までスライド */
     }
 
     nav a {
@@ -81,7 +74,6 @@
       text-align: center;
       margin: 0;
       padding: 0.6rem 0;
-      /* 左右は0に */
       font-size: 1.2rem;
       font-weight: bold;
       color: white;
@@ -102,9 +94,7 @@
       color: white;
       padding: 1rem;
       margin-top: 2rem;
-      /* --- 変更箇所 --- */
       width: 100%;
-      /* --- ここまで --- */
     }
 
     h1 {
@@ -140,14 +130,11 @@
       gap: 16px;
       margin-bottom: 16px;
       align-items: center;
-      /* 中央寄せ */
     }
 
     .team-box {
       width: 90%;
-      /* 横幅を画面の90%に制限 */
       max-width: 500px;
-      /* 最大幅を制限 */
       background: #eefaff;
       padding: 12px;
       border-radius: 12px;
@@ -260,7 +247,6 @@
       margin-bottom: 10px;
     }
 
-    /* ここからペア設定フォームのCSS */
     .pair-section {
       background: #eaf9f8;
       border: 2px solid #97eadb;
@@ -352,6 +338,32 @@
       color: #555;
     }
 
+    /* 全候補表示のスタイル */
+    #allCombinationsSection {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f0f8ff;
+      border-radius: 12px;
+      border: 2px solid #87ceeb;
+    }
+    #allCombinationsSection h2 {
+      margin-top: 0;
+      color: #4682b4;
+    }
+    #allCombinationsList {
+      list-style-type: none;
+      padding: 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    #allCombinationsList li {
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      background: #e8f4ff;
+      border-radius: 8px;
+      border: 1px solid #add8e6;
+    }
+    
     @media (max-width: 600px) {
       h1 {
         font-size: 22px;
@@ -455,6 +467,12 @@
         <div id="playerList" class="player-list"></div>
       </section>
       <p id="matchCount">過去 試合のカスタムマッチをもとに生成。</p>
+
+      <section id="allCombinationsSection">
+        <h2>すべてのチーム分け候補</h2>
+        <ul id="allCombinationsList"></ul>
+      </section>
+
     </div>
   </main>
 
@@ -482,11 +500,9 @@
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     let matchingPlayers = [];
 
-    // ペア設定配列
     let separatePairs = JSON.parse(localStorage.getItem("separatePairs") || "[]");
     let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
 
-    // ペアUI操作関数
     function addPair(type, name1, name2) {
       name1 = name1.trim();
       name2 = name2.trim();
@@ -494,7 +510,6 @@
       const pair = [name1, name2].sort();
       let arr = (type === "separate") ? separatePairs : togetherPairs;
 
-      // 重複チェック
       if (arr.some(p => p[0] === pair[0] && p[1] === pair[1])) return false;
 
       arr.push(pair);
@@ -529,7 +544,6 @@
       });
     }
 
-    // FirebaseからcurrentInputPlayersの監視（matchingPlayers更新）
     db.ref("currentInputPlayers").on("value", (snapshot) => {
       const data = snapshot.val() || {};
       matchingPlayers = [];
@@ -544,7 +558,6 @@
       renderPlayers();
     });
 
-    // スコア計算関数たち
     function calculateScoresAverage(matches) {
       const history = {};
       matches.forEach(match => {
@@ -645,7 +658,6 @@
       return scores;
     }
 
-    // ピン留め切替
     function togglePin(name) {
       if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
       else pinned.push(name);
@@ -654,7 +666,6 @@
       makeTeams();
     }
 
-    // プレイヤー一覧描画
     function renderPlayers() {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
@@ -666,7 +677,7 @@
       else if (method === "kdratio") scores = playerScoresKDRatio;
       else if (method === "balanced") {
         scores = {};
-        const source = Object.keys(playerScoresAverage); // 全プレイヤーを表示対象にする
+        const source = Object.keys(playerScoresAverage);
         source.forEach(name => {
           scores[name] = 0;
         });
@@ -691,7 +702,7 @@
         else if (matchingPlayers.includes(name)) div.classList.add("matching");
 
         div.dataset.name = name;
-        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}">`;
+        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}"></button>`;
         div.querySelector(".pin-btn").onclick = e => {
           e.stopPropagation();
           togglePin(name);
@@ -709,11 +720,18 @@
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
 
+      const teamAScoreEl = document.getElementById("teamAScore");
+      const teamBScoreEl = document.getElementById("teamBScore");
+      const allCombinationsList = document.getElementById("allCombinationsList");
+      
+      teamAScoreEl.textContent = "0";
+      teamBScoreEl.textContent = "0";
+      allCombinationsList.innerHTML = "";
+
+
       if (selected.length === 0) {
         document.getElementById("teamA").innerHTML = "";
         document.getElementById("teamB").innerHTML = "";
-        document.getElementById("teamAScore").textContent = "0";
-        document.getElementById("teamBScore").textContent = "0";
         db.ref("currentTeamResult").set({
           teamA: [],
           teamB: [],
@@ -726,7 +744,6 @@
       const separate = separatePairs;
       const together = togetherPairs;
 
-      // --- くっつけたいペアをグループ化 ---
       class UnionFind {
         constructor(n) {
           this.parent = Array(n).fill(0).map((_, i) => i);
@@ -754,7 +771,6 @@
         }
       });
 
-      // グループごとにメンバーをまとめる
       const groupsMap = new Map();
       players.forEach((p, i) => {
         const root = uf.find(i);
@@ -763,10 +779,11 @@
       });
       const groups = Array.from(groupsMap.values());
 
-      // 全探索でチーム分け
       async function divideGroups() {
         let bestResult = null;
         let bestDiff = Infinity;
+        const allCombinations = [];
+
         const combinations = getCombinations(groups, Math.floor(groups.length / 2));
 
         for (const comb of combinations) {
@@ -778,7 +795,6 @@
 
           if (Math.abs(teamAMembers.length - teamBMembers.length) > 1) continue;
 
-          // 離したいペアが同じチームにいないかチェック
           let isValid = true;
           for (const [p1, p2] of separate) {
             const p1InA = teamAMembers.includes(p1);
@@ -795,7 +811,6 @@
           let scoreA, scoreB, diffScore;
           let scores;
           if (method === "balanced") {
-            // 相性スコア計算
             scoreA = teamAMembers.reduce((sum, p1) =>
               sum + teamAMembers.reduce((innerSum, p2) =>
                 innerSum + (p1 !== p2 ? calcInteractionScore(p1, p2, matches) : 0), 0) -
@@ -810,7 +825,6 @@
 
             diffScore = Math.abs(scoreA - scoreB);
           } else {
-            // 通常モードのスコア計算
             if (method === "average") scores = playerScoresAverage;
             else if (method === "winrate") scores = playerScoresWinRate;
             else scores = playerScoresKDRatio;
@@ -819,6 +833,14 @@
             scoreB = teamBMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
             diffScore = Math.abs(scoreA - scoreB);
           }
+          
+          allCombinations.push({
+              teamA: teamAMembers,
+              teamB: teamBMembers,
+              diffScore,
+              scoreA,
+              scoreB
+          });
 
           if (diffScore < bestDiff) {
             bestDiff = diffScore;
@@ -831,16 +853,16 @@
             };
           }
         }
-        return bestResult;
+        return { bestResult, allCombinations };
       }
 
-      const best = await divideGroups();
+      const { bestResult, allCombinations } = await divideGroups();
 
-      if (!best) {
+      if (!bestResult) {
         document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
         document.getElementById("teamB").innerHTML = "";
-        document.getElementById("teamAScore").textContent = "0";
-        document.getElementById("teamBScore").textContent = "0";
+        teamAScoreEl.textContent = "0";
+        teamBScoreEl.textContent = "0";
         db.ref("currentTeamResult").set({
           teamA: [],
           teamB: [],
@@ -849,31 +871,43 @@
         return;
       }
 
-      // 「きゃたん」がチームBにいる場合にチームを入れ替え
-      if (best.teamB.includes("きゃたん") && !best.teamA.includes("きゃたん")) {
-        const temp = best.teamA;
-        best.teamA = best.teamB;
-        best.teamB = temp;
-        const tempScore = best.scoreA;
-        best.scoreA = best.scoreB;
-        best.scoreB = tempScore;
+      if (bestResult.teamB.includes("きゃたん") && !bestResult.teamA.includes("きゃたん")) {
+        const temp = bestResult.teamA;
+        bestResult.teamA = bestResult.teamB;
+        bestResult.teamB = temp;
+        const tempScore = bestResult.scoreA;
+        bestResult.scoreA = bestResult.scoreB;
+        bestResult.scoreB = tempScore;
       }
 
-      document.getElementById("teamA").innerHTML = best.teamA.map(n => `<li>${n}</li>`).join("");
-      document.getElementById("teamB").innerHTML = best.teamB.map(n => `<li>${n}</li>`).join("");
+      document.getElementById("teamA").innerHTML = bestResult.teamA.map(n => `<li>${n}</li>`).join("");
+      document.getElementById("teamB").innerHTML = bestResult.teamB.map(n => `<li>${n}</li>`).join("");
 
       if (method !== "balanced") {
-        document.getElementById("teamAScore").textContent = best.scoreA.toFixed(2);
-        document.getElementById("teamBScore").textContent = best.scoreB.toFixed(2);
+        teamAScoreEl.textContent = bestResult.scoreA.toFixed(2);
+        teamBScoreEl.textContent = bestResult.scoreB.toFixed(2);
       } else {
-        document.getElementById("teamAScore").textContent = "N/A";
-        document.getElementById("teamBScore").textContent = "N/A";
+        teamAScoreEl.textContent = "N/A";
+        teamBScoreEl.textContent = "N/A";
       }
 
       db.ref("currentTeamResult").set({
-        teamA: best.teamA,
-        teamB: best.teamB,
+        teamA: bestResult.teamA,
+        teamB: bestResult.teamB,
         timestamp: Date.now(),
+      });
+
+      // 全候補を表示する処理
+      allCombinations.sort((a, b) => a.diffScore - b.diffScore);
+      allCombinations.forEach(combination => {
+        const li = document.createElement("li");
+        const diffText = (method === "balanced") ? `スコア差: ${combination.diffScore.toFixed(2)}` : `スコア差: ${combination.diffScore.toFixed(2)}`;
+        li.innerHTML = `
+          <strong>チームA</strong>: ${combination.teamA.join(", ")}<br>
+          <strong>チームB</strong>: ${combination.teamB.join(", ")}<br>
+          ${diffText}
+        `;
+        allCombinationsList.appendChild(li);
       });
     }
 
@@ -888,11 +922,11 @@
         const p1InB = teamB.includes(player1);
         const p2InB = teamB.includes(player2);
 
-        if ((p1InA && p2InA) || (p1InB && p2InB)) { // 同じチーム
+        if ((p1InA && p2InA) || (p1InB && p2InB)) {
           const diff = (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
           interactionScore += diff > 0 ? 1 : (diff < 0 ? -1 : 0);
           interactionCount++;
-        } else if ((p1InA && p2InB) || (p1InB && p2InA)) { // 敵チーム
+        } else if ((p1InA && p2InB) || (p1InB && p2InA)) {
           const diff = (p1InA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
           interactionScore += diff > 0 ? 1 : (diff < 0 ? -1 : 0);
           interactionCount++;
@@ -901,7 +935,6 @@
       return interactionCount > 0 ? interactionScore / interactionCount : 0;
     }
 
-    // 補助関数
     function getCombinations(array, size) {
       if (size === 0) return [
         []
@@ -913,7 +946,6 @@
       return combsWithFirst.concat(combsWithoutFirst);
     }
 
-    // ペアフォーム イベント設定
     document.getElementById("separatePairForm").addEventListener("submit", e => {
       e.preventDefault();
       const n1 = document.getElementById("separateName1").value;
@@ -938,7 +970,6 @@
       }
     });
 
-    // マッチ履歴取得とスコア計算
     db.ref("apex_results").on("value", snapshot => {
       if (!snapshot.exists()) return;
       matches = Object.values(snapshot.val());
@@ -950,7 +981,6 @@
       document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
     });
 
-    // ラジオボタンとチェックボックス変化時イベント
     document.querySelectorAll('input[name="method"]').forEach(radio => {
       radio.addEventListener("change", () => {
         makeTeams();
@@ -966,7 +996,6 @@
       }
     });
 
-    // ペアリスト初期描画
     renderPairList("separate");
     renderPairList("together");
 
