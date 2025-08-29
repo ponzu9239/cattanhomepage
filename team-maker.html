@@ -814,18 +814,9 @@
           let scoreA, scoreB, diffScore;
           let scores;
           if (method === "balanced") {
-            scoreA = teamAMembers.reduce((sum, p1) =>
-              sum + teamAMembers.reduce((innerSum, p2) =>
-                innerSum + (p1 !== p2 ? calcInteractionScore(p1, p2, matches) : 0), 0) -
-              teamBMembers.reduce((innerSum, p2) =>
-                innerSum + calcInteractionScore(p1, p2, matches), 0), 0);
-
-            scoreB = teamBMembers.reduce((sum, p1) =>
-              sum + teamBMembers.reduce((innerSum, p2) =>
-                innerSum + (p1 !== p2 ? calcInteractionScore(p1, p2, matches) : 0), 0) -
-              teamAMembers.reduce((innerSum, p2) =>
-                innerSum + calcInteractionScore(p1, p2, matches), 0), 0);
-
+            scores = calculateBalancedScores(teamAMembers, teamBMembers, matches);
+            scoreA = teamAMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
+            scoreB = teamBMembers.reduce((sum, name) => sum + (scores[name] || 0), 0);
             diffScore = Math.abs(scoreA - scoreB);
           } else {
             if (method === "average") scores = playerScoresAverage;
@@ -892,13 +883,8 @@
       document.getElementById("teamA").innerHTML = bestResult.teamA.map(n => `<li>${n}</li>`).join("");
       document.getElementById("teamB").innerHTML = bestResult.teamB.map(n => `<li>${n}</li>`).join("");
 
-      if (method !== "balanced") {
-        teamAScoreEl.textContent = bestResult.scoreA.toFixed(2);
-        teamBScoreEl.textContent = bestResult.scoreB.toFixed(2);
-      } else {
-        teamAScoreEl.textContent = "N/A";
-        teamBScoreEl.textContent = "N/A";
-      }
+      teamAScoreEl.textContent = bestResult.scoreA.toFixed(2);
+      teamBScoreEl.textContent = bestResult.scoreB.toFixed(2);
 
       db.ref("currentTeamResult").set({
         teamA: bestResult.teamA,
@@ -909,7 +895,7 @@
       allCombinations.sort((a, b) => a.diffScore - b.diffScore);
       allCombinations.forEach(combination => {
         const li = document.createElement("li");
-        const diffText = (method === "balanced") ? `スコア差: ${combination.diffScore.toFixed(2)}` : `スコア差: ${combination.diffScore.toFixed(2)}`;
+        const diffText = `スコア差: ${combination.diffScore.toFixed(2)}`;
         li.innerHTML = `
           <strong>チームA</strong>: ${combination.teamA.join(", ")}<br>
           <strong>チームB</strong>: ${combination.teamB.join(", ")}<br>
@@ -919,28 +905,56 @@
       });
     }
 
-    function calcInteractionScore(player1, player2, matches) {
-      let interactionScore = 0;
-      let interactionCount = 0;
-      matches.forEach(match => {
-        const teamA = match.teamA || [];
-        const teamB = match.teamB || [];
-        const p1InA = teamA.includes(player1);
-        const p2InA = teamA.includes(player2);
-        const p1InB = teamB.includes(player1);
-        const p2InB = teamB.includes(player2);
+    function calculateBalancedScores(teamA, teamB, matches) {
+      const scores = {};
+      const allPlayers = [...teamA, ...teamB];
+      allPlayers.forEach(p => scores[p] = 0);
 
-        if ((p1InA && p2InA) || (p1InB && p2InB)) {
-          const diff = (match.teamAKills ?? 0) - (match.teamBKills ?? 0);
-          interactionScore += diff;
-          interactionCount++;
-        } else if ((p1InA && p2InB) || (p1InB && p2InA)) {
-          const diff = (p1InA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
-          interactionScore += diff;
-          interactionCount++;
-        }
+      allPlayers.forEach(p1 => {
+        const p1IsA = teamA.includes(p1);
+        const p1IsB = teamB.includes(p1);
+        let p1Score = 0;
+
+        allPlayers.forEach(p2 => {
+          if (p1 === p2) return;
+
+          const p2IsA = teamA.includes(p2);
+          const p2IsB = teamB.includes(p2);
+          let interactionScore = 0;
+          let interactionCount = 0;
+
+          matches.forEach(match => {
+            const matchTeamA = match.teamA || [];
+            const matchTeamB = match.teamB || [];
+            const p1InMatchA = matchTeamA.includes(p1);
+            const p2InMatchA = matchTeamA.includes(p2);
+
+            // 同じチームだった場合
+            if ((p1InMatchA && p2InMatchA) || (!p1InMatchA && !p2InMatchA)) {
+              if (p1IsA === p2IsA) { // 現在も味方
+                const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
+                interactionScore += diff;
+                interactionCount++;
+              }
+            }
+            // 敵チームだった場合
+            else {
+              if (p1IsA !== p2IsA) { // 現在も敵
+                const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
+                interactionScore += diff;
+                interactionCount++;
+              }
+            }
+          });
+
+          if (interactionCount > 0) {
+            p1Score += interactionScore / interactionCount;
+          }
+        });
+        scores[p1] = p1Score;
       });
-      return interactionCount > 0 ? interactionScore / interactionCount : 0;
+
+      return scores;
     }
 
     function getCombinations(array, size) {
