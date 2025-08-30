@@ -826,16 +826,24 @@ footer {
       
       let playersToShow;
       if (matchingPlayers.length > 0) {
-        playersToShow = names.filter(name => matchingPlayers.includes(name));
+        const matching = names.filter(name => matchingPlayers.includes(name));
+        const others = names.filter(name => !matchingPlayers.includes(name));
+        
+        const sortedMatching = sortPlayers(matching, readings, currentSortMode);
+        const sortedOthers = sortPlayers(others, readings, currentSortMode);
+        
+        playersToShow = [...sortedMatching, ...sortedOthers];
       } else {
-        playersToShow = names.filter(name => pinned.includes(name));
-        const otherPlayers = names.filter(name => !pinned.includes(name));
-        playersToShow = playersToShow.concat(otherPlayers);
+        const pinnedPlayers = names.filter(name => pinned.includes(name));
+        const unpinnedPlayers = names.filter(name => !pinned.includes(name));
+        
+        const sortedPinned = sortPlayers(pinnedPlayers, readings, currentSortMode);
+        const sortedUnpinned = sortPlayers(unpinnedPlayers, readings, currentSortMode);
+        
+        playersToShow = [...sortedPinned, ...sortedUnpinned];
       }
       
-      const sortedPlayers = sortPlayers(playersToShow, readings, currentSortMode);
-
-      sortedPlayers.forEach(name => {
+      playersToShow.forEach(name => {
         const div = document.createElement("div");
         div.className = "player";
         if (selected.includes(name)) div.classList.add("selected");
