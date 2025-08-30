@@ -229,6 +229,11 @@ h1 {
   border-color: var(--color-primary);
 }
 
+.player.matching.selected {
+  background: var(--color-primary);
+  color: var(--color-text-light);
+}
+
 /* Pin button */
 .pin-btn {
   position: absolute;
@@ -633,17 +638,16 @@ footer {
         const inputNames = inputStr.split(/\n/).map(name => name.trim()).filter(name => name !== '');
         
         playerSearchInput = inputNames.filter(name => {
-            const normalizedName = katakanaToHiragana(name).toLowerCase();
-            const resolvedName = playerAliasMap[normalizedName] || name;
+            const normalizedInput = katakanaToHiragana(name).toLowerCase();
             
-            // プレイヤー名と読み方の両方で完全一致検索
-            const matchedByAlias = allPlayersList.includes(resolvedName);
-            const matchedByReading = Object.keys(readingsData).some(p => {
-              const reading = readingsData[p].reading || "";
-              return katakanaToHiragana(reading).toLowerCase() === normalizedName;
+            // プレイヤー名または読み方で一致するかを判定
+            return allPlayersList.some(player => {
+                const normalizedPlayer = katakanaToHiragana(player).toLowerCase();
+                const playerReading = katakanaToHiragana(readingsData[player]?.reading || "").toLowerCase();
+                const playerAliases = (readingsData[player]?.aliases || []).map(alias => katakanaToHiragana(alias).toLowerCase());
+                
+                return normalizedPlayer.includes(normalizedInput) || playerReading.includes(normalizedInput) || playerAliases.includes(normalizedInput);
             });
-
-            return matchedByAlias || matchedByReading;
         });
         updateMatchingPlayers();
     });
@@ -664,7 +668,11 @@ footer {
     });
     
     function resolveAliases(names) {
-      return names.map(name => playerAliasMap[katakanaToHiragana(name).toLowerCase()] || name);
+      return names.map(name => {
+        const normalizedName = katakanaToHiragana(name).toLowerCase();
+        // マップから解決、なければ元の名前を返す
+        return playerAliasMap[normalizedName] || name;
+      });
     }
 
     function updateMatchingPlayers() {
@@ -857,8 +865,13 @@ footer {
         const div = document.createElement("div");
         div.className = "player";
         
-        if (selected.includes(name)) div.classList.add("selected");
-        if (matchingPlayers.includes(name) && matchingPlayers.length > 0) div.classList.add("matching");
+        // 選択されたプレイヤーは常に濃く塗る
+        if (selected.includes(name)) {
+          div.classList.add("selected");
+        } else if (matchingPlayers.includes(name) && matchingPlayers.length > 0) {
+          // 選択されておらず、かつ検索にヒットした場合に薄く塗る
+          div.classList.add("matching");
+        }
         
         div.dataset.name = name;
         div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" title="固定/固定解除"></button>`;
@@ -869,6 +882,10 @@ footer {
         };
         div.onclick = () => {
           div.classList.toggle("selected");
+          // 選択されたら.matchingクラスを削除
+          if (div.classList.contains("selected")) {
+            div.classList.remove("matching");
+          }
           makeTeams();
         };
         container.appendChild(div);
