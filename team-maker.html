@@ -600,6 +600,12 @@ footer {
       return baseId;
     }
     const deviceId = getDeviceId();
+
+    function katakanaToHiragana(str) {
+      return str.replace(/[\u30a1-\u30f6]/g, function(match) {
+        return String.fromCharCode(match.charCodeAt(0) - 0x60);
+      });
+    }
     
     let matches = [];
     let playerScoresAverage = {},
@@ -620,12 +626,17 @@ footer {
     let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
 
     let playerAliasMap = {};
+    let readingsData = {};
 
     document.getElementById("playerSearchInput").addEventListener("input", () => {
-        playerSearchInput = document.getElementById("playerSearchInput").value
-            .split("\n")
-            .map(n => n.trim())
-            .filter(n => n);
+        const inputStr = document.getElementById("playerSearchInput").value;
+        const normalizedInput = katakanaToHiragana(inputStr).toLowerCase();
+        
+        playerSearchInput = allPlayersList.filter(name => {
+            const normalizedName = katakanaToHiragana(name).toLowerCase();
+            const normalizedReading = katakanaToHiragana(readingsData[name]?.reading || "").toLowerCase();
+            return normalizedName.includes(normalizedInput) || normalizedReading.includes(normalizedInput);
+        });
         updateMatchingPlayers();
     });
     
@@ -799,8 +810,8 @@ footer {
     function sortPlayers(names, readings, sortMode) {
       if (sortMode === 'reading') {
         return names.sort((a, b) => {
-          const readingA = readings[a]?.reading || a;
-          const readingB = readings[b]?.reading || b;
+          const readingA = katakanaToHiragana(readings[a]?.reading || a);
+          const readingB = katakanaToHiragana(readings[b]?.reading || b);
           return readingA.localeCompare(readingB, "ja");
         });
       } else if (sortMode === 'recent') {
@@ -823,25 +834,20 @@ footer {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       
-      const readingsSnapshot = await db.ref("player_readings").once("value");
-      const readings = readingsSnapshot.val() || {};
-
       container.innerHTML = "";
       
       let playersToShow = [...allPlayersList];
       
-      // 検索窓に名前が入力されていれば、そのプレイヤーのみ表示
       if (matchingPlayers.length > 0) {
         playersToShow = playersToShow.filter(name => matchingPlayers.includes(name));
       }
 
-      const sortedPlayers = sortPlayers(playersToShow, readings, currentSortMode);
+      const sortedPlayers = sortPlayers(playersToShow, readingsData, currentSortMode);
 
       sortedPlayers.forEach(name => {
         const div = document.createElement("div");
         div.className = "player";
         
-        // プレイヤーが現在選択されているか、検索結果でマッチしているかを確認
         if (selected.includes(name)) div.classList.add("selected");
         else if (matchingPlayers.includes(name) && matchingPlayers.length > 0) div.classList.add("matching");
         
@@ -1167,7 +1173,7 @@ footer {
     async function initializePage() {
       // プレイヤーの読み方とあだ名を取得
       const readingsSnapshot = await db.ref("player_readings").once("value");
-      const readingsData = readingsSnapshot.val() || {};
+      readingsData = readingsSnapshot.val() || {};
       
       // あだ名と本名のマッピングを作成
       for (const name in readingsData) {
@@ -1194,7 +1200,6 @@ footer {
         (match.teamB || []).forEach(p => allPlayersInMatches.add(p));
       });
       allPlayersList = Array.from(allPlayersInMatches);
-      // プレイヤーリストを50音順でソート
       const sortedByReading = sortPlayers(allPlayersList, readingsData, 'reading');
       allPlayersList = sortedByReading;
 
@@ -1209,7 +1214,6 @@ footer {
           });
       });
 
-      // ページ読み込み時にプレイヤーリストを初期表示
       renderPlayers();
 
       renderPairList("separate");
