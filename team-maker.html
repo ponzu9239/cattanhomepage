@@ -636,8 +636,14 @@ footer {
             const normalizedName = katakanaToHiragana(name).toLowerCase();
             const resolvedName = playerAliasMap[normalizedName] || name;
             
-            // 完全一致で検索
-            return allPlayersList.includes(resolvedName);
+            // プレイヤー名と読み方の両方で完全一致検索
+            const matchedByAlias = allPlayersList.includes(resolvedName);
+            const matchedByReading = Object.keys(readingsData).some(p => {
+              const reading = readingsData[p].reading || "";
+              return katakanaToHiragana(reading).toLowerCase() === normalizedName;
+            });
+
+            return matchedByAlias || matchedByReading;
         });
         updateMatchingPlayers();
     });
