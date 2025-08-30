@@ -5,471 +5,523 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>いい感じにチーム分けしてくれるやつ</title>
   <style>
-
+/* ==================================== */
+/* 1. CSS Variables and Base Styles     */
+/* ==================================== */
 :root {
-  /* Colors */
-  --color-primary: #97EADB;
-  --color-accent: #47b6a2;
-  --color-text-light: #fff;
-  --color-bg: #f7fcfc;
-  --color-team-a-bg: #eefaff;
-  --color-team-a-border: #97eadb;
-  --color-team-b-bg: #fff1f5;
-  --color-team-b-border: #ffb6c1;
-  --color-pair-bg: #eaf9f8;
-  --color-hover: #0099aa;
-  
-  /* Spacing */
-  --spacing-sm: 8px;
-  --spacing-md: 1rem;
-  --spacing-lg: 2rem;
-  
-  /* Other */
-  --header-height: 75px;
+    /* Color Palette */
+    --color-primary-light: #F7FCFC;
+    --color-primary: #97EADB;
+    --color-primary-dark: #47B6A2;
+    --color-text: #333;
+    --color-text-light: #fff;
+    --color-background: #F0F8FF;
+    --color-section-bg: #EAF9F8;
+    --color-border: #97EADB;
+    --color-highlight: #0099AA;
+
+    /* Team Colors */
+    --color-team-a-bg: #EEFAFF;
+    --color-team-b-bg: #FFF1F5;
+    --color-team-a-border: #97EADB;
+    --color-team-b-border: #FFB6C1;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* Other */
+    --header-height: 75px;
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
 }
 
-/* Base styles */
 body {
-  font-family: "Hiragino Maru Gothic ProN", sans-serif;
-  background-color: var(--color-bg);
-  margin: 0;
-  padding-top: var(--header-height);
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
+    font-family: "Hiragino Maru Gothic ProN", sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    margin: 0;
+    padding-top: var(--header-height);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .container {
-  flex: 1;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 90vw;
-  padding: 0 var(--spacing-md);
+    flex: 1;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 90vw;
+    padding: 0 var(--spacing-md);
 }
 
+h1, h2, h3 {
+    color: var(--color-primary-dark);
+}
 
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background-color: #97EADB;
-      padding: 1rem;
-      text-align: center;
-      z-index: 1000;
-    }
+/* ==================================== */
+/* 2. Header and Navigation             */
+/* ==================================== */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-primary);
+    padding: var(--spacing-md);
+    text-align: center;
+    z-index: 1000;
+}
 
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #fff;
-    }
+header h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: var(--color-text-light);
+}
 
-    /* ハンバーガーアイコン */
-    .hamburger {
-      font-size: 2rem;
-      cursor: pointer;
-      position: absolute;
-      top: 50%;
-      right: 3rem;
-      color: white;
-      transform: translateY(-50%);
-      z-index: 1100;
-    }
+.hamburger {
+    font-size: 2rem;
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    right: var(--spacing-lg);
+    color: var(--color-text-light);
+    transform: translateY(-50%);
+    z-index: 1100;
+}
 
 nav {
-  position: fixed;
-  top: 75px; /* ヘッダーの下に固定 */
-  left: 0;
-  width: 100%;
-  background-color: #97EADB;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  /* メニューを隠すための transform */
-  transform: translateY(-100vh);
-  transition: transform 0.3s ease;
-  z-index: 1050;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    width: 100%;
+    background-color: var(--color-primary);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    transform: translateY(-100vh);
+    transition: transform 0.3s ease;
+    z-index: 1050;
 }
 
 nav.show {
-  /* showクラスが付くと、メニューがスライドして表示される */
-  transform: translateY(0);
+    transform: translateY(0);
 }
 
 nav a {
-  display: block;
-  text-align: center;
-  margin: 0;
-  padding: 0.6rem 0;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: white;
-  background-color: #97eadb;
-  border-bottom: 1px solid #97EADB;
-  text-decoration: none;
-  transition: background-color 0.2s, transform 0.2s;
+    display: block;
+    text-align: center;
+    padding: 0.6rem 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-text-light);
+    background-color: var(--color-primary);
+    border-bottom: 1px solid var(--color-primary-dark);
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.2s;
 }
 
 nav a:hover {
-  background-color: #0099aa;
-  transform: scale(1.03);
+    background-color: var(--color-highlight);
+    transform: scale(1.03);
 }
-/* Main content sections */
+
+/* ==================================== */
+/* 3. Main Content Layout               */
+/* ==================================== */
 h1 {
-  text-align: center;
-  color: var(--color-accent);
-  margin-bottom: 12px;
-}
-
-.method-select {
-  text-align: center;
-  margin: 18px 0 12px 0;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.method-select label {
-  margin: 0 var(--spacing-sm);
-  font-weight: bold;
-  color: var(--color-accent);
-  cursor: pointer;
-  user-select: none;
-  background: var(--color-text-light);
-  padding: 5px 10px;
-  border-radius: 16px;
-  border: 1.5px solid var(--color-primary);
-  font-size: 14px;
+    text-align: center;
+    margin-bottom: var(--spacing-md);
 }
 
 .teams {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 16px;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    align-items: center;
 }
 
 .team-box {
-  width: 90%;
-  max-width: 500px;
-  padding: 12px;
-  border-radius: 12px;
-  border: 2px solid var(--color-team-a-border);
-  text-align: center;
-  background: var(--color-team-a-bg);
+    width: 90%;
+    max-width: 500px;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    border: 2px solid var(--color-team-a-border);
+    text-align: center;
+    background: var(--color-team-a-bg);
 }
 
 .team-box.team2 {
-  background: var(--color-team-b-bg);
-  border-color: var(--color-team-b-border);
+    background: var(--color-team-b-bg);
+    border-color: var(--color-team-b-border);
 }
 
 .team-box h2 {
-  font-size: 18px;
-  margin: 0 0 8px 0;
-  color: var(--color-accent);
+    font-size: 1.2rem;
+    margin: 0 0 var(--spacing-sm) 0;
 }
 
 .team-box ul {
-  list-style: none;
-  padding: 0 8px;
-  margin: 0;
-  display: grid;
-  /* 常に2列で固定 */
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  box-sizing: border-box;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--spacing-sm);
 }
-
 
 .team-box li {
-  background: var(--color-text-light);
-  border: 1.5px solid #ddd;
-  border-radius: 8px;
-  padding: 6px;
-  font-size: 15px;
-  font-weight: 500;
-  text-align: center;
-}
-
-      .player-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 12px;
-        margin-bottom: 20px;
-      }
-
-      .player {
-        background: #fff;
-        border: 2px solid #97eadb;
-        border-radius: 10px;
-        padding: 10px 6px;
-        text-align: center;
-        cursor: pointer;
-        transition: transform 0.15s, box-shadow 0.15s;
-        position: relative;
-        font-size: 14px;
-      }
-
-
-.player:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.player.selected {
-  background: var(--color-primary);
-  color: var(--color-text-light);
-}
-
-.player.matching {
-  background: #e0f7f3;
-  border-color: var(--color-primary);
-}
-
-/* Pin button */
-.pin-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 20px;
-  height: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.pin-btn::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: #bbb;
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%,
-      79% 91%, 50% 70%, 21% 91%, 32% 57%,
-      2% 35%, 39% 35%);
-  transition: background 0.3s;
-}
-
-.pin-btn.pinned::before {
-  background: gold;
-}
-
-/* Other sections */
-#matchCount {
-  text-align: center;
-  font-size: 12px;
-  color: gray;
-  margin-top: var(--spacing-sm);
-  user-select: none;
-}
-
-.pair-section {
-  background: var(--color-pair-bg);
-  border: 2px solid var(--color-primary);
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-}
-
-.pair-section h3 {
-  margin-top: 0;
-  color: var(--color-accent);
-  font-weight: 700;
-  font-size: 20px;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-.pair-form {
-  display: flex;
-  gap: var(--spacing-sm);
-  justify-content: center;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-
-.pair-form input[type="text"] {
-  flex: 1 1 40%;
-  min-width: 100px;
-  padding: 6px 8px;
-  border: 1.5px solid var(--color-primary);
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.pair-form button {
-  background: var(--color-accent);
-  border: none;
-  color: var(--color-text-light);
-  padding: 6px 16px;
-  border-radius: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.pair-form button:hover {
-  background: #369482;
-}
-
-.pair-list {
-  list-style: none;
-  padding-left: 0;
-  max-height: 150px;
-  overflow-y: auto;
-  margin: 0;
-  border-top: 1px solid var(--color-primary);
-}
-
-.pair-list li {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 1px solid #b2e2dd;
-  font-size: 14px;
-  color: #333;
-}
-
-.pair-list button.delete-btn {
-  background: #ff6b6b;
-  border: none;
-  color: var(--color-text-light);
-  border-radius: 12px;
-  padding: 2px 8px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.3s;
-}
-
-.pair-list button.delete-btn:hover {
-  background: #e03e3e;
+    background: var(--color-text-light);
+    border: 1.5px solid #ddd;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-xs);
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .score-display {
-  font-size: 1rem;
-  font-weight: bold;
-  margin-top: var(--spacing-sm);
-  color: #555;
-}
-
-#allCombinationsSection {
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-md);
-  background: #f0f8ff;
-  border-radius: 12px;
-  border: 2px solid #87ceeb;
-}
-
-#allCombinationsSection h2 {
-  margin-top: 0;
-  color: #4682b4;
-}
-
-#allCombinationsList {
-  list-style-type: none;
-  padding: 0;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-#allCombinationsList li {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background: #e8f4ff;
-  border-radius: 8px;
-  border: 1px solid #add8e6;
-}
-
-/* Footer */
-footer {
-  background: var(--color-primary);
-  text-align: center;
-  color: var(--color-text-light);
-  padding: var(--spacing-md);
-  margin-top: var(--spacing-lg);
-}
-
-/* Media Queries */
-@media (max-width: 991px) {
-  .player {
-    flex: 1 1 calc((100% - 12px * 2) / 3);
-  }
-}
-
-@media (max-width: 767px) {
-  .player {
-    flex: 1 1 calc((100% - 12px) / 2);
-  }
-}
-
-@media (max-width: 599px) {
-  h1 {
-    font-size: 22px;
-  }
-
-  .team-box h2 {
-    font-size: 16px;
-  }
-
-  .team-box li {
-    font-size: 14px;
-    padding: 5px;
-  }
-
-  .pair-form {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .pair-form input[type="text"] {
-    flex: none;
-    width: 80%;
-  }
-
-  .player {
-    flex: 1 1 100%;
-    max-width: 100%;
-  }
-}
-
-.sort-buttons {
-    text-align: center;
-    margin-bottom: 12px;
-}
-
-.sort-buttons button {
-    background: #fff;
-    border: 1px solid var(--color-primary);
-    border-radius: 16px;
-    padding: 5px 10px;
+    font-size: 1rem;
     font-weight: bold;
-    color: var(--color-accent);
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
+    margin-top: var(--spacing-sm);
 }
 
-.sort-buttons button.active {
+/* ==================================== */
+/* 4. Controls and Forms                */
+/* ==================================== */
+.method-select {
+    text-align: center;
+    margin: var(--spacing-md) 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.method-select label {
+    font-weight: bold;
+    color: var(--color-primary-dark);
+    cursor: pointer;
+    user-select: none;
+    background: var(--color-text-light);
+    padding: 5px 10px;
+    border-radius: 16px;
+    border: 1.5px solid var(--color-primary);
+    font-size: 14px;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.method-select input[type="radio"] {
+    display: none;
+}
+
+.method-select input[type="radio"]:checked + label {
     background: var(--color-primary);
     color: var(--color-text-light);
+    border-color: var(--color-primary);
+}
+
+.pair-section {
+    background: var(--color-section-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.pair-section h3 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    text-align: center;
+}
+
+.pair-form {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.pair-form input[type="text"] {
+    flex: 1;
+    min-width: 100px;
+    padding: 6px 8px;
+    border: 1.5px solid var(--color-primary);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+}
+
+.pair-form button {
+    background: var(--color-primary-dark);
+    border: none;
+    color: var(--color-text-light);
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.pair-form button:hover {
+    background: #369482;
+    transform: translateY(-1px);
+}
+
+.pair-list {
+    list-style: none;
+    padding-left: 0;
+    max-height: 150px;
+    overflow-y: auto;
+    margin: 0;
+    border-top: 1px solid var(--color-primary);
+}
+
+.pair-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #b2e2dd;
+    font-size: 0.9rem;
+}
+
+.pair-list button.delete-btn {
+    background: #FF6B6B;
+    border: none;
+    color: var(--color-text-light);
+    border-radius: 12px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: background-color 0.3s;
+}
+
+.pair-list button.delete-btn:hover {
+    background: #E03E3E;
+}
+
+/* プレイヤー検索のスタイルを改善 */
+label[for="playerSearchInput"] {
+    display: block;
+    font-weight: bold;
+    color: var(--color-primary-dark);
+    margin-bottom: var(--spacing-sm);
+    text-align: center;
 }
 
 #playerSearchInput {
     display: block;
     width: 90%;
     max-width: 500px;
-    margin: 1rem auto;
-    padding: 10px;
-    font-size: 16px;
-    border: 2px solid var(--color-primary);
-    border-radius: 8px;
+    margin: 0 auto var(--spacing-lg) auto;
+    padding: 12px;
+    font-size: 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-md);
     height: 120px;
     box-sizing: border-box;
+    resize: vertical;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
+#playerSearchInput:focus {
+    outline: none;
+    border-color: var(--color-primary-dark);
+    box-shadow: 0 0 0 4px rgba(71, 182, 162, 0.2);
+}
+
+.sort-buttons {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.sort-buttons button {
+    background: var(--color-text-light);
+    border: 1px solid var(--color-primary);
+    border-radius: 16px;
+    padding: 5px 10px;
+    font-weight: bold;
+    color: var(--color-primary-dark);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sort-buttons button:hover {
+    background-color: var(--color-primary-light);
+}
+
+.sort-buttons button.active {
+    background: var(--color-primary);
+    color: var(--color-text-light);
+    border-color: var(--color-primary);
+}
+
+/* ==================================== */
+/* 5. Player List and Player Items      */
+/* ==================================== */
+.player-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.player {
+    background: var(--color-text-light);
+    border: 2px solid #E0F0F0;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm) var(--spacing-xs);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.2s;
+    position: relative;
+    font-size: 0.9rem;
+}
+
+.player:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.player.selected {
+    background: var(--color-primary);
+    color: var(--color-text-light);
+    border-color: var(--color-primary-dark);
+}
+
+.player.matching {
+    background: #E0F7F3;
+    border-color: var(--color-primary);
+}
+
+.player.selected .pin-btn::before,
+.player.matching .pin-btn::before {
+    background: gold;
+}
+
+.pin-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.pin-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #bbb;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%,
+        79% 91%, 50% 70%, 21% 91%, 32% 57%,
+        2% 35%, 39% 35%);
+    transition: background 0.3s;
+}
+
+.pin-btn.pinned::before {
+    background: gold;
+}
+
+/* ==================================== */
+/* 6. Other Sections and Footer         */
+/* ==================================== */
+#matchCount {
+    text-align: center;
+    font-size: 0.8rem;
+    color: gray;
+    margin-top: var(--spacing-sm);
+    user-select: none;
+}
+
+#allCombinationsSection {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-md);
+    background: var(--color-background);
+    border-radius: var(--border-radius-md);
+    border: 2px solid #87CEEB;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+#allCombinationsSection h2 {
+    margin-top: 0;
+    color: #4682B4;
+}
+
+#allCombinationsList {
+    list-style-type: none;
+    padding: 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+#allCombinationsList li {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: #E8F4FF;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid #ADD8E6;
+}
+
+footer {
+    background: var(--color-primary);
+    text-align: center;
+    color: var(--color-text-light);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+/* ==================================== */
+/* 7. Media Queries                     */
+/* ==================================== */
+@media (max-width: 767px) {
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .hamburger {
+        right: var(--spacing-md);
+    }
+}
+
+@media (max-width: 599px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .team-box h2 {
+        font-size: 1rem;
+    }
+
+    .team-box li {
+        font-size: 0.8rem;
+    }
+
+    .pair-form {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .pair-form input[type="text"] {
+        width: 100%;
+    }
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -538,7 +590,7 @@ footer {
         </section>
       </section>
       
-      <label>プレイヤー検索（改行で区切る）</label>
+      <label for="playerSearchInput">プレイヤー検索（改行で区切る）</label>
       <textarea id="playerSearchInput" rows="6"></textarea>
 
       <section>
@@ -1166,6 +1218,7 @@ footer {
     }
 
     async function initializePage() {
+      // 1. Firebaseから全試合データを取得
       const snapshot = await db.ref("apex_results").once("value");
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -1186,12 +1239,30 @@ footer {
         });
       }
 
+      // 2. ローカルストレージとペアリストのレンダリング
       renderPairList("separate");
       renderPairList("together");
       
-      makeTeams();
+      // 3. 参加メンバーのリアルタイム監視を設定し、初回データを取得
+      // このon()イベントは、初期化時とデータ変更時に実行されます。
+      db.ref("currentInputPlayers").on("value", (snapshot) => {
+          const data = snapshot.val() || {};
+          firebaseMatchingPlayers = [];
+          Object.values(data).forEach(nameList => {
+              if (Array.isArray(nameList)) {
+                  nameList.forEach(name => {
+                      if (name && name.trim() !== '') {
+                          firebaseMatchingPlayers.push(name.trim());
+                      }
+                  });
+              }
+          });
+          // 参加メンバーリストが更新されたら、チーム分けも更新
+          updateMatchingPlayers();
+      });
     }
     
+    // ページロード時にinitializePageを呼び出し
     initializePage();
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
