@@ -14,9 +14,8 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      overflow-x: hidden; /* 修正箇所: 左右スクロールを無効化 */
+      overflow-x: hidden;
     }
-
 
     .container {
       flex: 1;
@@ -92,13 +91,12 @@
 
     footer {
       background: #97EADB;
-      text-align: center; /* 修正箇所: 中央揃え */
+      text-align: center;
       color: white;
       padding: 1rem;
       margin-top: 2rem;
       width: 100%;
     }
-
 
     h1 {
       text-align: center;
@@ -179,7 +177,7 @@
     .player-list {
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-between; /* 修正箇所: 均等配置 */
+      justify-content: flex-start;
       gap: 12px;
       margin-bottom: 20px;
     }
@@ -194,10 +192,8 @@
       transition: transform 0.15s, box-shadow 0.15s;
       position: relative;
       font-size: 14px;
-      flex-grow: 1; /* 修正箇所: 拡張 */
-      min-width: 120px; /* 修正箇所: 最小幅を保持 */
+      min-width: 120px;
     }
-
 
     .player:hover {
       transform: translateY(-2px);
