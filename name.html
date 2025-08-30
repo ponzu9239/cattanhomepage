@@ -35,20 +35,21 @@
       font-size: 16px;
       font-weight: bold;
     }
+    .player-item .input-group {
+      display: flex;
+      gap: 10px; /* 入力欄間の隙間 */
+    }
     .player-item input {
       width: 150px;
       padding: 5px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-    .player-item button {
-      background-color: #97EADB;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-left: 10px;
+    .player-item input.reading-input {
+      width: 120px;
+    }
+    .player-item input.alias-input {
+      width: 200px;
     }
     #saveAllButton {
       display: block;
@@ -67,7 +68,7 @@
 <body>
 
 <div class="container">
-  <h1>プレイヤー読み方設定</h1>
+  <h1>プレイヤー読み方・あだ名設定</h1>
   <div id="playerReadingsList"></div>
   <button id="saveAllButton">すべて保存</button>
 </div>
@@ -91,7 +92,7 @@
     const listContainer = document.getElementById("playerReadingsList");
     listContainer.innerHTML = "読込中...";
 
-    // プレイヤーの読み方データを取得
+    // プレイヤーの読み方＆あだ名データを取得
     db.ref("player_readings").once("value", readingsSnapshot => {
       const existingReadings = readingsSnapshot.val() || {};
 
@@ -114,13 +115,26 @@
           playerNameSpan.textContent = name;
           div.appendChild(playerNameSpan);
 
-          const input = document.createElement("input");
-          input.type = "text";
-          input.placeholder = "読み方を入力";
-          input.value = existingReadings[name]?.reading || "";
-          input.dataset.playerName = name;
-          div.appendChild(input);
+          const inputGroup = document.createElement("div");
+          inputGroup.className = "input-group";
 
+          const readingInput = document.createElement("input");
+          readingInput.type = "text";
+          readingInput.placeholder = "読み方";
+          readingInput.className = "reading-input";
+          readingInput.value = existingReadings[name]?.reading || "";
+          readingInput.dataset.playerName = name;
+          inputGroup.appendChild(readingInput);
+
+          const aliasInput = document.createElement("input");
+          aliasInput.type = "text";
+          aliasInput.placeholder = "あだ名 (カンマ区切り)";
+          aliasInput.className = "alias-input";
+          aliasInput.value = existingReadings[name]?.aliases?.join(", ") || "";
+          aliasInput.dataset.playerName = name;
+          inputGroup.appendChild(aliasInput);
+
+          div.appendChild(inputGroup);
           listContainer.appendChild(div);
         });
       });
@@ -128,28 +142,34 @@
   }
 
   document.getElementById("saveAllButton").addEventListener("click", () => {
-    const inputs = document.querySelectorAll("#playerReadingsList input");
+    const readingInputs = document.querySelectorAll("#playerReadingsList .reading-input");
+    const aliasInputs = document.querySelectorAll("#playerReadingsList .alias-input");
     const readingsToSave = {};
 
-    inputs.forEach(input => {
+    readingInputs.forEach((input, index) => {
       const playerName = input.dataset.playerName;
       const reading = input.value.trim();
-      if (reading) {
-        readingsToSave[playerName] = { reading: reading };
-      }
+      const aliasValue = aliasInputs[index].value.trim();
+      
+      const aliases = aliasValue.split(",").map(alias => alias.trim()).filter(alias => alias !== "");
+      
+      readingsToSave[playerName] = {
+        reading: reading || null, // 読み方が空の場合はnullを保存
+        aliases: aliases.length > 0 ? aliases : null // あだ名が空の場合はnullを保存
+      };
     });
 
     if (Object.keys(readingsToSave).length > 0) {
-      db.ref("player_readings").update(readingsToSave)
+      db.ref("player_readings").set(readingsToSave) // update()ではなくset()を使用
         .then(() => {
-          alert("読み方を保存しました。");
+          alert("設定を保存しました。");
         })
         .catch(error => {
           console.error("保存中にエラーが発生しました:", error);
           alert("保存に失敗しました。");
         });
     } else {
-      alert("入力された読み方がありません。");
+      alert("入力された設定がありません。");
     }
   });
 
