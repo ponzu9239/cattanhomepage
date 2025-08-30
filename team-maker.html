@@ -196,18 +196,17 @@ h1 {
   text-align: center;
 }
 
-/* Player list & cards */
 .player-list {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start; /* これで左に揃います */
   gap: 12px;
   margin-bottom: 20px;
 }
 
 .player {
-  background: var(--color-text-light);
-  border: 2px solid var(--color-primary);
+  background: #fff;
+  border: 2px solid #97eadb;
   border-radius: 10px;
   padding: 10px 6px;
   text-align: center;
@@ -215,8 +214,31 @@ h1 {
   transition: transform 0.15s, box-shadow 0.15s;
   position: relative;
   font-size: 14px;
-  flex: 1 1 calc((100% - 12px * 3) / 4);
-  max-width: 150px;
+  /* 幅を正確に計算し、余分な拡大・縮小を防止 */
+  flex: 0 0 calc((100% - 12px * 3) / 4);
+  max-width: calc((100% - 12px * 3) / 4);
+}
+
+/* レスポンシブデザインの調整 */
+@media (max-width: 991px) {
+  .player {
+    flex: 0 0 calc((100% - 12px * 2) / 3);
+    max-width: calc((100% - 12px * 2) / 3);
+  }
+}
+
+@media (max-width: 767px) {
+  .player {
+    flex: 0 0 calc((100% - 12px) / 2);
+    max-width: calc((100% - 12px) / 2);
+  }
+}
+
+@media (max-width: 599px) {
+  .player {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
 }
 
 .player:hover {
