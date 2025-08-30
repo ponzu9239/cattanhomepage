@@ -457,7 +457,7 @@ footer {
     color: var(--color-text-light);
 }
 
-#livePlayerInput {
+#playerSearchInput {
     display: block;
     width: 90%;
     max-width: 500px;
@@ -507,9 +507,6 @@ footer {
         </div>
       </section>
       
-      <label>手動追加（改行で区切る）</label>
-      <textarea id="livePlayerInput" rows="6"></textarea>
-
       <section>
         <div class="method-select">
           <label><input type="radio" name="method" value="average" checked> 平均キル</label>
@@ -540,6 +537,9 @@ footer {
           <ul id="togetherPairList" class="pair-list"></ul>
         </section>
       </section>
+      
+      <label>プレイヤー検索（改行で区切る）</label>
+      <textarea id="playerSearchInput" rows="6"></textarea>
 
       <section>
         <div class="sort-buttons">
@@ -594,7 +594,7 @@ footer {
     
     // admin2.htmlから取得したプレイヤーリストと、新しい入力欄のプレイヤーリストを管理する
     let firebaseMatchingPlayers = [];
-    let liveInputPlayers = [];
+    let playerSearchInput = [];
     let matchingPlayers = []; // 最終的な統合リスト
     
     let allPlayersList = []; // 全プレイヤーのリスト（検索用）
@@ -606,8 +606,8 @@ footer {
     let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
 
     // 新しい入力欄の監視
-    document.getElementById("livePlayerInput").addEventListener("input", () => {
-        liveInputPlayers = document.getElementById("livePlayerInput").value
+    document.getElementById("playerSearchInput").addEventListener("input", () => {
+        playerSearchInput = document.getElementById("playerSearchInput").value
             .split("\n")
             .map(n => n.trim())
             .filter(n => n);
@@ -632,7 +632,7 @@ footer {
     
     // 2つのリストを統合して更新する関数
     function updateMatchingPlayers() {
-      const mergedList = [...firebaseMatchingPlayers, ...liveInputPlayers];
+      const mergedList = [...firebaseMatchingPlayers, ...playerSearchInput];
       matchingPlayers = [...new Set(mergedList)]; // 重複を削除して統合
       makeTeams();
     }
