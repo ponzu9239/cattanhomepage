@@ -175,7 +175,7 @@
     .player-list {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: flex-start; /* 修正箇所: 左詰めに変更 */
       gap: 12px;
       margin-bottom: 20px;
     }
@@ -190,7 +190,7 @@
       transition: transform 0.15s, box-shadow 0.15s;
       position: relative;
       font-size: 14px;
-      flex: 1 1 120px;
+      flex: 0 0 120px; /* 修正箇所: 幅を固定 */
     }
 
     .player:hover {
