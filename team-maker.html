@@ -469,6 +469,22 @@ footer {
     box-sizing: border-box;
 }
 
+#playerList.loading::before {
+    content: '読み込み中...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2em;
+    color: #47b6a2;
+}
+
+#playerList.loading {
+    min-height: 100px;
+    position: relative;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -591,12 +607,11 @@ footer {
       playerScoresKDRatio = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     
-    // admin2.htmlから取得したプレイヤーリストと、新しい入力欄のプレイヤーリストを管理する
     let firebaseMatchingPlayers = [];
     let playerSearchInput = [];
-    let matchingPlayers = []; // 最終的な統合リスト
+    let matchingPlayers = [];
     
-    let allPlayersList = []; // 全プレイヤーのリスト（検索用）
+    let allPlayersList = [];
     let playerPlayDates = {};
     let playerPlayCounts = {};
     let currentSortMode = 'reading';
@@ -604,7 +619,8 @@ footer {
     let separatePairs = JSON.parse(localStorage.getItem("separatePairs") || "[]");
     let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
 
-    // 新しい入力欄の監視
+    let playerAliasMap = {};
+
     document.getElementById("playerSearchInput").addEventListener("input", () => {
         playerSearchInput = document.getElementById("playerSearchInput").value
             .split("\n")
@@ -613,7 +629,6 @@ footer {
         updateMatchingPlayers();
     });
     
-    // Firebaseからのリアルタイム参加メンバーを監視
     db.ref("currentInputPlayers").on("value", (snapshot) => {
         const data = snapshot.val() || {};
         firebaseMatchingPlayers = [];
@@ -629,10 +644,14 @@ footer {
         updateMatchingPlayers();
     });
     
-    // 2つのリストを統合して更新する関数
+    function resolveAliases(names) {
+      return names.map(name => playerAliasMap[name.toLowerCase()] || name);
+    }
+
     function updateMatchingPlayers() {
       const mergedList = [...firebaseMatchingPlayers, ...playerSearchInput];
-      matchingPlayers = [...new Set(mergedList)]; // 重複を削除して統合
+      const resolvedList = resolveAliases(mergedList);
+      matchingPlayers = [...new Set(resolvedList)];
       renderPlayers();
     }
 
@@ -777,7 +796,6 @@ footer {
       makeTeams();
     }
     
-    // プレイヤーのソート順を決定する関数
     function sortPlayers(names, readings, sortMode) {
       if (sortMode === 'reading') {
         return names.sort((a, b) => {
@@ -804,55 +822,31 @@ footer {
     async function renderPlayers() {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
-      const method = document.querySelector('input[name="method"]:checked').value;
-
-      let scores;
-      if (method === "average") scores = playerScoresAverage;
-      else if (method === "winrate") scores = playerScoresWinRate;
-      else if (method === "kdratio") scores = playerScoresKDRatio;
-      else if (method === "balanced") {
-        scores = {};
-        const source = Object.keys(playerScoresAverage);
-        source.forEach(name => {
-          scores[name] = 0;
-        });
-      }
-
+      
       const readingsSnapshot = await db.ref("player_readings").once("value");
       const readings = readingsSnapshot.val() || {};
 
       container.innerHTML = "";
-      let names = Object.keys(scores).filter(name => scores[name] !== undefined);
       
-      let playersToShow;
+      let playersToShow = [...allPlayersList];
+      
+      // 検索窓に名前が入力されていれば、そのプレイヤーのみ表示
       if (matchingPlayers.length > 0) {
-        const matching = names.filter(name => matchingPlayers.includes(name));
-        const others = names.filter(name => !matchingPlayers.includes(name));
-        
-        const sortedMatching = sortPlayers(matching, readings, currentSortMode);
-        const sortedOthers = sortPlayers(others, readings, currentSortMode);
-        
-        playersToShow = [...sortedMatching, ...sortedOthers];
-      } else {
-        const pinnedPlayers = names.filter(name => pinned.includes(name));
-        const unpinnedPlayers = names.filter(name => !pinned.includes(name));
-        
-        const sortedPinned = sortPlayers(pinnedPlayers, readings, currentSortMode);
-        const sortedUnpinned = sortPlayers(unpinnedPlayers, readings, currentSortMode);
-        
-        playersToShow = [...sortedPinned, ...sortedUnpinned];
+        playersToShow = playersToShow.filter(name => matchingPlayers.includes(name));
       }
-      
-      playersToShow.forEach(name => {
+
+      const sortedPlayers = sortPlayers(playersToShow, readings, currentSortMode);
+
+      sortedPlayers.forEach(name => {
         const div = document.createElement("div");
         div.className = "player";
-        if (selected.includes(name)) div.classList.add("selected");
-        else if (matchingPlayers.includes(name)) div.classList.add("matching");
         
-        const displayText = '';
-
+        // プレイヤーが現在選択されているか、検索結果でマッチしているかを確認
+        if (selected.includes(name)) div.classList.add("selected");
+        else if (matchingPlayers.includes(name) && matchingPlayers.length > 0) div.classList.add("matching");
+        
         div.dataset.name = name;
-        div.innerHTML = `<span>${name}${displayText}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" title="固定/固定解除"></button>`;
+        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" title="固定/固定解除"></button>`;
         
         div.querySelector(".pin-btn").onclick = e => {
           e.stopPropagation();
@@ -865,7 +859,6 @@ footer {
         container.appendChild(div);
       });
     }
-
 
     async function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
@@ -1146,23 +1139,22 @@ footer {
       }
     });
     
-    // ソートボタンのイベントリスナーを設定
     document.getElementById("sort-reading").addEventListener("click", () => {
         currentSortMode = 'reading';
         updateSortButtons('sort-reading');
-        renderPlayers(); // ソート時に再描画
+        renderPlayers();
     });
 
     document.getElementById("sort-recent").addEventListener("click", () => {
         currentSortMode = 'recent';
         updateSortButtons('sort-recent');
-        renderPlayers(); // ソート時に再描画
+        renderPlayers();
     });
 
     document.getElementById("sort-count").addEventListener("click", () => {
         currentSortMode = 'count';
         updateSortButtons('sort-count');
-        renderPlayers(); // ソート時に再描画
+        renderPlayers();
     });
 
     function updateSortButtons(activeId) {
@@ -1173,7 +1165,19 @@ footer {
     }
 
     async function initializePage() {
-      // 過去の試合データを取得し、スコアを計算
+      // プレイヤーの読み方とあだ名を取得
+      const readingsSnapshot = await db.ref("player_readings").once("value");
+      const readingsData = readingsSnapshot.val() || {};
+      
+      // あだ名と本名のマッピングを作成
+      for (const name in readingsData) {
+        if (readingsData[name].aliases) {
+          readingsData[name].aliases.forEach(alias => {
+            playerAliasMap[alias.toLowerCase()] = name;
+          });
+        }
+      }
+
       const snapshot = await db.ref("apex_results").once("value");
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -1184,15 +1188,17 @@ footer {
         document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
       }
       
-      // 全プレイヤーリスト（試合データから抽出）を生成
       const allPlayersInMatches = new Set();
       matches.forEach(match => {
         (match.teamA || []).forEach(p => allPlayersInMatches.add(p));
         (match.teamB || []).forEach(p => allPlayersInMatches.add(p));
       });
       allPlayersList = Array.from(allPlayersInMatches);
+      // プレイヤーリストを50音順でソート
+      const sortedByReading = sortPlayers(allPlayersList, readingsData, 'reading');
+      allPlayersList = sortedByReading;
 
-      // 各プレイヤーのプレイ回数と最終プレイ日を計算
+
       playerPlayDates = {};
       playerPlayCounts = {};
       matches.forEach(match => {
@@ -1203,13 +1209,12 @@ footer {
           });
       });
 
-      // ページ読み込み時に全プレイヤーリストをレンダリング
-      renderAllPlayers();
+      // ページ読み込み時にプレイヤーリストを初期表示
+      renderPlayers();
 
       renderPairList("separate");
       renderPairList("together");
       
-      // Firebaseからのリアルタイム参加メンバーを監視するリスナーをセットアップ
       db.ref("currentInputPlayers").on("value", (snapshot) => {
           const data = snapshot.val() || {};
           firebaseMatchingPlayers = [];
@@ -1226,38 +1231,6 @@ footer {
       });
     }
 
-    async function renderAllPlayers() {
-        const container = document.getElementById("playerList");
-        const readingsSnapshot = await db.ref("player_readings").once("value");
-        const readings = readingsSnapshot.val() || {};
-
-        container.innerHTML = "";
-        let playersToShow = allPlayersList;
-
-        const sortedPlayers = sortPlayers(playersToShow, readings, currentSortMode);
-
-        sortedPlayers.forEach(name => {
-            const div = document.createElement("div");
-            div.className = "player";
-            if (pinned.includes(name)) div.classList.add("pinned-player");
-            
-            const displayText = ''; // ここにスコアや勝率などの情報を表示することも可能
-
-            div.dataset.name = name;
-            div.innerHTML = `<span>${name}${displayText}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" title="固定/固定解除"></button>`;
-            
-            div.querySelector(".pin-btn").onclick = e => {
-              e.stopPropagation();
-              togglePin(name);
-            };
-            div.onclick = () => {
-              div.classList.toggle("selected");
-              makeTeams();
-            };
-            container.appendChild(div);
-        });
-    }
-    
     initializePage();
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
