@@ -179,7 +179,7 @@
     .player-list {
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 12px;
       margin-bottom: 20px;
     }
@@ -194,8 +194,8 @@
       transition: transform 0.15s, box-shadow 0.15s;
       position: relative;
       font-size: 14px;
-      flex: 1 1 auto;
       min-width: 120px;
+      flex: 1 1 calc((100% - 12px * 3) / 4);
     }
 
     .player:hover {
@@ -373,6 +373,19 @@
       border: 1px solid #add8e6;
     }
 
+    /* レスポンシブデザインの調整 */
+    @media (max-width: 991px) {
+      .player {
+        flex: 1 1 calc((100% - 12px * 2) / 3);
+      }
+    }
+
+    @media (max-width: 767px) {
+      .player {
+        flex: 1 1 calc((100% - 12px) / 2);
+      }
+    }
+
     @media (max-width: 599px) {
       h1 {
         font-size: 22px;
@@ -395,6 +408,10 @@
       .pair-form input[type="text"] {
         flex: none;
         width: 80%;
+      }
+
+      .player {
+        flex: 1 1 100%;
       }
     }
   </style>
