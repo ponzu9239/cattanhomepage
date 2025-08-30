@@ -1,181 +1,553 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>APEX 試合結果入力</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>いい感じにチーム分けしてくれるやつ</title>
   <style>
-    body {
-      font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background-color: #f7fcfc;
-      margin: 0;
-      padding: 0;
-    }
 
-    .container {
-      max-width: 500px;
-      margin: 30px auto;
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+:root {
+  /* Colors */
+  --color-primary: #97EADB;
+  --color-accent: #47b6a2;
+  --color-text-light: #fff;
+  --color-bg: #f7fcfc;
+  --color-team-a-bg: #eefaff;
+  --color-team-a-border: #97eadb;
+  --color-team-b-bg: #fff1f5;
+  --color-team-b-border: #ffb6c1;
+  --color-pair-bg: #eaf9f8;
+  --color-hover: #0099aa;
+  
+  /* Spacing */
+  --spacing-sm: 8px;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  
+  /* Other */
+  --header-height: 75px;
+}
 
-    h1 {
-      text-align: center;
-      color: #47b6a2;
-    }
+/* Base styles */
+body {
+  font-family: "Hiragino Maru Gothic ProN", sans-serif;
+  background-color: var(--color-bg);
+  margin: 0;
+  padding-top: var(--header-height);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-    textarea {
-      width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #97eadb;
-      margin-top: 4px;
-    }
+.container {
+  flex: 1;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 90vw;
+  padding: 0 var(--spacing-md);
+}
 
-    .teams {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 20px;
-    }
 
-    .team-box {
-      background: #eefaff;
-      padding: 10px;
-      border-radius: 8px;
-      border: 2px solid #97eadb;
-    }
-
-    .team-box.team2 {
-      background: #fff1f5;
-      border-color: #ffb6c1;
-    }
-
-    .team-box.unassigned {
-      background: #fefae0;
-      border-color: #f1c40f;
-    }
-
-    .team-box h2 {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 0 8px 0;
-      color: #47b6a2;
-    }
-
-    #teamA,
-    #teamB {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-
-    #unassigned {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 6px;
-    }
-
-    .player-card {
-      background: #fff;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      padding: 6px;
-      text-align: center;
-      cursor: grab;
-    }
-
-    input[type=number] {
-      width: 90%;
-      margin-bottom: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      padding: 4px 8px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background-color: #97eadb;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #7dd2c3;
-    }
-
-    #status {
-      margin-top: 12px;
-      text-align: center;
-      font-weight: bold;
-      color: #47b6a2;
-    }
-
-    .drag-preview {
+    header {
       position: fixed;
-      pointer-events: none;
-      opacity: 0.8;
-      z-index: 9999;
-    }
-    
-    textarea {
+      top: 0;
+      left: 0;
       width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #97eadb;
-      margin-top: 4px;
-      box-sizing: border-box;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
     }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    /* ハンバーガーアイコン */
+    .hamburger {
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
+
+nav {
+  position: fixed;
+  top: 75px; /* ヘッダーの下に固定 */
+  left: 0;
+  width: 100%;
+  background-color: #97EADB;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  /* メニューを隠すための transform */
+  transform: translateY(-100vh);
+  transition: transform 0.3s ease;
+  z-index: 1050;
+}
+
+nav.show {
+  /* showクラスが付くと、メニューがスライドして表示される */
+  transform: translateY(0);
+}
+
+nav a {
+  display: block;
+  text-align: center;
+  margin: 0;
+  padding: 0.6rem 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  background-color: #97eadb;
+  border-bottom: 1px solid #97EADB;
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+nav a:hover {
+  background-color: #0099aa;
+  transform: scale(1.03);
+}
+/* Main content sections */
+h1 {
+  text-align: center;
+  color: var(--color-accent);
+  margin-bottom: 12px;
+}
+
+.method-select {
+  text-align: center;
+  margin: 18px 0 12px 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.method-select label {
+  margin: 0 var(--spacing-sm);
+  font-weight: bold;
+  color: var(--color-accent);
+  cursor: pointer;
+  user-select: none;
+  background: var(--color-text-light);
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: 1.5px solid var(--color-primary);
+  font-size: 14px;
+}
+
+.teams {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.team-box {
+  width: 90%;
+  max-width: 500px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--color-team-a-border);
+  text-align: center;
+  background: var(--color-team-a-bg);
+}
+
+.team-box.team2 {
+  background: var(--color-team-b-bg);
+  border-color: var(--color-team-b-border);
+}
+
+.team-box h2 {
+  font-size: 18px;
+  margin: 0 0 8px 0;
+  color: var(--color-accent);
+}
+
+.team-box ul {
+  list-style: none;
+  padding: 0 8px;
+  margin: 0;
+  display: grid;
+  /* 常に2列で固定 */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+
+.team-box li {
+  background: var(--color-text-light);
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+}
+
+      .player-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .player {
+        background: #fff;
+        border: 2px solid #97eadb;
+        border-radius: 10px;
+        padding: 10px 6px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+        position: relative;
+        font-size: 14px;
+      }
+
+
+.player:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.player.selected {
+  background: var(--color-primary);
+  color: var(--color-text-light);
+}
+
+.player.matching {
+  background: #e0f7f3;
+  border-color: var(--color-primary);
+}
+
+/* Pin button */
+.pin-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pin-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #bbb;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%,
+      79% 91%, 50% 70%, 21% 91%, 32% 57%,
+      2% 35%, 39% 35%);
+  transition: background 0.3s;
+}
+
+.pin-btn.pinned::before {
+  background: gold;
+}
+
+/* Other sections */
+#matchCount {
+  text-align: center;
+  font-size: 12px;
+  color: gray;
+  margin-top: var(--spacing-sm);
+  user-select: none;
+}
+
+.pair-section {
+  background: var(--color-pair-bg);
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.pair-section h3 {
+  margin-top: 0;
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.pair-form {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.pair-form input[type="text"] {
+  flex: 1 1 40%;
+  min-width: 100px;
+  padding: 6px 8px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.pair-form button {
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-text-light);
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.pair-form button:hover {
+  background: #369482;
+}
+
+.pair-list {
+  list-style: none;
+  padding-left: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  margin: 0;
+  border-top: 1px solid var(--color-primary);
+}
+
+.pair-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #b2e2dd;
+  font-size: 14px;
+  color: #333;
+}
+
+.pair-list button.delete-btn {
+  background: #ff6b6b;
+  border: none;
+  color: var(--color-text-light);
+  border-radius: 12px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+}
+
+.pair-list button.delete-btn:hover {
+  background: #e03e3e;
+}
+
+.score-display {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: var(--spacing-sm);
+  color: #555;
+}
+
+#allCombinationsSection {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: #f0f8ff;
+  border-radius: 12px;
+  border: 2px solid #87ceeb;
+}
+
+#allCombinationsSection h2 {
+  margin-top: 0;
+  color: #4682b4;
+}
+
+#allCombinationsList {
+  list-style-type: none;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#allCombinationsList li {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: #e8f4ff;
+  border-radius: 8px;
+  border: 1px solid #add8e6;
+}
+
+/* Footer */
+footer {
+  background: var(--color-primary);
+  text-align: center;
+  color: var(--color-text-light);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+/* Media Queries */
+@media (max-width: 991px) {
+  .player {
+    flex: 1 1 calc((100% - 12px * 2) / 3);
+  }
+}
+
+@media (max-width: 767px) {
+  .player {
+    flex: 1 1 calc((100% - 12px) / 2);
+  }
+}
+
+@media (max-width: 599px) {
+  h1 {
+    font-size: 22px;
+  }
+
+  .team-box h2 {
+    font-size: 16px;
+  }
+
+  .team-box li {
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  .pair-form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pair-form input[type="text"] {
+    flex: none;
+    width: 80%;
+  }
+
+  .player {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+.sort-buttons {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.sort-buttons button {
+    background: #fff;
+    border: 1px solid var(--color-primary);
+    border-radius: 16px;
+    padding: 5px 10px;
+    font-weight: bold;
+    color: var(--color-accent);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sort-buttons button.active {
+    background: var(--color-primary);
+    color: var(--color-text-light);
+}
 
   </style>
-
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 
 <body>
-  <div class="container">
-    <h1>試合結果入力</h1>
+  <header>
+    <h1>ド天然のきゃたん</h1>
+    <div class="hamburger" id="hamburger">☰</div>
+    <nav id="nav">
+      <a href="index.html">ホーム</a>
+      <a href="roulette.html">イベント</a>
+      <a href="team-view.html">チーム分けを見る</a>
+      <a href="admin2.html">管理画面</a>
+      <a href="team-maker.html">チーム分けする</a>
+    </nav>
+  </header>
 
-    <label>メンバー名を1行ごとに入力：</label>
-    <textarea id="nameInput" rows="12"></textarea>
+  <main>
+    <div class="container">
+      <h1>いい感じにチーム分けしてくれるやつ</h1>
 
-    <div class="teams">
-      <div class="team-box unassigned" ondragover="allowDrop(event)" ondrop="drop(event, 'unassigned')">
-        <h2>チーム未割り当て</h2>
-        <div id="unassigned"></div>
-      </div>
+      <section>
+        <div class="teams">
+          <div class="team-box team1">
+            <h2>チーム1</h2>
+            <ul id="teamA"></ul>
+            <p class="score-display">合計スコア: <span id="teamAScore">0</span></p>
+          </div>
+          <div class="team-box team2">
+            <h2>チーム2</h2>
+            <ul id="teamB"></ul>
+            <p class="score-display">合計スコア: <span id="teamBScore">0</span></p>
+          </div>
+        </div>
+      </section>
 
-      <div class="team-box team1" ondragover="allowDrop(event)" ondrop="drop(event, 'teamA')">
-        <h2>チーム1</h2>
-        <input type="number" id="teamAKills" placeholder="キル数" />
-        <div id="teamA"></div>
-      </div>
+      <section>
+        <div class="method-select">
+          <label><input type="radio" name="method" value="average" checked> 平均キル</label>
+          <label><input type="radio" name="method" value="balanced"> 相性</label>
+          <label><input type="radio" name="method" value="kdratio"> キルレ</label>
+          <label><input type="radio" name="method" value="winrate"> 勝率</label>
+        </div>
+      </section>
 
-      <div class="team-box team2" ondragover="allowDrop(event)" ondrop="drop(event, 'teamB')">
-        <h2>チーム2</h2>
-        <input type="number" id="teamBKills" placeholder="キル数" />
-        <div id="teamB"></div>
-      </div>
+      <section>
+        <section class="pair-section" id="separatePairsSection">
+          <h3>離したいペアを追加</h3>
+          <form id="separatePairForm" class="pair-form" onsubmit="return false;">
+            <input type="text" id="separateName1" placeholder="名前1" autocomplete="off" />
+            <input type="text" id="separateName2" placeholder="名前2" autocomplete="off" />
+            <button type="submit">追加</button>
+          </form>
+          <ul id="separatePairList" class="pair-list"></ul>
+        </section>
+
+        <section class="pair-section" id="togetherPairsSection">
+          <h3>くっつけたいペアを追加</h3>
+          <form id="togetherPairForm" class="pair-form" onsubmit="return false;">
+            <input type="text" id="togetherName1" placeholder="名前1" autocomplete="off" />
+            <input type="text" id="togetherName2" placeholder="名前2" autocomplete="off" />
+            <button type="submit">追加</button>
+          </form>
+          <ul id="togetherPairList" class="pair-list"></ul>
+        </section>
+      </section>
+
+      <section>
+        <div class="sort-buttons">
+          <button id="sort-reading" class="active">50音順</button>
+          <button id="sort-recent">最近プレイした順</button>
+          <button id="sort-count">参加回数順</button>
+        </div>
+        <div id="playerList" class="player-list"></div>
+      </section>
+      <p id="matchCount">過去 試合のカスタムマッチをもとに生成。</p>
+
+      <section id="allCombinationsSection">
+        <h2>すべてのチーム分け候補</h2>
+        <ul id="allCombinationsList"></ul>
+      </section>
+
     </div>
+  </main>
 
-    <button onclick="saveResult()">保存する</button>
-    <p id="status"></p>
-  </div>
+  <footer>
+    <p>ド天然のきゃたん</p>
+  </footer>
 
   <script>
-    // --- Firebase 設定 ---
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -183,151 +555,633 @@
       projectId: "match-result-ea475",
       storageBucket: "match-result-ea475.firebasestorage.app",
       messagingSenderId: "759877853492",
-      appId: "1:759877853492:web:a10935960bf8230af90561"
+      appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- デバイス固有ID作成 ---
-    function getDeviceId() {
-      let baseId = localStorage.getItem("deviceId");
-      if (!baseId) {
-        baseId = "device_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
-        localStorage.setItem("deviceId", baseId);
-      }
-      let tabId = sessionStorage.getItem("tabId");
-      if (!tabId) {
-        tabId = "_" + Math.floor(Math.random() * 100000);
-        sessionStorage.setItem("tabId", tabId);
-      }
-      return baseId + tabId;
+    let matches = [];
+    let playerScoresAverage = {},
+      playerScoresWinRate = {},
+      playerScoresKDRatio = {};
+    let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
+    let matchingPlayers = [];
+    
+    // 新しい変数
+    let playerPlayDates = {};
+    let playerPlayCounts = {};
+    let currentSortMode = 'reading'; // 初期ソートモード
+
+    let separatePairs = JSON.parse(localStorage.getItem("separatePairs") || "[]");
+    let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
+
+    function addPair(type, name1, name2) {
+      name1 = name1.trim();
+      name2 = name2.trim();
+      if (!name1 || !name2 || name1 === name2) return false;
+      const pair = [name1, name2].sort();
+      let arr = (type === "separate") ? separatePairs : togetherPairs;
+
+      if (arr.some(p => p[0] === pair[0] && p[1] === pair[1])) return false;
+
+      arr.push(pair);
+      localStorage.setItem(type + "Pairs", JSON.stringify(arr));
+      renderPairList(type);
+      makeTeams();
+      return true;
     }
-    const deviceId = getDeviceId();
 
-    let preview = null;
+    function removePair(type, index) {
+      let arr = (type === "separate") ? separatePairs : togetherPairs;
+      arr.splice(index, 1);
+      localStorage.setItem(type + "Pairs", JSON.stringify(arr));
+      renderPairList(type);
+      makeTeams();
+    }
 
-    // --- 両対応ドラッグイベント追加関数 ---
-    function addDragEvents(card, name) {
-      // マウス / トラックパッド
-      card.draggable = true;
-      card.addEventListener("dragstart", e => {
-        e.dataTransfer.setData("text", name);
-      });
-
-      // タッチ
-      card.addEventListener("touchstart", e => {
-        e.preventDefault();
-        preview = card.cloneNode(true);
-        preview.classList.add("drag-preview");
-        preview.style.position = "fixed";
-        preview.style.pointerEvents = "none";
-        preview.style.zIndex = "9999";
-        document.body.appendChild(preview);
-      });
-
-      card.addEventListener("touchmove", e => {
-        if (!preview) return;
-        e.preventDefault();
-        const touch = e.touches[0];
-        preview.style.left = touch.clientX - 40 + "px";
-        preview.style.top = touch.clientY - 20 + "px";
-      });
-
-      card.addEventListener("touchend", e => {
-        if (!preview) return;
-        const touch = e.changedTouches[0];
-        const dropTargetBox = document.elementFromPoint(touch.clientX, touch.clientY)?.closest(".team-box");
-        if (dropTargetBox) {
-          const containerDiv = dropTargetBox.querySelector("div");
-          if (containerDiv) containerDiv.appendChild(card);
-        }
-        preview.remove();
-        preview = null;
+    function renderPairList(type) {
+      let arr = (type === "separate") ? separatePairs : togetherPairs;
+      const listId = type === "separate" ? "separatePairList" : "togetherPairList";
+      const ul = document.getElementById(listId);
+      ul.innerHTML = "";
+      arr.forEach((pair, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${pair[0]} ＆ ${pair[1]}`;
+        const btn = document.createElement("button");
+        btn.className = "delete-btn";
+        btn.textContent = "×";
+        btn.onclick = () => removePair(type, i);
+        li.appendChild(btn);
+        ul.appendChild(li);
       });
     }
 
-    // --- プレイヤーカード描画 ---
-    function renderCards(names) {
-      const currentCards = {};
-      ["unassigned", "teamA", "teamB"].forEach(id => {
-        [...document.getElementById(id).children].forEach(card => {
-          currentCards[card.textContent] = card;
+    function calculateScoresAverage(matches) {
+      const history = {};
+      matches.forEach(match => {
+        match.teamA?.forEach(p => {
+          if (!history[p]) history[p] = [];
+          history[p].push(match.teamAKills);
+        });
+        match.teamB?.forEach(p => {
+          if (!history[p]) history[p] = [];
+          history[p].push(match.teamBKills);
         });
       });
 
-      names.forEach(name => {
-        if (!currentCards[name]) {
-          const card = document.createElement("div");
-          card.className = "player-card";
-          card.textContent = name;
-          addDragEvents(card, name);
-          document.getElementById("unassigned").appendChild(card);
+      const scores = {};
+      Object.keys(history).forEach(name => {
+        const arr = history[name];
+        if (arr.length === 0) {
+          scores[name] = 0;
+          return;
         }
+        scores[name] = +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+      });
+      return scores;
+    }
+
+    function calculateWinRate(matches) {
+      const stats = {};
+      matches.forEach(match => {
+        const teamAWins = (match.teamAKills ?? 0) > (match.teamBKills ?? 0);
+        match.teamA?.forEach(p => {
+          if (!stats[p]) stats[p] = {
+            win: 0,
+            total: 0
+          };
+          stats[p].total++;
+          if (teamAWins) stats[p].win++;
+        });
+        match.teamB?.forEach(p => {
+          if (!stats[p]) stats[p] = {
+            win: 0,
+            total: 0
+          };
+          stats[p].total++;
+          if (!teamAWins) stats[p].win++;
+        });
+      });
+      const scores = {};
+      Object.keys(stats).forEach(name => {
+        scores[name] = +(stats[name].win / stats[name].total).toFixed(2);
+      });
+      return scores;
+    }
+
+    function calculateKDRatio(matches) {
+      const playerStats = {};
+
+      matches.forEach(match => {
+        if (!match.teamA || !match.teamB) return;
+
+        const teamAKills = match.teamAKills ?? 0;
+        const teamBKills = match.teamBKills ?? 0;
+
+        match.teamA.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = {
+            kills: 0,
+            deaths: 0
+          };
+          playerStats[p].kills += teamAKills;
+          playerStats[p].deaths += teamBKills;
+        });
+
+        match.teamB.forEach(p => {
+          if (!playerStats[p]) playerStats[p] = {
+            kills: 0,
+            deaths: 0
+          };
+          playerStats[p].kills += teamBKills;
+          playerStats[p].deaths += teamAKills;
+        });
       });
 
-      // 名前が消えたらカードも削除
-      Object.keys(currentCards).forEach(name => {
-        if (!names.includes(name)) currentCards[name].remove();
+      const scores = {};
+      Object.keys(playerStats).forEach(name => {
+        const {
+          kills,
+          deaths
+        } = playerStats[name];
+        scores[name] = deaths === 0 ? kills : +(kills / deaths).toFixed(2);
+      });
+      return scores;
+    }
+
+    function togglePin(name) {
+      if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
+      else pinned.push(name);
+      localStorage.setItem("pinnedPlayers", JSON.stringify(pinned));
+      makeTeams();
+    }
+    
+    // プレイヤーのソート順を決定する関数
+    function sortPlayers(names, readings, sortMode) {
+      if (sortMode === 'reading') {
+        return names.sort((a, b) => {
+          const readingA = readings[a]?.reading || a;
+          const readingB = readings[b]?.reading || b;
+          return readingA.localeCompare(readingB, "ja");
+        });
+      } else if (sortMode === 'recent') {
+        return names.sort((a, b) => {
+          // 試合番号（matchNumber）が新しい順にソート
+          const dateA = playerPlayDates[a] || 0;
+          const dateB = playerPlayDates[b] || 0;
+          return dateB - dateA;
+        });
+      } else if (sortMode === 'count') {
+        return names.sort((a, b) => {
+          const countA = playerPlayCounts[a] || 0;
+          const countB = playerPlayCounts[b] || 0;
+          return countB - countA; // 参加回数が多い方が先
+        });
+      }
+      return names;
+    }
+
+    async function renderPlayers() {
+      const container = document.getElementById("playerList");
+      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
+      const method = document.querySelector('input[name="method"]:checked').value;
+
+      let scores;
+      if (method === "average") scores = playerScoresAverage;
+      else if (method === "winrate") scores = playerScoresWinRate;
+      else if (method === "kdratio") scores = playerScoresKDRatio;
+      else if (method === "balanced") {
+        scores = {};
+        const source = Object.keys(playerScoresAverage);
+        source.forEach(name => {
+          scores[name] = 0;
+        });
+      }
+
+      const readingsSnapshot = await db.ref("player_readings").once("value");
+      const readings = readingsSnapshot.val() || {};
+
+      container.innerHTML = "";
+      let names = Object.keys(scores).filter(name => scores[name] !== undefined);
+
+      const matchingOnlyPlayers = names.filter(name => matchingPlayers.includes(name));
+      const pinnedOnlyPlayers = names.filter(name => pinned.includes(name) && !matchingPlayers.includes(name));
+      const otherPlayers = names.filter(name => !matchingPlayers.includes(name) && !pinned.includes(name));
+
+      const sortedMatching = sortPlayers(matchingOnlyPlayers, readings, currentSortMode);
+      const sortedPinned = sortPlayers(pinnedOnlyPlayers, readings, currentSortMode);
+      const sortedOthers = sortPlayers(otherPlayers, readings, currentSortMode);
+
+      const orderedNames = sortedMatching.concat(sortedPinned, sortedOthers);
+
+      orderedNames.forEach(name => {
+        const div = document.createElement("div");
+        div.className = "player";
+        if (selected.includes(name)) div.classList.add("selected");
+        else if (matchingPlayers.includes(name)) div.classList.add("matching");
+        
+        // 名前横に最終プレイ試合番号を表示
+        const displayText = currentSortMode === 'recent' ? ` (${playerPlayDates[name] || 0})` : '';
+
+        div.dataset.name = name;
+        div.innerHTML = `<span>${name}${displayText}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}"></button>`;
+        
+        div.querySelector(".pin-btn").onclick = e => {
+          e.stopPropagation();
+          togglePin(name);
+        };
+        div.onclick = () => {
+          div.classList.toggle("selected");
+          makeTeams();
+        };
+        container.appendChild(div);
       });
     }
 
-    // --- ドロップ許可 ---
-    function allowDrop(ev) {
-      ev.preventDefault();
-    }
+    async function makeTeams() {
+      const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
+      const method = document.querySelector('input[name="method"]:checked').value;
 
-    // --- ドロップ処理 ---
-    function drop(ev, teamId) {
-      ev.preventDefault();
-      const name = ev.dataTransfer.getData("text");
-      const card = [...document.querySelectorAll(".player-card")].find(c => c.textContent === name);
-      if (card) document.getElementById(teamId).appendChild(card);
-    }
+      const teamAScoreEl = document.getElementById("teamAScore");
+      const teamBScoreEl = document.getElementById("teamBScore");
+      const allCombinationsList = document.getElementById("allCombinationsList");
 
-    // --- 保存処理 ---
-    async function saveResult() {
-      const teamA = [...document.getElementById("teamA").children].map(c => c.textContent);
-      const teamB = [...document.getElementById("teamB").children].map(c => c.textContent);
-      const teamAKills = Number(document.getElementById("teamAKills").value);
-      const teamBKills = Number(document.getElementById("teamBKills").value);
+      teamAScoreEl.textContent = "0";
+      teamBScoreEl.textContent = "0";
+      allCombinationsList.innerHTML = "";
 
-      if (teamA.length === 0 || teamB.length === 0) {
-        document.getElementById("status").innerText = "⚠️ チームにメンバーを入れてください";
+      await renderPlayers();
+
+      if (selected.length === 0) {
+        document.getElementById("teamA").innerHTML = "";
+        document.getElementById("teamB").innerHTML = "";
+        db.ref("currentTeamResult").set({
+          teamA: [],
+          teamB: [],
+          timestamp: Date.now()
+        });
         return;
       }
 
-      try {
-        const snapshot = await db.ref("apex_results").once("value");
-        let nextMatchNumber = 1;
-        if (snapshot.exists()) {
-          const matches = Object.values(snapshot.val());
-          const maxMatch = Math.max(...matches.map(m => m.matchNumber || 0));
-          nextMatchNumber = maxMatch + 1;
+      const players = selected;
+      const separate = separatePairs;
+      const together = togetherPairs;
+
+      class UnionFind {
+        constructor(n) {
+          this.parent = Array(n).fill(0).map((_, i) => i);
         }
-
-        await db.ref("apex_results").push({
-          matchNumber: nextMatchNumber,
-          teamA,
-          teamAKills,
-          teamB,
-          teamBKills
-        });
-
-        document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
-      } catch (err) {
-        console.error(err);
-        document.getElementById("status").innerText = "❌ エラーが発生しました";
+        find(x) {
+          if (this.parent[x] !== x) this.parent[x] = this.find(this.parent[x]);
+          return this.parent[x];
+        }
+        union(a, b) {
+          const rootA = this.find(a);
+          const rootB = this.find(b);
+          if (rootA !== rootB) this.parent[rootB] = rootA;
+        }
       }
+
+      const nameToIndex = {};
+      players.forEach((p, i) => {
+        nameToIndex[p] = i;
+      });
+      const uf = new UnionFind(players.length);
+
+      together.forEach(([n1, n2]) => {
+        if (n1 in nameToIndex && n2 in nameToIndex) {
+          uf.union(nameToIndex[n1], nameToIndex[n2]);
+        }
+      });
+
+      const groupsMap = new Map();
+      players.forEach((p, i) => {
+        const root = uf.find(i);
+        if (!groupsMap.has(root)) groupsMap.set(root, []);
+        groupsMap.get(root).push(p);
+      });
+      const groups = Array.from(groupsMap.values());
+
+      async function divideGroups() {
+        let bestResult = null;
+        let bestDiff = Infinity;
+        const allCombinations = [];
+
+        const combinations = getCombinations(groups, Math.floor(groups.length / 2));
+
+        for (const comb of combinations) {
+          const teamAGroups = comb;
+          const teamBGroups = groups.filter(g => !comb.includes(g));
+
+          const teamAMembers = teamAGroups.flat();
+          const teamBMembers = teamBGroups.flat();
+
+          if (Math.abs(teamAMembers.length - teamBMembers.length) > 1) continue;
+
+          let isValid = true;
+          for (const [p1, p2] of separate) {
+            const p1InA = teamAMembers.includes(p1);
+            const p2InA = teamAMembers.includes(p2);
+            const p1InB = teamBMembers.includes(p1);
+            const p2InB = teamBMembers.includes(p2);
+            if ((p1InA && p2InA) || (p1InB && p2InB)) {
+              isValid = false;
+              break;
+            }
+          }
+          if (!isValid) continue;
+
+          let scoreA, scoreB, diffScore;
+          let individualScores;
+          if (method === "balanced") {
+            individualScores = calculateBalancedScores(teamAMembers, teamBMembers, matches);
+            scoreA = teamAMembers.reduce((sum, name) => sum + (individualScores[name] || 0), 0);
+            scoreB = teamBMembers.reduce((sum, name) => sum + (individualScores[name] || 0), 0);
+            diffScore = Math.abs(scoreA - scoreB);
+          } else {
+            if (method === "average") individualScores = playerScoresAverage;
+            else if (method === "winrate") individualScores = playerScoresWinRate;
+            else individualScores = playerScoresKDRatio;
+
+            scoreA = teamAMembers.reduce((sum, name) => sum + (individualScores[name] || 0), 0);
+            scoreB = teamBMembers.reduce((sum, name) => sum + (individualScores[name] || 0), 0);
+            diffScore = Math.abs(scoreA - scoreB);
+          }
+
+          allCombinations.push({
+            teamA: teamAMembers,
+            teamB: teamBMembers,
+            diffScore,
+            scoreA,
+            scoreB,
+            individualScores
+          });
+
+          if (diffScore < bestDiff) {
+            bestDiff = diffScore;
+            bestResult = {
+              teamA: teamAMembers,
+              teamB: teamBMembers,
+              diffScore,
+              scoreA,
+              scoreB,
+              individualScores
+            };
+          }
+        }
+        return {
+          bestResult,
+          allCombinations
+        };
+      }
+
+      const {
+        bestResult,
+        allCombinations
+      } = await divideGroups();
+
+      if (!bestResult) {
+        document.getElementById("teamA").innerHTML = "<li>条件に合う分け方がありません</li>";
+        document.getElementById("teamB").innerHTML = "";
+        teamAScoreEl.textContent = "0";
+        teamBScoreEl.textContent = "0";
+        db.ref("currentTeamResult").set({
+          teamA: [],
+          teamB: [],
+          timestamp: Date.now()
+        });
+        return;
+      }
+
+      if (bestResult.teamB.includes("きゃたん") && !bestResult.teamA.includes("きゃたん")) {
+        const temp = bestResult.teamA;
+        bestResult.teamA = bestResult.teamB;
+        bestResult.teamB = temp;
+        const tempScore = bestResult.scoreA;
+        bestResult.scoreA = bestResult.scoreB;
+        bestResult.scoreB = tempScore;
+      }
+
+      document.getElementById("teamA").innerHTML = bestResult.teamA.map(n => `<li>${n} (${bestResult.individualScores[n].toFixed(2)})</li>`).join("");
+      document.getElementById("teamB").innerHTML = bestResult.teamB.map(n => `<li>${n} (${bestResult.individualScores[n].toFixed(2)})</li>`).join("");
+
+      teamAScoreEl.textContent = bestResult.scoreA.toFixed(2);
+      teamBScoreEl.textContent = bestResult.scoreB.toFixed(2);
+
+      db.ref("currentTeamResult").set({
+        teamA: bestResult.teamA,
+        teamB: bestResult.teamB,
+        timestamp: Date.now(),
+      });
+
+      allCombinations.sort((a, b) => a.diffScore - b.diffScore);
+      allCombinations.forEach(combination => {
+        const li = document.createElement("li");
+        const diffText = `スコア差: ${combination.diffScore.toFixed(2)}`;
+        const teamAPlayers = combination.teamA.map(n => `${n}(${combination.individualScores[n].toFixed(2)})`).join(", ");
+        const teamBPlayers = combination.teamB.map(n => `${n}(${combination.individualScores[n].toFixed(2)})`).join(", ");
+
+        li.innerHTML = `
+          <strong>チームA</strong>: ${teamAPlayers}<br>
+          <strong>チームB</strong>: ${teamBPlayers}<br>
+          ${diffText}
+        `;
+        allCombinationsList.appendChild(li);
+      });
     }
 
-    // --- 名前入力欄監視 ---
-    document.getElementById("nameInput").addEventListener("input", () => {
-      const names = document.getElementById("nameInput").value
-        .split("\n")
-        .map(n => n.trim())
-        .filter(n => n);
-      renderCards(names);
-      db.ref("currentInputPlayers/" + deviceId).set(names);
+    function calculateBalancedScores(teamA, teamB, matches) {
+      const scores = {};
+      const allPlayers = [...teamA, ...teamB];
+      allPlayers.forEach(p => scores[p] = 0);
+
+      allPlayers.forEach(p1 => {
+        const p1IsA = teamA.includes(p1);
+        let p1Score = 0;
+
+        allPlayers.forEach(p2 => {
+          if (p1 === p2) return;
+          const p2IsA = teamA.includes(p2);
+          let interactionScore = 0;
+          let interactionCount = 0;
+
+          matches.forEach(match => {
+            const matchTeamA = match.teamA || [];
+            const matchTeamB = match.teamB || [];
+            const p1InMatch = matchTeamA.includes(p1) || matchTeamB.includes(p1);
+            const p2InMatch = matchTeamA.includes(p2) || matchTeamB.includes(p2);
+            
+            // プレイヤーが両方とも試合に参加していない場合はスキップ
+            if (!p1InMatch || !p2InMatch) {
+                return;
+            }
+
+            const p1InMatchA = matchTeamA.includes(p1);
+            const p2InMatchA = matchTeamA.includes(p2);
+
+            // 過去に同じチームだった場合
+            if ((p1InMatchA && p2InMatchA) || (!p1InMatchA && !p2InMatchA)) {
+              // 現在も同じチームの場合
+              if (p1IsA === p2IsA) { 
+                const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
+                interactionScore += diff;
+                interactionCount++;
+              }
+            }
+            // 過去に敵チームだった場合
+            else {
+              // 現在も敵チームの場合
+              if (p1IsA !== p2IsA) { 
+                const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
+                interactionScore += diff;
+                interactionCount++;
+              }
+            }
+          });
+
+          if (interactionCount > 0) {
+            p1Score += interactionScore / interactionCount;
+          }
+        });
+        scores[p1] = p1Score;
+      });
+
+      return scores;
+    }
+
+    function getCombinations(array, size) {
+      if (size === 0) return [
+        []
+      ];
+      if (array.length < size) return [];
+      const [first, ...rest] = array;
+      const combsWithFirst = getCombinations(rest, size - 1).map(c => [first, ...c]);
+      const combsWithoutFirst = getCombinations(rest, size);
+      return combsWithFirst.concat(combsWithoutFirst);
+    }
+
+    document.getElementById("separatePairForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const n1 = document.getElementById("separateName1").value;
+      const n2 = document.getElementById("separateName2").value;
+      if (addPair("separate", n1, n2)) {
+        document.getElementById("separateName1").value = "";
+        document.getElementById("separateName2").value = "";
+      } else {
+        alert("名前が空欄か同じ、もしくは既に登録済みです。");
+      }
+    });
+
+    document.getElementById("togetherPairForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const n1 = document.getElementById("togetherName1").value;
+      const n2 = document.getElementById("togetherName2").value;
+      if (addPair("together", n1, n2)) {
+        document.getElementById("togetherName1").value = "";
+        document.getElementById("togetherName2").value = "";
+      } else {
+        alert("名前が空欄か同じ、もしくは既に登録済みです。");
+      }
+    });
+    
+    // ソートボタンのイベントリスナーを設定
+    document.getElementById("sort-reading").addEventListener("click", () => {
+        currentSortMode = 'reading';
+        updateSortButtons('sort-reading');
+        renderPlayers();
+    });
+
+    document.getElementById("sort-recent").addEventListener("click", () => {
+        currentSortMode = 'recent';
+        updateSortButtons('sort-recent');
+        renderPlayers();
+    });
+
+    document.getElementById("sort-count").addEventListener("click", () => {
+        currentSortMode = 'count';
+        updateSortButtons('sort-count');
+        renderPlayers();
+    });
+
+    function updateSortButtons(activeId) {
+        document.querySelectorAll('.sort-buttons button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(activeId).classList.add('active');
+    }
+
+    // ページの初期化処理を統合
+    async function initializePage() {
+      // 1. Firebaseから全ての試合データを一度だけ取得
+      const snapshot = await db.ref("apex_results").once("value");
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        matches = Object.keys(data).map(key => ({ ...data[key], matchId: parseInt(key, 10) }));
+        playerScoresAverage = calculateScoresAverage(matches);
+        playerScoresWinRate = calculateWinRate(matches);
+        playerScoresKDRatio = calculateKDRatio(matches);
+        document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
+
+        // 参加回数と最終プレイ日時を計算
+        playerPlayDates = {};
+        playerPlayCounts = {};
+        matches.forEach(match => {
+          const allPlayersInMatch = (match.teamA || []).concat(match.teamB || []);
+          allPlayersInMatch.forEach(p => {
+            playerPlayCounts[p] = (playerPlayCounts[p] || 0) + 1;
+            // 試合番号（matchNumber）を最終プレイ日時として使用
+            playerPlayDates[p] = Math.max(playerPlayDates[p] || 0, match.matchNumber || 0);
+          });
+        });
+      }
+
+      // 2. プレイヤーのリアルタイム参加状況を監視
+      db.ref("currentInputPlayers").on("value", (snapshot) => {
+        const data = snapshot.val() || {};
+        matchingPlayers = [];
+
+        Object.values(data).forEach(nameList => {
+          if (Array.isArray(nameList)) {
+            nameList.forEach(name => {
+              if (name && name.trim() !== '') {
+                matchingPlayers.push(name.trim());
+              }
+            });
+          }
+        });
+
+        matchingPlayers = [...new Set(matchingPlayers)];
+        makeTeams(); // 参加プレイヤーが変更されたらチーム分けを再計算
+      });
+
+      renderPairList("separate");
+      renderPairList("together");
+    }
+    
+    // ページロード時に初期化関数を呼び出す
+    initializePage();
+
+    document.querySelectorAll('input[name="method"]').forEach(radio => {
+      radio.addEventListener("change", () => {
+        makeTeams();
+      });
+    });
+
+    const hamburger = document.getElementById("hamburger");
+    const nav = document.getElementById("nav");
+
+    hamburger.addEventListener("click", () => {
+      nav.classList.toggle("show");
+      const links = nav.querySelectorAll("a");
+      links.forEach((link, index) => {
+        if (nav.classList.contains("show")) {
+          link.style.opacity = "1";
+          link.style.transform = "translateY(0)";
+        } else {
+          link.style.opacity = "0";
+          link.style.transform = "translateY(-20px)";
+          link.style.transitionDelay = "0s";
+        }
+      });
     });
   </script>
 </body>
