@@ -630,12 +630,14 @@ footer {
 
     document.getElementById("playerSearchInput").addEventListener("input", () => {
         const inputStr = document.getElementById("playerSearchInput").value;
-        const normalizedInput = katakanaToHiragana(inputStr).toLowerCase();
+        const inputNames = inputStr.split(/\n/).map(name => name.trim()).filter(name => name !== '');
         
-        playerSearchInput = allPlayersList.filter(name => {
+        playerSearchInput = inputNames.filter(name => {
             const normalizedName = katakanaToHiragana(name).toLowerCase();
-            const normalizedReading = katakanaToHiragana(readingsData[name]?.reading || "").toLowerCase();
-            return normalizedName.includes(normalizedInput) || normalizedReading.includes(normalizedInput);
+            const resolvedName = playerAliasMap[normalizedName] || name;
+            
+            // 完全一致で検索
+            return allPlayersList.includes(resolvedName);
         });
         updateMatchingPlayers();
     });
@@ -656,7 +658,7 @@ footer {
     });
     
     function resolveAliases(names) {
-      return names.map(name => playerAliasMap[name.toLowerCase()] || name);
+      return names.map(name => playerAliasMap[katakanaToHiragana(name).toLowerCase()] || name);
     }
 
     function updateMatchingPlayers() {
@@ -836,11 +838,16 @@ footer {
       
       container.innerHTML = "";
       
-      const playersToShow = [...allPlayersList];
+      const sortedPlayers = sortPlayers(allPlayersList, readingsData, currentSortMode);
 
-      const sortedPlayers = sortPlayers(playersToShow, readingsData, currentSortMode);
+      const matchingAndPinned = sortedPlayers.filter(name => matchingPlayers.includes(name) && pinned.includes(name));
+      const matchingNotPinned = sortedPlayers.filter(name => matchingPlayers.includes(name) && !pinned.includes(name));
+      const pinnedNotMatching = sortedPlayers.filter(name => pinned.includes(name) && !matchingPlayers.includes(name));
+      const others = sortedPlayers.filter(name => !matchingPlayers.includes(name) && !pinned.includes(name));
 
-      sortedPlayers.forEach(name => {
+      const finalSortedList = [...matchingAndPinned, ...matchingNotPinned, ...pinnedNotMatching, ...others];
+      
+      finalSortedList.forEach(name => {
         const div = document.createElement("div");
         div.className = "player";
         
@@ -1175,7 +1182,7 @@ footer {
       for (const name in readingsData) {
         if (readingsData[name].aliases) {
           readingsData[name].aliases.forEach(alias => {
-            playerAliasMap[alias.toLowerCase()] = name;
+            playerAliasMap[katakanaToHiragana(alias).toLowerCase()] = name;
           });
         }
       }
