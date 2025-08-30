@@ -785,7 +785,7 @@ footer {
       teamBScoreEl.textContent = "0";
       allCombinationsList.innerHTML = "";
 
-      // 読み方データを取得してから renderPlayers を呼び出す
+      // renderPlayers()をmakeTeams()の先頭で呼び出す
       await renderPlayers();
 
       if (selected.length === 0) {
@@ -1108,6 +1108,17 @@ footer {
       radio.addEventListener("change", () => {
         makeTeams();
       });
+    });
+
+    // ページロード時にすべてのデータを読み込む
+    db.ref("apex_results").once("value", snapshot => {
+        if (!snapshot.exists()) return;
+        matches = Object.values(snapshot.val());
+        playerScoresAverage = calculateScoresAverage(matches);
+        playerScoresWinRate = calculateWinRate(matches);
+        playerScoresKDRatio = calculateKDRatio(matches);
+        document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
+        makeTeams();
     });
   </script>
 </body>
