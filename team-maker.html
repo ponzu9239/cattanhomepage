@@ -633,7 +633,6 @@ footer {
     function updateMatchingPlayers() {
       const mergedList = [...firebaseMatchingPlayers, ...playerSearchInput];
       matchingPlayers = [...new Set(mergedList)]; // 重複を削除して統合
-      // プレイヤー表示だけを更新する
       renderPlayers();
     }
 
@@ -870,7 +869,8 @@ footer {
       teamBScoreEl.textContent = "0";
       allCombinationsList.innerHTML = "";
 
-      await renderPlayers();
+      // renderPlayers()はmakeTeams()の前に呼び出されるため、ここでは不要
+      // await renderPlayers();
 
       if (selected.length === 0) {
         document.getElementById("teamA").innerHTML = "";
@@ -1143,19 +1143,19 @@ footer {
     document.getElementById("sort-reading").addEventListener("click", () => {
         currentSortMode = 'reading';
         updateSortButtons('sort-reading');
-        makeTeams();
+        renderPlayers(); // ソート時に再描画
     });
 
     document.getElementById("sort-recent").addEventListener("click", () => {
         currentSortMode = 'recent';
         updateSortButtons('sort-recent');
-        makeTeams();
+        renderPlayers(); // ソート時に再描画
     });
 
     document.getElementById("sort-count").addEventListener("click", () => {
         currentSortMode = 'count';
         updateSortButtons('sort-count');
-        makeTeams();
+        renderPlayers(); // ソート時に再描画
     });
 
     function updateSortButtons(activeId) {
@@ -1189,7 +1189,7 @@ footer {
       renderPairList("separate");
       renderPairList("together");
       
-      // 修正: ここで初回描画のためにrenderPlayers()を呼び出す
+      // 修正：この行を追加
       renderPlayers();
 
       // Firebaseからのリアルタイム参加メンバーを監視するリスナーをセットアップ
@@ -1205,7 +1205,6 @@ footer {
                   });
               }
           });
-          // 参加メンバーリストが更新されたら、プレイヤー表示を更新
           updateMatchingPlayers();
       });
     }
