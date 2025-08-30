@@ -174,13 +174,15 @@ h1 {
 
 .team-box ul {
   list-style: none;
-  padding: 0 var(--spacing-sm);
+  padding: 0 8px;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: var(--spacing-sm);
+  /* 常に2列で固定 */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
   box-sizing: border-box;
 }
+
 
 .team-box li {
   background: var(--color-text-light);
@@ -1074,15 +1076,23 @@ footer {
     renderPairList("separate");
     renderPairList("together");
 
-// ハンバーガーアイコンとナビゲーションメニューの要素を取得
-const hamburger = document.getElementById("hamburger");
-const nav = document.getElementById("nav");
+    const hamburger = document.getElementById("hamburger");
+    const nav = document.getElementById("nav");
 
-// ハンバーガーアイコンにクリックイベントを追加
-hamburger.addEventListener("click", () => {
-  // nav要素に "show" クラスを追加・削除する
-  nav.classList.toggle("show");
-});
+    hamburger.addEventListener("click", () => {
+      nav.classList.toggle("show");
+      const links = nav.querySelectorAll("a");
+      links.forEach((link, index) => {
+        if (nav.classList.contains("show")) {
+          link.style.opacity = "1";
+          link.style.transform = "translateY(0)";
+        } else {
+          link.style.opacity = "0";
+          link.style.transform = "translateY(-20px)";
+          link.style.transitionDelay = "0s";
+        }
+      });
+    });
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
       radio.addEventListener("change", () => {
