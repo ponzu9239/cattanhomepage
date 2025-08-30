@@ -173,9 +173,11 @@
       text-align: center;
     }
 
+    /* 変更箇所: flexboxレイアウトに変更 */
     .player-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 12px;
       margin-bottom: 20px;
     }
@@ -190,6 +192,7 @@
       transition: transform 0.15s, box-shadow 0.15s;
       position: relative;
       font-size: 14px;
+      flex: 1 1 120px; /* 変更箇所: flexプロパティを設定 */
     }
 
     .player:hover {
@@ -367,7 +370,7 @@
       border: 1px solid #add8e6;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 599px) {
       h1 {
         font-size: 22px;
       }
@@ -379,10 +382,6 @@
       .team-box li {
         font-size: 14px;
         padding: 5px;
-      }
-
-      .player-list {
-        grid-template-columns: repeat(2, 1fr);
       }
 
       .pair-form {
