@@ -14,6 +14,8 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      width: 100vw;
+      min-width: 100vw;
       overflow-x: hidden;
     }
 
@@ -177,7 +179,7 @@
     .player-list {
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-between; /* 修正箇所: 左右いっぱい */
+      justify-content: space-between;
       gap: 12px;
       margin-bottom: 20px;
     }
@@ -192,10 +194,9 @@
       transition: transform 0.15s, box-shadow 0.15s;
       position: relative;
       font-size: 14px;
+      flex: 1 1 auto;
       min-width: 120px;
-      flex: 1 1 auto; /* 修正箇所: ブロックを均等に拡張 */
     }
-
 
     .player:hover {
       transform: translateY(-2px);
@@ -983,82 +984,3 @@
 
     document.getElementById("separatePairForm").addEventListener("submit", e => {
       e.preventDefault();
-      const n1 = document.getElementById("separateName1").value;
-      const n2 = document.getElementById("separateName2").value;
-      if (addPair("separate", n1, n2)) {
-        document.getElementById("separateName1").value = "";
-        document.getElementById("separateName2").value = "";
-      } else {
-        alert("名前が空欄か同じ、もしくは既に登録済みです。");
-      }
-    });
-
-    document.getElementById("togetherPairForm").addEventListener("submit", e => {
-      e.preventDefault();
-      const n1 = document.getElementById("togetherName1").value;
-      const n2 = document.getElementById("togetherName2").value;
-      if (addPair("together", n1, n2)) {
-        document.getElementById("togetherName1").value = "";
-        document.getElementById("togetherName2").value = "";
-      } else {
-        alert("名前が空欄か同じ、もしくは既に登録済みです。");
-      }
-    });
-
-    db.ref("apex_results").on("value", snapshot => {
-      if (!snapshot.exists()) return;
-      matches = Object.values(snapshot.val());
-      playerScoresAverage = calculateScoresAverage(matches);
-      playerScoresWinRate = calculateWinRate(matches);
-      playerScoresKDRatio = calculateKDRatio(matches);
-      renderPlayers();
-      makeTeams();
-      document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
-    });
-
-    document.querySelectorAll('input[name="method"]').forEach(radio => {
-      radio.addEventListener("change", () => {
-        makeTeams();
-        renderPlayers();
-      });
-    });
-
-    document.getElementById("recentBiasToggle").addEventListener("change", () => {
-      if (document.querySelector('input[name="method"]:checked').value !== "winrate") {
-        playerScoresAverage = calculateScoresAverage(matches);
-        renderPlayers();
-        makeTeams();
-      }
-    });
-
-    renderPairList("separate");
-    renderPairList("together");
-
-    const hamburger = document.getElementById("hamburger");
-    const nav = document.getElementById("nav");
-
-    hamburger.addEventListener("click", () => {
-      nav.classList.toggle("show");
-      const links = nav.querySelectorAll("a");
-      links.forEach((link, index) => {
-        if (nav.classList.contains("show")) {
-          link.style.opacity = "1";
-          link.style.transform = "translateY(0)";
-        } else {
-          link.style.opacity = "0";
-          link.style.transform = "translateY(-20px)";
-          link.style.transitionDelay = "0s";
-        }
-      });
-    });
-
-    document.querySelectorAll('input[name="method"]').forEach(radio => {
-      radio.addEventListener("change", () => {
-        makeTeams();
-        renderPlayers();
-      });
-    });
-  </script>
-</body>
-
-</html>
