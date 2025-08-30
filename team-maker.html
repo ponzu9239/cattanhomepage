@@ -997,8 +997,8 @@ footer {
           }
         }
         return {
-          bestResult,
-          allCombinations
+            bestResult,
+            allCombinations
         };
       }
 
@@ -1196,8 +1196,8 @@ footer {
       renderPairList("separate");
       renderPairList("together");
       
-      // 修正：この行を追加
-      updateMatchingPlayers(); // ロード時に初期リストを生成し、描画
+      // 修正: ページロード時にプレイヤーリストを初期表示するために、この行を追加
+      updateMatchingPlayers();
       
       // Firebaseからのリアルタイム参加メンバーを監視するリスナーをセットアップ
       db.ref("currentInputPlayers").on("value", (snapshot) => {
