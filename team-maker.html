@@ -1173,6 +1173,7 @@ footer {
     }
 
     async function initializePage() {
+      // 過去の試合データを取得し、スコアを計算
       const snapshot = await db.ref("apex_results").once("value");
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -1181,23 +1182,32 @@ footer {
         playerScoresWinRate = calculateWinRate(matches);
         playerScoresKDRatio = calculateKDRatio(matches);
         document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
+      }
+      
+      // 全プレイヤーリスト（試合データから抽出）を生成
+      const allPlayersInMatches = new Set();
+      matches.forEach(match => {
+        (match.teamA || []).forEach(p => allPlayersInMatches.add(p));
+        (match.teamB || []).forEach(p => allPlayersInMatches.add(p));
+      });
+      allPlayersList = Array.from(allPlayersInMatches);
 
-        playerPlayDates = {};
-        playerPlayCounts = {};
-        matches.forEach(match => {
+      // 各プレイヤーのプレイ回数と最終プレイ日を計算
+      playerPlayDates = {};
+      playerPlayCounts = {};
+      matches.forEach(match => {
           const allPlayersInMatch = (match.teamA || []).concat(match.teamB || []);
           allPlayersInMatch.forEach(p => {
-            playerPlayCounts[p] = (playerPlayCounts[p] || 0) + 1;
-            playerPlayDates[p] = Math.max(playerPlayDates[p] || 0, match.matchNumber || 0);
+              playerPlayCounts[p] = (playerPlayCounts[p] || 0) + 1;
+              playerPlayDates[p] = Math.max(playerPlayDates[p] || 0, match.matchNumber || 0);
           });
-        });
-      }
+      });
+
+      // ページ読み込み時に全プレイヤーリストをレンダリング
+      renderAllPlayers();
 
       renderPairList("separate");
       renderPairList("together");
-      
-      // 修正: ページロード時にプレイヤーリストを初期表示するために、この行を追加
-      updateMatchingPlayers();
       
       // Firebaseからのリアルタイム参加メンバーを監視するリスナーをセットアップ
       db.ref("currentInputPlayers").on("value", (snapshot) => {
@@ -1214,6 +1224,38 @@ footer {
           });
           updateMatchingPlayers();
       });
+    }
+
+    async function renderAllPlayers() {
+        const container = document.getElementById("playerList");
+        const readingsSnapshot = await db.ref("player_readings").once("value");
+        const readings = readingsSnapshot.val() || {};
+
+        container.innerHTML = "";
+        let playersToShow = allPlayersList;
+
+        const sortedPlayers = sortPlayers(playersToShow, readings, currentSortMode);
+
+        sortedPlayers.forEach(name => {
+            const div = document.createElement("div");
+            div.className = "player";
+            if (pinned.includes(name)) div.classList.add("pinned-player");
+            
+            const displayText = ''; // ここにスコアや勝率などの情報を表示することも可能
+
+            div.dataset.name = name;
+            div.innerHTML = `<span>${name}${displayText}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" title="固定/固定解除"></button>`;
+            
+            div.querySelector(".pin-btn").onclick = e => {
+              e.stopPropagation();
+              togglePin(name);
+            };
+            div.onclick = () => {
+              div.classList.toggle("selected");
+              makeTeams();
+            };
+            container.appendChild(div);
+        });
     }
     
     initializePage();
