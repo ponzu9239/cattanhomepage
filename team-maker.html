@@ -872,10 +872,12 @@ footer {
         div.dataset.name = name;
         div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" title="固定/固定解除"></button>`;
         
-        div.querySelector(".pin-btn").onclick = e => {
+        const pinBtn = div.querySelector(".pin-btn");
+        pinBtn.onclick = e => {
           e.stopPropagation();
           togglePin(name);
         };
+        
         div.onclick = () => {
           div.classList.toggle("selected");
           // 選択されたら.matchingクラスを削除
