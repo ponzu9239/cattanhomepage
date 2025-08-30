@@ -42,41 +42,45 @@
       z-index: 1100;
     }
 
-    nav {
-      position: fixed;
-      top: -100%;
-      left: 0;
-      width: 100%;
-      background-color: #97EADB;
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-      transition: top 0.3s ease;
-      z-index: 1050;
-    }
+nav {
+  position: fixed;
+  top: 75px; /* ヘッダーの下に固定 */
+  left: 0;
+  width: 100%;
+  background-color: #97EADB;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  /* メニューを隠すための transform */
+  transform: translateY(-100vh);
+  transition: transform 0.3s ease;
+  z-index: 1050;
+}
 
-    nav.show {
-      top: 75px;
-    }
+nav.show {
+  /* showクラスが付くと、メニューがスライドして表示される */
+  transform: translateY(0);
+}
 
-    nav a {
-      display: block;
-      text-align: center;
-      margin: 0;
-      padding: 0.6rem 0;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: white;
-      background-color: #97eadb;
-      border-bottom: 1px solid #97EADB;
-      text-decoration: none;
-      transition: background-color 0.2s, transform 0.2s;
-    }
+nav a {
+  display: block;
+  text-align: center;
+  margin: 0;
+  padding: 0.6rem 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  background-color: #97eadb;
+  border-bottom: 1px solid #97EADB;
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.2s;
+}
 
-    nav a:hover {
-      background-color: #0099aa;
-      transform: scale(1.03);
-    }
+nav a:hover {
+  background-color: #0099aa;
+  transform: scale(1.03);
+}
+
 
     footer {
       background: #97EADB;
