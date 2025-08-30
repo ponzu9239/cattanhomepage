@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>いい感じにチーム分けしてくれるやつ</title>
   <style>
-
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
       background: #f7fcfc;
@@ -396,10 +395,6 @@
         width: 80%;
       }
     }
-    
-    body, html {
-  overflow-x: hidden;
-}
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -907,8 +902,8 @@
         const teamBPlayers = combination.teamB.map(n => `${n}(${combination.individualScores[n].toFixed(2)})`).join(", ");
 
         li.innerHTML = `
-          <strong>チーム1</strong>: ${teamAPlayers}<br>
-          <strong>チーム2</strong>: ${teamBPlayers}<br>
+          <strong>チームA</strong>: ${teamAPlayers}<br>
+          <strong>チームB</strong>: ${teamBPlayers}<br>
           ${diffText}
         `;
         allCombinationsList.appendChild(li);
