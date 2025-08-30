@@ -778,9 +778,13 @@ footer {
         div.className = "player";
         if (selected.includes(name)) div.classList.add("selected");
         else if (matchingPlayers.includes(name)) div.classList.add("matching");
+        
+        // 名前横に最終プレイ試合番号を表示
+        const displayText = currentSortMode === 'recent' ? ` (${playerPlayDates[name] || 0})` : '';
 
         div.dataset.name = name;
-        div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}"></button>`;
+        div.innerHTML = `<span>${name}${displayText}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}"></button>`;
+        
         div.querySelector(".pin-btn").onclick = e => {
           e.stopPropagation();
           togglePin(name);
