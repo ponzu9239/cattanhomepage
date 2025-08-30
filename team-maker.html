@@ -480,9 +480,6 @@ footer {
           <label><input type="radio" name="method" value="kdratio"> キルレ</label>
           <label><input type="radio" name="method" value="winrate"> 勝率</label>
         </div>
-        <div class="method-select">
-          <label><input type="checkbox" id="recentBiasToggle"> 直前試合重視(勝率除く)</label>
-        </div>
       </section>
 
       <section>
@@ -619,7 +616,6 @@ footer {
         });
       });
 
-      const recentBias = document.getElementById("recentBiasToggle").checked;
       const scores = {};
       Object.keys(history).forEach(name => {
         const arr = history[name];
@@ -627,14 +623,7 @@ footer {
           scores[name] = 0;
           return;
         }
-        if (recentBias) {
-          const last = arr[arr.length - 1];
-          const prev = arr.slice(0, -1);
-          const prevAvg = prev.length ? prev.reduce((a, b) => a + b, 0) / prev.length : 0;
-          scores[name] = +(prevAvg + last).toFixed(2);
-        } else {
-          scores[name] = +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
-        }
+        scores[name] = +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
       });
       return scores;
     }
@@ -1066,6 +1055,7 @@ footer {
       playerScoresAverage = calculateScoresAverage(matches);
       playerScoresWinRate = calculateWinRate(matches);
       playerScoresKDRatio = calculateKDRatio(matches);
+      // makeTeams();をここで呼び出すことで、リアルタイム更新を維持
       makeTeams();
       document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
     });
@@ -1074,13 +1064,6 @@ footer {
       radio.addEventListener("change", () => {
         makeTeams();
       });
-    });
-
-    document.getElementById("recentBiasToggle").addEventListener("change", () => {
-      if (document.querySelector('input[name="method"]:checked').value !== "winrate") {
-        playerScoresAverage = calculateScoresAverage(matches);
-        makeTeams();
-      }
     });
 
     renderPairList("separate");
@@ -1104,22 +1087,9 @@ footer {
       });
     });
 
-    document.querySelectorAll('input[name="method"]').forEach(radio => {
-      radio.addEventListener("change", () => {
-        makeTeams();
-      });
-    });
-
-    // ページロード時にすべてのデータを読み込む
-    db.ref("apex_results").once("value", snapshot => {
-        if (!snapshot.exists()) return;
-        matches = Object.values(snapshot.val());
-        playerScoresAverage = calculateScoresAverage(matches);
-        playerScoresWinRate = calculateWinRate(matches);
-        playerScoresKDRatio = calculateKDRatio(matches);
-        document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
-        makeTeams();
-    });
+    // ページロード時に1度だけチーム分けを実行
+    // これにより、初回アクセス時にリストが表示される
+    makeTeams();
   </script>
 </body>
 
