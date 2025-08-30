@@ -493,6 +493,9 @@ footer {
           </div>
         </div>
       </section>
+      
+      <label>リアルタイム参加メンバー入力（改行で区切る）：</label>
+      <textarea id="livePlayerInput" rows="6"></textarea>
 
       <section>
         <div class="method-select">
@@ -555,25 +558,72 @@ footer {
       projectId: "match-result-ea475",
       storageBucket: "match-result-ea475.firebasestorage.app",
       messagingSenderId: "759877853492",
-      appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
+      appId: "1:759877853492:web:a10935960bf8230af90561"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // デバイス固有ID作成
+    function getDeviceId() {
+      let baseId = localStorage.getItem("deviceId");
+      if (!baseId) {
+        baseId = "device_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+        localStorage.setItem("deviceId", baseId);
+      }
+      return baseId;
+    }
+    const deviceId = getDeviceId();
+    
     let matches = [];
     let playerScoresAverage = {},
       playerScoresWinRate = {},
       playerScoresKDRatio = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
-    let matchingPlayers = [];
     
-    // 新しい変数
+    // admin2.htmlから取得したプレイヤーリストと、新しい入力欄のプレイヤーリストを管理する
+    let firebaseMatchingPlayers = [];
+    let liveInputPlayers = [];
+    let matchingPlayers = []; // 最終的な統合リスト
+    
     let playerPlayDates = {};
     let playerPlayCounts = {};
-    let currentSortMode = 'reading'; // 初期ソートモード
+    let currentSortMode = 'reading';
 
     let separatePairs = JSON.parse(localStorage.getItem("separatePairs") || "[]");
     let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
+
+    // 新しい入力欄の監視
+    document.getElementById("livePlayerInput").addEventListener("input", () => {
+        liveInputPlayers = document.getElementById("livePlayerInput").value
+            .split("\n")
+            .map(n => n.trim())
+            .filter(n => n);
+        updateMatchingPlayers();
+    });
+    
+    // Firebaseからのリアルタイム参加メンバーを監視
+    db.ref("currentInputPlayers").on("value", (snapshot) => {
+        const data = snapshot.val() || {};
+        firebaseMatchingPlayers = [];
+        Object.values(data).forEach(nameList => {
+            if (Array.isArray(nameList)) {
+                nameList.forEach(name => {
+                    if (name && name.trim() !== '') {
+                        firebaseMatchingPlayers.push(name.trim());
+                    }
+                });
+            }
+        });
+        updateMatchingPlayers();
+    });
+    
+    // 2つのリストを統合して更新する関数
+    function updateMatchingPlayers() {
+      const mergedList = [...firebaseMatchingPlayers, ...liveInputPlayers];
+      matchingPlayers = [...new Set(mergedList)]; // 重複を削除して統合
+      makeTeams();
+    }
+
 
     function addPair(type, name1, name2) {
       name1 = name1.trim();
@@ -725,7 +775,6 @@ footer {
         });
       } else if (sortMode === 'recent') {
         return names.sort((a, b) => {
-          // 試合番号（matchNumber）が新しい順にソート
           const dateA = playerPlayDates[a] || 0;
           const dateB = playerPlayDates[b] || 0;
           return dateB - dateA;
@@ -734,7 +783,7 @@ footer {
         return names.sort((a, b) => {
           const countA = playerPlayCounts[a] || 0;
           const countB = playerPlayCounts[b] || 0;
-          return countB - countA; // 参加回数が多い方が先
+          return countB - countA;
         });
       }
       return names;
@@ -779,7 +828,6 @@ footer {
         if (selected.includes(name)) div.classList.add("selected");
         else if (matchingPlayers.includes(name)) div.classList.add("matching");
         
-        // 名前横に最終プレイ試合番号を表示
         const displayText = '';
 
         div.dataset.name = name;
@@ -964,14 +1012,14 @@ footer {
       document.getElementById("teamA").innerHTML = bestResult.teamA.map(n => `<li>${n} (${bestResult.individualScores[n].toFixed(2)})</li>`).join("");
       document.getElementById("teamB").innerHTML = bestResult.teamB.map(n => `<li>${n} (${bestResult.individualScores[n].toFixed(2)})</li>`).join("");
 
-      teamAScoreEl.textContent = bestResult.scoreA.toFixed(2);
-      teamBScoreEl.textContent = bestResult.scoreB.toFixed(2);
-
       db.ref("currentTeamResult").set({
         teamA: bestResult.teamA,
         teamB: bestResult.teamB,
         timestamp: Date.now(),
       });
+
+      teamAScoreEl.textContent = bestResult.scoreA.toFixed(2);
+      teamBScoreEl.textContent = bestResult.scoreB.toFixed(2);
 
       allCombinations.sort((a, b) => a.diffScore - b.diffScore);
       allCombinations.forEach(combination => {
@@ -1087,19 +1135,19 @@ footer {
     document.getElementById("sort-reading").addEventListener("click", () => {
         currentSortMode = 'reading';
         updateSortButtons('sort-reading');
-        renderPlayers();
+        makeTeams();
     });
 
     document.getElementById("sort-recent").addEventListener("click", () => {
         currentSortMode = 'recent';
         updateSortButtons('sort-recent');
-        renderPlayers();
+        makeTeams();
     });
 
     document.getElementById("sort-count").addEventListener("click", () => {
         currentSortMode = 'count';
         updateSortButtons('sort-count');
-        renderPlayers();
+        makeTeams();
     });
 
     function updateSortButtons(activeId) {
@@ -1109,9 +1157,7 @@ footer {
         document.getElementById(activeId).classList.add('active');
     }
 
-    // ページの初期化処理を統合
     async function initializePage() {
-      // 1. Firebaseから全ての試合データを一度だけ取得
       const snapshot = await db.ref("apex_results").once("value");
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -1121,43 +1167,23 @@ footer {
         playerScoresKDRatio = calculateKDRatio(matches);
         document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
 
-        // 参加回数と最終プレイ日時を計算
         playerPlayDates = {};
         playerPlayCounts = {};
         matches.forEach(match => {
           const allPlayersInMatch = (match.teamA || []).concat(match.teamB || []);
           allPlayersInMatch.forEach(p => {
             playerPlayCounts[p] = (playerPlayCounts[p] || 0) + 1;
-            // 試合番号（matchNumber）を最終プレイ日時として使用
             playerPlayDates[p] = Math.max(playerPlayDates[p] || 0, match.matchNumber || 0);
           });
         });
       }
 
-      // 2. プレイヤーのリアルタイム参加状況を監視
-      db.ref("currentInputPlayers").on("value", (snapshot) => {
-        const data = snapshot.val() || {};
-        matchingPlayers = [];
-
-        Object.values(data).forEach(nameList => {
-          if (Array.isArray(nameList)) {
-            nameList.forEach(name => {
-              if (name && name.trim() !== '') {
-                matchingPlayers.push(name.trim());
-              }
-            });
-          }
-        });
-
-        matchingPlayers = [...new Set(matchingPlayers)];
-        makeTeams(); // 参加プレイヤーが変更されたらチーム分けを再計算
-      });
-
       renderPairList("separate");
       renderPairList("together");
+      
+      makeTeams();
     }
     
-    // ページロード時に初期化関数を呼び出す
     initializePage();
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
