@@ -725,7 +725,7 @@ footer {
         });
       } else if (sortMode === 'recent') {
         return names.sort((a, b) => {
-          // 試合番号（matchId）が新しい順にソート
+          // 試合番号（matchNumber）が新しい順にソート
           const dateA = playerPlayDates[a] || 0;
           const dateB = playerPlayDates[b] || 0;
           return dateB - dateA;
@@ -1128,8 +1128,8 @@ footer {
           const allPlayersInMatch = (match.teamA || []).concat(match.teamB || []);
           allPlayersInMatch.forEach(p => {
             playerPlayCounts[p] = (playerPlayCounts[p] || 0) + 1;
-            // 試合番号（matchId）を最終プレイ日時として使用
-            playerPlayDates[p] = Math.max(playerPlayDates[p] || 0, match.matchId || 0);
+            // 試合番号（matchNumber）を最終プレイ日時として使用
+            playerPlayDates[p] = Math.max(playerPlayDates[p] || 0, match.matchNumber || 0);
           });
         });
       }
