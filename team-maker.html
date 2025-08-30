@@ -633,7 +633,8 @@ footer {
     function updateMatchingPlayers() {
       const mergedList = [...firebaseMatchingPlayers, ...playerSearchInput];
       matchingPlayers = [...new Set(mergedList)]; // 重複を削除して統合
-      makeTeams();
+      // プレイヤー表示だけを更新する
+      renderPlayers();
     }
 
 
@@ -1165,7 +1166,6 @@ footer {
     }
 
     async function initializePage() {
-      // 1. Firebaseから全試合データを取得
       const snapshot = await db.ref("apex_results").once("value");
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -1186,12 +1186,13 @@ footer {
         });
       }
 
-      // 2. ローカルストレージとペアリストのレンダリング
       renderPairList("separate");
       renderPairList("together");
       
-      // 3. 参加メンバーのリアルタイム監視を設定し、初回データを取得
-      // このon()イベントは、初期化時とデータ変更時に実行されます。
+      // 修正: ここで初回描画のためにrenderPlayers()を呼び出す
+      renderPlayers();
+
+      // Firebaseからのリアルタイム参加メンバーを監視するリスナーをセットアップ
       db.ref("currentInputPlayers").on("value", (snapshot) => {
           const data = snapshot.val() || {};
           firebaseMatchingPlayers = [];
@@ -1204,12 +1205,11 @@ footer {
                   });
               }
           });
-          // 参加メンバーリストが更新されたら、チーム分けも更新
+          // 参加メンバーリストが更新されたら、プレイヤー表示を更新
           updateMatchingPlayers();
       });
     }
     
-    // ページロード時にinitializePageを呼び出し
     initializePage();
 
     document.querySelectorAll('input[name="method"]').forEach(radio => {
