@@ -607,11 +607,12 @@ footer {
     const deviceId = getDeviceId();
 
     function katakanaToHiragana(str) {
+      if (!str) return "";
       return str.replace(/[\u30a1-\u30f6]/g, function(match) {
         return String.fromCharCode(match.charCodeAt(0) - 0x60);
       });
     }
-    
+
     let matches = [];
     let playerScoresAverage = {},
       playerScoresWinRate = {},
@@ -630,25 +631,29 @@ footer {
     let separatePairs = JSON.parse(localStorage.getItem("separatePairs") || "[]");
     let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
 
-    let playerAliasMap = {};
     let readingsData = {};
 
     document.getElementById("playerSearchInput").addEventListener("input", () => {
         const inputStr = document.getElementById("playerSearchInput").value;
         const inputNames = inputStr.split(/\n/).map(name => name.trim()).filter(name => name !== '');
         
-        playerSearchInput = inputNames.filter(name => {
-            const normalizedInput = katakanaToHiragana(name).toLowerCase();
+        const resolvedInputPlayers = new Set();
+        
+        inputNames.forEach(inputName => {
+            const normalizedInput = katakanaToHiragana(inputName).toLowerCase();
             
-            // プレイヤー名または読み方で一致するかを判定
-            return allPlayersList.some(player => {
+            allPlayersList.forEach(player => {
                 const normalizedPlayer = katakanaToHiragana(player).toLowerCase();
                 const playerReading = katakanaToHiragana(readingsData[player]?.reading || "").toLowerCase();
                 const playerAliases = (readingsData[player]?.aliases || []).map(alias => katakanaToHiragana(alias).toLowerCase());
                 
-                return normalizedPlayer.includes(normalizedInput) || playerReading.includes(normalizedInput) || playerAliases.includes(normalizedInput);
+                // プレイヤー名、読み方、エイリアスが入力文字列と一致するかをチェック
+                if (normalizedPlayer === normalizedInput || playerReading === normalizedInput || playerAliases.includes(normalizedInput)) {
+                    resolvedInputPlayers.add(player);
+                }
             });
         });
+        playerSearchInput = Array.from(resolvedInputPlayers);
         updateMatchingPlayers();
     });
     
@@ -667,18 +672,9 @@ footer {
         updateMatchingPlayers();
     });
     
-    function resolveAliases(names) {
-      return names.map(name => {
-        const normalizedName = katakanaToHiragana(name).toLowerCase();
-        // マップから解決、なければ元の名前を返す
-        return playerAliasMap[normalizedName] || name;
-      });
-    }
-
     function updateMatchingPlayers() {
-      const mergedList = [...firebaseMatchingPlayers, ...playerSearchInput];
-      const resolvedList = resolveAliases(mergedList);
-      matchingPlayers = [...new Set(resolvedList)];
+      const allInputPlayers = [...firebaseMatchingPlayers, ...playerSearchInput];
+      matchingPlayers = [...new Set(allInputPlayers)];
       renderPlayers();
     }
 
@@ -1201,15 +1197,6 @@ footer {
       const readingsSnapshot = await db.ref("player_readings").once("value");
       readingsData = readingsSnapshot.val() || {};
       
-      // あだ名と本名のマッピングを作成
-      for (const name in readingsData) {
-        if (readingsData[name].aliases) {
-          readingsData[name].aliases.forEach(alias => {
-            playerAliasMap[katakanaToHiragana(alias).toLowerCase()] = name;
-          });
-        }
-      }
-
       const snapshot = await db.ref("apex_results").once("value");
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -1228,7 +1215,6 @@ footer {
       allPlayersList = Array.from(allPlayersInMatches);
       const sortedByReading = sortPlayers(allPlayersList, readingsData, 'reading');
       allPlayersList = sortedByReading;
-
 
       playerPlayDates = {};
       playerPlayCounts = {};
