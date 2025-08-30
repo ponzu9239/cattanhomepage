@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -595,12 +594,16 @@ footer {
 
       Object.values(data).forEach(nameList => {
         if (Array.isArray(nameList)) {
-          matchingPlayers.push(...nameList);
+          nameList.forEach(name => {
+            if (name && name.trim() !== '') {
+              matchingPlayers.push(name.trim());
+            }
+          });
         }
       });
 
       matchingPlayers = [...new Set(matchingPlayers)];
-      renderPlayers();
+      makeTeams(); // プレイヤーリストの変更時にチーム分けと表示を更新
     });
 
     function calculateScoresAverage(matches) {
@@ -707,11 +710,10 @@ footer {
       if (pinned.includes(name)) pinned = pinned.filter(x => x !== name);
       else pinned.push(name);
       localStorage.setItem("pinnedPlayers", JSON.stringify(pinned));
-      renderPlayers();
-      makeTeams();
+      makeTeams(); // ピンの変更時にチーム分けと表示を更新
     }
 
-    function renderPlayers() {
+    async function renderPlayers() {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
@@ -728,15 +730,26 @@ footer {
         });
       }
 
+      // 読み方データを取得
+      const readingsSnapshot = await db.ref("player_readings").once("value");
+      const readings = readingsSnapshot.val() || {};
+
+      // プレイヤー名を読み方に基づいてソートする関数を定義
+      function sortPlayersByReading(a, b) {
+        const readingA = readings[a]?.reading || a;
+        const readingB = readings[b]?.reading || b;
+        return readingA.localeCompare(readingB, "ja");
+      }
+
       container.innerHTML = "";
       let names = Object.keys(scores).filter(name => scores[name] !== undefined);
 
       const matchingOnlyPlayers = names.filter(name => matchingPlayers.includes(name))
-        .sort((a, b) => a.localeCompare(b, "ja"));
+        .sort(sortPlayersByReading);
       const pinnedOnlyPlayers = names.filter(name => pinned.includes(name) && !matchingPlayers.includes(name))
-        .sort((a, b) => a.localeCompare(b, "ja"));
+        .sort(sortPlayersByReading);
       const otherPlayers = names.filter(name => !matchingPlayers.includes(name) && !pinned.includes(name))
-        .sort((a, b) => a.localeCompare(b, "ja"));
+        .sort(sortPlayersByReading);
 
       const orderedNames = matchingOnlyPlayers.concat(pinnedOnlyPlayers, otherPlayers);
 
@@ -755,7 +768,6 @@ footer {
         div.onclick = () => {
           div.classList.toggle("selected");
           makeTeams();
-          renderPlayers();
         };
         container.appendChild(div);
       });
@@ -773,6 +785,8 @@ footer {
       teamBScoreEl.textContent = "0";
       allCombinationsList.innerHTML = "";
 
+      // 読み方データを取得してから renderPlayers を呼び出す
+      await renderPlayers();
 
       if (selected.length === 0) {
         document.getElementById("teamA").innerHTML = "";
@@ -1052,7 +1066,6 @@ footer {
       playerScoresAverage = calculateScoresAverage(matches);
       playerScoresWinRate = calculateWinRate(matches);
       playerScoresKDRatio = calculateKDRatio(matches);
-      renderPlayers();
       makeTeams();
       document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
     });
@@ -1060,14 +1073,12 @@ footer {
     document.querySelectorAll('input[name="method"]').forEach(radio => {
       radio.addEventListener("change", () => {
         makeTeams();
-        renderPlayers();
       });
     });
 
     document.getElementById("recentBiasToggle").addEventListener("change", () => {
       if (document.querySelector('input[name="method"]:checked').value !== "winrate") {
         playerScoresAverage = calculateScoresAverage(matches);
-        renderPlayers();
         makeTeams();
       }
     });
@@ -1096,7 +1107,6 @@ footer {
     document.querySelectorAll('input[name="method"]').forEach(radio => {
       radio.addEventListener("change", () => {
         makeTeams();
-        renderPlayers();
       });
     });
   </script>
