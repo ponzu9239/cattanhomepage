@@ -457,6 +457,17 @@ footer {
     color: var(--color-text-light);
 }
 
+#playerSearchInput {
+    display: block;
+    width: 90%;
+    max-width: 500px;
+    margin: 1rem auto;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid var(--color-primary);
+    border-radius: 8px;
+}
+
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -494,8 +505,8 @@ footer {
         </div>
       </section>
       
-      <label>リアルタイム参加メンバー入力（改行で区切る）：</label>
-      <textarea id="livePlayerInput" rows="6"></textarea>
+      <label>プレイヤー検索</label>
+      <input type="text" id="playerSearchInput" placeholder="名前を検索" />
 
       <section>
         <div class="method-select">
@@ -563,7 +574,6 @@ footer {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // デバイス固有ID作成
     function getDeviceId() {
       let baseId = localStorage.getItem("deviceId");
       if (!baseId) {
@@ -580,11 +590,11 @@ footer {
       playerScoresKDRatio = {};
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     
-    // admin2.htmlから取得したプレイヤーリストと、新しい入力欄のプレイヤーリストを管理する
     let firebaseMatchingPlayers = [];
     let liveInputPlayers = [];
-    let matchingPlayers = []; // 最終的な統合リスト
+    let matchingPlayers = [];
     
+    let allPlayersList = []; // 全プレイヤーのリスト（検索用）
     let playerPlayDates = {};
     let playerPlayCounts = {};
     let currentSortMode = 'reading';
@@ -592,16 +602,12 @@ footer {
     let separatePairs = JSON.parse(localStorage.getItem("separatePairs") || "[]");
     let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
 
-    // 新しい入力欄の監視
-    document.getElementById("livePlayerInput").addEventListener("input", () => {
-        liveInputPlayers = document.getElementById("livePlayerInput").value
-            .split("\n")
-            .map(n => n.trim())
-            .filter(n => n);
-        updateMatchingPlayers();
+    // 新しい検索欄の監視
+    document.getElementById("playerSearchInput").addEventListener("input", () => {
+        const searchText = document.getElementById("playerSearchInput").value;
+        renderPlayers(searchText);
     });
     
-    // Firebaseからのリアルタイム参加メンバーを監視
     db.ref("currentInputPlayers").on("value", (snapshot) => {
         const data = snapshot.val() || {};
         firebaseMatchingPlayers = [];
@@ -617,10 +623,9 @@ footer {
         updateMatchingPlayers();
     });
     
-    // 2つのリストを統合して更新する関数
     function updateMatchingPlayers() {
-      const mergedList = [...firebaseMatchingPlayers, ...liveInputPlayers];
-      matchingPlayers = [...new Set(mergedList)]; // 重複を削除して統合
+      const mergedList = [...firebaseMatchingPlayers];
+      matchingPlayers = [...new Set(mergedList)];
       makeTeams();
     }
 
@@ -765,7 +770,6 @@ footer {
       makeTeams();
     }
     
-    // プレイヤーのソート順を決定する関数
     function sortPlayers(names, readings, sortMode) {
       if (sortMode === 'reading') {
         return names.sort((a, b) => {
@@ -789,7 +793,7 @@ footer {
       return names;
     }
 
-    async function renderPlayers() {
+    async function renderPlayers(filterText = '') {
       const container = document.getElementById("playerList");
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
@@ -810,11 +814,15 @@ footer {
       const readings = readingsSnapshot.val() || {};
 
       container.innerHTML = "";
-      let names = Object.keys(scores).filter(name => scores[name] !== undefined);
+      
+      const filteredNames = allPlayersList.filter(name => {
+          const reading = readings[name]?.reading || name;
+          return name.includes(filterText) || reading.includes(filterText);
+      });
 
-      const matchingOnlyPlayers = names.filter(name => matchingPlayers.includes(name));
-      const pinnedOnlyPlayers = names.filter(name => pinned.includes(name) && !matchingPlayers.includes(name));
-      const otherPlayers = names.filter(name => !matchingPlayers.includes(name) && !pinned.includes(name));
+      const matchingOnlyPlayers = filteredNames.filter(name => matchingPlayers.includes(name));
+      const pinnedOnlyPlayers = filteredNames.filter(name => pinned.includes(name) && !matchingPlayers.includes(name));
+      const otherPlayers = filteredNames.filter(name => !matchingPlayers.includes(name) && !pinned.includes(name));
 
       const sortedMatching = sortPlayers(matchingOnlyPlayers, readings, currentSortMode);
       const sortedPinned = sortPlayers(pinnedOnlyPlayers, readings, currentSortMode);
@@ -857,7 +865,9 @@ footer {
       teamBScoreEl.textContent = "0";
       allCombinationsList.innerHTML = "";
 
-      await renderPlayers();
+      // 検索ボックスのテキストを取得してレンダリング
+      const searchText = document.getElementById('playerSearchInput').value;
+      await renderPlayers(searchText);
 
       if (selected.length === 0) {
         document.getElementById("teamA").innerHTML = "";
@@ -1058,7 +1068,6 @@ footer {
             const p1InMatch = matchTeamA.includes(p1) || matchTeamB.includes(p1);
             const p2InMatch = matchTeamA.includes(p2) || matchTeamB.includes(p2);
             
-            // プレイヤーが両方とも試合に参加していない場合はスキップ
             if (!p1InMatch || !p2InMatch) {
                 return;
             }
@@ -1066,18 +1075,14 @@ footer {
             const p1InMatchA = matchTeamA.includes(p1);
             const p2InMatchA = matchTeamA.includes(p2);
 
-            // 過去に同じチームだった場合
             if ((p1InMatchA && p2InMatchA) || (!p1InMatchA && !p2InMatchA)) {
-              // 現在も同じチームの場合
               if (p1IsA === p2IsA) { 
                 const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
                 interactionScore += diff;
                 interactionCount++;
               }
             }
-            // 過去に敵チームだった場合
             else {
-              // 現在も敵チームの場合
               if (p1IsA !== p2IsA) { 
                 const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
                 interactionScore += diff;
@@ -1131,7 +1136,6 @@ footer {
       }
     });
     
-    // ソートボタンのイベントリスナーを設定
     document.getElementById("sort-reading").addEventListener("click", () => {
         currentSortMode = 'reading';
         updateSortButtons('sort-reading');
@@ -1167,6 +1171,8 @@ footer {
         playerScoresKDRatio = calculateKDRatio(matches);
         document.getElementById("matchCount").textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
 
+        allPlayersList = Object.keys(playerScoresAverage);
+        
         playerPlayDates = {};
         playerPlayCounts = {};
         matches.forEach(match => {
