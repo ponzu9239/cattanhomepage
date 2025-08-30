@@ -823,18 +823,19 @@ footer {
 
       container.innerHTML = "";
       let names = Object.keys(scores).filter(name => scores[name] !== undefined);
+      
+      let playersToShow;
+      if (matchingPlayers.length > 0) {
+        playersToShow = names.filter(name => matchingPlayers.includes(name));
+      } else {
+        playersToShow = names.filter(name => pinned.includes(name));
+        const otherPlayers = names.filter(name => !pinned.includes(name));
+        playersToShow = playersToShow.concat(otherPlayers);
+      }
+      
+      const sortedPlayers = sortPlayers(playersToShow, readings, currentSortMode);
 
-      const matchingOnlyPlayers = names.filter(name => matchingPlayers.includes(name));
-      const pinnedOnlyPlayers = names.filter(name => pinned.includes(name) && !matchingPlayers.includes(name));
-      const otherPlayers = names.filter(name => !matchingPlayers.includes(name) && !pinned.includes(name));
-
-      const sortedMatching = sortPlayers(matchingOnlyPlayers, readings, currentSortMode);
-      const sortedPinned = sortPlayers(pinnedOnlyPlayers, readings, currentSortMode);
-      const sortedOthers = sortPlayers(otherPlayers, readings, currentSortMode);
-
-      const orderedNames = sortedMatching.concat(sortedPinned, sortedOthers);
-
-      orderedNames.forEach(name => {
+      sortedPlayers.forEach(name => {
         const div = document.createElement("div");
         div.className = "player";
         if (selected.includes(name)) div.classList.add("selected");
@@ -843,7 +844,7 @@ footer {
         const displayText = '';
 
         div.dataset.name = name;
-        div.innerHTML = `<span>${name}${displayText}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}"></button>`;
+        div.innerHTML = `<span>${name}${displayText}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" title="固定/固定解除"></button>`;
         
         div.querySelector(".pin-btn").onclick = e => {
           e.stopPropagation();
@@ -857,6 +858,7 @@ footer {
       });
     }
 
+
     async function makeTeams() {
       const selected = Array.from(document.querySelectorAll(".player.selected")).map(d => d.dataset.name);
       const method = document.querySelector('input[name="method"]:checked').value;
@@ -868,9 +870,6 @@ footer {
       teamAScoreEl.textContent = "0";
       teamBScoreEl.textContent = "0";
       allCombinationsList.innerHTML = "";
-
-      // renderPlayers()はmakeTeams()の前に呼び出されるため、ここでは不要
-      // await renderPlayers();
 
       if (selected.length === 0) {
         document.getElementById("teamA").innerHTML = "";
