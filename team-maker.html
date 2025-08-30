@@ -928,20 +928,30 @@
           matches.forEach(match => {
             const matchTeamA = match.teamA || [];
             const matchTeamB = match.teamB || [];
+            const p1InMatch = matchTeamA.includes(p1) || matchTeamB.includes(p1);
+            const p2InMatch = matchTeamA.includes(p2) || matchTeamB.includes(p2);
+            
+            // プレイヤーが両方とも試合に参加していない場合はスキップ
+            if (!p1InMatch || !p2InMatch) {
+                return;
+            }
+
             const p1InMatchA = matchTeamA.includes(p1);
             const p2InMatchA = matchTeamA.includes(p2);
 
-            // Same team in the past
+            // 過去に同じチームだった場合
             if ((p1InMatchA && p2InMatchA) || (!p1InMatchA && !p2InMatchA)) {
-              if (p1IsA === p2IsA) { // Same team now
+              // 現在も同じチームの場合
+              if (p1IsA === p2IsA) { 
                 const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
                 interactionScore += diff;
                 interactionCount++;
               }
             }
-            // Different teams in the past
+            // 過去に敵チームだった場合
             else {
-              if (p1IsA !== p2IsA) { // Different teams now
+              // 現在も敵チームの場合
+              if (p1IsA !== p2IsA) { 
                 const diff = (p1InMatchA ? (match.teamAKills ?? 0) - (match.teamBKills ?? 0) : (match.teamBKills ?? 0) - (match.teamAKills ?? 0));
                 interactionScore += diff;
                 interactionCount++;
