@@ -836,11 +836,7 @@ footer {
       
       container.innerHTML = "";
       
-      let playersToShow = [...allPlayersList];
-      
-      if (matchingPlayers.length > 0) {
-        playersToShow = playersToShow.filter(name => matchingPlayers.includes(name));
-      }
+      const playersToShow = [...allPlayersList];
 
       const sortedPlayers = sortPlayers(playersToShow, readingsData, currentSortMode);
 
@@ -849,7 +845,7 @@ footer {
         div.className = "player";
         
         if (selected.includes(name)) div.classList.add("selected");
-        else if (matchingPlayers.includes(name) && matchingPlayers.length > 0) div.classList.add("matching");
+        if (matchingPlayers.includes(name) && matchingPlayers.length > 0) div.classList.add("matching");
         
         div.dataset.name = name;
         div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" title="固定/固定解除"></button>`;
