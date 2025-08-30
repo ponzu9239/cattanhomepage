@@ -80,19 +80,21 @@ header h1 {
 
 nav {
   position: fixed;
-  top: calc(-1 * var(--header-height));
+  top: -100%;
   left: 0;
   width: 100%;
-  background-color: var(--color-primary);
+  height: 100vh; /* 高さも画面いっぱいに */
+  transform: translateY(-100%); /* これで完全に画面外へ */
+  background-color: #97EADB;
   display: flex;
   flex-direction: column;
   padding: 0;
-  transition: top 0.3s ease;
+  transition: transform 0.3s ease;
   z-index: 1050;
 }
 
 nav.show {
-  top: var(--header-height);
+  transform: translateY(0); /* 画面内へスライド */
 }
 
 nav a {
