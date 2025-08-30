@@ -725,9 +725,10 @@ footer {
         });
       } else if (sortMode === 'recent') {
         return names.sort((a, b) => {
+          // 試合番号（matchId）が新しい順にソート
           const dateA = playerPlayDates[a] || 0;
           const dateB = playerPlayDates[b] || 0;
-          return dateB - dateA; // 新しい日付が先
+          return dateB - dateA;
         });
       } else if (sortMode === 'count') {
         return names.sort((a, b) => {
@@ -1109,7 +1110,8 @@ footer {
       // 1. Firebaseから全ての試合データを一度だけ取得
       const snapshot = await db.ref("apex_results").once("value");
       if (snapshot.exists()) {
-        matches = Object.values(snapshot.val());
+        const data = snapshot.val();
+        matches = Object.keys(data).map(key => ({ ...data[key], matchId: parseInt(key, 10) }));
         playerScoresAverage = calculateScoresAverage(matches);
         playerScoresWinRate = calculateWinRate(matches);
         playerScoresKDRatio = calculateKDRatio(matches);
@@ -1122,7 +1124,8 @@ footer {
           const allPlayersInMatch = (match.teamA || []).concat(match.teamB || []);
           allPlayersInMatch.forEach(p => {
             playerPlayCounts[p] = (playerPlayCounts[p] || 0) + 1;
-            playerPlayDates[p] = Math.max(playerPlayDates[p] || 0, match.timestamp || 0);
+            // 試合番号（matchId）を最終プレイ日時として使用
+            playerPlayDates[p] = Math.max(playerPlayDates[p] || 0, match.matchId || 0);
           });
         });
       }
