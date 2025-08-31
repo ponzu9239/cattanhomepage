@@ -600,7 +600,9 @@ footer {
       return baseId;
     }
     const deviceId = getDeviceId();
-    const selectedPlayersRef = db.ref("currentSelectedPlayers");
+    
+    // 選択されたプレイヤーのリストをローカルで管理
+    let selectedPlayers = JSON.parse(localStorage.getItem("selectedPlayers") || "[]");
 
     function katakanaToHiragana(str) {
       return str.replace(/[\u30a1-\u30f6]/g, function(match) {
@@ -617,7 +619,6 @@ footer {
     let firebaseMatchingPlayers = [];
     let playerSearchInputNames = []; 
     let matchingPlayers = [];
-    let firebaseSelectedPlayers = [];
     
     let allPlayersList = [];
     let playerPlayDates = {};
@@ -651,7 +652,7 @@ footer {
 
         for (const deviceId in data) {
             const deviceData = data[deviceId];
-            if (deviceData.timestamp && (now - deviceData.timestamp) < 86400000) {
+            if (deviceData.timestamp && (now - deviceData.timestamp) < 3600000) { // 1時間の例
                 if (Array.isArray(deviceData.players)) {
                     playersToKeep[deviceId] = deviceData.players;
                 }
@@ -679,27 +680,6 @@ footer {
 
         updateMatchingPlayers(); 
     });
-
-    selectedPlayersRef.on("value", (snapshot) => {
-      const data = snapshot.val() || {};
-      firebaseSelectedPlayers = [];
-      Object.values(data).forEach(names => {
-          if (Array.isArray(names)) {
-              firebaseSelectedPlayers.push(...names);
-          }
-      });
-      firebaseSelectedPlayers = [...new Set(firebaseSelectedPlayers)];
-      renderPlayers();
-      makeTeams();
-    });
-
-    function updateSelectedPlayers(selectedNames) {
-        selectedPlayersRef.child(deviceId).set(selectedNames);
-    }
-    
-    function resolveAliases(names) {
-      return names.map(name => playerAliasMap[katakanaToHiragana(name).toLowerCase()] || name);
-    }
 
     function updateMatchingPlayers() {
       const mergedList = [...firebaseMatchingPlayers, ...playerSearchInputNames];
@@ -879,7 +859,6 @@ footer {
 
     async function renderPlayers() {
       const container = document.getElementById("playerList");
-      const selected = firebaseSelectedPlayers;
       
       container.innerHTML = "";
       
@@ -896,7 +875,7 @@ footer {
         const div = document.createElement("div");
         div.className = "player";
         
-        if (selected.includes(name)) {
+        if (selectedPlayers.includes(name)) {
           div.classList.add("selected");
           div.classList.remove("matching"); 
         } else if (matchingPlayers.includes(name) && matchingPlayers.length > 0) {
@@ -912,18 +891,21 @@ footer {
         };
         div.onclick = () => {
           const isSelected = div.classList.contains("selected");
-          const newSelectedNames = isSelected ?
-              selected.filter(n => n !== name) :
-              [...selected, name];
-          
-          updateSelectedPlayers(newSelectedNames);
+          if (isSelected) {
+            selectedPlayers = selectedPlayers.filter(n => n !== name);
+          } else {
+            selectedPlayers.push(name);
+          }
+          localStorage.setItem("selectedPlayers", JSON.stringify(selectedPlayers));
+          renderPlayers();
+          makeTeams();
         };
         container.appendChild(div);
       });
     }
 
     async function makeTeams() {
-      const selected = firebaseSelectedPlayers;
+      const players = selectedPlayers;
       const method = document.querySelector('input[name="method"]:checked').value;
 
       const teamAScoreEl = document.getElementById("teamAScore");
@@ -934,7 +916,7 @@ footer {
       teamBScoreEl.textContent = "0";
       allCombinationsList.innerHTML = "";
 
-      if (selected.length === 0) {
+      if (players.length === 0) {
         document.getElementById("teamA").innerHTML = "";
         document.getElementById("teamB").innerHTML = "";
         db.ref("currentTeamResult").set({
@@ -945,7 +927,6 @@ footer {
         return;
       }
 
-      const players = selected;
       const separate = separatePairs;
       const together = togetherPairs;
 
@@ -1226,6 +1207,10 @@ footer {
         document.getElementById(activeId).classList.add('active');
     }
 
+    function resolveAliases(names) {
+      return names.map(name => playerAliasMap[katakanaToHiragana(name).toLowerCase()] || name);
+    }
+    
     async function initializePage() {
       const readingsSnapshot = await db.ref("player_readings").once("value");
       readingsData = readingsSnapshot.val() || {};
@@ -1282,7 +1267,7 @@ footer {
 
           for (const deviceId in data) {
               const deviceData = data[deviceId];
-              if (deviceData.timestamp && (now - deviceData.timestamp) < 86400000) {
+              if (deviceData.timestamp && (now - deviceData.timestamp) < 60000) {
                   if (Array.isArray(deviceData.players)) {
                       playersToKeep[deviceId] = deviceData.players;
                   }
