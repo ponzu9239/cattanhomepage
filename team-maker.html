@@ -1069,8 +1069,8 @@ footer {
         const teamBPlayers = combination.teamB.map(n => `${n}(${combination.individualScores[n].toFixed(2)})`).join(", ");
 
         li.innerHTML = `
-          <strong>チームA</strong>: ${teamAPlayers}<br>
-          <strong>チームB</strong>: ${teamBPlayers}<br>
+          <strong>チーム1</strong>: ${teamAPlayers}<br>
+          <strong>チーム2</strong>: ${teamBPlayers}<br>
           ${diffText}
         `;
         allCombinationsList.appendChild(li);
