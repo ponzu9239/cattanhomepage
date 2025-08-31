@@ -1029,12 +1029,12 @@ footer {
       }
 
       if (bestResult.teamB.includes("きゃたん") && !bestResult.teamA.includes("きゃたん")) {
-        const temp = bestResult.teamA;
-        bestResult.teamA = bestResult.teamB;
-        bestResult.teamB = temp;
-        const tempScore = bestResult.scoreA;
-        bestResult.scoreA = bestResult.scoreB;
-        bestResult.scoreB = tempScore;
+        const temp = best.teamA;
+        best.teamA = best.teamB;
+        best.teamB = temp;
+        const tempScore = best.scoreA;
+        best.scoreA = best.scoreB;
+        best.scoreB = tempScore;
       }
 
       document.getElementById("teamA").innerHTML = bestResult.teamA.map(n => `<li>${n} (${bestResult.individualScores[n].toFixed(2)})</li>`).join("");
