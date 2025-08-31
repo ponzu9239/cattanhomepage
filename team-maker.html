@@ -614,7 +614,7 @@ footer {
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     
     let firebaseMatchingPlayers = [];
-    let playerSearchInput = [];
+    let playerSearchInputNames = []; // 変更: playerSearchInput から playerSearchInputNames に変更
     let matchingPlayers = [];
     
     let allPlayersList = [];
@@ -632,14 +632,14 @@ footer {
         const inputStr = document.getElementById("playerSearchInput").value;
         const inputNames = inputStr.split(/\n/).map(name => name.trim()).filter(name => name !== '');
         
-        playerSearchInput = inputNames.filter(name => {
+        playerSearchInputNames = inputNames.filter(name => {
             const normalizedName = katakanaToHiragana(name).toLowerCase();
             const resolvedName = playerAliasMap[normalizedName] || name;
             
             // 完全一致で検索
             return allPlayersList.includes(resolvedName);
         });
-        updateMatchingPlayers();
+        updateMatchingPlayers(); // リアルタイム更新
     });
     
     db.ref("currentInputPlayers").on("value", (snapshot) => {
@@ -654,20 +654,20 @@ footer {
                 });
             }
         });
-        updateMatchingPlayers();
+        updateMatchingPlayers(); // リアルタイム更新
     });
     
     function resolveAliases(names) {
       return names.map(name => playerAliasMap[katakanaToHiragana(name).toLowerCase()] || name);
     }
 
-    // 修正: チーム分けの再計算をここで行う
+    // プレイヤーリストとチーム分けを更新する統合関数
     function updateMatchingPlayers() {
-      const mergedList = [...firebaseMatchingPlayers, ...playerSearchInput];
+      const mergedList = [...firebaseMatchingPlayers, ...playerSearchInputNames];
       const resolvedList = resolveAliases(mergedList);
       matchingPlayers = [...new Set(resolvedList)];
       renderPlayers();
-      makeTeams(); // ★追加: リアルタイムでチーム分けを再計算
+      makeTeams();
     }
 
 
@@ -812,7 +812,7 @@ footer {
       }
       localStorage.setItem("pinnedPlayers", JSON.stringify(pinned));
       renderPlayers();
-      makeTeams(); // ★修正: ピン留め変更時もチーム分けを再計算
+      makeTeams();
     }
     
     function sortPlayers(names, readings, sortMode) {
@@ -857,8 +857,13 @@ footer {
         const div = document.createElement("div");
         div.className = "player";
         
-        if (selected.includes(name)) div.classList.add("selected");
-        if (matchingPlayers.includes(name) && matchingPlayers.length > 0) div.classList.add("matching");
+        // 修正: selectedがmatchingよりも優先されるように調整
+        if (selected.includes(name)) {
+          div.classList.add("selected");
+          div.classList.remove("matching"); // matchingクラスを削除
+        } else if (matchingPlayers.includes(name) && matchingPlayers.length > 0) {
+          div.classList.add("matching");
+        }
         
         div.dataset.name = name;
         div.innerHTML = `<span>${name}</span><button class="pin-btn ${pinned.includes(name) ? "pinned" : ""}" title="固定/固定解除"></button>`;
@@ -869,6 +874,12 @@ footer {
         };
         div.onclick = () => {
           div.classList.toggle("selected");
+          // 修正: selected状態が切り替わった後、matchingPlayersの状態と合わせてクラスを再評価
+          if (div.classList.contains("selected")) {
+            div.classList.remove("matching");
+          } else if (matchingPlayers.includes(name)) {
+            div.classList.add("matching");
+          }
           makeTeams();
         };
         container.appendChild(div);
@@ -1029,12 +1040,12 @@ footer {
       }
 
       if (bestResult.teamB.includes("きゃたん") && !bestResult.teamA.includes("きゃたん")) {
-        const temp = best.teamA;
-        best.teamA = best.teamB;
-        best.teamB = temp;
-        const tempScore = best.scoreA;
-        best.scoreA = best.scoreB;
-        best.scoreB = tempScore;
+        const temp = bestResult.teamA;
+        bestResult.teamA = bestResult.teamB;
+        bestResult.teamB = temp;
+        const tempScore = bestResult.scoreA;
+        bestResult.scoreA = bestResult.scoreB;
+        bestResult.scoreB = tempScore;
       }
 
       document.getElementById("teamA").innerHTML = bestResult.teamA.map(n => `<li>${n} (${bestResult.individualScores[n].toFixed(2)})</li>`).join("");
@@ -1226,6 +1237,7 @@ footer {
       renderPairList("separate");
       renderPairList("together");
       
+      // FirebaseのcurrentInputPlayers監視を初期化後に設定
       db.ref("currentInputPlayers").on("value", (snapshot) => {
           const data = snapshot.val() || {};
           firebaseMatchingPlayers = [];
@@ -1238,7 +1250,7 @@ footer {
                   });
               }
           });
-          updateMatchingPlayers();
+          updateMatchingPlayers(); // Firebase更新時にリアルタイム更新
       });
     }
 
