@@ -645,8 +645,29 @@ footer {
     
     db.ref("currentInputPlayers").on("value", (snapshot) => {
         const data = snapshot.val() || {};
+        const now = Date.now();
+        const playersToKeep = {};
+        const playerKeysToRemove = [];
+
+        for (const deviceId in data) {
+            const deviceData = data[deviceId];
+            if (deviceData.timestamp && (now - deviceData.timestamp) < 86400000) {
+                if (Array.isArray(deviceData.players)) {
+                    playersToKeep[deviceId] = deviceData.players;
+                }
+            } else {
+                playerKeysToRemove.push(deviceId);
+            }
+        }
+
+        if (playerKeysToRemove.length > 0) {
+            playerKeysToRemove.forEach(key => {
+                db.ref("currentInputPlayers").child(key).remove();
+            });
+        }
+        
         firebaseMatchingPlayers = [];
-        Object.values(data).forEach(nameList => {
+        Object.values(playersToKeep).forEach(nameList => {
             if (Array.isArray(nameList)) {
                 nameList.forEach(name => {
                     if (name && name.trim() !== '') {
@@ -655,6 +676,7 @@ footer {
                 });
             }
         });
+
         updateMatchingPlayers(); 
     });
 
@@ -1254,8 +1276,29 @@ footer {
       
       db.ref("currentInputPlayers").on("value", (snapshot) => {
           const data = snapshot.val() || {};
+          const now = Date.now();
+          const playersToKeep = {};
+          const playerKeysToRemove = [];
+
+          for (const deviceId in data) {
+              const deviceData = data[deviceId];
+              if (deviceData.timestamp && (now - deviceData.timestamp) < 86400000) {
+                  if (Array.isArray(deviceData.players)) {
+                      playersToKeep[deviceId] = deviceData.players;
+                  }
+              } else {
+                  playerKeysToRemove.push(deviceId);
+              }
+          }
+
+          if (playerKeysToRemove.length > 0) {
+              playerKeysToRemove.forEach(key => {
+                  db.ref("currentInputPlayers").child(key).remove();
+              });
+          }
+          
           firebaseMatchingPlayers = [];
-          Object.values(data).forEach(nameList => {
+          Object.values(playersToKeep).forEach(nameList => {
               if (Array.isArray(nameList)) {
                   nameList.forEach(name => {
                       if (name && name.trim() !== '') {
@@ -1264,6 +1307,7 @@ footer {
                   });
               }
           });
+
           updateMatchingPlayers(); 
       });
     }
