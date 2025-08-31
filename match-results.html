@@ -327,7 +327,10 @@
         .map(n => n.trim())
         .filter(n => n);
       renderCards(names);
-      db.ref("currentInputPlayers/" + deviceId).set(names);
+      db.ref("currentInputPlayers/" + deviceId).set({
+        players: names,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
     });
   </script>
 </body>
