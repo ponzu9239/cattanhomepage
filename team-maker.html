@@ -614,7 +614,7 @@ footer {
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     
     let firebaseMatchingPlayers = [];
-    let playerSearchInputNames = []; // 変更: playerSearchInput から playerSearchInputNames に変更
+    let playerSearchInputNames = [];
     let matchingPlayers = [];
     
     let allPlayersList = [];
@@ -642,6 +642,7 @@ footer {
         updateMatchingPlayers(); // リアルタイム更新
     });
     
+    // Firebaseからのリアルタイム更新を監視するリスナー
     db.ref("currentInputPlayers").on("value", (snapshot) => {
         const data = snapshot.val() || {};
         firebaseMatchingPlayers = [];
@@ -654,7 +655,7 @@ footer {
                 });
             }
         });
-        updateMatchingPlayers(); // リアルタイム更新
+        updateMatchingPlayers(); // Firebase更新時にリアルタイム更新
     });
     
     function resolveAliases(names) {
