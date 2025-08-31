@@ -661,11 +661,13 @@ footer {
       return names.map(name => playerAliasMap[katakanaToHiragana(name).toLowerCase()] || name);
     }
 
+    // 修正: チーム分けの再計算をここで行う
     function updateMatchingPlayers() {
       const mergedList = [...firebaseMatchingPlayers, ...playerSearchInput];
       const resolvedList = resolveAliases(mergedList);
       matchingPlayers = [...new Set(resolvedList)];
       renderPlayers();
+      makeTeams(); // ★追加: リアルタイムでチーム分けを再計算
     }
 
 
@@ -810,7 +812,7 @@ footer {
       }
       localStorage.setItem("pinnedPlayers", JSON.stringify(pinned));
       renderPlayers();
-      makeTeams();
+      makeTeams(); // ★修正: ピン留め変更時もチーム分けを再計算
     }
     
     function sortPlayers(names, readings, sortMode) {
@@ -1055,8 +1057,8 @@ footer {
         const teamBPlayers = combination.teamB.map(n => `${n}(${combination.individualScores[n].toFixed(2)})`).join(", ");
 
         li.innerHTML = `
-          <strong>チーム1</strong>: ${teamAPlayers}<br>
-          <strong>チーム2</strong>: ${teamBPlayers}<br>
+          <strong>チームA</strong>: ${teamAPlayers}<br>
+          <strong>チームB</strong>: ${teamBPlayers}<br>
           ${diffText}
         `;
         allCombinationsList.appendChild(li);
