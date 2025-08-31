@@ -119,17 +119,38 @@
       word-break: break-all;
     }
 
-    /* SNSリンクのスタイル */
-    .sns a {
-      display: inline-block;
-      margin: 0.5rem;
-      text-decoration: none;
-      font-size: 1.2rem;
-      background: #97EADB;
-      padding: 0.5rem 1rem;
-      border-radius: 999px;
-      color: white;
-    }
+/* 元の共通スタイル */
+.sns a {
+  display: inline-block;
+  margin: 0.5rem;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  color: white;
+}
+
+/* 個別の色設定を追加 */
+.youtube-link {
+  background: #ff0000; /* YouTubeのブランドカラー */
+}
+
+.x-link {
+  background: #000000; /* X（旧Twitter）のブランドカラー */
+}
+
+.discord-link {
+  background: #5865f2; /* Discordのブランドカラー */
+}
+
+.twitch-link {
+  background: #9146ff; /* Twitchのブランドカラー */
+}
+
+.tiktok-link {
+  background: #000000; /* TikTokのブランドカラー */
+  box-shadow: 2px 0 0 #25f4ee, -2px 0 0 #fe2c52; /* 特徴的なシャドウを追加 */
+}
 
     .roulette-banner {
       text-align: center;
@@ -345,14 +366,15 @@
       <p class="banner-note">※クリックするとページに移動します</p>
     </section>
 
-    <section id="sns" class="sns">
-      <h3>🐾 SNSリンク</h3>
-      <a href="https://www.youtube.com/@catiffanygame">YouTube</a>
-      <a href="https://x.com/catiffanygame">X（旧Twitter）</a>
-      <a href="https://discord.com/invite/hhF9xhMaJc">Discord</a>
-      <a href="https://www.twitch.tv/catkungame">Twitch</a>
-      <a href="https://www.tiktok.com/@catiffanygame?_t=ZS-8xKiPhVrRxq&_r=1">TikTok</a>
-    </section>
+<section id="sns" class="sns">
+  <h3>🐾 SNSリンク</h3>
+  <a href="https://www.youtube.com/@catiffanygame" class="youtube-link">YouTube</a>
+  <a href="https://x.com/catiffanygame" class="x-link">X（旧Twitter）</a>
+  <a href="https://discord.com/invite/hhF9xhMaJc" class="discord-link">Discord</a>
+  <a href="https://www.twitch.tv/catkungame" class="twitch-link">Twitch</a>
+  <a href="https://www.tiktok.com/@catiffanygame?_t=ZS-8xKiPhVrRxq&_r=1" class="tiktok-link">TikTok</a>
+</section>
+　
   </main>
 
   <footer>
