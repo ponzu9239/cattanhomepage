@@ -1267,7 +1267,7 @@ footer {
 
           for (const deviceId in data) {
               const deviceData = data[deviceId];
-              if (deviceData.timestamp && (now - deviceData.timestamp) < 60000) {
+              if (deviceData.timestamp && (now - deviceData.timestamp) < 7200000) {
                   if (Array.isArray(deviceData.players)) {
                       playersToKeep[deviceId] = deviceData.players;
                   }
