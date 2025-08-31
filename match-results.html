@@ -137,7 +137,6 @@
       margin-top: 4px;
       box-sizing: border-box;
     }
-
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -310,7 +309,8 @@
           teamA,
           teamAKills,
           teamB,
-          teamBKills
+          teamBKills,
+          timestamp: firebase.database.ServerValue.TIMESTAMP
         });
 
         document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
