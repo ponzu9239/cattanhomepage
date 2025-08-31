@@ -303,6 +303,37 @@
       background: linear-gradient(135deg, #ff69b4, #ff1493);
       color: #fff;
     }
+    
+    /* イベント終了後のバナーのスタイル */
+.roulette-banner.ended .ended-message {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  margin: 1rem auto;
+  padding: 1rem 0;
+  font-weight: bold;
+  font-size: 1.3rem;
+  text-align: center;
+  text-decoration: none;
+  color: #6c757d; /* グレーアウトした文字色 */
+  border-radius: 2px;
+  background: #e9ecef; /* グレーアウトした背景色 */
+  box-shadow: none; /* シャドウを削除 */
+  border: 2px solid #adb5bd; /* グレーの枠線 */
+  cursor: default; /* マウスカーソルをデフォルトに */
+}
+
+.roulette-banner.ended .ended-message:hover {
+  transform: none; /* ホバー時の変形を無効に */
+  box-shadow: none; /* ホバー時のシャドウも削除 */
+  background: #e9ecef; /* ホバー時の背景色もグレーのまま */
+  color: #6c757d;
+}
+
+.roulette-banner.ended + .banner-note {
+  display: none; /* 「クリックするとページに移動します」の注釈を非表示に */
+}
+
   </style>
 
 </head>
@@ -360,13 +391,15 @@
       </ul>
     </section>
 
-    <section id="event">
-      <h3>🌟イベント</h3>
-      <div class="roulette-banner">
-        <a href="roulette.html">きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</a>
-      </div>
-      <p class="banner-note">※クリックするとページに移動します</p>
-    </section>
+<section id="event">
+  <h3>🌟イベント</h3>
+  <div class="roulette-banner ended">
+    <div class="ended-message">
+      きゃたんのPayPayルーレット<br>🍧イベントは終了しました🍉
+    </div>
+  </div>
+</section>
+
 
 <section id="sns" class="sns">
   <h3>🐾 SNSリンク</h3>
