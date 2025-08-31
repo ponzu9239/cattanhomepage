@@ -33,208 +33,6 @@
       color: #fff;
     }
 
-    #rouletteCanvas {
-      background-color: #fff;
-      border-radius: 50%;
-      box-shadow: 0 0 15px #97EADBAA;
-      max-width: 100%;
-      height: auto;
-      user-select: none;
-    }
-
-    #rouletteContainer {
-      margin: 1.5rem 0;
-      text-align: center;
-      position: relative;
-    }
-
-    #pointer {
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-top: -27px;
-      width: 0;
-      height: 0;
-      border-left: 30px solid transparent;
-      border-right: 30px solid transparent;
-      border-bottom: 50px solid #97EADB;
-    }
-
-    #currentNameDisplay {
-      margin-top: 40px;
-      font-weight: bold;
-      font-size: 1.3rem;
-      color: #97EADB;
-      text-shadow: 1px 1px 2px #aaa;
-      text-align: center;
-      display: inline-block;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.4;
-      user-select: none;
-    }
-
-    #centerDisplay {
-      margin: 0 auto;
-      display: block;
-      text-align: center;
-      width: fit-content;
-      max-width: 100%;
-      margin-top: 50px;
-    }
-
-    @keyframes winnerPop {
-      0% {
-        transform: scale(1);
-        opacity: 0.2;
-      }
-
-      50% {
-        transform: scale(1.3);
-        opacity: 1;
-      }
-
-      100% {
-        transform: scale(1);
-      }
-    }
-
-    .winner-animated {
-      animation: winnerPop 0.6s ease;
-      display: inline-block;
-      transform-origin: center;
-      font-weight: bold;
-      color: #FFD700;
-      text-shadow: 2px 2px 4px #000000;
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 8px 16px;
-      border-radius: 10px;
-    }
-
-    #probabilityTableContainer {
-      margin-top: 30px;
-      text-align: center;
-      font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      color: #333;
-      user-select: none;
-    }
-
-    #probabilityTableContainer h2 {
-      color: #97EADB;
-      font-weight: bold;
-      font-size: 1.5rem;
-      margin-bottom: 12px;
-      text-shadow: 1px 1px 2px #a0d9de88;
-    }
-
-    #probabilityTable {
-      margin: auto;
-      border-collapse: separate;
-      border-spacing: 0 8px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 4px 10px rgba(151, 234, 219, 0.4);
-      border-radius: 12px;
-      overflow: hidden;
-      background: #e0f7f9;
-    }
-
-    #probabilityTable thead tr {
-      background-color: #97EADB;
-      color: white;
-      font-weight: 700;
-      font-size: 1.1rem;
-      text-shadow: 0 0 3px #51b8bb;
-    }
-
-    #probabilityTable thead th {
-      padding: 12px 16px;
-    }
-
-    #probabilityTable tbody tr {
-      background-color: #ffffff;
-      transition: background-color 0.3s ease;
-      cursor: default;
-    }
-
-    #probabilityTable tbody tr:hover {
-      background-color: #b5e7e9;
-    }
-
-    #probabilityTable tbody td {
-      padding: 10px 14px;
-      font-weight: 600;
-      font-size: 1rem;
-      color: #397f81;
-    }
-
-    #probabilityTable tbody td:nth-child(3) {
-      font-weight: 700;
-      color: #1e5556;
-      text-shadow: 0 0 2px #a0d9deaa;
-    }
-
-    #rouletteDisplay {
-      font-size: 1.4rem;
-      font-weight: 900;
-      color: #007ACC;
-      text-align: center;
-      margin-bottom: 0.8em;
-      min-height: 1.6em;
-      font-family: 'Rounded Mplus 1c', 'Hiragino Maru Gothic ProN', sans-serif;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-
-    #winner {
-      text-align: center;
-      background-color: #ffeef5;
-      border: 2px solid #ffb3c1;
-      padding: 1em;
-      margin: 2em auto;
-      border-radius: 10px;
-      width: fit-content;
-      max-width: 90%;
-      margin-top: 50px;
-    }
-
-    #winner h2 {
-      font-size: 1.5em;
-      color: #e91e63;
-      margin-bottom: 0.5em;
-    }
-
-    #winnerName {
-      font-size: 1.2em;
-      font-weight: bold;
-      color: #333;
-    }
-
-    @keyframes winnerAnimation {
-      0% {
-        transform: scale(1);
-        color: #e91e63;
-        opacity: 1;
-      }
-
-      50% {
-        transform: scale(1.3);
-        color: #ff4081;
-        opacity: 1;
-      }
-
-      100% {
-        transform: scale(1);
-        color: #e91e63;
-        opacity: 1;
-      }
-    }
-
-    .animate-winner {
-      animation: winnerAnimation 1.5s ease-in-out;
-    }
-
     .hamburger {
       font-size: 2rem;
       cursor: pointer;
@@ -306,6 +104,22 @@
       padding: 8px;
     }
 
+    #lotteryRules h2.event-ended {
+      font-size: 1.6em;
+      color: #ff69b4;
+      background: linear-gradient(90deg, #ffe8f4, #ffc0cb);
+      border: 2px solid #ff69b4;
+      box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4);
+    }
+
+    #lotteryRules p.event-ended-message {
+      font-size: 1.1em;
+      color: #555;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+
     footer {
       background: #97EADB;
       text-align: center;
@@ -336,23 +150,21 @@
       }
     }
 
-.birthday-banner {
-  background: linear-gradient(135deg, #ffc0cb, #ff69b4);
-  color: #fff;
-  font-weight: bold;
-  text-align: center;
-  padding: 10px 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  animation: sparkle 1s ease-in-out infinite alternate;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  display: none;
-  margin-top: 75px;
-  white-space: nowrap; /* 改行を禁止 */
-  font-size: 7vw; /* 画面幅の5%のフォントサイズ */
-  min-font-size: 1.5rem; /* 最小フォントサイズ */
-}
-
-
+    .birthday-banner {
+      background: linear-gradient(135deg, #ffc0cb, #ff69b4);
+      color: #fff;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      animation: sparkle 1s ease-in-out infinite alternate;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      display: none;
+      margin-top: 75px;
+      white-space: nowrap;
+      font-size: 7vw;
+      min-font-size: 1.5rem;
+    }
 
     body.birthday-mode .birthday-banner {
       display: block;
@@ -366,47 +178,6 @@
       to {
         transform: scale(1.03);
       }
-    }
-
-    body.birthday-mode #rouletteCanvas {
-      box-shadow: 0 0 15px #FF69B4AA;
-    }
-
-    body.birthday-mode #pointer {
-      border-bottom-color: #ff69b4;
-    }
-
-    body.birthday-mode #currentNameDisplay {
-      color: #ff69b4;
-      text-shadow: 1px 1px 2px #ffc0cb;
-    }
-
-    body.birthday-mode #probabilityTableContainer h2 {
-      color: #ff69b4;
-      text-shadow: 1px 1px 2px #ffc0cb;
-    }
-
-    body.birthday-mode #probabilityTable {
-      box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4);
-      background: #fff0f5;
-    }
-
-    body.birthday-mode #probabilityTable thead tr {
-      background-color: #ff69b4;
-      text-shadow: 0 0 3px #e91e63;
-    }
-
-    body.birthday-mode #probabilityTable tbody tr:hover {
-      background-color: #ffd6e0;
-    }
-
-    body.birthday-mode #probabilityTable tbody td {
-      color: #c71585;
-    }
-
-    body.birthday-mode #probabilityTable tbody td:nth-child(3) {
-      color: #99004d;
-      text-shadow: 0 0 2px #ffc0cb;
     }
 
     body.birthday-mode #lotteryRules {
@@ -442,25 +213,15 @@
   </div>
 
   <section id="lotteryRules">
-    <h2 style="text-align: center;"><b>きゃたんのPayPayルーレット<br>🍧夏休み限定🍉【フォロー＆リポストで毎日プレゼント🎁】</b></h2>
+    <h2 class="event-ended"><b>きゃたんのPayPayルーレット<br>🍧イベントは終了しました🍉</b></h2>
 
-    <p style="padding-left: 1.5rem">
-      YouTube、Twitch、Xをフォローして配信告知ツイートを<b>リポストするだけ！</b><br>
-      ☆当選者には<b>PayPay100円💰</b><br>
-      参加条件を満たせば<b>毎日抽選参加可能</b>‼️
+    <p style="padding-left: 1.5rem" class="event-ended-message">
+      本イベントは多くの方にご参加いただき、盛況のうちに終了いたしました。<br>
+      ご参加いただいた皆様、ありがとうございました！
     </p>
-
-    <ul style="padding-left: 1.5em;">
-      <p>▶︎YouTubeとTwitchどちらもリポストで<b>当選確率2倍にUP!</b></p>
-      <p>▶︎サブスクメンバー<b>当選確率3倍UP!</b></p>
-      <p>▶︎Twitchで20ビッツを送るごとに<b>当選確率1倍UP!(最大5倍)</b></p>
-    </ul>
-
-
   </section>
 
-
-  <section>
+  <section style="display: none;">
     <div id="rouletteContainer">
       <canvas id="rouletteCanvas" width="400" height="400"></canvas>
       <div id="pointer"></div>
@@ -525,7 +286,6 @@
 
     document.addEventListener("DOMContentLoaded", checkBirthday);
 
-
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
       authDomain: "catiffanygame.firebaseapp.com",
@@ -537,236 +297,6 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
-    const canvas = document.getElementById("rouletteCanvas");
-    const ctx = canvas.getContext("2d");
-    const currentNameDisplay = document.getElementById("currentNameDisplay");
-
-    let participants = [];
-    let totalMultiplier = 0;
-    let segments = [];
-    let angle = 0;
-    let angularVelocity = 0;
-    let spinning = false;
-    let decelerating = false;
-
-    const colors = [
-      "#A0E7E5", "#B4F8C8", "#FBE7C6",
-      "#FFAEBC", "#A0CED9", "#FFC6FF",
-      "#FFB5A7", "#D0F4DE",
-
-      "#C1E9E7", "#D3F0D9", "#FFF0D9",
-      "#FFC9D1", "#B2DCE6", "#FFD6FF",
-      "#FFD1BF", "#E3F5E8"
-    ];
-
-    function calculateSegments() {
-      segments = [];
-      let startAngle = 0;
-      participants.forEach((p, i) => {
-        const span = (p.multiplier / totalMultiplier) * 2 * Math.PI;
-        segments.push({
-          name: p.name,
-          multiplier: p.multiplier,
-          startAngle,
-          endAngle: startAngle + span,
-          color: colors[i % colors.length]
-        });
-        startAngle += span;
-      });
-    }
-
-    function drawRoulette() {
-      const size = Math.min(canvas.width, canvas.height);
-      const cx = size / 2;
-      const cy = size / 2;
-      const radius = size / 2 - 20;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (segments.length === 0) {
-        ctx.fillStyle = "#999";
-        ctx.font = "20px 'Hiragino Maru Gothic ProN', sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("参加者がいません。", cx, cy);
-        return;
-      }
-
-      segments.forEach(seg => {
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.fillStyle = seg.color;
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.arc(cx, cy, radius, seg.startAngle + angle, seg.endAngle + angle);
-        ctx.lineTo(cx, cy);
-        ctx.fill();
-        ctx.stroke();
-
-        const midAngle = (seg.startAngle + seg.endAngle) / 2 + angle;
-        const textRadius = radius * 0.6;
-        ctx.fillStyle = "#333";
-        ctx.font = "bold 14px 'Hiragino Maru Gothic ProN', sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        const x = cx + Math.cos(midAngle) * textRadius;
-        const y = cy + Math.sin(midAngle) * textRadius;
-        ctx.fillText(seg.name, x, y);
-      });
-    }
-
-    db.ref("/roulette/participants").on("value", snap => {
-      participants = snap.val() || [];
-      totalMultiplier = participants.reduce((acc, p) => acc + p.multiplier, 0);
-      calculateSegments();
-      drawRoulette();
-      updateProbabilityTable();
-
-      function updateProbabilityTable() {
-        const tbody = document.querySelector("#probabilityTable tbody");
-        tbody.innerHTML = "";
-
-        participants.forEach(p => {
-          const tr = document.createElement("tr");
-          const probability = ((p.multiplier / totalMultiplier) * 100).toFixed(1) + "%";
-
-          tr.innerHTML = `
-            <td>${p.name}</td>
-            <td>${p.multiplier}</td>
-            <td>${probability}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-    });
-
-    db.ref("/roulette/angle").on("value", snap => {
-      if (snap.exists()) {
-        angle = snap.val();
-        drawRoulette();
-      }
-    });
-    db.ref("/roulette/angularVelocity").on("value", snap => {
-      if (snap.exists()) angularVelocity = snap.val();
-    });
-    db.ref("/roulette/spinning").on("value", snap => {
-      if (snap.exists()) spinning = snap.val();
-    });
-    db.ref("/roulette/decelerating").on("value", snap => {
-      if (snap.exists()) decelerating = snap.val();
-    });
-    db.ref("/roulette/currentName").on("value", snap => {
-      const name = snap.val() || "";
-      currentNameDisplay.innerHTML = name ? `🎲 抽選中 🎲<br>${name}` : "";
-    });
-
-    // 当選者表示
-    db.ref("/roulette/winner").limitToLast(1).on("child_added", snap => {
-      const winner = snap.val();
-      if (winner) {
-        currentNameDisplay.innerHTML = `🎉 当選者 🎉<br>${winner}`;
-        currentNameDisplay.classList.remove("winner-animated");
-        void currentNameDisplay.offsetWidth;
-        currentNameDisplay.classList.add("winner-animated");
-      }
-    });
-
-    // 当選者更新
-    const winnerEl = document.getElementById("winnerName");
-    const winnerRef = firebase.database().ref("/roulette/winner");
-    const currentNameRef = firebase.database().ref("/roulette/currentName");
-    const spinningRef = firebase.database().ref("/roulette/spinning");
-
-    function showWinner(name) {
-      winnerEl.textContent = `🎊 ${name} 🎊`;
-      updateProbabilityBar(name);
-      winnerEl.classList.remove("animate-winner");
-      void winnerEl.offsetWidth;
-      winnerEl.classList.add("animate-winner");
-    }
-
-    function showCurrentName(name) {
-      winnerEl.innerHTML = name ? `🎲 抽選中 🎲<br>${name}` : "🎲 抽選中 🎲";
-      winnerEl.classList.remove("animate-winner");
-    }
-
-    function showNoDraw() {
-      winnerEl.textContent = "まだ抽選が行われていません。";
-      winnerEl.classList.remove("animate-winner");
-    }
-
-    function updateDisplay(spinning, currentName, winnerName) {
-      if (spinning) {
-        showCurrentName(currentName);
-      } else {
-        if (winnerName) {
-          showWinner(winnerName);
-        } else {
-          showNoDraw();
-        }
-      }
-    }
-
-    let currentSpinning = false;
-    let currentCurrentName = "";
-    let currentWinnerName = "";
-
-    spinningRef.on("value", snap => {
-      currentSpinning = snap.val();
-      updateDisplay(currentSpinning, currentCurrentName, currentWinnerName);
-      updateProbabilityBar(currentWinnerName, currentSpinning);
-    });
-
-
-    currentNameRef.on("value", snap => {
-      currentCurrentName = snap.val() || "";
-      updateDisplay(currentSpinning, currentCurrentName, currentWinnerName);
-    });
-
-    winnerRef.on("value", snap => {
-      const winners = snap.val() || {};
-      const keys = Object.keys(winners).sort();
-      currentWinnerName = keys.length > 0 ? winners[keys[keys.length - 1]] : null;
-      updateDisplay(currentSpinning, currentCurrentName, currentWinnerName);
-    });
-
-
-    function updateProbabilityBar(winnerName, spinning) {
-      const bar = document.getElementById("probabilityBar");
-      const text = document.getElementById("probabilityPercent");
-
-      if (spinning) {
-        bar.style.width = `0%`;
-        text.textContent = "当選確率: ??%";
-        return;
-      }
-
-      firebase.database().ref("/roulette/participants").once("value").then(snapshot => {
-        const participantsObj = snapshot.val() || {};
-        const participants = Object.values(participantsObj);
-
-        const winner = participants.find(p => {
-          if (typeof p === "object") return p.name === winnerName;
-          return p === winnerName;
-        });
-
-        if (!winner) {
-          bar.style.width = `0%`;
-          text.textContent = "当選確率: ??%";
-          return;
-        }
-
-        const winnerMultiplier = winner.multiplier || 1;
-        const total = participants.reduce((sum, u) => {
-          return sum + (typeof u === "object" ? (u.multiplier || 1) : 1);
-        }, 0);
-
-        const percent = (winnerMultiplier / total) * 100;
-
-        bar.style.width = `${percent}%`;
-        text.textContent = `当選確率: ${percent.toFixed(1)}%`;
-      });
-    }
 
     const hamburger = document.getElementById("hamburger");
     const nav = document.getElementById("nav");
