@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APEX 試合結果閲覧</title>
+  <style>
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background-color: #f7fcfc;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+      margin-bottom: 20px;
+    }
+
+    .navigation-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .navigation-buttons button {
+      flex-grow: 1;
+      padding: 10px;
+      background-color: #97eadb;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .navigation-buttons button:hover {
+      background-color: #7dd2c3;
+    }
+
+    .teams {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .team-box {
+      background: #eefaff;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #97eadb;
+    }
+
+    .team-box.team2 {
+      background: #fff1f5;
+      border-color: #ffb6c1;
+    }
+
+    .team-box h2 {
+      text-align: center;
+      font-size: 16px;
+      margin: 0 0 8px 0;
+      color: #47b6a2;
+    }
+
+    .team-box.team2 h2 {
+      color: #ffb6c1;
+    }
+
+    .player-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 6px;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .player-list li {
+      background: #fff;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      text-align: center;
+    }
+
+    .kills {
+      font-size: 24px;
+      font-weight: bold;
+      color: #47b6a2;
+      margin-top: 5px;
+    }
+
+    .team-box.team2 .kills {
+      color: #ffb6c1;
+    }
+
+    .match-number {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    #loading-status {
+      text-align: center;
+      color: #666;
+      margin-top: 20px;
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>試合結果閲覧</h1>
+    <div id="loading-status">試合データを読み込み中...</div>
+    <div id="match-view" style="display: none;">
+      <p class="match-number">試合番号：<span id="match-no"></span></p>
+      <div class="teams">
+        <div class="team-box team1">
+          <h2>チーム1</h2>
+          <p class="kills">キル数：<span id="teamA-kills"></span></p>
+          <ul id="teamA-players" class="player-list"></ul>
+        </div>
+        <div class="team-box team2">
+          <h2>チーム2</h2>
+          <p class="kills">キル数：<span id="teamB-kills"></span></p>
+          <ul id="teamB-players" class="player-list"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="navigation-buttons">
+      <button onclick="navigateMatch('previous')" id="prev-btn">前の試合</button>
+      <button onclick="navigateMatch('next')" id="next-btn">次の試合</button>
+    </div>
+  </div>
+
+  <script>
+    // --- Firebase 設定 (入力ページと同一) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+      authDomain: "match-result-ea475.firebaseapp.com",
+      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+      projectId: "match-result-ea475",
+      storageBucket: "match-result-ea475.firebasestorage.app",
+      messagingSenderId: "759877853492",
+      appId: "1:759877853492:web:a10935960bf8230af90561"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let allMatches = [];
+    let currentMatchIndex = -1;
+
+    // --- 試合データを読み込む ---
+    async function fetchAllMatches() {
+      try {
+        const snapshot = await db.ref("apex_results").orderByChild("matchNumber").once("value");
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          allMatches = Object.values(data);
+          allMatches.sort((a, b) => a.matchNumber - b.matchNumber);
+          if (allMatches.length > 0) {
+            currentMatchIndex = allMatches.length - 1; // 最新の試合を表示
+            displayMatch(currentMatchIndex);
+          } else {
+            document.getElementById("loading-status").innerText = "保存された試合データがありません。";
+          }
+        } else {
+          document.getElementById("loading-status").innerText = "保存された試合データがありません。";
+        }
+        document.getElementById("loading-status").style.display = "none";
+        document.getElementById("match-view").style.display = "block";
+      } catch (err) {
+        console.error("データの読み込み中にエラーが発生しました:", err);
+        document.getElementById("loading-status").innerText = "データの読み込み中にエラーが発生しました。";
+      }
+    }
+
+    // --- 試合データを表示する ---
+    function displayMatch(index) {
+      if (index >= 0 && index < allMatches.length) {
+        const match = allMatches[index];
+        document.getElementById("match-no").innerText = match.matchNumber;
+        document.getElementById("teamA-kills").innerText = match.teamAKills;
+        document.getElementById("teamB-kills").innerText = match.teamBKills;
+        renderPlayers("teamA-players", match.teamA);
+        renderPlayers("teamB-players", match.teamB);
+
+        // ナビゲーションボタンの有効/無効
+        document.getElementById("prev-btn").disabled = index === 0;
+        document.getElementById("next-btn").disabled = index === allMatches.length - 1;
+      }
+    }
+
+    // --- プレイヤーリストを描画する ---
+    function renderPlayers(elementId, players) {
+      const ul = document.getElementById(elementId);
+      ul.innerHTML = "";
+      players.forEach(player => {
+        const li = document.createElement("li");
+        li.innerText = player;
+        ul.appendChild(li);
+      });
+    }
+
+    // --- 試合を切り替える ---
+    function navigateMatch(direction) {
+      if (direction === "next" && currentMatchIndex < allMatches.length - 1) {
+        currentMatchIndex++;
+      } else if (direction === "previous" && currentMatchIndex > 0) {
+        currentMatchIndex--;
+      }
+      displayMatch(currentMatchIndex);
+    }
+
+    // --- ページ読み込み時にデータを取得 ---
+    document.addEventListener("DOMContentLoaded", fetchAllMatches);
+  </script>
+</body>
+
+</html>
