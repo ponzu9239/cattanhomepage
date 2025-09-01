@@ -29,6 +29,36 @@
       margin-bottom: 20px;
     }
 
+    .match-search {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .match-search input {
+      width: 80px;
+      padding: 8px;
+      border: 1px solid #97eadb;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .match-search button {
+      padding: 8px 15px;
+      background-color: #97eadb;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .match-search button:hover {
+      background-color: #7dd2c3;
+    }
+
     .navigation-buttons {
       display: flex;
       justify-content: space-between;
@@ -130,6 +160,13 @@
 <body>
   <div class="container">
     <h1>試合結果閲覧</h1>
+
+    <div class="match-search">
+      <label for="match-no-input">試合番号：</label>
+      <input type="number" id="match-no-input" placeholder="番号を入力" min="1" />
+      <button onclick="goToMatchNumber()">表示</button>
+    </div>
+
     <div id="loading-status">試合データを読み込み中...</div>
     <div id="match-view" style="display: none;">
       <p class="match-number">試合番号：<span id="match-no"></span></p>
@@ -194,6 +231,18 @@
       }
     }
 
+    // --- 試合番号から試合を表示する ---
+    function goToMatchNumber() {
+      const inputNumber = Number(document.getElementById("match-no-input").value);
+      const index = allMatches.findIndex(match => match.matchNumber === inputNumber);
+      if (index !== -1) {
+        currentMatchIndex = index;
+        displayMatch(currentMatchIndex);
+      } else {
+        alert("指定された試合番号は見つかりませんでした。");
+      }
+    }
+
     // --- 試合データを表示する ---
     function displayMatch(index) {
       if (index >= 0 && index < allMatches.length) {
@@ -207,6 +256,9 @@
         // ナビゲーションボタンの有効/無効
         document.getElementById("prev-btn").disabled = index === 0;
         document.getElementById("next-btn").disabled = index === allMatches.length - 1;
+        
+        // 入力欄に現在の試合番号を反映
+        document.getElementById("match-no-input").value = match.matchNumber;
       }
     }
 
