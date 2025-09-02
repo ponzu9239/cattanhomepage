@@ -152,7 +152,6 @@
     .kills {
       font-size: 24px;
       font-weight: bold;
-      /* 基本の文字色を統一 */
       color: #444; 
       margin-top: 5px;
     }
@@ -205,7 +204,7 @@
     </div>
 
     <div class="auto-update-option">
-      <label for="auto-update-checkbox">最新の試合結果を表示</label>
+      <label for="auto-update-checkbox">最新の試合を見る</label>
       <input type="checkbox" id="auto-update-checkbox" checked>
     </div>
 
@@ -303,13 +302,17 @@
 
         document.getElementById("teamA-kills").innerText = match.teamAKills;
         document.getElementById("teamB-kills").innerText = match.teamBKills;
-        renderPlayers("teamA-players", match.teamA);
-        renderPlayers("teamB-players", match.teamB);
+        
+        // プレイヤー名を五十音順にソートして描画
+        const sortedTeamA = [...match.teamA].sort((a, b) => a.localeCompare(b, 'ja'));
+        const sortedTeamB = [...match.teamB].sort((a, b) => a.localeCompare(b, 'ja'));
+        
+        renderPlayers("teamA-players", sortedTeamA);
+        renderPlayers("teamB-players", sortedTeamB);
 
         const team1Box = document.getElementById("team1-box");
         const team2Box = document.getElementById("team2-box");
 
-        // 勝敗表示をリセット
         team1Box.classList.remove("winner");
         team2Box.classList.remove("winner");
         const existingMarks = document.querySelectorAll(".winner-mark");
