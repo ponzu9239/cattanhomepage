@@ -87,7 +87,7 @@
       flex-direction: column;
       gap: 16px;
       margin-top: 20px;
-      margin-bottom: 20px; /* 余白を追加 */
+      margin-bottom: 20px;
     }
 
     .team-box {
@@ -152,14 +152,33 @@
     .kills {
       font-size: 24px;
       font-weight: bold;
-      color: #47b6a2;
+      /* 基本の文字色を統一 */
+      color: #444; 
       margin-top: 5px;
     }
 
+    .team-box.team1 h2,
+    .team-box.team1 .kills {
+        color: #47b6a2;
+    }
+    .team-box.team2 h2,
     .team-box.team2 .kills {
-      color: #ffb6c1;
+        color: #ffb6c1;
     }
     
+    .match-number {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    #loading-status {
+      text-align: center;
+      color: #666;
+      margin-top: 20px;
+    }
+
     .auto-update-option {
       display: flex;
       align-items: center;
@@ -186,7 +205,7 @@
     </div>
 
     <div class="auto-update-option">
-      <label for="auto-update-checkbox">最新の試合を見る</label>
+      <label for="auto-update-checkbox">最新の試合結果を表示</label>
       <input type="checkbox" id="auto-update-checkbox" checked>
     </div>
 
@@ -280,7 +299,6 @@
     function displayMatch(index) {
       if (index >= 0 && index < allMatches.length) {
         const match = allMatches[index];
-        // 試合番号の表示を1つに統合
         document.getElementById("match-no-input").value = match.matchNumber;
 
         document.getElementById("teamA-kills").innerText = match.teamAKills;
@@ -291,6 +309,7 @@
         const team1Box = document.getElementById("team1-box");
         const team2Box = document.getElementById("team2-box");
 
+        // 勝敗表示をリセット
         team1Box.classList.remove("winner");
         team2Box.classList.remove("winner");
         const existingMarks = document.querySelectorAll(".winner-mark");
