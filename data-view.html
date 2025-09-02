@@ -204,7 +204,7 @@
     </div>
 
     <div class="auto-update-option">
-      <label for="auto-update-checkbox">最新の試合結果を表示</label>
+      <label for="auto-update-checkbox">自動更新</label>
       <input type="checkbox" id="auto-update-checkbox" checked>
     </div>
 
@@ -230,7 +230,6 @@
   </div>
 
   <script>
-    // --- Firebase 設定 (入力ページと同一) ---
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -244,32 +243,67 @@
     const db = firebase.database();
 
     let allMatches = [];
+    let playerReadings = {}; // プレイヤーの読み方データを格納する
     let currentMatchIndex = -1;
     let autoUpdateEnabled = true;
 
     const autoUpdateCheckbox = document.getElementById("auto-update-checkbox");
 
-    // --- 試合データをリアルタイムで同期する ---
-    db.ref("apex_results").orderByChild("matchNumber").on("value", (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
+    // --- データを一括で取得する
+    Promise.all([
+      db.ref("apex_results").orderByChild("matchNumber").once("value"),
+      db.ref("player_readings").once("value")
+    ]).then(snapshots => {
+      const resultsSnapshot = snapshots[0];
+      const readingsSnapshot = snapshots[1];
+      
+      if (resultsSnapshot.exists()) {
+        const data = resultsSnapshot.val();
         allMatches = Object.values(data);
         allMatches.sort((a, b) => a.matchNumber - b.matchNumber);
+      }
+      
+      if (readingsSnapshot.exists()) {
+        playerReadings = readingsSnapshot.val();
+      }
 
-        if (autoUpdateEnabled) {
-          currentMatchIndex = allMatches.length - 1;
-        }
-        
+      if (allMatches.length > 0) {
+        currentMatchIndex = allMatches.length - 1;
         displayMatch(currentMatchIndex);
       } else {
-        allMatches = [];
-        currentMatchIndex = -1;
         document.getElementById("loading-status").innerText = "保存された試合データがありません。";
-        document.getElementById("match-view").style.display = "none";
       }
+
       document.getElementById("loading-status").style.display = "none";
       document.getElementById("match-view").style.display = "block";
+
+      // データのリアルタイム更新を監視
+      db.ref("apex_results").orderByChild("matchNumber").on("value", updatePage);
+      db.ref("player_readings").on("value", updatePage);
+    }).catch(error => {
+      console.error("データの読み込み中にエラーが発生しました:", error);
+      document.getElementById("loading-status").innerText = "データの読み込み中にエラーが発生しました。";
     });
+
+    // --- ページを更新する関数
+    function updatePage(snapshot) {
+      if (snapshot.ref.key === "apex_results") {
+        if (snapshot.exists()) {
+          allMatches = Object.values(snapshot.val());
+          allMatches.sort((a, b) => a.matchNumber - b.matchNumber);
+        } else {
+          allMatches = [];
+        }
+      } else if (snapshot.ref.key === "player_readings") {
+        playerReadings = snapshot.val() || {};
+      }
+
+      if (autoUpdateEnabled) {
+        currentMatchIndex = allMatches.length - 1;
+      }
+      
+      displayMatch(currentMatchIndex);
+    }
 
     // --- 最新の試合を見るチェックボックスのイベントリスナー
     autoUpdateCheckbox.addEventListener('change', () => {
@@ -303,9 +337,18 @@
         document.getElementById("teamA-kills").innerText = match.teamAKills;
         document.getElementById("teamB-kills").innerText = match.teamBKills;
         
-        // プレイヤー名を五十音順にソートして描画
-        const sortedTeamA = [...match.teamA].sort((a, b) => a.localeCompare(b, 'ja'));
-        const sortedTeamB = [...match.teamB].sort((a, b) => a.localeCompare(b, 'ja'));
+        // プレイヤー名を読み方でソート
+        const sortedTeamA = [...match.teamA].sort((a, b) => {
+          const readingA = playerReadings[a]?.reading || a;
+          const readingB = playerReadings[b]?.reading || b;
+          return readingA.localeCompare(readingB, 'ja', { sensitivity: 'base' });
+        });
+
+        const sortedTeamB = [...match.teamB].sort((a, b) => {
+          const readingA = playerReadings[a]?.reading || a;
+          const readingB = playerReadings[b]?.reading || b;
+          return readingA.localeCompare(readingB, 'ja', { sensitivity: 'base' });
+        });
         
         renderPlayers("teamA-players", sortedTeamA);
         renderPlayers("teamB-players", sortedTeamB);
