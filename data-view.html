@@ -206,30 +206,37 @@
     let allMatches = [];
     let currentMatchIndex = -1;
 
-    // --- 試合データを読み込む ---
-    async function fetchAllMatches() {
-      try {
-        const snapshot = await db.ref("apex_results").orderByChild("matchNumber").once("value");
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          allMatches = Object.values(data);
-          allMatches.sort((a, b) => a.matchNumber - b.matchNumber);
-          if (allMatches.length > 0) {
-            currentMatchIndex = allMatches.length - 1; // 最新の試合を表示
-            displayMatch(currentMatchIndex);
-          } else {
-            document.getElementById("loading-status").innerText = "保存された試合データがありません。";
-          }
-        } else {
-          document.getElementById("loading-status").innerText = "保存された試合データがありません。";
+    // --- 試合データをリアルタイムで同期する ---
+    db.ref("apex_results").orderByChild("matchNumber").on("value", (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        allMatches = Object.values(data);
+        allMatches.sort((a, b) => a.matchNumber - b.matchNumber);
+        
+        // 現在の試合番号を保持し、再描画後にその試合を表示する
+        const currentMatchNumber = currentMatchIndex !== -1 ? allMatches[currentMatchIndex].matchNumber : -1;
+        let newIndex = -1;
+        if (currentMatchNumber !== -1) {
+          newIndex = allMatches.findIndex(match => match.matchNumber === currentMatchNumber);
         }
-        document.getElementById("loading-status").style.display = "none";
-        document.getElementById("match-view").style.display = "block";
-      } catch (err) {
-        console.error("データの読み込み中にエラーが発生しました:", err);
-        document.getElementById("loading-status").innerText = "データの読み込み中にエラーが発生しました。";
+        
+        // 新しいデータに現在の試合番号がない場合は、最新の試合を表示
+        if (newIndex === -1) {
+          currentMatchIndex = allMatches.length - 1;
+        } else {
+          currentMatchIndex = newIndex;
+        }
+
+        displayMatch(currentMatchIndex);
+      } else {
+        allMatches = [];
+        currentMatchIndex = -1;
+        document.getElementById("loading-status").innerText = "保存された試合データがありません。";
+        document.getElementById("match-view").style.display = "none";
       }
-    }
+      document.getElementById("loading-status").style.display = "none";
+      document.getElementById("match-view").style.display = "block";
+    });
 
     // --- 試合番号から試合を表示する ---
     function goToMatchNumber() {
@@ -282,9 +289,6 @@
       }
       displayMatch(currentMatchIndex);
     }
-
-    // --- ページ読み込み時にデータを取得 ---
-    document.addEventListener("DOMContentLoaded", fetchAllMatches);
   </script>
 </body>
 
