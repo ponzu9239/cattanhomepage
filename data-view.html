@@ -62,6 +62,7 @@
     .navigation-buttons {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
       gap: 10px;
     }
@@ -93,13 +94,32 @@
       padding: 10px;
       border-radius: 8px;
       border: 2px solid #97eadb;
+      position: relative;
     }
 
     .team-box.team2 {
       background: #fff1f5;
       border-color: #ffb6c1;
     }
+    
+    .team-box.winner {
+      border-color: #ffc107;
+      box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+    
+    .team-box.winner .kills, .team-box.winner h2 {
+      color: #ffc107;
+    }
 
+    .winner-mark {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 24px;
+      color: #ffc107;
+      font-weight: bold;
+    }
+    
     .team-box h2 {
       text-align: center;
       font-size: 16px;
@@ -113,7 +133,7 @@
 
     .player-list {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      grid-template-columns: 1fr 1fr;
       gap: 6px;
       list-style-type: none;
       padding: 0;
@@ -151,6 +171,16 @@
       color: #666;
       margin-top: 20px;
     }
+
+    .auto-update-option {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+      margin-top: 10px;
+      margin-bottom: -10px;
+    }
+    
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -167,16 +197,21 @@
       <button onclick="goToMatchNumber()">表示</button>
     </div>
 
+    <div class="auto-update-option">
+      <label for="auto-update-checkbox">最新の試合を見る</label>
+      <input type="checkbox" id="auto-update-checkbox" checked>
+    </div>
+
     <div id="loading-status">試合データを読み込み中...</div>
     <div id="match-view" style="display: none;">
       <p class="match-number">試合番号：<span id="match-no"></span></p>
       <div class="teams">
-        <div class="team-box team1">
+        <div class="team-box team1" id="team1-box">
           <h2>チーム1</h2>
           <p class="kills">キル数：<span id="teamA-kills"></span></p>
           <ul id="teamA-players" class="player-list"></ul>
         </div>
-        <div class="team-box team2">
+        <div class="team-box team2" id="team2-box">
           <h2>チーム2</h2>
           <p class="kills">キル数：<span id="teamB-kills"></span></p>
           <ul id="teamB-players" class="player-list"></ul>
@@ -205,6 +240,9 @@
 
     let allMatches = [];
     let currentMatchIndex = -1;
+    let autoUpdateEnabled = true;
+
+    const autoUpdateCheckbox = document.getElementById("auto-update-checkbox");
 
     // --- 試合データをリアルタイムで同期する ---
     db.ref("apex_results").orderByChild("matchNumber").on("value", (snapshot) => {
@@ -212,21 +250,13 @@
         const data = snapshot.val();
         allMatches = Object.values(data);
         allMatches.sort((a, b) => a.matchNumber - b.matchNumber);
-        
-        // 現在の試合番号を保持し、再描画後にその試合を表示する
-        const currentMatchNumber = currentMatchIndex !== -1 ? allMatches[currentMatchIndex].matchNumber : -1;
-        let newIndex = -1;
-        if (currentMatchNumber !== -1) {
-          newIndex = allMatches.findIndex(match => match.matchNumber === currentMatchNumber);
-        }
-        
-        // 新しいデータに現在の試合番号がない場合は、最新の試合を表示
-        if (newIndex === -1) {
-          currentMatchIndex = allMatches.length - 1;
-        } else {
-          currentMatchIndex = newIndex;
-        }
 
+        // 最新の試合を見る設定が有効な場合、最新の試合を表示
+        if (autoUpdateEnabled) {
+          currentMatchIndex = allMatches.length - 1;
+        }
+        
+        // データを再描画
         displayMatch(currentMatchIndex);
       } else {
         allMatches = [];
@@ -238,6 +268,16 @@
       document.getElementById("match-view").style.display = "block";
     });
 
+    // --- 最新の試合を見るチェックボックスのイベントリスナー
+    autoUpdateCheckbox.addEventListener('change', () => {
+      autoUpdateEnabled = autoUpdateCheckbox.checked;
+      if (autoUpdateEnabled) {
+        // チェックを入れたら最新の試合に移動
+        currentMatchIndex = allMatches.length - 1;
+        displayMatch(currentMatchIndex);
+      }
+    });
+
     // --- 試合番号から試合を表示する ---
     function goToMatchNumber() {
       const inputNumber = Number(document.getElementById("match-no-input").value);
@@ -245,6 +285,9 @@
       if (index !== -1) {
         currentMatchIndex = index;
         displayMatch(currentMatchIndex);
+        // 手動で試合を切り替えたので自動更新を無効化
+        autoUpdateEnabled = false;
+        autoUpdateCheckbox.checked = false;
       } else {
         alert("指定された試合番号は見つかりませんでした。");
       }
@@ -260,12 +303,36 @@
         renderPlayers("teamA-players", match.teamA);
         renderPlayers("teamB-players", match.teamB);
 
+        // 勝敗の表示
+        const team1Box = document.getElementById("team1-box");
+        const team2Box = document.getElementById("team2-box");
+
+        // 勝敗表示をリセット
+        team1Box.classList.remove("winner");
+        team2Box.classList.remove("winner");
+        const existingMarks = document.querySelectorAll(".winner-mark");
+        existingMarks.forEach(mark => mark.remove());
+
+        if (match.teamAKills > match.teamBKills) {
+          team1Box.classList.add("winner");
+          team1Box.insertAdjacentHTML('beforeend', '<div class="winner-mark">🏆</div>');
+        } else if (match.teamBKills > match.teamAKills) {
+          team2Box.classList.add("winner");
+          team2Box.insertAdjacentHTML('beforeend', '<div class="winner-mark">🏆</div>');
+        }
+
         // ナビゲーションボタンの有効/無効
         document.getElementById("prev-btn").disabled = index === 0;
         document.getElementById("next-btn").disabled = index === allMatches.length - 1;
         
         // 入力欄に現在の試合番号を反映
         document.getElementById("match-no-input").value = match.matchNumber;
+
+        // 最新の試合を見ている場合のみチェックボックスを有効にする
+        if (index === allMatches.length - 1) {
+          autoUpdateEnabled = true;
+          autoUpdateCheckbox.checked = true;
+        }
       }
     }
 
@@ -288,6 +355,9 @@
         currentMatchIndex--;
       }
       displayMatch(currentMatchIndex);
+      // 手動で試合を切り替えたので自動更新を無効化
+      autoUpdateEnabled = false;
+      autoUpdateCheckbox.checked = false;
     }
   </script>
 </body>
