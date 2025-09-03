@@ -2,7 +2,7 @@
 <html lang="ja">
 
 <head>
-  <meta charset="UTF="8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>APEX 試合結果閲覧</title>
   <style>
@@ -16,10 +16,9 @@
     .container {
       max-width: 500px;
       margin: 30px auto;
-      /* 背景色とシャドウを削除 */
-      background: none; 
+      background: none;
       box-shadow: none;
-      border-radius: 12px; /* なくても良いが、念のため残す */
+      border-radius: 12px;
       padding: 20px;
       text-align: center;
     }
@@ -103,13 +102,14 @@
       background: #fff1f5;
       border-color: #ffb6c1;
     }
-    
+
     .team-box.winner {
       border-color: #ffc107;
       box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
     }
-    
-    .team-box.winner .kills, .team-box.winner h2 {
+
+    .team-box.winner .kills,
+    .team-box.winner h2 {
       color: #ffc107;
     }
 
@@ -121,7 +121,7 @@
       color: #ffc107;
       font-weight: bold;
     }
-    
+
     .team-box h2 {
       text-align: center;
       font-size: 16px;
@@ -153,19 +153,20 @@
     .kills {
       font-size: 24px;
       font-weight: bold;
-      color: #444; 
+      color: #444;
       margin-top: 5px;
     }
 
     .team-box.team1 h2,
     .team-box.team1 .kills {
-        color: #47b6a2;
+      color: #47b6a2;
     }
+
     .team-box.team2 h2,
     .team-box.team2 .kills {
-        color: #ffb6c1;
+      color: #ffb6c1;
     }
-    
+
     .match-number {
       font-size: 20px;
       font-weight: bold;
@@ -185,9 +186,8 @@
       justify-content: flex-end;
       gap: 5px;
       margin-top: 10px;
-      margin-bottom: -10px;
+      margin-bottom: 10px; /* ここを変更 */
     }
-    
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -208,6 +208,11 @@
       <label for="auto-update-checkbox">最新の試合を見る</label>
       <input type="checkbox" id="auto-update-checkbox" checked>
     </div>
+    
+    <div class="navigation-buttons">
+      <button onclick="navigateMatch('previous')" id="prev-btn">前の試合</button>
+      <button onclick="navigateMatch('next')" id="next-btn">次の試合</button>
+    </div>
 
     <div id="loading-status">試合データを読み込み中...</div>
     <div id="match-view" style="display: none;">
@@ -223,10 +228,6 @@
           <ul id="teamB-players" class="player-list"></ul>
         </div>
       </div>
-    </div>
-    <div class="navigation-buttons">
-      <button onclick="navigateMatch('previous')" id="prev-btn">前の試合</button>
-      <button onclick="navigateMatch('next')" id="next-btn">次の試合</button>
     </div>
   </div>
 
