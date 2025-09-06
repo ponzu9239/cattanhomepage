@@ -600,9 +600,6 @@ footer {
       return baseId;
     }
     const deviceId = getDeviceId();
-    
-    // 選択されたプレイヤーのリストをローカルで管理
-    let selectedPlayers = JSON.parse(localStorage.getItem("selectedPlayers") || "[]");
 
     function katakanaToHiragana(str) {
       return str.replace(/[\u30a1-\u30f6]/g, function(match) {
@@ -624,9 +621,6 @@ footer {
     let playerPlayDates = {};
     let playerPlayCounts = {};
     let currentSortMode = 'reading';
-
-    let separatePairs = JSON.parse(localStorage.getItem("separatePairs") || "[]");
-    let togetherPairs = JSON.parse(localStorage.getItem("togetherPairs") || "[]");
 
     let playerAliasMap = {};
     let readingsData = {};
@@ -700,7 +694,6 @@ footer {
       if (arr.some(p => p[0] === pair[0] && p[1] === pair[1])) return false;
 
       arr.push(pair);
-      localStorage.setItem(type + "Pairs", JSON.stringify(arr));
       renderPairList(type);
       makeTeams();
       return true;
@@ -709,7 +702,6 @@ footer {
     function removePair(type, index) {
       let arr = (type === "separate") ? separatePairs : togetherPairs;
       arr.splice(index, 1);
-      localStorage.setItem(type + "Pairs", JSON.stringify(arr));
       renderPairList(type);
       makeTeams();
     }
@@ -896,8 +888,6 @@ footer {
           } else {
             selectedPlayers.push(name);
           }
-          localStorage.setItem("selectedPlayers", JSON.stringify(selectedPlayers));
-          renderPlayers();
           makeTeams();
         };
         container.appendChild(div);
