@@ -1147,16 +1147,20 @@ footer {
       return scores;
     }
 
-    function getCombinations(array, size) {
-      if (size === 0) return [
-        []
-      ];
-      if (array.length < size) return [];
-      const [first, ...rest] = array;
-      const combsWithFirst = getCombinations(rest, size - 1).map(c => [first, ...c]);
-      const combsWithoutFirst = getCombinations(rest, size);
-      return combsWithFirst.concat(combsWithoutFirst);
-    }
+// 新しいgetCombinations関数
+function getCombinations(array, size) {
+  if (size === 0) return [[]];
+  if (array.length < size) return [];
+  const [first, ...rest] = array;
+  
+  // 1. firstを含む組み合わせ
+  const combsWithFirst = getCombinations(rest, size - 1).map(c => [first, ...c]);
+  
+  // 2. firstを含まない組み合わせ
+  const combsWithoutFirst = getCombinations(rest, size);
+  
+  return [...combsWithFirst, ...combsWithoutFirst];
+}
 
     document.getElementById("separatePairForm").addEventListener("submit", e => {
       e.preventDefault();
