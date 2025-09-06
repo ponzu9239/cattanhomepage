@@ -33,6 +33,7 @@
       border-radius: 6px;
       border: 1px solid #97eadb;
       margin-top: 4px;
+      box-sizing: border-box;
     }
 
     .teams {
@@ -88,6 +89,12 @@
       cursor: grab;
     }
 
+    /* 過去に名前があった場合に適用するスタイル */
+    .player-card.name-present-history {
+        background-color: lightgreen;
+        border-color: #47b6a2;
+    }
+
     input[type=number] {
       width: 90%;
       margin-bottom: 6px;
@@ -127,15 +134,6 @@
       pointer-events: none;
       opacity: 0.8;
       z-index: 9999;
-    }
-    
-    textarea {
-      width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #97eadb;
-      margin-top: 4px;
-      box-sizing: border-box;
     }
   </style>
 
@@ -245,6 +243,35 @@
       });
     }
 
+    // --- 過去のプレイヤー名をロードしてカードを更新する ---
+    async function checkAndColorizeCards() {
+      const playersInHistory = new Set();
+      const snapshot = await db.ref("apex_results").once("value");
+
+      if (snapshot.exists()) {
+        const results = snapshot.val();
+        for (const matchId in results) {
+          const match = results[matchId];
+          if (match.teamA) {
+            match.teamA.forEach(name => playersInHistory.add(name));
+          }
+          if (match.teamB) {
+            match.teamB.forEach(name => playersInHistory.add(name));
+          }
+        }
+      }
+
+      // 現在のカードに色を適用
+      document.querySelectorAll(".player-card").forEach(card => {
+        const playerName = card.textContent;
+        if (playersInHistory.has(playerName)) {
+          card.classList.add("name-present-history");
+        } else {
+          card.classList.remove("name-present-history");
+        }
+      });
+    }
+
     // --- プレイヤーカード描画 ---
     function renderCards(names) {
       const currentCards = {};
@@ -313,6 +340,9 @@
         });
 
         document.getElementById("status").innerText = `✅ 保存しました！（試合番号: ${nextMatchNumber}）`;
+        
+        // 保存後、再度色付け処理を実行
+        await checkAndColorizeCards();
       } catch (err) {
         console.error(err);
         document.getElementById("status").innerText = "❌ エラーが発生しました";
@@ -320,7 +350,7 @@
     }
 
     // --- 名前入力欄監視 ---
-    document.getElementById("nameInput").addEventListener("input", () => {
+    document.getElementById("nameInput").addEventListener("input", async () => {
       const names = document.getElementById("nameInput").value
         .split("\n")
         .map(n => n.trim())
@@ -330,6 +360,14 @@
         players: names,
         timestamp: firebase.database.ServerValue.TIMESTAMP
       });
+      
+      // カードが描画された後、履歴チェックを実行
+      await checkAndColorizeCards();
+    });
+
+    // ページ読み込み時にも実行
+    window.addEventListener('DOMContentLoaded', async () => {
+      await checkAndColorizeCards();
     });
   </script>
 </body>
