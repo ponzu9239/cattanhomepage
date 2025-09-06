@@ -600,6 +600,12 @@ footer {
       return baseId;
     }
     const deviceId = getDeviceId();
+    
+    // 選択されたプレイヤー、ペアの情報をlocalStorageから読み込まないように変更
+    let selectedPlayers = [];
+    let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
+    let separatePairs = [];
+    let togetherPairs = [];
 
     function katakanaToHiragana(str) {
       return str.replace(/[\u30a1-\u30f6]/g, function(match) {
@@ -611,7 +617,6 @@ footer {
     let playerScoresAverage = {},
       playerScoresWinRate = {},
       playerScoresKDRatio = {};
-    let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     
     let firebaseMatchingPlayers = [];
     let playerSearchInputNames = []; 
@@ -625,17 +630,21 @@ footer {
     let playerAliasMap = {};
     let readingsData = {};
 
+    let debounceTimer;
     document.getElementById("playerSearchInput").addEventListener("input", () => {
-        const inputStr = document.getElementById("playerSearchInput").value;
-        const inputNames = inputStr.split(/\n/).map(name => name.trim()).filter(name => name !== '');
-        
-        playerSearchInputNames = inputNames.filter(name => {
-            const normalizedName = katakanaToHiragana(name).toLowerCase();
-            const resolvedName = playerAliasMap[normalizedName] || name;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const inputStr = document.getElementById("playerSearchInput").value;
+            const inputNames = inputStr.split(/\n/).map(name => name.trim()).filter(name => name !== '');
             
-            return allPlayersList.includes(resolvedName);
-        });
-        updateMatchingPlayers(); 
+            playerSearchInputNames = inputNames.filter(name => {
+                const normalizedName = katakanaToHiragana(name).toLowerCase();
+                const resolvedName = playerAliasMap[normalizedName] || name;
+                
+                return allPlayersList.includes(resolvedName);
+            });
+            updateMatchingPlayers(); 
+        }, 300);
     });
     
     db.ref("currentInputPlayers").on("value", (snapshot) => {
@@ -888,6 +897,7 @@ footer {
           } else {
             selectedPlayers.push(name);
           }
+          renderPlayers();
           makeTeams();
         };
         container.appendChild(div);
@@ -1137,20 +1147,16 @@ footer {
       return scores;
     }
 
-// 新しいgetCombinations関数
-function getCombinations(array, size) {
-  if (size === 0) return [[]];
-  if (array.length < size) return [];
-  const [first, ...rest] = array;
-  
-  // 1. firstを含む組み合わせ
-  const combsWithFirst = getCombinations(rest, size - 1).map(c => [first, ...c]);
-  
-  // 2. firstを含まない組み合わせ
-  const combsWithoutFirst = getCombinations(rest, size);
-  
-  return [...combsWithFirst, ...combsWithoutFirst];
-}
+    function getCombinations(array, size) {
+      if (size === 0) return [[]];
+      if (array.length < size) return [];
+      const [first, ...rest] = array;
+      
+      const combsWithFirst = getCombinations(rest, size - 1).map(c => [first, ...c]);
+      const combsWithoutFirst = getCombinations(rest, size);
+      
+      return [...combsWithFirst, ...combsWithoutFirst];
+    }
 
     document.getElementById("separatePairForm").addEventListener("submit", e => {
       e.preventDefault();
@@ -1316,6 +1322,7 @@ function getCombinations(array, size) {
         }
       });
     });
+
   </script>
 </body>
 </html>
