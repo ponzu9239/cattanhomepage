@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>プレイヤー読み方設定</title>
+  <title>プレイヤー読み方・ID設定</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -11,12 +11,12 @@
       padding: 20px;
     }
     .container {
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h1 {
       color: #47b6a2;
@@ -37,20 +37,16 @@
     }
     .player-item .input-group {
       display: flex;
-      gap: 10px; /* 入力欄間の隙間 */
+      gap: 10px;
     }
     .player-item input {
-      width: 150px;
       padding: 5px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-    .player-item input.reading-input {
-      width: 120px;
-    }
-    .player-item input.alias-input {
-      width: 200px;
-    }
+    .reading-input { width: 120px; }
+    .alias-input { width: 200px; }
+    .id-input { width: 200px; }
     #saveAllButton {
       display: block;
       width: 100%;
@@ -68,7 +64,7 @@
 <body>
 
 <div class="container">
-  <h1>プレイヤー読み方・あだ名設定</h1>
+  <h1>プレイヤー読み方・あだ名・ID設定</h1>
   <div id="playerReadingsList"></div>
   <button id="saveAllButton">すべて保存</button>
 </div>
@@ -76,105 +72,109 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
-    authDomain: "match-result-ea475.firebaseapp.com",
-    databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
-    projectId: "match-result-ea475",
-    storageBucket: "match-result-ea475.firebasestorage.app",
-    messagingSenderId: "759877853492",
-    appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+const firebaseConfig = {
+  apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+  authDomain: "match-result-ea475.firebaseapp.com",
+  databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+  projectId: "match-result-ea475",
+  storageBucket: "match-result-ea475.firebasestorage.app",
+  messagingSenderId: "759877853492",
+  appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-  function renderPlayerReadings() {
-    const listContainer = document.getElementById("playerReadingsList");
-    listContainer.innerHTML = "読込中...";
+function renderPlayerReadings() {
+  const listContainer = document.getElementById("playerReadingsList");
+  listContainer.innerHTML = "読込中...";
 
-    // プレイヤーの読み方＆あだ名データを取得
-    db.ref("player_readings").once("value", readingsSnapshot => {
-      const existingReadings = readingsSnapshot.val() || {};
+  db.ref("player_readings").once("value", readingsSnapshot => {
+    const existingReadings = readingsSnapshot.val() || {};
 
-      // 過去の試合結果から全プレイヤー名を取得
-      db.ref("apex_results").once("value", resultsSnapshot => {
-        const matches = resultsSnapshot.val() || {};
-        const allPlayers = new Set();
-        Object.values(matches).forEach(match => {
-          if (match.teamA) match.teamA.forEach(p => allPlayers.add(p));
-          if (match.teamB) match.teamB.forEach(p => allPlayers.add(p));
-        });
+    db.ref("apex_results").once("value", resultsSnapshot => {
+      const matches = resultsSnapshot.val() || {};
+      const allPlayers = new Set();
+      Object.values(matches).forEach(match => {
+        if (match.teamA) match.teamA.forEach(p => allPlayers.add(p));
+        if (match.teamB) match.teamB.forEach(p => allPlayers.add(p));
+      });
 
-        // 読み方設定ページのプレイヤーリストを生成
-        listContainer.innerHTML = "";
-        allPlayers.forEach(name => {
-          const div = document.createElement("div");
-          div.className = "player-item";
-          
-          const playerNameSpan = document.createElement("span");
-          playerNameSpan.textContent = name;
-          div.appendChild(playerNameSpan);
+      listContainer.innerHTML = "";
+      allPlayers.forEach(name => {
+        const div = document.createElement("div");
+        div.className = "player-item";
 
-          const inputGroup = document.createElement("div");
-          inputGroup.className = "input-group";
+        const playerNameSpan = document.createElement("span");
+        playerNameSpan.textContent = name;
+        div.appendChild(playerNameSpan);
 
-          const readingInput = document.createElement("input");
-          readingInput.type = "text";
-          readingInput.placeholder = "読み方";
-          readingInput.className = "reading-input";
-          readingInput.value = existingReadings[name]?.reading || "";
-          readingInput.dataset.playerName = name;
-          inputGroup.appendChild(readingInput);
+        const inputGroup = document.createElement("div");
+        inputGroup.className = "input-group";
 
-          const aliasInput = document.createElement("input");
-          aliasInput.type = "text";
-          aliasInput.placeholder = "あだ名 (カンマ区切り)";
-          aliasInput.className = "alias-input";
-          aliasInput.value = existingReadings[name]?.aliases?.join(", ") || "";
-          aliasInput.dataset.playerName = name;
-          inputGroup.appendChild(aliasInput);
+        // 読み方
+        const readingInput = document.createElement("input");
+        readingInput.type = "text";
+        readingInput.placeholder = "読み方";
+        readingInput.className = "reading-input";
+        readingInput.value = existingReadings[name]?.reading || "";
+        readingInput.dataset.playerName = name;
+        inputGroup.appendChild(readingInput);
 
-          div.appendChild(inputGroup);
-          listContainer.appendChild(div);
-        });
+        // あだ名
+        const aliasInput = document.createElement("input");
+        aliasInput.type = "text";
+        aliasInput.placeholder = "あだ名 (カンマ区切り)";
+        aliasInput.className = "alias-input";
+        aliasInput.value = existingReadings[name]?.aliases?.join(", ") || "";
+        aliasInput.dataset.playerName = name;
+        inputGroup.appendChild(aliasInput);
+
+        // 不変ID
+        const idInput = document.createElement("input");
+        idInput.type = "text";
+        idInput.placeholder = "不変ID (channelId)";
+        idInput.className = "id-input";
+        idInput.value = existingReadings[name]?.id || "";
+        idInput.dataset.playerName = name;
+        inputGroup.appendChild(idInput);
+
+        div.appendChild(inputGroup);
+        listContainer.appendChild(div);
       });
     });
-  }
+  });
+}
 
-  document.getElementById("saveAllButton").addEventListener("click", () => {
-    const readingInputs = document.querySelectorAll("#playerReadingsList .reading-input");
-    const aliasInputs = document.querySelectorAll("#playerReadingsList .alias-input");
-    const readingsToSave = {};
+document.getElementById("saveAllButton").addEventListener("click", () => {
+  const readingInputs = document.querySelectorAll(".reading-input");
+  const aliasInputs = document.querySelectorAll(".alias-input");
+  const idInputs = document.querySelectorAll(".id-input");
+  const readingsToSave = {};
 
-    readingInputs.forEach((input, index) => {
-      const playerName = input.dataset.playerName;
-      const reading = input.value.trim();
-      const aliasValue = aliasInputs[index].value.trim();
-      
-      const aliases = aliasValue.split(",").map(alias => alias.trim()).filter(alias => alias !== "");
-      
-      readingsToSave[playerName] = {
-        reading: reading || null, // 読み方が空の場合はnullを保存
-        aliases: aliases.length > 0 ? aliases : null // あだ名が空の場合はnullを保存
-      };
-    });
+  readingInputs.forEach((input, index) => {
+    const playerName = input.dataset.playerName;
+    const reading = input.value.trim();
+    const aliasValue = aliasInputs[index].value.trim();
+    const idValue = idInputs[index].value.trim();
 
-    if (Object.keys(readingsToSave).length > 0) {
-      db.ref("player_readings").set(readingsToSave) // update()ではなくset()を使用
-        .then(() => {
-          alert("設定を保存しました。");
-        })
-        .catch(error => {
-          console.error("保存中にエラーが発生しました:", error);
-          alert("保存に失敗しました。");
-        });
-    } else {
-      alert("入力された設定がありません。");
-    }
+    const aliases = aliasValue.split(",").map(a => a.trim()).filter(a => a !== "");
+
+    readingsToSave[playerName] = {
+      reading: reading || null,
+      aliases: aliases.length > 0 ? aliases : null,
+      id: idValue || null
+    };
   });
 
-  // ページロード時にプレイヤーリストをレンダリング
-  renderPlayerReadings();
+  db.ref("player_readings").set(readingsToSave)
+    .then(() => alert("設定を保存しました。"))
+    .catch(error => {
+      console.error("保存中にエラー:", error);
+      alert("保存に失敗しました。");
+    });
+});
+
+renderPlayerReadings();
 </script>
 
 </body>
