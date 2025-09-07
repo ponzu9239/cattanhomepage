@@ -5,16 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>YouTubeライブコメント取得</title>
 <style>
-  body { font-family: sans-serif; background: #f7fcfc; padding: 20px; }
-  h1 { color: #47b6a2; }
-  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-  th { background: #97eadb; }
+  body { font-family: sans-serif; background:#f7fcfc; padding:20px; }
+  h1 { color:#47b6a2; }
+  table { width: 100%; border-collapse: collapse; margin-top:20px; }
+  th, td { border:1px solid #ccc; padding:8px; text-align:left; }
+  th { background:#97eadb; }
 </style>
 </head>
 <body>
 <h1>ライブコメント参加者リスト</h1>
-<label>ライブ動画ID: <input type="text" id="videoId" placeholder="例: dQw4w9WgXcQ" /></label>
+
+<label>ライブ動画URL: <input type="text" id="videoUrl" placeholder="例: https://www.youtube.com/watch?v=dQw4w9WgXcQ" style="width:80%" /></label>
 <button id="startBtn">取得開始</button>
 
 <table>
@@ -28,14 +29,21 @@
 </table>
 
 <script>
-const API_KEY = "AIzaSyCXuHe4uwDiIAhq0Hz_mqqAnSKbBSpGxqA"; // ←ここに自分のYouTube Data APIキーを入れる
+const API_KEY = "AIzaSyCXuHe4uwDiIAhq0Hz_mqqAnSKbBSpGxqA"; // ←自分のAPIキーに置き換える
 let liveChatId = "";
 let nextPageToken = "";
 const participantsTable = document.getElementById("participants");
 
+// URLから動画IDを抽出
+function getVideoId(url) {
+  const match = url.match(/[?&]v=([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
+}
+
 document.getElementById("startBtn").addEventListener("click", async () => {
-  const videoId = document.getElementById("videoId").value.trim();
-  if (!videoId) return alert("動画IDを入力してください");
+  const url = document.getElementById("videoUrl").value.trim();
+  const videoId = getVideoId(url);
+  if (!videoId) return alert("動画URLが正しくありません");
 
   // 1. liveChatIdを取得
   const videoRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${videoId}&key=${API_KEY}`);
@@ -44,20 +52,17 @@ document.getElementById("startBtn").addEventListener("click", async () => {
     return alert("ライブチャットIDが取得できませんでした");
   }
   liveChatId = videoData.items[0].liveStreamingDetails.activeLiveChatId;
-  console.log("liveChatId:", liveChatId);
 
   // 2. コメント取得開始
   fetchChatMessages();
 });
 
-// コメント取得関数
 async function fetchChatMessages() {
   if (!liveChatId) return;
   const url = `https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${liveChatId}&part=authorDetails,snippet&key=${API_KEY}` + (nextPageToken ? `&pageToken=${nextPageToken}` : '');
   
   const res = await fetch(url);
   const data = await res.json();
-
   nextPageToken = data.nextPageToken || "";
 
   if (data.items) {
@@ -65,7 +70,6 @@ async function fetchChatMessages() {
       const channelId = item.authorDetails.channelId;
       const displayName = item.authorDetails.displayName;
 
-      // 重複チェック
       if (!document.getElementById(channelId)) {
         const tr = document.createElement("tr");
         tr.id = channelId;
