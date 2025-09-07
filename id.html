@@ -3,61 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ライブ参加者リスト</title>
+<title>YouTubeライブコメント取得</title>
 <style>
-  body { font-family: sans-serif; background:#f7fcfc; padding:20px;}
-  h1 { color:#47b6a2; }
-  table { width:100%; border-collapse: collapse; margin-top:20px; }
-  th, td { border:1px solid #ccc; padding:8px; text-align:left; }
-  th { background:#97eadb; }
+  body { font-family: sans-serif; background: #f7fcfc; padding: 20px; }
+  h1 { color: #47b6a2; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  th { background: #97eadb; }
 </style>
 </head>
 <body>
-<h1>ライブ参加者リスト</h1>
+<h1>ライブコメント参加者リスト</h1>
+<label>ライブ動画ID: <input type="text" id="videoId" placeholder="例: dQw4w9WgXcQ" /></label>
+<button id="startBtn">取得開始</button>
+
 <table>
   <thead>
     <tr>
       <th>表示名</th>
-      <th>不変ID</th>
+      <th>不変ID (channelId)</th>
     </tr>
   </thead>
   <tbody id="participants"></tbody>
 </table>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
-  // Firebase 初期化
-  const firebaseConfig = {
-    apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
-    authDomain: "match-result-ea475.firebaseapp.com",
-    databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
-    projectId: "match-result-ea475",
-    storageBucket: "match-result-ea475.firebasestorage.app",
-    messagingSenderId: "759877853492",
-    appId: "1:759877853492:web:a10935960bf8230af90561"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+const API_KEY = "AIzaSyCXuHe4uwDiIAhq0Hz_mqqAnSKbBSpGxqA"; // ←ここに自分のYouTube Data APIキーを入れる
+let liveChatId = "";
+let nextPageToken = "";
+const participantsTable = document.getElementById("participants");
 
-  const tbody = document.getElementById("participants");
+document.getElementById("startBtn").addEventListener("click", async () => {
+  const videoId = document.getElementById("videoId").value.trim();
+  if (!videoId) return alert("動画IDを入力してください");
 
-  // ライブ参加者一覧を取得して表示
-  db.ref("live_participants").on("value", snapshot => {
-    tbody.innerHTML = ""; // クリア
-    if (!snapshot.exists()) return;
-    const data = snapshot.val();
-    Object.values(data).forEach(p => {
-      const tr = document.createElement("tr");
-      const tdName = document.createElement("td");
-      tdName.textContent = p.name;
-      const tdId = document.createElement("td");
-      tdId.textContent = p.id; // authorChannelId など
-      tr.appendChild(tdName);
-      tr.appendChild(tdId);
-      tbody.appendChild(tr);
+  // 1. liveChatIdを取得
+  const videoRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${videoId}&key=${API_KEY}`);
+  const videoData = await videoRes.json();
+  if (!videoData.items || !videoData.items[0]?.liveStreamingDetails?.activeLiveChatId) {
+    return alert("ライブチャットIDが取得できませんでした");
+  }
+  liveChatId = videoData.items[0].liveStreamingDetails.activeLiveChatId;
+  console.log("liveChatId:", liveChatId);
+
+  // 2. コメント取得開始
+  fetchChatMessages();
+});
+
+// コメント取得関数
+async function fetchChatMessages() {
+  if (!liveChatId) return;
+  const url = `https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${liveChatId}&part=authorDetails,snippet&key=${API_KEY}` + (nextPageToken ? `&pageToken=${nextPageToken}` : '');
+  
+  const res = await fetch(url);
+  const data = await res.json();
+
+  nextPageToken = data.nextPageToken || "";
+
+  if (data.items) {
+    data.items.forEach(item => {
+      const channelId = item.authorDetails.channelId;
+      const displayName = item.authorDetails.displayName;
+
+      // 重複チェック
+      if (!document.getElementById(channelId)) {
+        const tr = document.createElement("tr");
+        tr.id = channelId;
+        const tdName = document.createElement("td");
+        tdName.textContent = displayName;
+        const tdId = document.createElement("td");
+        tdId.textContent = channelId;
+        tr.appendChild(tdName);
+        tr.appendChild(tdId);
+        participantsTable.appendChild(tr);
+      }
     });
-  });
+  }
+
+  // 5秒ごとにポーリング
+  setTimeout(fetchChatMessages, 5000);
+}
 </script>
 </body>
 </html>
