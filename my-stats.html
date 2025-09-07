@@ -17,69 +17,76 @@
 <button id="loginBtn">YouTubeでログイン</button>
 <div id="stats"></div>
 
-<script src="https://apis.google.com/js/api.js"></script>
+<!-- gapi.js の読み込み後に handleClientLoad を呼ぶ -->
+<script src="https://apis.google.com/js/api.js" onload="handleClientLoad()"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-// --- Firebase設定 ---
-const firebaseConfig = {
-  apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
-  authDomain: "match-result-ea475.firebaseapp.com",
-  databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
-  projectId: "match-result-ea475",
-  storageBucket: "match-result-ea475.firebasestorage.app",
-  messagingSenderId: "759877853492",
-  appId: "1:759877853492:web:a10935960bf8230afbg3M8wOY68X1ITrE-yw"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+  // --- Firebase設定 ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
+    authDomain: "match-result-ea475.firebaseapp.com",
+    databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
+    projectId: "match-result-ea475",
+    storageBucket: "match-result-ea475.appspot.com",
+    messagingSenderId: "759877853492",
+    appId: "1:759877853492:web:正しいappIdに置き換えてください"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-// --- Google OAuth設定 ---
-const CLIENT_ID = '576234643674-rup0n7chsn92pq3t3holf1a3quv4r1d7.apps.googleusercontent.com';
-const API_KEY = 'AIzaSyCXuHe4uwDiIAhq0Hz_mqqAnSKbBSpGxqA';
-const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"];
-const SCOPES = "https://www.googleapis.com/auth/youtube.readonly";
+  // --- Google OAuth設定 ---
+  const CLIENT_ID = '576234643674-rup0n7chsn92pq3t3holf1a3quv4r1d7.apps.googleusercontent.com';
+  const API_KEY = 'AIzaSyCXuHe4uwDiIAhq0Hz_mqqAnSKbBSpGxqA';
+  const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"];
+  const SCOPES = "https://www.googleapis.com/auth/youtube.readonly";
 
-function handleClientLoad() {
-  gapi.load('client:auth2', initClient);
-}
+  function handleClientLoad() {
+    gapi.load('client:auth2', initClient);
+  }
 
-function initClient() {
-  gapi.client.init({
-    apiKey: API_KEY,
-    clientId: CLIENT_ID,
-    discoveryDocs: DISCOVERY_DOCS,
-    scope: SCOPES
-  }).then(() => {
-    document.getElementById('loginBtn').onclick = handleAuthClick;
-  });
-}
+  function initClient() {
+    gapi.client.init({
+      apiKey: API_KEY,
+      clientId: CLIENT_ID,
+      discoveryDocs: DISCOVERY_DOCS,
+      scope: SCOPES
+    }).then(() => {
+      document.getElementById('loginBtn').onclick = handleAuthClick;
+    });
+  }
 
-function handleAuthClick() {
-  gapi.auth2.getAuthInstance().signIn().then(() => {
-    loadYouTubeChannel();
-  });
-}
+  function handleAuthClick() {
+    gapi.auth2.getAuthInstance().signIn().then(() => {
+      loadYouTubeChannel();
+    });
+  }
 
-function loadYouTubeChannel() {
-  gapi.client.youtube.channels.list({
-    part: 'snippet',
-    mine: true
-  }).then(response => {
-    const channel = response.result.items[0];
-    const channelId = channel.id;
+  function loadYouTubeChannel() {
+    gapi.client.youtube.channels.list({
+      part: 'snippet',
+      mine: true
+    }).then(response => {
+      const channel = response.result.items[0];
+      const channelId = channel.id;
 
-    // FirebaseからIDに紐づく名前を取得
-    db.ref("player_readings").orderByChild("id").equalTo(channelId).once("value")
-      .then(snapshot => {
-        if (!snapshot.exists()) {
+      // FirebaseからIDに紐づく名前を取得
+      db.ref("player_readings").once("value").then(snapshot => {
+        const readings = snapshot.val() || {};
+        let playerName = null;
+
+        for (const name in readings) {
+          if (readings[name].id === channelId) {
+            playerName = name;
+            break;
+          }
+        }
+
+        if (!playerName) {
           document.getElementById('stats').innerHTML = "<p>登録されたプレイヤー名が見つかりません。</p>";
           return;
         }
-
-        const playerData = Object.values(snapshot.val())[0];
-        const playerName = Object.keys(snapshot.val())[0]; // 名前
 
         // apex_resultsから統計を計算
         db.ref("apex_results").once("value").then(resultsSnap => {
@@ -105,10 +112,9 @@ function loadYouTubeChannel() {
           `;
         });
       });
-  });
-}
-
-handleClientLoad();
+    });
+  }
 </script>
+
 </body>
 </html>
