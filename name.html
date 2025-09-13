@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>プレイヤー読み方・ID設定</title>
+  <title>プレイヤー読み方・あだ名設定</title>
   <style>
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -46,7 +46,6 @@
     }
     .reading-input { width: 120px; }
     .alias-input { width: 200px; }
-    .id-input { width: 200px; }
     #saveAllButton {
       display: block;
       width: 100%;
@@ -64,7 +63,7 @@
 <body>
 
 <div class="container">
-  <h1>プレイヤー読み方・あだ名・ID設定</h1>
+  <h1>プレイヤー読み方・あだ名設定</h1>
   <div id="playerReadingsList"></div>
   <button id="saveAllButton">すべて保存</button>
 </div>
@@ -129,15 +128,6 @@ function renderPlayerReadings() {
         aliasInput.dataset.playerName = name;
         inputGroup.appendChild(aliasInput);
 
-        // 不変ID
-        const idInput = document.createElement("input");
-        idInput.type = "text";
-        idInput.placeholder = "不変ID (channelId)";
-        idInput.className = "id-input";
-        idInput.value = existingReadings[name]?.id || "";
-        idInput.dataset.playerName = name;
-        inputGroup.appendChild(idInput);
-
         div.appendChild(inputGroup);
         listContainer.appendChild(div);
       });
@@ -148,21 +138,18 @@ function renderPlayerReadings() {
 document.getElementById("saveAllButton").addEventListener("click", () => {
   const readingInputs = document.querySelectorAll(".reading-input");
   const aliasInputs = document.querySelectorAll(".alias-input");
-  const idInputs = document.querySelectorAll(".id-input");
   const readingsToSave = {};
 
   readingInputs.forEach((input, index) => {
     const playerName = input.dataset.playerName;
     const reading = input.value.trim();
     const aliasValue = aliasInputs[index].value.trim();
-    const idValue = idInputs[index].value.trim();
 
     const aliases = aliasValue.split(",").map(a => a.trim()).filter(a => a !== "");
 
     readingsToSave[playerName] = {
       reading: reading || null,
-      aliases: aliases.length > 0 ? aliases : null,
-      id: idValue || null
+      aliases: aliases.length > 0 ? aliases : null
     };
   });
 
