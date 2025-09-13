@@ -491,27 +491,16 @@
 
       db.ref("apex_results").once("value").then(snap => {
         const matches = snap.exists() ? Object.values(snap.val()) : [];
-        const playerSums = {};
+        const playerScores = {};
 
+        // 1. 各プレイヤーの相性スコアと個人合計を先に計算
         players.forEach(playerRow => {
-          const tr = document.createElement("tr");
-          const th = document.createElement("th");
-          th.textContent = playerRow;
-          th.style.border = "1px solid #ddd";
-          th.style.padding = "2px";
-          th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
-          tr.appendChild(th);
-
+          playerScores[playerRow] = {};
           let rowSum = 0;
 
           players.forEach(playerCol => {
-            const td = document.createElement("td");
-            td.style.border = "1px solid #ddd";
-            td.style.padding = "2px";
-            td.style.textAlign = "center";
-
             if (playerRow === playerCol) {
-              td.textContent = "-";
+              playerScores[playerRow][playerCol] = "-";
             } else {
               const diffs = [];
               const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
@@ -540,20 +529,39 @@
 
               if (diffs.length > 0) {
                 const diffValue = (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1);
-                td.textContent = diffValue;
+                playerScores[playerRow][playerCol] = parseFloat(diffValue);
                 rowSum += parseFloat(diffValue);
               } else {
-                td.textContent = "-";
+                playerScores[playerRow][playerCol] = 0;
               }
             }
+          });
+          playerScores[playerRow].total = rowSum;
+        });
+
+        // 2. 表のDOMを生成
+        players.forEach(playerRow => {
+          const tr = document.createElement("tr");
+          const th = document.createElement("th");
+          th.textContent = playerRow;
+          th.style.border = "1px solid #ddd";
+          th.style.padding = "2px";
+          th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
+          tr.appendChild(th);
+
+          players.forEach(playerCol => {
+            const td = document.createElement("td");
+            td.style.border = "1px solid #ddd";
+            td.style.padding = "2px";
+            td.style.textAlign = "center";
+            const score = playerScores[playerRow][playerCol];
+            td.textContent = score === 0 ? "-" : score; // 0の場合はハイフンに
             tr.appendChild(td);
           });
 
-          playerSums[playerRow] = rowSum;
-
           // 個人の合計値
           const tdTotal = document.createElement("td");
-          tdTotal.textContent = rowSum.toFixed(1);
+          tdTotal.textContent = playerScores[playerRow].total.toFixed(1);
           tdTotal.style.border = "1px solid #ddd";
           tdTotal.style.padding = "2px";
           tdTotal.style.textAlign = "center";
@@ -564,7 +572,7 @@
           if (teamA.includes(playerRow) && teamA.indexOf(playerRow) === 0) {
             const tdTeamTotal = document.createElement("td");
             tdTeamTotal.rowSpan = teamA.length;
-            let teamASum = teamA.reduce((sum, p) => sum + (playerSums[p] || 0), 0);
+            let teamASum = teamA.reduce((sum, p) => sum + playerScores[p].total, 0);
             tdTeamTotal.textContent = teamASum.toFixed(1);
             tdTeamTotal.style.border = "1px solid #ddd";
             tdTeamTotal.style.padding = "2px";
@@ -575,7 +583,7 @@
           } else if (teamB.includes(playerRow) && teamB.indexOf(playerRow) === 0) {
             const tdTeamTotal = document.createElement("td");
             tdTeamTotal.rowSpan = teamB.length;
-            let teamBSum = teamB.reduce((sum, p) => sum + (playerSums[p] || 0), 0);
+            let teamBSum = teamB.reduce((sum, p) => sum + playerScores[p].total, 0);
             tdTeamTotal.textContent = teamBSum.toFixed(1);
             tdTeamTotal.style.border = "1px solid #ddd";
             tdTeamTotal.style.padding = "2px";
