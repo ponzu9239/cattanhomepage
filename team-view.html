@@ -245,7 +245,7 @@
     #killDiffTableContainer td {
       padding: 2px;
       text-align: center;
-      white-space: nowrap; /* 表が小さくなった時の折り返しを防ぐ */
+      white-space: nowrap;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -481,7 +481,7 @@
       headerRow.appendChild(thTotal);
 
       const thTeamTotal = document.createElement("th");
-      thTeamTotal.textContent = "チーム計";
+      thTeamTotal.textContent = "チーム合計";
       thTeamTotal.style.border = "1px solid #ddd";
       thTeamTotal.style.padding = "2px";
       thTeamTotal.style.background = "#97EADB";
@@ -514,6 +514,8 @@
               td.textContent = "-";
             } else {
               const diffs = [];
+              const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
+                (teamB.includes(playerRow) && teamB.includes(playerCol));
 
               matches.forEach(match => {
                 const matchTeamA = match.teamA || [];
@@ -525,28 +527,23 @@
                 const rowInB = matchTeamB.includes(playerRow);
                 const colInA = matchTeamA.includes(playerCol);
                 const colInB = matchTeamB.includes(playerCol);
+                const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
 
                 if ((rowInA || rowInB) && (colInA || colInB)) {
-                  const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
-                    (teamB.includes(playerRow) && teamB.includes(playerCol));
-                  const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
-
-                  if (currentSameTeam && matchSameTeam) {
-                    const rowTeamKills = rowInA ? killsA : killsB;
-                    const enemyTeamKills = rowInA ? killsB : killsA;
-                    diffs.push(rowTeamKills - enemyTeamKills);
-                  } else if (!currentSameTeam && !matchSameTeam) {
+                  if (currentSameTeam === matchSameTeam) {
                     const rowTeamKills = rowInA ? killsA : killsB;
                     const enemyTeamKills = rowInA ? killsB : killsA;
                     diffs.push(rowTeamKills - enemyTeamKills);
                   }
                 }
               });
-              
-              const diffValue = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
-              td.textContent = diffValue;
-              if (diffValue !== "-") {
-                rowSum += parseFloat(diffValue);
+
+              if (diffs.length > 0) {
+                const diffValue = diffs.reduce((a, b) => a + b, 0);
+                td.textContent = diffValue;
+                rowSum += diffValue;
+              } else {
+                td.textContent = "-";
               }
             }
             tr.appendChild(td);
@@ -556,7 +553,7 @@
 
           // 個人の合計値
           const tdTotal = document.createElement("td");
-          tdTotal.textContent = rowSum.toFixed(1);
+          tdTotal.textContent = rowSum;
           tdTotal.style.border = "1px solid #ddd";
           tdTotal.style.padding = "2px";
           tdTotal.style.textAlign = "center";
@@ -567,12 +564,8 @@
           if (teamA.includes(playerRow) && teamA.indexOf(playerRow) === 0) {
             const tdTeamTotal = document.createElement("td");
             tdTeamTotal.rowSpan = teamA.length;
-            let teamASum = 0;
-            teamA.forEach(p => {
-              // ここでrowSumを直接使用すると、ループのスコープの問題でNaNになる可能性があるため、playerSumsを使用する
-              teamASum += playerSums[p];
-            });
-            tdTeamTotal.textContent = teamASum.toFixed(1);
+            let teamASum = teamA.reduce((sum, p) => sum + (playerSums[p] || 0), 0);
+            tdTeamTotal.textContent = teamASum;
             tdTeamTotal.style.border = "1px solid #ddd";
             tdTeamTotal.style.padding = "2px";
             tdTeamTotal.style.textAlign = "center";
@@ -582,12 +575,8 @@
           } else if (teamB.includes(playerRow) && teamB.indexOf(playerRow) === 0) {
             const tdTeamTotal = document.createElement("td");
             tdTeamTotal.rowSpan = teamB.length;
-            let teamBSum = 0;
-            teamB.forEach(p => {
-              // ここでrowSumを直接使用すると、ループのスコープの問題でNaNになる可能性があるため、playerSumsを使用する
-              teamBSum += playerSums[p];
-            });
-            tdTeamTotal.textContent = teamBSum.toFixed(1);
+            let teamBSum = teamB.reduce((sum, p) => sum + (playerSums[p] || 0), 0);
+            tdTeamTotal.textContent = teamBSum;
             tdTeamTotal.style.border = "1px solid #ddd";
             tdTeamTotal.style.padding = "2px";
             tdTeamTotal.style.textAlign = "center";
