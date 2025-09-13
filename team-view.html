@@ -6,259 +6,237 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <title>チーム分け</title>
 
-<style>
-  html,
-  body {
-    height: 100%;
-    margin: 0;
-  }
-
-  body {
-    font-family: "Hiragino Maru Gothic ProN", sans-serif;
-    background: #f7fcfc;
-    padding-top: 100px;
-    transition: background-color 0.5s ease;
-    display: flex;
-    flex-direction: column;
-  }
-
-  h1 {
-    text-align: center;
-    color: #47b6a2;
-    margin-bottom: 12px;
-  }
-
-  /* 通常時のスタイル */
-  header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #97EADB;
-    padding: 1rem;
-    text-align: center;
-    z-index: 1000;
-  }
-
-  header h1 {
-    margin: 0;
-    font-size: 2rem;
-    color: #fff;
-  }
-
-  /* ハンバーガーアイコン */
-  .hamburger {
-    font-size: 2rem;
-    cursor: pointer;
-    position: absolute;
-    top: 50%;
-    right: 3rem;
-    color: white;
-    transform: translateY(-50%);
-    z-index: 1100;
-  }
-
-  nav {
-    position: fixed;
-    top: -100%;
-    left: 0;
-    width: 100%;
-    background-color: #97EADB;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    transition: top 0.3s ease;
-    z-index: 1050;
-  }
-
-  nav.show {
-    top: 75px;
-  }
-
-  nav a {
-    display: block;
-    text-align: center;
-    margin: 0;
-    padding: 0.6rem 0;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: white;
-    background-color: #97eadb;
-    border-bottom: 1px solid #97EADB;
-    text-decoration: none;
-    transition: background-color 0.2s, transform 0.2s;
-  }
-
-  nav a:hover {
-    background-color: #0099aa;
-    transform: scale(1.03);
-  }
-
-  main {
-    flex: 1;
-  }
-
-  footer {
-    background: #97EADB;
-    text-align: center;
-    color: white;
-    padding: 1rem;
-  }
-
-  .teams {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 16px;
-    align-items: center;
-  }
-
-  .team-box {
-    width: 90%;
-    max-width: 500px;
-    background: #eefaff;
-    padding: 12px;
-    border-radius: 12px;
-    border: 2px solid #97eadb;
-    text-align: center;
-  }
-
-  .team-box.team2 {
-    background: #fff1f5;
-    border-color: #ffb6c1;
-  }
-
-  .team-box h2 {
-    font-size: 18px;
-    margin: 0 0 8px 0;
-    color: #47b6a2;
-  }
-
-  .team-box ul {
-    list-style: none;
-    padding: 0 8px;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    box-sizing: border-box;
-  }
-
-  .team-box li {
-    background: white;
-    border: 1.5px solid #ddd;
-    border-radius: 8px;
-    padding: 6px;
-    font-size: 15px;
-    font-weight: 500;
-    text-align: center;
-  }
-
-  #matchCount,
-  #lastUpdated {
-    text-align: center;
-    color: #888;
-    font-weight: 600;
-    margin-top: 8px;
-    user-select: none;
-    font-size: 14px;
-    letter-spacing: 0.05em;
-  }
-
-  section {
-    padding: 0 2rem;
-    margin: auto;
-  }
-
-  .info-btn {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    margin-left: 6px;
-  }
-
-  .info-text {
-    background-color: #eefaff;
-    border: 1px solid #97EADB;
-    border-radius: 6px;
-    padding: 8px;
-    margin-top: 6px;
-    color: #333;
-  }
-
-  .info-btn-container {
-    text-align: center;
-    margin-top: 12px;
-  }
-
-  .info-btn {
-    background-color: #97EADB;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .info-btn:hover {
-    background-color: #47b6a2;
-  }
-
-  .info-text {
-    display: none;
-    max-width: 600px;
-    margin: 8px auto 16px auto;
-    background: #eefaff;
-    border: 1px solid #97EADB;
-    border-radius: 6px;
-    padding: 8px;
-    color: #333;
-    line-height: 1.5;
-    font-size: 14px;
-  }
-  
-  /* 相性表を小さくする用のスタイル */
-#killDiffTableContainer table {
-  font-size: 12px;       /* 文字サイズを小さく */
-  width: auto;           /* 横幅を縮める */
-  margin: 0 auto;        /* 中央寄せ */
-}
-
-#killDiffTableContainer th,
-#killDiffTableContainer td {
-  padding: 2px 4px;      /* セルの余白を小さく */
-  min-width: 40px;       /* セル幅を狭く */
-}
-
-  @keyframes confetti {
-    from {
-      background-position: 0 0, 60px 60px, 0 0;
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
     }
 
-    to {
-      background-position: 100px 100px, 160px 160px, 0 200%;
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      padding-top: 100px;
+      transition: background-color 0.5s ease;
+      display: flex;
+      flex-direction: column;
     }
-  }
 
-  @keyframes sparkle {
-    from {
-      transform: scale(1);
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+      margin-bottom: 12px;
     }
 
-    to {
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .hamburger {
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
+
+    nav {
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      transition: top 0.3s ease;
+      z-index: 1050;
+    }
+
+    nav.show {
+      top: 75px;
+    }
+
+    nav a {
+      display: block;
+      text-align: center;
+      margin: 0;
+      padding: 0.6rem 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background-color: #97eadb;
+      border-bottom: 1px solid #97EADB;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    nav a:hover {
+      background-color: #0099aa;
       transform: scale(1.03);
     }
-  }
 
-</style>
+    main {
+      flex: 1;
+    }
+
+    footer {
+      background: #97EADB;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+    }
+
+    .teams {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .team-box {
+      width: 90%;
+      max-width: 500px;
+      background: #eefaff;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #97eadb;
+      text-align: center;
+    }
+
+    .team-box.team2 {
+      background: #fff1f5;
+      border-color: #ffb6c1;
+    }
+
+    .team-box h2 {
+      font-size: 18px;
+      margin: 0 0 8px 0;
+      color: #47b6a2;
+    }
+
+    .team-box ul {
+      list-style: none;
+      padding: 0 8px;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      box-sizing: border-box;
+    }
+
+    .team-box li {
+      background: white;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    #matchCount,
+    #lastUpdated {
+      text-align: center;
+      color: #888;
+      font-weight: 600;
+      margin-top: 8px;
+      user-select: none;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+    }
+
+    section {
+      padding: 0 2rem;
+      margin: auto;
+    }
+
+    .info-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+    .info-text {
+      background-color: #eefaff;
+      border: 1px solid #97EADB;
+      border-radius: 6px;
+      padding: 8px;
+      margin-top: 6px;
+      color: #333;
+    }
+
+    .info-btn-container {
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .info-btn {
+      background-color: #97EADB;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .info-btn:hover {
+      background-color: #47b6a2;
+    }
+
+    .info-text {
+      display: none;
+      max-width: 600px;
+      margin: 8px auto 16px auto;
+      background: #eefaff;
+      border: 1px solid #97EADB;
+      border-radius: 6px;
+      padding: 8px;
+      color: #333;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    /* 相性表をコンパクトに */
+    #killDiffTableContainer table {
+      font-size: 12px;
+      width: auto;
+      margin: 0 auto;
+    }
+
+    #killDiffTableContainer th,
+    #killDiffTableContainer td {
+      padding: 2px 4px;
+      min-width: 40px;
+    }
+  </style>
+
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -298,73 +276,9 @@
     <section>
       <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
       <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
-
-      <section style="text-align:center; margin:2rem 0;">
-        <button class="info-btn">▽ 相性表の見方</button>
-        <div class="info-text"
-          style="display:none; text-align:left; max-width:700px; margin:1rem auto; border:1px solid #ccc; padding:1rem; border-radius:8px; background:#f9f9f9;">
-          <h3>相性表の見方</h3>
-          <p>
-            この表は、プレイヤー同士が<b>「チームを組むとどうなるか？」</b>を過去の試合データから予測するものです。
-          </p>
-
-          <h4>表の読み方</h4>
-          <p>
-            <b>横の列（相手）</b> と <b>縦の行（自分）</b> が交わるところにある数字が <b>「相性スコア」</b> です。<br>
-            このスコアは、同じ色同士の場合は <b>味方</b>、違う色同士の場合は <b>敵</b> として戦った時のチームのスコアを表しています。
-          </p>
-
-          <h4>スコアの意味</h4>
-          <p>
-            スコアの数字は、<b>「どれだけチームが勝つ力を持っていたか」</b> を示します。
-          </p>
-
-          <ul>
-            <li><b><span style="color: green;">プラス (+) の数字</span></b><br>
-              <ul style="margin:0; padding-left: 20px;">
-                <li><b>味方とのスコア</b>: この人と組むと、チームのキル数が相手より多くなる傾向にあります。<b>「相性の良い味方」</b>です。</li>
-                <li><b>敵とのスコア</b>: この人を敵に回すと、あなたのチームのキル数が相手チームより多くなる傾向にあります。<b>「得意な敵」</b>です。</li>
-              </ul>
-            </li>
-            <li><b><span style="color: red;">マイナス (-) の数字</span></b><br>
-              <ul style="margin:0; padding-left: 20px;">
-                <li><b>味方とのスコア</b>: この人と組むと、チームのキル数が相手より少なくなる傾向にあります。<b>「相性の悪い味方」</b>です。</li>
-                <li><b>敵とのスコア</b>: この人を敵に回すと、あなたのチームのキル数が相手チームより少なくなる傾向にあります。<b>「苦手な敵」</b>です。</li>
-              </ul>
-            </li>
-          </ul>
-
-          <h4>具体例</h4>
-          <table style="border-collapse:collapse; width:100%; text-align:center; margin: 12px 0;">
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">d (敵)</th>
-            </tr>
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">b (自分)</th>
-              <td>+14<br>→ 過去にaさんと組んだ時、<br>あなたのチームが平均14キル差をつけて勝ってたよ！</td>
-              <td>+14<br>→ 過去にdさんを敵にした時、<br>あなたのチームが平均14キル差をつけて勝ってたよ！</td>
-            </tr>
-          </table>
-          <table style="border-collapse:collapse; width:100%; text-align:center;">
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
-              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">e (敵)</th>
-            </tr>
-            <tr>
-              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">c (自分)</th>
-              <td>-4<br>→ 過去にaさんと組んだ時、<br>あなたのチームか平均4キル差で負けてたよ...</td>
-              <td>+8<br>→ 過去にeさんを敵にした時、<br>あなたのチームが平均8キル差をつけて勝ってたよ！</td>
-            </tr>
-          </table>
-          <p>この表は、プレイヤー間の相性を一目でわかるようにするためのものです。個人間の強さの関係を表すものではありません。</p>
-        </div>
-      </section>
-
       <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
       <div id="lastUpdated">最終更新: --</div>
+    </section>
   </main>
 
   <footer>
@@ -445,18 +359,6 @@
 
     hamburger.addEventListener("click", () => {
       nav.classList.toggle("show");
-
-      const links = nav.querySelectorAll("a");
-      links.forEach((link, index) => {
-        if (nav.classList.contains("show")) {
-          link.style.opacity = "1";
-          link.style.transform = "translateY(0)";
-        } else {
-          link.style.opacity = "0";
-          link.style.transform = "translateY(-20px)";
-          link.style.transitionDelay = "0s";
-        }
-      });
     });
 
     function updateKillDiffTable(teamA, teamB) {
@@ -566,23 +468,75 @@
           table.appendChild(tr);
         });
 
+        // チームごとの合計行を追加
+        addTeamTotals(table, players, teamA, teamB);
+
         killDiffTableContainer.innerHTML = "";
         killDiffTableContainer.appendChild(table);
       });
     }
 
-    const btn = document.querySelector(".info-btn");
-    const info = document.querySelector(".info-text");
+    // チームごとの合計を追加する関数
+    function addTeamTotals(table, players, teamA, teamB) {
+      const teams = [
+        { name: "チーム1合計", members: teamA, color: "#eefaff" },
+        { name: "チーム2合計", members: teamB, color: "#fff1f5" }
+      ];
 
-    btn.addEventListener("click", () => {
-      if (info.style.display === "none") {
-        info.style.display = "block";
-        btn.textContent = "△ 相性表の見方";
-      } else {
-        info.style.display = "none";
-        btn.textContent = "▽ 相性表の見方";
-      }
-    });
+      teams.forEach(team => {
+        if (team.members.length === 0) return;
+
+        const tr = document.createElement("tr");
+        const th = document.createElement("th");
+        th.textContent = team.name;
+        th.style.border = "1px solid #ddd";
+        th.style.padding = "4px";
+        th.style.background = team.color;
+        tr.appendChild(th);
+
+        let teamRowSum = 0;
+
+        players.forEach(playerCol => {
+          const td = document.createElement("td");
+          td.style.border = "1px solid #ddd";
+          td.style.padding = "4px";
+          td.style.textAlign = "center";
+
+          let sum = 0, count = 0;
+          const memberRows = table.querySelectorAll("tr");
+
+          memberRows.forEach(row => {
+            const headerCell = row.querySelector("th");
+            if (headerCell && team.members.includes(headerCell.textContent)) {
+              const cells = row.querySelectorAll("td");
+              const idx = players.indexOf(playerCol);
+              if (idx >= 0 && cells[idx] && cells[idx].textContent !== "-") {
+                sum += parseFloat(cells[idx].textContent);
+                count++;
+              }
+            }
+          });
+
+          td.textContent = count > 0 ? (sum / count).toFixed(1) : "-";
+
+          if (td.textContent !== "-") {
+            teamRowSum += parseFloat(td.textContent);
+          }
+
+          tr.appendChild(td);
+        });
+
+        const tdTotal = document.createElement("td");
+        tdTotal.textContent = teamRowSum.toFixed(1);
+        tdTotal.style.border = "1px solid #ddd";
+        tdTotal.style.padding = "4px";
+        tdTotal.style.textAlign = "center";
+        tdTotal.style.fontWeight = "bold";
+        tr.appendChild(tdTotal);
+
+        table.appendChild(tr);
+      });
+    }
   </script>
 </body>
 
