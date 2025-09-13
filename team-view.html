@@ -183,12 +183,16 @@
     }
 
     .info-text {
-      background-color: #eefaff;
+      display: none;
+      max-width: 600px;
+      margin: 8px auto 16px auto;
+      background: #eefaff;
       border: 1px solid #97EADB;
       border-radius: 6px;
       padding: 8px;
-      margin-top: 6px;
       color: #333;
+      line-height: 1.5;
+      font-size: 14px;
     }
 
     .info-btn-container {
@@ -210,19 +214,6 @@
 
     .info-btn:hover {
       background-color: #47b6a2;
-    }
-
-    .info-text {
-      display: none;
-      max-width: 600px;
-      margin: 8px auto 16px auto;
-      background: #eefaff;
-      border: 1px solid #97EADB;
-      border-radius: 6px;
-      padding: 8px;
-      color: #333;
-      line-height: 1.5;
-      font-size: 14px;
     }
 
     @keyframes confetti {
@@ -254,6 +245,7 @@
     #killDiffTableContainer td {
       padding: 2px;
       text-align: center;
+      white-space: nowrap; /* 表が小さくなった時の折り返しを防ぐ */
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -499,41 +491,6 @@
 
       db.ref("apex_results").once("value").then(snap => {
         const matches = snap.exists() ? Object.values(snap.val()) : [];
-        const playerPairDiffs = {};
-
-        matches.forEach(match => {
-          const matchTeamA = match.teamA || [];
-          const matchTeamB = match.teamB || [];
-          const killsA = match.teamAKills || 0;
-          const killsB = match.teamBKills || 0;
-
-          players.forEach(p1 => {
-            players.forEach(p2 => {
-              if (p1 === p2) return;
-
-              const p1InA = matchTeamA.includes(p1);
-              const p1InB = matchTeamB.includes(p1);
-              const p2InA = matchTeamA.includes(p2);
-              const p2InB = matchTeamB.includes(p2);
-
-              if ((p1InA || p1InB) && (p2InA || p2InB)) {
-                const sameTeam = (p1InA && p2InA) || (p1InB && p2InB);
-                const diff = (p1InA ? killsA : killsB) - (p1InA ? killsB : killsA);
-
-                if (!playerPairDiffs[p1]) playerPairDiffs[p1] = {};
-                if (!playerPairDiffs[p1][p2]) playerPairDiffs[p1][p2] = {
-                  total: 0,
-                  count: 0,
-                  currentSameTeam: sameTeam
-                };
-
-                playerPairDiffs[p1][p2].total += diff;
-                playerPairDiffs[p1][p2].count++;
-              }
-            });
-          });
-        });
-
         const playerSums = {};
 
         players.forEach(playerRow => {
@@ -556,19 +513,41 @@
             if (playerRow === playerCol) {
               td.textContent = "-";
             } else {
-              const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) || (teamB.includes(playerRow) && teamB.includes(playerCol));
-              let diff = "-";
+              const diffs = [];
 
-              if (playerPairDiffs[playerRow] && playerPairDiffs[playerRow][playerCol]) {
-                const pairData = playerPairDiffs[playerRow][playerCol];
-                if (currentSameTeam === pairData.currentSameTeam) {
-                  diff = (pairData.total / pairData.count).toFixed(1);
-                  rowSum += parseFloat(diff);
-                } else {
-                  diff = "-";
+              matches.forEach(match => {
+                const matchTeamA = match.teamA || [];
+                const matchTeamB = match.teamB || [];
+                const killsA = match.teamAKills || 0;
+                const killsB = match.teamBKills || 0;
+
+                const rowInA = matchTeamA.includes(playerRow);
+                const rowInB = matchTeamB.includes(playerRow);
+                const colInA = matchTeamA.includes(playerCol);
+                const colInB = matchTeamB.includes(playerCol);
+
+                if ((rowInA || rowInB) && (colInA || colInB)) {
+                  const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
+                    (teamB.includes(playerRow) && teamB.includes(playerCol));
+                  const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
+
+                  if (currentSameTeam && matchSameTeam) {
+                    const rowTeamKills = rowInA ? killsA : killsB;
+                    const enemyTeamKills = rowInA ? killsB : killsA;
+                    diffs.push(rowTeamKills - enemyTeamKills);
+                  } else if (!currentSameTeam && !matchSameTeam) {
+                    const rowTeamKills = rowInA ? killsA : killsB;
+                    const enemyTeamKills = rowInA ? killsB : killsA;
+                    diffs.push(rowTeamKills - enemyTeamKills);
+                  }
                 }
+              });
+              
+              const diffValue = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
+              td.textContent = diffValue;
+              if (diffValue !== "-") {
+                rowSum += parseFloat(diffValue);
               }
-              td.textContent = diff;
             }
             tr.appendChild(td);
           });
@@ -590,6 +569,7 @@
             tdTeamTotal.rowSpan = teamA.length;
             let teamASum = 0;
             teamA.forEach(p => {
+              // ここでrowSumを直接使用すると、ループのスコープの問題でNaNになる可能性があるため、playerSumsを使用する
               teamASum += playerSums[p];
             });
             tdTeamTotal.textContent = teamASum.toFixed(1);
@@ -604,6 +584,7 @@
             tdTeamTotal.rowSpan = teamB.length;
             let teamBSum = 0;
             teamB.forEach(p => {
+              // ここでrowSumを直接使用すると、ループのスコープの問題でNaNになる可能性があるため、playerSumsを使用する
               teamBSum += playerSums[p];
             });
             tdTeamTotal.textContent = teamBSum.toFixed(1);
