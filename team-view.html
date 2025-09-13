@@ -539,11 +539,11 @@
               });
 
               if (diffs.length > 0) {
-                const diffValue = diffs.reduce((a, b) => a + b, 0);
+                const diffValue = (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1);
                 td.textContent = diffValue;
-                rowSum += diffValue;
+                rowSum += parseFloat(diffValue);
               } else {
-                td.textContent = "0"; // データがない場合は0と表示
+                td.textContent = "-";
               }
             }
             tr.appendChild(td);
@@ -553,7 +553,7 @@
 
           // 個人の合計値
           const tdTotal = document.createElement("td");
-          tdTotal.textContent = rowSum;
+          tdTotal.textContent = rowSum.toFixed(1);
           tdTotal.style.border = "1px solid #ddd";
           tdTotal.style.padding = "2px";
           tdTotal.style.textAlign = "center";
@@ -565,7 +565,7 @@
             const tdTeamTotal = document.createElement("td");
             tdTeamTotal.rowSpan = teamA.length;
             let teamASum = teamA.reduce((sum, p) => sum + (playerSums[p] || 0), 0);
-            tdTeamTotal.textContent = teamASum;
+            tdTeamTotal.textContent = teamASum.toFixed(1);
             tdTeamTotal.style.border = "1px solid #ddd";
             tdTeamTotal.style.padding = "2px";
             tdTeamTotal.style.textAlign = "center";
@@ -576,7 +576,7 @@
             const tdTeamTotal = document.createElement("td");
             tdTeamTotal.rowSpan = teamB.length;
             let teamBSum = teamB.reduce((sum, p) => sum + (playerSums[p] || 0), 0);
-            tdTeamTotal.textContent = teamBSum;
+            tdTeamTotal.textContent = teamBSum.toFixed(1);
             tdTeamTotal.style.border = "1px solid #ddd";
             tdTeamTotal.style.padding = "2px";
             tdTeamTotal.style.textAlign = "center";
