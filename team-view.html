@@ -32,6 +32,7 @@
       margin-bottom: 12px;
     }
 
+    /* 通常時のスタイル */
     header {
       position: fixed;
       top: 0;
@@ -49,6 +50,7 @@
       color: #fff;
     }
 
+    /* ハンバーガーアイコン */
     .hamburger {
       font-size: 2rem;
       cursor: pointer;
@@ -117,9 +119,9 @@
 
     .team-box {
       width: 90%;
-      max-width: 400px;
+      max-width: 500px;
       background: #eefaff;
-      padding: 8px;
+      padding: 12px;
       border-radius: 12px;
       border: 2px solid #97eadb;
       text-align: center;
@@ -131,53 +133,29 @@
     }
 
     .team-box h2 {
-      font-size: 16px;
-      margin: 0 0 6px 0;
+      font-size: 18px;
+      margin: 0 0 8px 0;
       color: #47b6a2;
     }
 
     .team-box ul {
       list-style: none;
-      padding: 0 4px;
+      padding: 0 8px;
       margin: 0;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 4px;
+      gap: 8px;
       box-sizing: border-box;
     }
 
-.team-box li {
-    background: white;
-    border: 1.5px solid #ddd;
-    border-radius: 6px;
-    padding: 4px;
-    font-size: 13px;
-    font-weight: 500;
-    text-align: center;
-    letter-spacing: -0.3px; /* チームリストも詰める */
-}
-
-#killDiffTableContainer table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-top: 12px;
-    font-size: 12px;
-    letter-spacing: -0.5px; /* 文字間をぎゅっと詰める */
-}
-
-    #killDiffTableContainer th,
-    #killDiffTableContainer td {
-      border: 1px solid #ddd;
-      padding: 2px 4px;
+    .team-box li {
+      background: white;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      font-size: 15px;
+      font-weight: 500;
       text-align: center;
-    }
-
-    #killDiffTableContainer th {
-      background-color: #eefaff;
-    }
-
-    #killDiffTableContainer .team2 th {
-      background-color: #fff1f5;
     }
 
     #matchCount,
@@ -185,18 +163,46 @@
       text-align: center;
       color: #888;
       font-weight: 600;
-      margin-top: 4px;
+      margin-top: 8px;
       user-select: none;
-      font-size: 12px;
+      font-size: 12px; /* 小さく変更 */
+      letter-spacing: 0.05em;
+    }
+
+    section {
+      padding: 0 2rem;
+      margin: auto;
+    }
+
+    .info-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+    .info-text {
+      background-color: #eefaff;
+      border: 1px solid #97EADB;
+      border-radius: 6px;
+      padding: 8px;
+      margin-top: 6px;
+      color: #333;
+    }
+
+    .info-btn-container {
+      text-align: center;
+      margin-top: 12px;
     }
 
     .info-btn {
       background-color: #97EADB;
       border: none;
       color: #fff;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: bold;
-      padding: 6px 12px;
+      padding: 8px 16px;
       border-radius: 6px;
       cursor: pointer;
       transition: background 0.2s;
@@ -209,17 +215,44 @@
     .info-text {
       display: none;
       max-width: 600px;
-      margin: 6px auto 12px auto;
+      margin: 8px auto 16px auto;
       background: #eefaff;
       border: 1px solid #97EADB;
       border-radius: 6px;
-      padding: 6px;
+      padding: 8px;
       color: #333;
-      line-height: 1.4;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    @keyframes confetti {
+      from {
+        background-position: 0 0, 60px 60px, 0 0;
+      }
+
+      to {
+        background-position: 100px 100px, 160px 160px, 0 200%;
+      }
+    }
+
+    @keyframes sparkle {
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.03);
+      }
+    }
+    
+    /* 相性表のスタイルをコンパクトに */
+    #killDiffTableContainer table {
       font-size: 12px;
     }
+    #killDiffTableContainer th, #killDiffTableContainer td {
+      padding: 4px; /* 余白を減らす */
+    }
   </style>
-
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -235,6 +268,10 @@
       <a href="data-view.html">カスタム結果を見る</a>
     </nav>
   </header>
+
+  <div class="birthday-banner">
+    🎉 HAPPY BIRTHDAY 🎉
+  </div>
 
   <main>
     <h1>チーム分け</h1>
@@ -254,11 +291,74 @@
 
     <section>
       <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
-      <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:6px;"></div>
-    </section>
+      <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
 
-    <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
-    <div id="lastUpdated">最終更新: --</div>
+      <section style="text-align:center; margin:2rem 0;">
+        <button class="info-btn">▽ 相性表の見方</button>
+        <div class="info-text"
+          style="display:none; text-align:left; max-width:700px; margin:1rem auto; border:1px solid #ccc; padding:1rem; border-radius:8px; background:#f9f9f9;">
+          <h3>相性表の見方</h3>
+          <p>
+            この表は、プレイヤー同士が<b>「チームを組むとどうなるか？」</b>を過去の試合データから予測するものです。
+          </p>
+
+          <h4>表の読み方</h4>
+          <p>
+            <b>横の列（相手）</b> と <b>縦の行（自分）</b> が交わるところにある数字が <b>「相性スコア」</b> です。<br>
+            このスコアは、同じ色同士の場合は <b>味方</b>、違う色同士の場合は <b>敵</b> として戦った時のチームのスコアを表しています。
+          </p>
+
+          <h4>スコアの意味</h4>
+          <p>
+            スコアの数字は、<b>「どれだけチームが勝つ力を持っていたか」</b> を示します。
+          </p>
+
+          <ul>
+            <li><b><span style="color: green;">プラス (+) の数字</span></b><br>
+              <ul style="margin:0; padding-left: 20px;">
+                <li><b>味方とのスコア</b>: この人と組むと、チームのキル数が相手より多くなる傾向にあります。<b>「相性の良い味方」</b>です。</li>
+                <li><b>敵とのスコア</b>: この人を敵に回すと、あなたのチームのキル数が相手チームより多くなる傾向にあります。<b>「得意な敵」</b>です。</li>
+              </ul>
+            </li>
+            <li><b><span style="color: red;">マイナス (-) の数字</span></b><br>
+              <ul style="margin:0; padding-left: 20px;">
+                <li><b>味方とのスコア</b>: この人と組むと、チームのキル数が相手より少なくなる傾向にあります。<b>「相性の悪い味方」</b>です。</li>
+                <li><b>敵とのスコア</b>: この人を敵に回すと、あなたのチームのキル数が相手チームより少なくなる傾向にあります。<b>「苦手な敵」</b>です。</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h4>具体例</h4>
+          <table style="border-collapse:collapse; width:100%; text-align:center; margin: 12px 0;">
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">d (敵)</th>
+            </tr>
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">b (自分)</th>
+              <td>+14<br>→ 過去にaさんと組んだ時、<br>あなたのチームが平均14キル差をつけて勝ってたよ！</td>
+              <td>+14<br>→ 過去にdさんを敵にした時、<br>あなたのチームが平均14キル差をつけて勝ってたよ！</td>
+            </tr>
+          </table>
+          <table style="border-collapse:collapse; width:100%; text-align:center;">
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff;"></th>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">a (味方)</th>
+              <th style="border:1px solid #ddd; padding:6px; background:#fff1f5;">e (敵)</th>
+            </tr>
+            <tr>
+              <th style="border:1px solid #ddd; padding:6px; background:#eefaff;">c (自分)</th>
+              <td>-4<br>→ 過去にaさんと組んだ時、<br>あなたのチームか平均4キル差で負けてたよ...</td>
+              <td>+8<br>→ 過去にeさんを敵にした時、<br>あなたのチームが平均8キル差をつけて勝ってたよ！</td>
+            </tr>
+          </table>
+          <p>この表は、プレイヤー間の相性を一目でわかるようにするためのものです。個人間の強さの関係を表すものではありません。</p>
+        </div>
+      </section>
+
+      <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
+      <div id="lastUpdated">最終更新: --</div>
   </main>
 
   <footer>
@@ -266,6 +366,27 @@
   </footer>
 
   <script>
+    function checkBirthday() {
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const day = today.getDate();
+      const birthdayBanner = document.querySelector('.birthday-banner');
+
+      if (month === 8 && day === 23) {
+        document.body.classList.add("birthday-mode");
+        if (birthdayBanner) {
+          birthdayBanner.style.display = 'block';
+        }
+      } else {
+        document.body.classList.remove("birthday-mode");
+        if (birthdayBanner) {
+          birthdayBanner.style.display = 'none';
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", checkBirthday);
+
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -284,16 +405,13 @@
     const lastUpdatedEl = document.getElementById("lastUpdated");
     const killDiffTableContainer = document.getElementById("killDiffTableContainer");
 
-    let teamA = [];
-    let teamB = [];
-
     db.ref("currentTeamResult").on("value", snapshot => {
       const data = snapshot.val() || {};
-      teamA = Array.isArray(data.teamA) ? data.teamA : [];
-      teamB = Array.isArray(data.teamB) ? data.teamB : [];
+      const teamA = Array.isArray(data.teamA) ? data.teamA : [];
+      const teamB = Array.isArray(data.teamB) ? data.teamB : [];
 
-      teamAul.innerHTML = teamA.map(name => `<li>${name}</li>`).join("");
-      teamBul.innerHTML = teamB.map(name => `<li>${name}</li>`).join("");
+      teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
+      teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
 
       if (data.timestamp && typeof data.timestamp === "number") {
         const d = new Date(data.timestamp);
@@ -304,118 +422,208 @@
         lastUpdatedEl.textContent = "最終更新: --";
       }
 
-      updateKillDiffTable();
+      updateKillDiffTable(teamA, teamB);
     });
 
     db.ref("apex_results").on("value", snapshot => {
-      if (snapshot.exists()) {
-        const matches = Object.values(snapshot.val());
-        matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
-      } else {
+      if (!snapshot.exists()) {
         matchCountEl.textContent = "過去 試合のカスタムマッチをもとに生成。";
+        return;
       }
+      const matches = Object.values(snapshot.val());
+      matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
     });
 
     const hamburger = document.getElementById("hamburger");
     const nav = document.getElementById("nav");
+
     hamburger.addEventListener("click", () => {
       nav.classList.toggle("show");
-      nav.querySelectorAll("a").forEach(link => {
-        link.style.opacity = nav.classList.contains("show") ? "1" : "0";
-        link.style.transform = nav.classList.contains("show") ? "translateY(0)" : "translateY(-20px)";
+
+      const links = nav.querySelectorAll("a");
+      links.forEach((link, index) => {
+        if (nav.classList.contains("show")) {
+          link.style.opacity = "1";
+          link.style.transform = "translateY(0)";
+        } else {
+          link.style.opacity = "0";
+          link.style.transform = "translateY(-20px)";
+          link.style.transitionDelay = "0s";
+        }
       });
     });
 
-    function updateKillDiffTable() {
+    function updateKillDiffTable(teamA, teamB) {
       const players = [...teamA, ...teamB];
+
       if (players.length <= 1) {
         killDiffTableContainer.innerHTML = "";
         return;
       }
 
+      const table = document.createElement("table");
+      table.style.borderCollapse = "collapse";
+      table.style.width = "100%";
+
+      const headerRow = document.createElement("tr");
+      const emptyTh = document.createElement("th");
+      headerRow.appendChild(emptyTh);
+
+      players.forEach(p => {
+        const th = document.createElement("th");
+        th.textContent = p;
+        th.style.border = "1px solid #ddd";
+        th.style.padding = "4px";
+        th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
+        headerRow.appendChild(th);
+      });
+
+      const thTotal = document.createElement("th");
+      thTotal.textContent = "個人合計";
+      thTotal.style.border = "1px solid #ddd";
+      thTotal.style.padding = "4px";
+      thTotal.style.background = "#ccc";
+      headerRow.appendChild(thTotal);
+
+      const thTeamTotal = document.createElement("th");
+      thTeamTotal.textContent = "チーム合計";
+      thTeamTotal.style.border = "1px solid #ddd";
+      thTeamTotal.style.padding = "4px";
+      thTeamTotal.style.background = "#97EADB";
+      headerRow.appendChild(thTeamTotal);
+
+      table.appendChild(headerRow);
+
       db.ref("apex_results").once("value").then(snap => {
         const matches = snap.exists() ? Object.values(snap.val()) : [];
-        const totals = {};
-        players.forEach(p => totals[p] = 0);
+        const playerPairDiffs = {};
+        
+        matches.forEach(match => {
+          const matchTeamA = match.teamA || [];
+          const matchTeamB = match.teamB || [];
+          const killsA = match.teamAKills || 0;
+          const killsB = match.teamBKills || 0;
 
-        const table = document.createElement("table");
-        const headerRow = document.createElement("tr");
-        headerRow.appendChild(document.createElement("th"));
+          players.forEach(p1 => {
+            players.forEach(p2 => {
+              if (p1 === p2) return;
 
-        players.forEach(p => {
-          const th = document.createElement("th");
-          th.textContent = p;
-          th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
-          headerRow.appendChild(th);
+              const p1InA = matchTeamA.includes(p1);
+              const p1InB = matchTeamB.includes(p1);
+              const p2InA = matchTeamA.includes(p2);
+              const p2InB = matchTeamB.includes(p2);
+
+              if ((p1InA || p1InB) && (p2InA || p2InB)) {
+                const sameTeam = (p1InA && p2InA) || (p1InB && p2InB);
+                const diff = (p1InA ? killsA : killsB) - (p1InA ? killsB : killsA);
+                
+                if (!playerPairDiffs[p1]) playerPairDiffs[p1] = {};
+                if (!playerPairDiffs[p1][p2]) playerPairDiffs[p1][p2] = { total: 0, count: 0, currentSameTeam: sameTeam };
+                
+                playerPairDiffs[p1][p2].total += diff;
+                playerPairDiffs[p1][p2].count++;
+              }
+            });
+          });
         });
 
-        const thTeamTotal = document.createElement("th");
-        thTeamTotal.textContent = "チーム合計";
-        headerRow.appendChild(thTeamTotal);
-        table.appendChild(headerRow);
-
-        players.forEach((playerRow, idx) => {
+        players.forEach(playerRow => {
           const tr = document.createElement("tr");
           const th = document.createElement("th");
           th.textContent = playerRow;
+          th.style.border = "1px solid #ddd";
+          th.style.padding = "4px";
           th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
           tr.appendChild(th);
 
           let rowSum = 0;
+
           players.forEach(playerCol => {
             const td = document.createElement("td");
+            td.style.border = "1px solid #ddd";
+            td.style.padding = "4px";
+            td.style.textAlign = "center";
+
             if (playerRow === playerCol) {
               td.textContent = "-";
             } else {
-              const diffs = [];
-              matches.forEach(match => {
-                const matchTeamA = match.teamA || [];
-                const matchTeamB = match.teamB || [];
-                const killsA = match.teamAKills || 0;
-                const killsB = match.teamBKills || 0;
-
-                const rowInA = matchTeamA.includes(playerRow);
-                const rowInB = matchTeamB.includes(playerRow);
-                const colInA = matchTeamA.includes(playerCol);
-                const colInB = matchTeamB.includes(playerCol);
-
-                if ((rowInA || rowInB) && (colInA || colInB)) {
-                  const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) || (teamB.includes(playerRow) && teamB.includes(playerCol));
-                  const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
-                  if ((currentSameTeam && matchSameTeam) || (!currentSameTeam && !matchSameTeam)) {
-                    const rowTeamKills = rowInA ? killsA : killsB;
-                    const enemyTeamKills = rowInA ? killsB : killsA;
-                    diffs.push(rowTeamKills - enemyTeamKills);
-                  }
+              const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) || (teamB.includes(playerRow) && teamB.includes(playerCol));
+              let diff = "-";
+              
+              if (playerPairDiffs[playerRow] && playerPairDiffs[playerRow][playerCol]) {
+                const pairData = playerPairDiffs[playerRow][playerCol];
+                if (currentSameTeam === pairData.currentSameTeam) {
+                  diff = (pairData.total / pairData.count).toFixed(1);
+                  rowSum += parseFloat(diff);
+                } else {
+                  diff = "-"; // チーム編成が異なる場合は表示しない
                 }
-              });
-              td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
-              if (td.textContent !== "-") rowSum += parseFloat(td.textContent);
+              }
+              td.textContent = diff;
             }
             tr.appendChild(td);
           });
+          
+          // 個人の合計値
+          const tdTotal = document.createElement("td");
+          tdTotal.textContent = rowSum.toFixed(1);
+          tdTotal.style.border = "1px solid #ddd";
+          tdTotal.style.padding = "4px";
+          tdTotal.style.textAlign = "center";
+          tdTotal.style.fontWeight = "bold";
+          tr.appendChild(tdTotal);
 
-          totals[playerRow] = rowSum;
-
-          if (idx === 0) {
-            const tdTeam = document.createElement("td");
-            tdTeam.textContent = teamA.reduce((sum, p) => sum + (totals[p] || 0), 0).toFixed(1);
-            tdTeam.rowSpan = teamA.length;
-            tr.appendChild(tdTeam);
-          } else if (idx === teamA.length) {
-            const tdTeam = document.createElement("td");
-            tdTeam.textContent = teamB.reduce((sum, p) => sum + (totals[p] || 0), 0).toFixed(1);
-            tdTeam.rowSpan = teamB.length;
-            tr.appendChild(tdTeam);
+          // チームの合計値
+          const tdTeamTotal = document.createElement("td");
+          tdTeamTotal.style.border = "1px solid #ddd";
+          tdTeamTotal.style.padding = "4px";
+          tdTeamTotal.style.textAlign = "center";
+          tdTeamTotal.style.fontWeight = "bold";
+          
+          let teamSum = 0;
+          if (teamA.includes(playerRow)) {
+            teamA.forEach(teammate => {
+              if (teammate !== playerRow && playerPairDiffs[playerRow] && playerPairDiffs[playerRow][teammate]) {
+                const pairData = playerPairDiffs[playerRow][teammate];
+                if (pairData.count > 0) {
+                  teamSum += (pairData.total / pairData.count);
+                }
+              }
+            });
+          } else {
+            teamB.forEach(teammate => {
+              if (teammate !== playerRow && playerPairDiffs[playerRow] && playerPairDiffs[playerRow][teammate]) {
+                const pairData = playerPairDiffs[playerRow][teammate];
+                if (pairData.count > 0) {
+                  teamSum += (pairData.total / pairData.count);
+                }
+              }
+            });
           }
+          
+          tdTeamTotal.textContent = teamSum.toFixed(1);
+          tr.appendChild(tdTeamTotal);
 
           table.appendChild(tr);
         });
-
+        
         killDiffTableContainer.innerHTML = "";
         killDiffTableContainer.appendChild(table);
       });
     }
+
+    const btn = document.querySelector(".info-btn");
+    const info = document.querySelector(".info-text");
+
+    btn.addEventListener("click", () => {
+      if (info.style.display === "none") {
+        info.style.display = "block";
+        btn.textContent = "△ 相性表の見方";
+      } else {
+        info.style.display = "none";
+        btn.textContent = "▽ 相性表の見方";
+      }
+    });
   </script>
 </body>
 
