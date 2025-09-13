@@ -224,6 +224,19 @@
     line-height: 1.5;
     font-size: 14px;
   }
+  
+  /* 相性表を小さくする用のスタイル */
+#killDiffTableContainer table {
+  font-size: 12px;       /* 文字サイズを小さく */
+  width: auto;           /* 横幅を縮める */
+  margin: 0 auto;        /* 中央寄せ */
+}
+
+#killDiffTableContainer th,
+#killDiffTableContainer td {
+  padding: 2px 4px;      /* セルの余白を小さく */
+  min-width: 40px;       /* セル幅を狭く */
+}
 
   @keyframes confetti {
     from {
