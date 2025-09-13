@@ -543,7 +543,7 @@
                 td.textContent = diffValue;
                 rowSum += diffValue;
               } else {
-                td.textContent = "-";
+                td.textContent = "0"; // データがない場合は0と表示
               }
             }
             tr.appendChild(td);
