@@ -163,7 +163,7 @@
       font-weight: 600;
       margin-top: 8px;
       user-select: none;
-      font-size: 14px;
+      font-size: 12px;
       letter-spacing: 0.05em;
     }
 
@@ -223,18 +223,34 @@
       font-size: 14px;
     }
 
-    /* 相性表をコンパクトに */
-    #killDiffTableContainer table {
-      font-size: 12px;
-      width: auto;
-      margin: 0 auto;
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 12px;
     }
 
-    #killDiffTableContainer th,
-    #killDiffTableContainer td {
-      padding: 2px 4px;
-      min-width: 40px;
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 4px;
+      text-align: center;
     }
+
+    th {
+      background-color: #eefaff;
+    }
+
+    .team2 th {
+      background-color: #fff1f5;
+    }
+
+    #summary {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      margin-top: 8px;
+    }
+
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -252,10 +268,6 @@
       <a href="data-view.html">カスタム結果を見る</a>
     </nav>
   </header>
-
-  <div class="birthday-banner">
-    🎉 HAPPY BIRTHDAY 🎉
-  </div>
 
   <main>
     <h1>チーム分け</h1>
@@ -276,9 +288,11 @@
     <section>
       <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
       <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
-      <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
-      <div id="lastUpdated">最終更新: --</div>
+      <div id="summary"></div>
     </section>
+
+    <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
+    <div id="lastUpdated">最終更新: --</div>
   </main>
 
   <footer>
@@ -286,27 +300,6 @@
   </footer>
 
   <script>
-    function checkBirthday() {
-      const today = new Date();
-      const month = today.getMonth() + 1;
-      const day = today.getDate();
-      const birthdayBanner = document.querySelector('.birthday-banner');
-
-      if (month === 8 && day === 23) {
-        document.body.classList.add("birthday-mode");
-        if (birthdayBanner) {
-          birthdayBanner.style.display = 'block';
-        }
-      } else {
-        document.body.classList.remove("birthday-mode");
-        if (birthdayBanner) {
-          birthdayBanner.style.display = 'none';
-        }
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", checkBirthday);
-
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -324,11 +317,15 @@
     const matchCountEl = document.getElementById("matchCount");
     const lastUpdatedEl = document.getElementById("lastUpdated");
     const killDiffTableContainer = document.getElementById("killDiffTableContainer");
+    const summaryEl = document.getElementById("summary");
+
+    let teamA = [];
+    let teamB = [];
 
     db.ref("currentTeamResult").on("value", snapshot => {
       const data = snapshot.val() || {};
-      const teamA = Array.isArray(data.teamA) ? data.teamA : [];
-      const teamB = Array.isArray(data.teamB) ? data.teamB : [];
+      teamA = Array.isArray(data.teamA) ? data.teamA : [];
+      teamB = Array.isArray(data.teamB) ? data.teamB : [];
 
       teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
       teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
@@ -342,7 +339,7 @@
         lastUpdatedEl.textContent = "最終更新: --";
       }
 
-      updateKillDiffTable(teamA, teamB);
+      updateKillDiffTable();
     });
 
     db.ref("apex_results").on("value", snapshot => {
@@ -359,50 +356,52 @@
 
     hamburger.addEventListener("click", () => {
       nav.classList.toggle("show");
+      const links = nav.querySelectorAll("a");
+      links.forEach((link) => {
+        if (nav.classList.contains("show")) {
+          link.style.opacity = "1";
+          link.style.transform = "translateY(0)";
+        } else {
+          link.style.opacity = "0";
+          link.style.transform = "translateY(-20px)";
+          link.style.transitionDelay = "0s";
+        }
+      });
     });
 
-    function updateKillDiffTable(teamA, teamB) {
+    function updateKillDiffTable() {
       const players = [...teamA, ...teamB];
-
       if (players.length <= 1) {
         killDiffTableContainer.innerHTML = "";
         return;
       }
 
-      const table = document.createElement("table");
-      table.style.borderCollapse = "collapse";
-      table.style.width = "100%";
-
-      const headerRow = document.createElement("tr");
-      headerRow.appendChild(document.createElement("th"));
-
-      players.forEach(p => {
-        const th = document.createElement("th");
-        th.textContent = p;
-        th.style.border = "1px solid #ddd";
-        th.style.padding = "4px";
-        th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
-        headerRow.appendChild(th);
-      });
-
-      const thTotal = document.createElement("th");
-      thTotal.textContent = "合計";
-      thTotal.style.border = "1px solid #ddd";
-      thTotal.style.padding = "4px";
-      thTotal.style.background = "#ccc";
-      headerRow.appendChild(thTotal);
-
-      table.appendChild(headerRow);
-
       db.ref("apex_results").once("value").then(snap => {
         const matches = snap.exists() ? Object.values(snap.val()) : [];
+        const totals = {};
+        players.forEach(p => totals[p] = 0);
 
-        players.forEach(playerRow => {
+        const table = document.createElement("table");
+        const headerRow = document.createElement("tr");
+        headerRow.appendChild(document.createElement("th"));
+
+        players.forEach(p => {
+          const th = document.createElement("th");
+          th.textContent = p;
+          th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
+          headerRow.appendChild(th);
+        });
+
+        const thTeamTotal = document.createElement("th");
+        thTeamTotal.textContent = "チーム合計";
+        headerRow.appendChild(thTeamTotal);
+
+        table.appendChild(headerRow);
+
+        players.forEach((playerRow, idx) => {
           const tr = document.createElement("tr");
           const th = document.createElement("th");
           th.textContent = playerRow;
-          th.style.border = "1px solid #ddd";
-          th.style.padding = "4px";
           th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
           tr.appendChild(th);
 
@@ -410,15 +409,10 @@
 
           players.forEach(playerCol => {
             const td = document.createElement("td");
-            td.style.border = "1px solid #ddd";
-            td.style.padding = "4px";
-            td.style.textAlign = "center";
-
             if (playerRow === playerCol) {
               td.textContent = "-";
             } else {
               const diffs = [];
-
               matches.forEach(match => {
                 const matchTeamA = match.teamA || [];
                 const matchTeamB = match.teamB || [];
@@ -435,11 +429,7 @@
                     (teamB.includes(playerRow) && teamB.includes(playerCol));
                   const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
 
-                  if (currentSameTeam && matchSameTeam) {
-                    const rowTeamKills = rowInA ? killsA : killsB;
-                    const enemyTeamKills = rowInA ? killsB : killsA;
-                    diffs.push(rowTeamKills - enemyTeamKills);
-                  } else if (!currentSameTeam && !matchSameTeam) {
+                  if ((currentSameTeam && matchSameTeam) || (!currentSameTeam && !matchSameTeam)) {
                     const rowTeamKills = rowInA ? killsA : killsB;
                     const enemyTeamKills = rowInA ? killsB : killsA;
                     diffs.push(rowTeamKills - enemyTeamKills);
@@ -448,93 +438,33 @@
               });
 
               td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
-
-              if (td.textContent !== "-") {
-                rowSum += parseFloat(td.textContent);
-              }
+              if (td.textContent !== "-") rowSum += parseFloat(td.textContent);
             }
-
             tr.appendChild(td);
           });
 
-          const tdTotal = document.createElement("td");
-          tdTotal.textContent = rowSum.toFixed(1);
-          tdTotal.style.border = "1px solid #ddd";
-          tdTotal.style.padding = "4px";
-          tdTotal.style.textAlign = "center";
-          tdTotal.style.fontWeight = "bold";
-          tr.appendChild(tdTotal);
+          totals[playerRow] = rowSum;
+
+          // チーム合計セルを最初の行に rowspan で結合
+          if (idx === 0) {
+            const tdTeam = document.createElement("td");
+            tdTeam.textContent = teamA.reduce((sum, p) => sum + (totals[p] || 0), 0).toFixed(1);
+            tdTeam.rowSpan = teamA.length;
+            tr.appendChild(tdTeam);
+          } else if (idx === teamA.length) {
+            const tdTeam = document.createElement("td");
+            tdTeam.textContent = teamB.reduce((sum, p) => sum + (totals[p] || 0), 0).toFixed(1);
+            tdTeam.rowSpan = teamB.length;
+            tr.appendChild(tdTeam);
+          }
 
           table.appendChild(tr);
         });
 
-        // チームごとの合計行を追加
-        addTeamTotals(table, players, teamA, teamB);
-
         killDiffTableContainer.innerHTML = "";
         killDiffTableContainer.appendChild(table);
-      });
-    }
 
-    // チームごとの合計を追加する関数
-    function addTeamTotals(table, players, teamA, teamB) {
-      const teams = [
-        { name: "チーム1合計", members: teamA, color: "#eefaff" },
-        { name: "チーム2合計", members: teamB, color: "#fff1f5" }
-      ];
-
-      teams.forEach(team => {
-        if (team.members.length === 0) return;
-
-        const tr = document.createElement("tr");
-        const th = document.createElement("th");
-        th.textContent = team.name;
-        th.style.border = "1px solid #ddd";
-        th.style.padding = "4px";
-        th.style.background = team.color;
-        tr.appendChild(th);
-
-        let teamRowSum = 0;
-
-        players.forEach(playerCol => {
-          const td = document.createElement("td");
-          td.style.border = "1px solid #ddd";
-          td.style.padding = "4px";
-          td.style.textAlign = "center";
-
-          let sum = 0, count = 0;
-          const memberRows = table.querySelectorAll("tr");
-
-          memberRows.forEach(row => {
-            const headerCell = row.querySelector("th");
-            if (headerCell && team.members.includes(headerCell.textContent)) {
-              const cells = row.querySelectorAll("td");
-              const idx = players.indexOf(playerCol);
-              if (idx >= 0 && cells[idx] && cells[idx].textContent !== "-") {
-                sum += parseFloat(cells[idx].textContent);
-                count++;
-              }
-            }
-          });
-
-          td.textContent = count > 0 ? (sum / count).toFixed(1) : "-";
-
-          if (td.textContent !== "-") {
-            teamRowSum += parseFloat(td.textContent);
-          }
-
-          tr.appendChild(td);
-        });
-
-        const tdTotal = document.createElement("td");
-        tdTotal.textContent = teamRowSum.toFixed(1);
-        tdTotal.style.border = "1px solid #ddd";
-        tdTotal.style.padding = "4px";
-        tdTotal.style.textAlign = "center";
-        tdTotal.style.fontWeight = "bold";
-        tr.appendChild(tdTotal);
-
-        table.appendChild(tr);
+        summaryEl.textContent = `過去${matches.length}試合をもとに生成`;
       });
     }
   </script>
