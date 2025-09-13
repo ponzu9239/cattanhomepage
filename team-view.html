@@ -117,9 +117,9 @@
 
     .team-box {
       width: 90%;
-      max-width: 500px;
+      max-width: 400px;
       background: #eefaff;
-      padding: 12px;
+      padding: 8px;
       border-radius: 12px;
       border: 2px solid #97eadb;
       text-align: center;
@@ -131,29 +131,51 @@
     }
 
     .team-box h2 {
-      font-size: 18px;
-      margin: 0 0 8px 0;
+      font-size: 16px;
+      margin: 0 0 6px 0;
       color: #47b6a2;
     }
 
     .team-box ul {
       list-style: none;
-      padding: 0 8px;
+      padding: 0 4px;
       margin: 0;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+      gap: 4px;
       box-sizing: border-box;
     }
 
     .team-box li {
       background: white;
       border: 1.5px solid #ddd;
-      border-radius: 8px;
-      padding: 6px;
-      font-size: 15px;
+      border-radius: 6px;
+      padding: 4px;
+      font-size: 13px;
       font-weight: 500;
       text-align: center;
+    }
+
+    #killDiffTableContainer table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    #killDiffTableContainer th,
+    #killDiffTableContainer td {
+      border: 1px solid #ddd;
+      padding: 2px 4px;
+      text-align: center;
+    }
+
+    #killDiffTableContainer th {
+      background-color: #eefaff;
+    }
+
+    #killDiffTableContainer .team2 th {
+      background-color: #fff1f5;
     }
 
     #matchCount,
@@ -161,46 +183,18 @@
       text-align: center;
       color: #888;
       font-weight: 600;
-      margin-top: 8px;
+      margin-top: 4px;
       user-select: none;
       font-size: 12px;
-      letter-spacing: 0.05em;
-    }
-
-    section {
-      padding: 0 2rem;
-      margin: auto;
-    }
-
-    .info-btn {
-      background: none;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      margin-left: 6px;
-    }
-
-    .info-text {
-      background-color: #eefaff;
-      border: 1px solid #97EADB;
-      border-radius: 6px;
-      padding: 8px;
-      margin-top: 6px;
-      color: #333;
-    }
-
-    .info-btn-container {
-      text-align: center;
-      margin-top: 12px;
     }
 
     .info-btn {
       background-color: #97EADB;
       border: none;
       color: #fff;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
-      padding: 8px 16px;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       transition: background 0.2s;
@@ -213,44 +207,15 @@
     .info-text {
       display: none;
       max-width: 600px;
-      margin: 8px auto 16px auto;
+      margin: 6px auto 12px auto;
       background: #eefaff;
       border: 1px solid #97EADB;
       border-radius: 6px;
-      padding: 8px;
+      padding: 6px;
       color: #333;
-      line-height: 1.5;
-      font-size: 14px;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 12px;
-    }
-
-    th,
-    td {
-      border: 1px solid #ddd;
-      padding: 4px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #eefaff;
-    }
-
-    .team2 th {
-      background-color: #fff1f5;
-    }
-
-    #summary {
+      line-height: 1.4;
       font-size: 12px;
-      color: #666;
-      text-align: center;
-      margin-top: 8px;
     }
-
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -287,8 +252,7 @@
 
     <section>
       <h2 style="text-align:center; color:#47b6a2;">相性表</h2>
-      <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:12px;"></div>
-      <div id="summary"></div>
+      <div id="killDiffTableContainer" style="overflow-x:auto; margin-top:6px;"></div>
     </section>
 
     <div id="matchCount">過去 試合のカスタムマッチをもとに生成。</div>
@@ -317,7 +281,6 @@
     const matchCountEl = document.getElementById("matchCount");
     const lastUpdatedEl = document.getElementById("lastUpdated");
     const killDiffTableContainer = document.getElementById("killDiffTableContainer");
-    const summaryEl = document.getElementById("summary");
 
     let teamA = [];
     let teamB = [];
@@ -327,8 +290,8 @@
       teamA = Array.isArray(data.teamA) ? data.teamA : [];
       teamB = Array.isArray(data.teamB) ? data.teamB : [];
 
-      teamAul.innerHTML = teamA.length > 0 ? teamA.map(name => `<li>${name}</li>`).join("") : "";
-      teamBul.innerHTML = teamB.length > 0 ? teamB.map(name => `<li>${name}</li>`).join("") : "";
+      teamAul.innerHTML = teamA.map(name => `<li>${name}</li>`).join("");
+      teamBul.innerHTML = teamB.map(name => `<li>${name}</li>`).join("");
 
       if (data.timestamp && typeof data.timestamp === "number") {
         const d = new Date(data.timestamp);
@@ -343,29 +306,21 @@
     });
 
     db.ref("apex_results").on("value", snapshot => {
-      if (!snapshot.exists()) {
+      if (snapshot.exists()) {
+        const matches = Object.values(snapshot.val());
+        matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
+      } else {
         matchCountEl.textContent = "過去 試合のカスタムマッチをもとに生成。";
-        return;
       }
-      const matches = Object.values(snapshot.val());
-      matchCountEl.textContent = `過去${matches.length}試合のカスタムマッチをもとに生成。`;
     });
 
     const hamburger = document.getElementById("hamburger");
     const nav = document.getElementById("nav");
-
     hamburger.addEventListener("click", () => {
       nav.classList.toggle("show");
-      const links = nav.querySelectorAll("a");
-      links.forEach((link) => {
-        if (nav.classList.contains("show")) {
-          link.style.opacity = "1";
-          link.style.transform = "translateY(0)";
-        } else {
-          link.style.opacity = "0";
-          link.style.transform = "translateY(-20px)";
-          link.style.transitionDelay = "0s";
-        }
+      nav.querySelectorAll("a").forEach(link => {
+        link.style.opacity = nav.classList.contains("show") ? "1" : "0";
+        link.style.transform = nav.classList.contains("show") ? "translateY(0)" : "translateY(-20px)";
       });
     });
 
@@ -395,7 +350,6 @@
         const thTeamTotal = document.createElement("th");
         thTeamTotal.textContent = "チーム合計";
         headerRow.appendChild(thTeamTotal);
-
         table.appendChild(headerRow);
 
         players.forEach((playerRow, idx) => {
@@ -406,7 +360,6 @@
           tr.appendChild(th);
 
           let rowSum = 0;
-
           players.forEach(playerCol => {
             const td = document.createElement("td");
             if (playerRow === playerCol) {
@@ -425,10 +378,8 @@
                 const colInB = matchTeamB.includes(playerCol);
 
                 if ((rowInA || rowInB) && (colInA || colInB)) {
-                  const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
-                    (teamB.includes(playerRow) && teamB.includes(playerCol));
+                  const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) || (teamB.includes(playerRow) && teamB.includes(playerCol));
                   const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
-
                   if ((currentSameTeam && matchSameTeam) || (!currentSameTeam && !matchSameTeam)) {
                     const rowTeamKills = rowInA ? killsA : killsB;
                     const enemyTeamKills = rowInA ? killsB : killsA;
@@ -436,7 +387,6 @@
                   }
                 }
               });
-
               td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
               if (td.textContent !== "-") rowSum += parseFloat(td.textContent);
             }
@@ -445,7 +395,6 @@
 
           totals[playerRow] = rowSum;
 
-          // チーム合計セルを最初の行に rowspan で結合
           if (idx === 0) {
             const tdTeam = document.createElement("td");
             tdTeam.textContent = teamA.reduce((sum, p) => sum + (totals[p] || 0), 0).toFixed(1);
@@ -463,8 +412,6 @@
 
         killDiffTableContainer.innerHTML = "";
         killDiffTableContainer.appendChild(table);
-
-        summaryEl.textContent = `過去${matches.length}試合をもとに生成`;
       });
     }
   </script>
