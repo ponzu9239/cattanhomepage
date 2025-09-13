@@ -6,246 +6,256 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <title>チーム分け</title>
 
-<style>
-  html,
-  body {
-    height: 100%;
-    margin: 0;
-  }
-
-  body {
-    font-family: "Hiragino Maru Gothic ProN", sans-serif;
-    background: #f7fcfc;
-    padding-top: 100px;
-    transition: background-color 0.5s ease;
-    display: flex;
-    flex-direction: column;
-  }
-
-  h1 {
-    text-align: center;
-    color: #47b6a2;
-    margin-bottom: 12px;
-  }
-
-  /* 通常時のスタイル */
-  header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #97EADB;
-    padding: 1rem;
-    text-align: center;
-    z-index: 1000;
-  }
-
-  header h1 {
-    margin: 0;
-    font-size: 2rem;
-    color: #fff;
-  }
-
-  /* ハンバーガーアイコン */
-  .hamburger {
-    font-size: 2rem;
-    cursor: pointer;
-    position: absolute;
-    top: 50%;
-    right: 3rem;
-    color: white;
-    transform: translateY(-50%);
-    z-index: 1100;
-  }
-
-  nav {
-    position: fixed;
-    top: -100%;
-    left: 0;
-    width: 100%;
-    background-color: #97EADB;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    transition: top 0.3s ease;
-    z-index: 1050;
-  }
-
-  nav.show {
-    top: 75px;
-  }
-
-  nav a {
-    display: block;
-    text-align: center;
-    margin: 0;
-    padding: 0.6rem 0;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: white;
-    background-color: #97eadb;
-    border-bottom: 1px solid #97EADB;
-    text-decoration: none;
-    transition: background-color 0.2s, transform 0.2s;
-  }
-
-  nav a:hover {
-    background-color: #0099aa;
-    transform: scale(1.03);
-  }
-
-  main {
-    flex: 1;
-  }
-
-  footer {
-    background: #97EADB;
-    text-align: center;
-    color: white;
-    padding: 1rem;
-  }
-
-  .teams {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 16px;
-    align-items: center;
-  }
-
-  .team-box {
-    width: 90%;
-    max-width: 500px;
-    background: #eefaff;
-    padding: 12px;
-    border-radius: 12px;
-    border: 2px solid #97eadb;
-    text-align: center;
-  }
-
-  .team-box.team2 {
-    background: #fff1f5;
-    border-color: #ffb6c1;
-  }
-
-  .team-box h2 {
-    font-size: 18px;
-    margin: 0 0 8px 0;
-    color: #47b6a2;
-  }
-
-  .team-box ul {
-    list-style: none;
-    padding: 0 8px;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    box-sizing: border-box;
-  }
-
-  .team-box li {
-    background: white;
-    border: 1.5px solid #ddd;
-    border-radius: 8px;
-    padding: 6px;
-    font-size: 15px;
-    font-weight: 500;
-    text-align: center;
-  }
-
-  #matchCount,
-  #lastUpdated {
-    text-align: center;
-    color: #888;
-    font-weight: 600;
-    margin-top: 8px;
-    user-select: none;
-    font-size: 14px;
-    letter-spacing: 0.05em;
-  }
-
-  section {
-    padding: 0 2rem;
-    margin: auto;
-  }
-
-  .info-btn {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    margin-left: 6px;
-  }
-
-  .info-text {
-    background-color: #eefaff;
-    border: 1px solid #97EADB;
-    border-radius: 6px;
-    padding: 8px;
-    margin-top: 6px;
-    color: #333;
-  }
-
-  .info-btn-container {
-    text-align: center;
-    margin-top: 12px;
-  }
-
-  .info-btn {
-    background-color: #97EADB;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .info-btn:hover {
-    background-color: #47b6a2;
-  }
-
-  .info-text {
-    display: none;
-    max-width: 600px;
-    margin: 8px auto 16px auto;
-    background: #eefaff;
-    border: 1px solid #97EADB;
-    border-radius: 6px;
-    padding: 8px;
-    color: #333;
-    line-height: 1.5;
-    font-size: 14px;
-  }
-
-  @keyframes confetti {
-    from {
-      background-position: 0 0, 60px 60px, 0 0;
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
     }
 
-    to {
-      background-position: 100px 100px, 160px 160px, 0 200%;
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      padding-top: 100px;
+      transition: background-color 0.5s ease;
+      display: flex;
+      flex-direction: column;
     }
-  }
 
-  @keyframes sparkle {
-    from {
-      transform: scale(1);
+    h1 {
+      text-align: center;
+      color: #47b6a2;
+      margin-bottom: 12px;
     }
 
-    to {
+    /* 通常時のスタイル */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    /* ハンバーガーアイコン */
+    .hamburger {
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
+
+    nav {
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      transition: top 0.3s ease;
+      z-index: 1050;
+    }
+
+    nav.show {
+      top: 75px;
+    }
+
+    nav a {
+      display: block;
+      text-align: center;
+      margin: 0;
+      padding: 0.6rem 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background-color: #97eadb;
+      border-bottom: 1px solid #97EADB;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    nav a:hover {
+      background-color: #0099aa;
       transform: scale(1.03);
     }
-  }
 
-</style>
+    main {
+      flex: 1;
+    }
+
+    footer {
+      background: #97EADB;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+    }
+
+    .teams {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .team-box {
+      width: 90%;
+      max-width: 500px;
+      background: #eefaff;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #97eadb;
+      text-align: center;
+    }
+
+    .team-box.team2 {
+      background: #fff1f5;
+      border-color: #ffb6c1;
+    }
+
+    .team-box h2 {
+      font-size: 18px;
+      margin: 0 0 8px 0;
+      color: #47b6a2;
+    }
+
+    .team-box ul {
+      list-style: none;
+      padding: 0 8px;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      box-sizing: border-box;
+    }
+
+    .team-box li {
+      background: white;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    #matchCount,
+    #lastUpdated {
+      text-align: center;
+      color: #888;
+      font-weight: 600;
+      margin-top: 8px;
+      user-select: none;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    section {
+      padding: 0 2rem;
+      margin: auto;
+    }
+
+    .info-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+    .info-text {
+      background-color: #eefaff;
+      border: 1px solid #97EADB;
+      border-radius: 6px;
+      padding: 8px;
+      margin-top: 6px;
+      color: #333;
+    }
+
+    .info-btn-container {
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .info-btn {
+      background-color: #97EADB;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .info-btn:hover {
+      background-color: #47b6a2;
+    }
+
+    .info-text {
+      display: none;
+      max-width: 600px;
+      margin: 8px auto 16px auto;
+      background: #eefaff;
+      border: 1px solid #97EADB;
+      border-radius: 6px;
+      padding: 8px;
+      color: #333;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    @keyframes confetti {
+      from {
+        background-position: 0 0, 60px 60px, 0 0;
+      }
+
+      to {
+        background-position: 100px 100px, 160px 160px, 0 200%;
+      }
+    }
+
+    @keyframes sparkle {
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.03);
+      }
+    }
+
+    /* 相性表のスタイルをさらにコンパクトに */
+    #killDiffTableContainer table {
+      font-size: 10px;
+    }
+
+    #killDiffTableContainer th,
+    #killDiffTableContainer td {
+      padding: 2px;
+      text-align: center;
+    }
+  </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -459,13 +469,14 @@
       table.style.width = "100%";
 
       const headerRow = document.createElement("tr");
-      headerRow.appendChild(document.createElement("th"));
+      const emptyTh = document.createElement("th");
+      headerRow.appendChild(emptyTh);
 
       players.forEach(p => {
         const th = document.createElement("th");
         th.textContent = p;
         th.style.border = "1px solid #ddd";
-        th.style.padding = "4px";
+        th.style.padding = "2px";
         th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
         headerRow.appendChild(th);
       });
@@ -473,21 +484,64 @@
       const thTotal = document.createElement("th");
       thTotal.textContent = "合計";
       thTotal.style.border = "1px solid #ddd";
-      thTotal.style.padding = "4px";
+      thTotal.style.padding = "2px";
       thTotal.style.background = "#ccc";
       headerRow.appendChild(thTotal);
+
+      const thTeamTotal = document.createElement("th");
+      thTeamTotal.textContent = "チーム計";
+      thTeamTotal.style.border = "1px solid #ddd";
+      thTeamTotal.style.padding = "2px";
+      thTeamTotal.style.background = "#97EADB";
+      headerRow.appendChild(thTeamTotal);
 
       table.appendChild(headerRow);
 
       db.ref("apex_results").once("value").then(snap => {
         const matches = snap.exists() ? Object.values(snap.val()) : [];
+        const playerPairDiffs = {};
+
+        matches.forEach(match => {
+          const matchTeamA = match.teamA || [];
+          const matchTeamB = match.teamB || [];
+          const killsA = match.teamAKills || 0;
+          const killsB = match.teamBKills || 0;
+
+          players.forEach(p1 => {
+            players.forEach(p2 => {
+              if (p1 === p2) return;
+
+              const p1InA = matchTeamA.includes(p1);
+              const p1InB = matchTeamB.includes(p1);
+              const p2InA = matchTeamA.includes(p2);
+              const p2InB = matchTeamB.includes(p2);
+
+              if ((p1InA || p1InB) && (p2InA || p2InB)) {
+                const sameTeam = (p1InA && p2InA) || (p1InB && p2InB);
+                const diff = (p1InA ? killsA : killsB) - (p1InA ? killsB : killsA);
+
+                if (!playerPairDiffs[p1]) playerPairDiffs[p1] = {};
+                if (!playerPairDiffs[p1][p2]) playerPairDiffs[p1][p2] = {
+                  total: 0,
+                  count: 0,
+                  currentSameTeam: sameTeam
+                };
+
+                playerPairDiffs[p1][p2].total += diff;
+                playerPairDiffs[p1][p2].count++;
+              }
+            });
+          });
+        });
+
+        const playerSums = {};
 
         players.forEach(playerRow => {
           const tr = document.createElement("tr");
           const th = document.createElement("th");
           th.textContent = playerRow;
           th.style.border = "1px solid #ddd";
-          th.style.padding = "4px";
+          th.style.padding = "2px";
           th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
           tr.appendChild(th);
 
@@ -496,59 +550,70 @@
           players.forEach(playerCol => {
             const td = document.createElement("td");
             td.style.border = "1px solid #ddd";
-            td.style.padding = "4px";
+            td.style.padding = "2px";
             td.style.textAlign = "center";
 
             if (playerRow === playerCol) {
               td.textContent = "-";
             } else {
-              const diffs = [];
+              const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) || (teamB.includes(playerRow) && teamB.includes(playerCol));
+              let diff = "-";
 
-              matches.forEach(match => {
-                const matchTeamA = match.teamA || [];
-                const matchTeamB = match.teamB || [];
-                const killsA = match.teamAKills || 0;
-                const killsB = match.teamBKills || 0;
-
-                const rowInA = matchTeamA.includes(playerRow);
-                const rowInB = matchTeamB.includes(playerRow);
-                const colInA = matchTeamA.includes(playerCol);
-                const colInB = matchTeamB.includes(playerCol);
-
-                if ((rowInA || rowInB) && (colInA || colInB)) {
-                  const currentSameTeam = (teamA.includes(playerRow) && teamA.includes(playerCol)) ||
-                    (teamB.includes(playerRow) && teamB.includes(playerCol));
-                  const matchSameTeam = (rowInA && colInA) || (rowInB && colInB);
-
-                  if (currentSameTeam && matchSameTeam) {
-                    const rowTeamKills = rowInA ? killsA : killsB;
-                    const enemyTeamKills = rowInA ? killsB : killsA;
-                    diffs.push(rowTeamKills - enemyTeamKills);
-                  } else if (!currentSameTeam && !matchSameTeam) {
-                    const rowTeamKills = rowInA ? killsA : killsB;
-                    const enemyTeamKills = rowInA ? killsB : killsA;
-                    diffs.push(rowTeamKills - enemyTeamKills);
-                  }
+              if (playerPairDiffs[playerRow] && playerPairDiffs[playerRow][playerCol]) {
+                const pairData = playerPairDiffs[playerRow][playerCol];
+                if (currentSameTeam === pairData.currentSameTeam) {
+                  diff = (pairData.total / pairData.count).toFixed(1);
+                  rowSum += parseFloat(diff);
+                } else {
+                  diff = "-";
                 }
-              });
-
-              td.textContent = diffs.length > 0 ? (diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1) : "-";
-
-              if (td.textContent !== "-") {
-                rowSum += parseFloat(td.textContent);
               }
+              td.textContent = diff;
             }
-
             tr.appendChild(td);
           });
 
+          playerSums[playerRow] = rowSum;
+
+          // 個人の合計値
           const tdTotal = document.createElement("td");
           tdTotal.textContent = rowSum.toFixed(1);
           tdTotal.style.border = "1px solid #ddd";
-          tdTotal.style.padding = "4px";
+          tdTotal.style.padding = "2px";
           tdTotal.style.textAlign = "center";
           tdTotal.style.fontWeight = "bold";
           tr.appendChild(tdTotal);
+
+          // チーム合計のセルを結合して表示
+          if (teamA.includes(playerRow) && teamA.indexOf(playerRow) === 0) {
+            const tdTeamTotal = document.createElement("td");
+            tdTeamTotal.rowSpan = teamA.length;
+            let teamASum = 0;
+            teamA.forEach(p => {
+              teamASum += playerSums[p];
+            });
+            tdTeamTotal.textContent = teamASum.toFixed(1);
+            tdTeamTotal.style.border = "1px solid #ddd";
+            tdTeamTotal.style.padding = "2px";
+            tdTeamTotal.style.textAlign = "center";
+            tdTeamTotal.style.fontWeight = "bold";
+            tdTeamTotal.style.background = "#eefaff";
+            tr.appendChild(tdTeamTotal);
+          } else if (teamB.includes(playerRow) && teamB.indexOf(playerRow) === 0) {
+            const tdTeamTotal = document.createElement("td");
+            tdTeamTotal.rowSpan = teamB.length;
+            let teamBSum = 0;
+            teamB.forEach(p => {
+              teamBSum += playerSums[p];
+            });
+            tdTeamTotal.textContent = teamBSum.toFixed(1);
+            tdTeamTotal.style.border = "1px solid #ddd";
+            tdTeamTotal.style.padding = "2px";
+            tdTeamTotal.style.textAlign = "center";
+            tdTeamTotal.style.fontWeight = "bold";
+            tdTeamTotal.style.background = "#fff1f5";
+            tr.appendChild(tdTeamTotal);
+          }
 
           table.appendChild(tr);
         });
