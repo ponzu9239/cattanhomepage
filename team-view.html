@@ -165,7 +165,7 @@
       font-weight: 600;
       margin-top: 8px;
       user-select: none;
-      font-size: 12px; /* 小さく変更 */
+      font-size: 10px; /* さらに小さく */
       letter-spacing: 0.05em;
     }
 
@@ -245,12 +245,12 @@
       }
     }
     
-    /* 相性表のスタイルをコンパクトに */
+    /* 相性表のスタイルをさらにコンパクトに */
     #killDiffTableContainer table {
-      font-size: 12px;
+      font-size: 10px; /* さらに小さく */
     }
     #killDiffTableContainer th, #killDiffTableContainer td {
-      padding: 4px; /* 余白を減らす */
+      padding: 2px; /* さらに余白を減らす */
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -473,22 +473,22 @@
         const th = document.createElement("th");
         th.textContent = p;
         th.style.border = "1px solid #ddd";
-        th.style.padding = "4px";
+        th.style.padding = "2px";
         th.style.background = teamA.includes(p) ? "#eefaff" : "#fff1f5";
         headerRow.appendChild(th);
       });
 
       const thTotal = document.createElement("th");
-      thTotal.textContent = "個人合計";
+      thTotal.textContent = "合計"; /* 短縮 */
       thTotal.style.border = "1px solid #ddd";
-      thTotal.style.padding = "4px";
+      thTotal.style.padding = "2px";
       thTotal.style.background = "#ccc";
       headerRow.appendChild(thTotal);
 
       const thTeamTotal = document.createElement("th");
-      thTeamTotal.textContent = "チーム合計";
+      thTeamTotal.textContent = "チーム計"; /* 短縮 */
       thTeamTotal.style.border = "1px solid #ddd";
-      thTeamTotal.style.padding = "4px";
+      thTeamTotal.style.padding = "2px";
       thTeamTotal.style.background = "#97EADB";
       headerRow.appendChild(thTeamTotal);
 
@@ -527,12 +527,14 @@
           });
         });
 
+        const playerSums = {};
+        
         players.forEach(playerRow => {
           const tr = document.createElement("tr");
           const th = document.createElement("th");
           th.textContent = playerRow;
           th.style.border = "1px solid #ddd";
-          th.style.padding = "4px";
+          th.style.padding = "2px";
           th.style.background = teamA.includes(playerRow) ? "#eefaff" : "#fff1f5";
           tr.appendChild(th);
 
@@ -541,7 +543,7 @@
           players.forEach(playerCol => {
             const td = document.createElement("td");
             td.style.border = "1px solid #ddd";
-            td.style.padding = "4px";
+            td.style.padding = "2px";
             td.style.textAlign = "center";
 
             if (playerRow === playerCol) {
@@ -556,7 +558,7 @@
                   diff = (pairData.total / pairData.count).toFixed(1);
                   rowSum += parseFloat(diff);
                 } else {
-                  diff = "-"; // チーム編成が異なる場合は表示しない
+                  diff = "-"; 
                 }
               }
               td.textContent = diff;
@@ -564,47 +566,44 @@
             tr.appendChild(td);
           });
           
+          playerSums[playerRow] = rowSum;
+
           // 個人の合計値
           const tdTotal = document.createElement("td");
           tdTotal.textContent = rowSum.toFixed(1);
           tdTotal.style.border = "1px solid #ddd";
-          tdTotal.style.padding = "4px";
+          tdTotal.style.padding = "2px";
           tdTotal.style.textAlign = "center";
           tdTotal.style.fontWeight = "bold";
           tr.appendChild(tdTotal);
 
-          // チームの合計値
+          // チーム合計のセルを後でまとめて計算するために仮のセルを作成
           const tdTeamTotal = document.createElement("td");
+          tdTeamTotal.className = 'team-total-cell';
           tdTeamTotal.style.border = "1px solid #ddd";
-          tdTeamTotal.style.padding = "4px";
+          tdTeamTotal.style.padding = "2px";
           tdTeamTotal.style.textAlign = "center";
           tdTeamTotal.style.fontWeight = "bold";
-          
-          let teamSum = 0;
-          if (teamA.includes(playerRow)) {
-            teamA.forEach(teammate => {
-              if (teammate !== playerRow && playerPairDiffs[playerRow] && playerPairDiffs[playerRow][teammate]) {
-                const pairData = playerPairDiffs[playerRow][teammate];
-                if (pairData.count > 0) {
-                  teamSum += (pairData.total / pairData.count);
-                }
-              }
-            });
-          } else {
-            teamB.forEach(teammate => {
-              if (teammate !== playerRow && playerPairDiffs[playerRow] && playerPairDiffs[playerRow][teammate]) {
-                const pairData = playerPairDiffs[playerRow][teammate];
-                if (pairData.count > 0) {
-                  teamSum += (pairData.total / pairData.count);
-                }
-              }
-            });
-          }
-          
-          tdTeamTotal.textContent = teamSum.toFixed(1);
           tr.appendChild(tdTeamTotal);
-
+          
           table.appendChild(tr);
+        });
+
+        // チーム合計を計算して表示
+        let teamASum = 0;
+        teamA.forEach(p => { teamASum += playerSums[p]; });
+        
+        let teamBSum = 0;
+        teamB.forEach(p => { teamBSum += playerSums[p]; });
+
+        const teamTotals = {};
+        teamA.forEach(p => { teamTotals[p] = teamASum; });
+        teamB.forEach(p => { teamTotals[p] = teamBSum; });
+
+        const teamTotalCells = table.querySelectorAll('.team-total-cell');
+        teamTotalCells.forEach((cell, index) => {
+          const playerName = players[index];
+          cell.textContent = teamTotals[playerName].toFixed(1);
         });
         
         killDiffTableContainer.innerHTML = "";
