@@ -1168,14 +1168,18 @@ footer {
     }
 
     function getCombinations(array, size) {
-      if (size === 0) return [[]];
-      if (array.length < size) return [];
-      const [first, ...rest] = array;
-      
-      const combsWithFirst = getCombinations(rest, size - 1).map(c => [first, ...c]);
-      const combsWithoutFirst = getCombinations(rest, size);
-      
-      return [...combsWithFirst, ...combsWithoutFirst];
+      const result = [];
+      function backtrack(tempList, start) {
+        if (tempList.length === size) {
+          result.push(tempList);
+          return;
+        }
+        for (let i = start; i < array.length; i++) {
+          backtrack([...tempList, array[i]], i + 1);
+        }
+      }
+      backtrack([], 0);
+      return result;
     }
 
     document.getElementById("separatePairForm").addEventListener("submit", e => {
