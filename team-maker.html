@@ -965,8 +965,10 @@ footer {
         const uf = new UnionFind(players.length);
 
         together.forEach(([n1, n2]) => {
-          if (nameToIndex[n1] !== undefined && nameToIndex[n2] !== undefined) {
-            uf.union(nameToIndex[n1], nameToIndex[n2]);
+          const index1 = nameToIndex[n1];
+          const index2 = nameToIndex[n2];
+          if (index1 !== undefined && index2 !== undefined) {
+            uf.union(index1, index2);
           }
         });
 
@@ -980,10 +982,11 @@ footer {
 
         const totalPlayers = players.length;
         const isEven = totalPlayers % 2 === 0;
-        const targetSize = Math.floor(totalPlayers / 2);
+        const targetSizeA = isEven ? totalPlayers / 2 : Math.floor(totalPlayers / 2);
+        const targetSizeB = totalPlayers - targetSizeA;
 
-        const combinations = getCombinations(groups, isEven ? targetSize : targetSize + 1);
-
+        const combinations = getCombinations(groups, totalPlayers);
+        
         for (const comb of combinations) {
           const teamAGroups = comb;
           const teamBGroups = groups.filter(g => !comb.includes(g));
@@ -1163,38 +1166,41 @@ footer {
       return scores;
     }
 
-    function getCombinations(array, size) {
+    function getCombinations(array, totalPlayers) {
       const result = [];
-      function backtrack(tempList, start) {
-        // 現在の合計人数を計算
-        const currentTotalPeople = tempList.reduce((sum, group) => sum + group.length, 0);
-        
-        // 目的のサイズに達したら結果に追加
-        if (currentTotalPeople === size) {
+      const targetSize = Math.floor(totalPlayers / 2);
+      const isEven = totalPlayers % 2 === 0;
+
+      function backtrack(tempList, start, currentSize) {
+        if (currentSize > targetSize + (isEven ? 0 : 1)) {
+          return;
+        }
+
+        if (currentSize === targetSize || (!isEven && currentSize === targetSize + 1)) {
+          // 人数がちょうど半分 (または半分+1) になる組み合わせだけを考慮
+          const members = tempList.flat();
+          const otherMembers = array.filter(group => !tempList.includes(group)).flat();
+
+          // チームの合計人数を再確認
+          if (members.length + otherMembers.length !== totalPlayers) {
+              return;
+          }
+
+          // チームAとチームBの人数差が1以下であることを確認
+          if (Math.abs(members.length - otherMembers.length) > 1) {
+              return;
+          }
+
           result.push(tempList);
           return;
         }
 
-        // 目的のサイズを超えたら中断
-        if (currentTotalPeople > size) {
-          return;
-        }
-
         for (let i = start; i < array.length; i++) {
-          backtrack([...tempList, array[i]], i + 1);
+          backtrack([...tempList, array[i]], i + 1, currentSize + array[i].length);
         }
       }
       
-      const totalPlayers = array.reduce((sum, group) => sum + group.length, 0);
-      const isEven = totalPlayers % 2 === 0;
-      const targetSize = Math.floor(totalPlayers / 2);
-      
-      backtrack([], targetSize);
-
-      if (!isEven) {
-        // 奇数の場合、もう一方のチームサイズも探索
-        backtrack([], targetSize + 1);
-      }
+      backtrack([], 0, 0);
 
       // 偶数人の場合のみ重複を排除
       if (isEven) {
