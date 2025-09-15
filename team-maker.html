@@ -274,31 +274,31 @@ h1 {
   background: var(--color-pair-bg);
   border: 2px solid var(--color-primary);
   border-radius: 12px;
-  padding: 12px; /* 修正 */
-  margin-bottom: 12px; /* 修正 */
+  padding: 8px; /* 修正 */
+  margin-bottom: 8px; /* 修正 */
 }
 
 .pair-section h3 {
   margin-top: 0;
   color: var(--color-accent);
   font-weight: 700;
-  font-size: 20px;
-  margin-bottom: 8px; /* 修正 */
+  font-size: 16px; /* 修正 */
+  margin-bottom: 4px; /* 修正 */
   text-align: center;
 }
 
 .pair-form {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 4px; /* 修正 */
   justify-content: center;
-  margin-bottom: 8px; /* 修正 */
+  margin-bottom: 4px; /* 修正 */
   flex-wrap: wrap;
 }
 
 .pair-form input[type="text"] {
   flex: 1 1 40%;
   min-width: 100px;
-  padding: 6px 8px;
+  padding: 4px 6px; /* 修正 */
   border: 1.5px solid var(--color-primary);
   border-radius: 8px;
   font-size: 14px;
@@ -308,7 +308,7 @@ h1 {
   background: var(--color-accent);
   border: none;
   color: var(--color-text-light);
-  padding: 6px 16px;
+  padding: 4px 12px; /* 修正 */
   border-radius: 16px;
   font-weight: 700;
   cursor: pointer;
@@ -322,7 +322,7 @@ h1 {
 .pair-list {
   list-style: none;
   padding-left: 0;
-  max-height: 150px;
+  max-height: 100px; /* 修正 */
   overflow-y: auto;
   margin: 0;
   border-top: 1px solid var(--color-primary);
@@ -465,11 +465,11 @@ footer {
     width: 90%;
     max-width: 500px;
     margin: 1rem auto;
-    padding: 10px;
-    font-size: 16px;
+    padding: 8px; /* 修正 */
+    font-size: 14px; /* 修正 */
     border: 2px solid var(--color-primary);
     border-radius: 8px;
-    height: 120px;
+    height: 100px; /* 修正 */
     box-sizing: border-box;
 }
 
@@ -983,7 +983,6 @@ footer {
         const totalPlayers = players.length;
         const isEven = totalPlayers % 2 === 0;
         const targetSizeA = isEven ? totalPlayers / 2 : Math.floor(totalPlayers / 2);
-        const targetSizeB = totalPlayers - targetSizeA;
 
         const combinations = getCombinations(groups, totalPlayers);
         
