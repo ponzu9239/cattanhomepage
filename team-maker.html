@@ -978,10 +978,28 @@ footer {
         });
         const groups = Array.from(groupsMap.values());
 
+        // 偶数人かどうかの判定
+        const isEven = players.length % 2 === 0;
+
         // 組み合わせを生成
         const combinations = getCombinations(groups, Math.floor(groups.length / 2));
 
         for (const comb of combinations) {
+          // 偶数人の場合のみ、対称性の利用
+          if (isEven) {
+            const teamAtemp = comb.flat();
+            const teamBtemp = groups.flat().filter(g => !teamAtemp.includes(g));
+
+            if (teamAtemp.includes(players[0]) && teamBtemp.includes(players[0])) {
+                continue; // 両方のチームに同じプレイヤーがいる場合はスキップ
+            }
+
+            // 最初のプレイヤーがチームAにいない場合はスキップ
+            if (!teamAtemp.includes(players[0])) {
+              continue;
+            }
+          }
+
           const teamAGroups = comb;
           const teamBGroups = groups.filter(g => !comb.includes(g));
 
