@@ -980,31 +980,21 @@ footer {
 
         // 偶数人かどうかの判定
         const isEven = players.length % 2 === 0;
-
+        
         // 組み合わせを生成
-        const combinations = getCombinations(groups, Math.floor(groups.length / 2));
-
+        const combinations = getCombinations(groups, Math.floor(players.length / 2));
+        
         for (const comb of combinations) {
-          // 偶数人の場合のみ、対称性の利用
-          if (isEven) {
-            const teamAtemp = comb.flat();
-            const teamBtemp = groups.flat().filter(g => !teamAtemp.includes(g));
-
-            if (teamAtemp.includes(players[0]) && teamBtemp.includes(players[0])) {
-                continue; // 両方のチームに同じプレイヤーがいる場合はスキップ
-            }
-
-            // 最初のプレイヤーがチームAにいない場合はスキップ
-            if (!teamAtemp.includes(players[0])) {
-              continue;
-            }
-          }
-
           const teamAGroups = comb;
           const teamBGroups = groups.filter(g => !comb.includes(g));
 
           const teamAMembers = teamAGroups.flat();
           const teamBMembers = teamBGroups.flat();
+
+          // 偶数人の場合、最初のプレイヤーがチームAにいる組み合わせのみを評価
+          if (isEven && !teamAMembers.includes(players[0])) {
+            continue;
+          }
 
           // 人数バランスのチェック
           if (Math.abs(teamAMembers.length - teamBMembers.length) > 1) continue;
