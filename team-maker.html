@@ -274,8 +274,8 @@ h1 {
   background: var(--color-pair-bg);
   border: 2px solid var(--color-primary);
   border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
+  padding: 12px; /* 修正 */
+  margin-bottom: 12px; /* 修正 */
 }
 
 .pair-section h3 {
@@ -283,7 +283,7 @@ h1 {
   color: var(--color-accent);
   font-weight: 700;
   font-size: 20px;
-  margin-bottom: 10px;
+  margin-bottom: 8px; /* 修正 */
   text-align: center;
 }
 
@@ -291,7 +291,7 @@ h1 {
   display: flex;
   gap: var(--spacing-sm);
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px; /* 修正 */
   flex-wrap: wrap;
 }
 
@@ -990,7 +990,7 @@ footer {
 
           const teamAMembers = teamAGroups.flat();
           const teamBMembers = teamBGroups.flat();
-
+          
           // 偶数人の場合、最初のプレイヤーがチームAにいる組み合わせのみを評価
           if (isEven && !teamAMembers.includes(players[0])) {
             continue;
