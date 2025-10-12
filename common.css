@@ -21,6 +21,14 @@
     
     /* ヘッダーの高さに合わせてCSS変数も定義 */
     --header-fixed-height: 140px; 
+
+    /* ★Team-maker固有変数を追記★ */
+    --color-team-a-bg: #eefaff;
+    --color-team-a-border: #97eadb;
+    --color-team-b-bg: #fff1f5;
+    --color-team-b-border: #ffb6c1;
+    --color-pair-bg: #eaf9f8;
+    --header-height: 75px; /* common.cssの定義を上書きする可能性がある */
 }
 
 
@@ -509,4 +517,378 @@ section h3 {
 
 #resetButton:hover {
     background-color: #c0392b;
+}
+
+/* ------------------------------------------------ */
+/* ★ 8. Team Maker固有スタイル (team-maker.html専用) ★ */
+/* ------------------------------------------------ */
+
+.container {
+  flex: 1;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 90vw;
+  padding: 0 var(--spacing-md);
+}
+
+/* Main content sections */
+h1 {
+  text-align: center;
+  color: var(--color-accent);
+  margin-bottom: 12px;
+}
+
+.method-select {
+  text-align: center;
+  margin: 18px 0 12px 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.method-select label {
+  margin: 0 var(--spacing-sm);
+  font-weight: bold;
+  color: var(--color-accent);
+  cursor: pointer;
+  user-select: none;
+  background: var(--color-text-light);
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: 1.5px solid var(--color-primary);
+  font-size: 14px;
+}
+
+.teams {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.team-box {
+  width: 90%;
+  max-width: 500px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--color-team-a-border);
+  text-align: center;
+  background: var(--color-team-a-bg);
+}
+
+.team-box.team2 {
+  background: var(--color-team-b-bg);
+  border-color: var(--color-team-b-border);
+}
+
+.team-box h2 {
+  font-size: 18px;
+  margin: 0 0 8px 0;
+  color: var(--color-accent);
+}
+
+.team-box ul {
+  list-style: none;
+  padding: 0 8px;
+  margin: 0;
+  display: grid;
+  /* 常に2列で固定 */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+
+.team-box li {
+  background: var(--color-text-light);
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.player-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.player {
+  background: #fff;
+  border: 2px solid #97eadb;
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+  font-size: 14px;
+}
+
+
+.player:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.player.selected {
+  background: var(--color-primary);
+  color: var(--color-text-light);
+}
+
+.player.matching {
+  background: #e0f7f3;
+  border-color: var(--color-primary);
+}
+
+/* Pin button */
+.pin-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pin-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #bbb;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%,
+      79% 91%, 50% 70%, 21% 91%, 32% 57%,
+      2% 35%, 39% 35%);
+  transition: background 0.3s;
+}
+
+.pin-btn.pinned::before {
+  background: gold;
+}
+
+/* Other sections */
+#matchCount {
+  text-align: center;
+  font-size: 12px;
+  color: gray;
+  margin-top: var(--spacing-sm);
+  user-select: none;
+}
+
+.pair-section {
+  background: var(--color-pair-bg);
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
+  padding: 8px; /* 修正 */
+  margin-bottom: 8px; /* 修正 */
+}
+
+.pair-section h3 {
+  margin-top: 0;
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 16px; /* 修正 */
+  margin-bottom: 4px; /* 修正 */
+  text-align: center;
+}
+
+.pair-form {
+  display: flex;
+  gap: 4px; /* 修正 */
+  justify-content: center;
+  margin-bottom: 4px; /* 修正 */
+  flex-wrap: wrap;
+}
+
+.pair-form input[type="text"] {
+  flex: 1 1 40%;
+  min-width: 100px;
+  padding: 4px 6px; /* 修正 */
+  border: 1.5px solid var(--color-primary);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.pair-form button {
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-text-light);
+  padding: 4px 12px; /* 修正 */
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.pair-form button:hover {
+  background: #369482;
+}
+
+.pair-list {
+  list-style: none;
+  padding-left: 0;
+  max-height: 100px; /* 修正 */
+  overflow-y: auto;
+  margin: 0;
+  border-top: 1px solid var(--color-primary);
+}
+
+.pair-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #b2e2dd;
+  font-size: 14px;
+  color: #333;
+}
+
+.pair-list button.delete-btn {
+  background: #ff6b6b;
+  border: none;
+  color: var(--color-text-light);
+  border-radius: 12px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+}
+
+.pair-list button.delete-btn:hover {
+  background: #e03e3e;
+}
+
+.score-display {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: var(--spacing-sm);
+  color: #555;
+}
+
+#allCombinationsSection {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: #f0f8ff;
+  border-radius: 12px;
+  border: 2px solid #87ceeb;
+}
+
+#allCombinationsSection h2 {
+  margin-top: 0;
+  color: #4682b4;
+}
+
+#allCombinationsList {
+  list-style-type: none;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#allCombinationsList li {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: #e8f4ff;
+  border-radius: 8px;
+  border: 1px solid #add8e6;
+}
+
+.sort-buttons {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.sort-buttons button {
+    background: #fff;
+    border: 1px solid var(--color-primary);
+    border-radius: 16px;
+    padding: 5px 10px;
+    font-weight: bold;
+    color: var(--color-accent);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sort-buttons button.active {
+    background: var(--color-primary);
+    color: var(--color-text-light);
+}
+
+#playerSearchInput {
+    display: block;
+    width: 90%;
+    max-width: 500px;
+    margin: 1rem auto;
+    padding: 8px; /* 修正 */
+    font-size: 14px; /* 修正 */
+    border: 2px solid var(--color-primary);
+    border-radius: 8px;
+    height: 100px; /* 修正 */
+    box-sizing: border-box;
+}
+
+#playerList.loading::before {
+    content: '読み込み中...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2em;
+    color: #47b6a2;
+}
+
+#playerList.loading {
+    min-height: 100px;
+    position: relative;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/* Media Queries (Team Maker) */
+@media (max-width: 991px) {
+  .player {
+    flex: 1 1 calc((100% - 12px * 2) / 3);
+  }
+}
+
+@media (max-width: 767px) {
+  .player {
+    flex: 1 1 calc((100% - 12px) / 2);
+  }
+}
+
+@media (max-width: 599px) {
+  h1 {
+    font-size: 22px;
+  }
+
+  .team-box h2 {
+    font-size: 16px;
+  }
+
+  .team-box li {
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  .pair-form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pair-form input[type="text"] {
+    flex: none;
+    width: 80%;
+  }
+
+  .player {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
 }
