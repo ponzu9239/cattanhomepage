@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>きゃたんのビンゴ抽選</title>
+  <title>きゃたんのビンゴ抽選会場 (管理者)</title>
 
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
@@ -15,7 +15,16 @@
 </head>
 
 <body>
-  <div id="header-placeholder"></div>
+  <header>
+      <h1>ド天然のきゃたん</h1>
+      <div class="hamburger" id="hamburger">☰</div>
+      <nav id="nav">
+          <a href="index.html">ホーム</a>
+          <a href="roulette.html">イベント</a>
+          <a href="team-view.html">チーム分けを見る</a>
+          <a href="data-view.html">カスタム結果を見る</a>
+      </nav>
+  </header>
 
   <main>
     <section id="bingo">
@@ -37,12 +46,12 @@
     </section>
   </main>
 
-  <div id="footer-placeholder"></div>
+  <footer>
+      <p>ド天然のきゃたん</p>
+  </footer>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-
-  <script src="common.js"></script>
 
   <script>
     // ----------------------------------------------------------------------
@@ -82,12 +91,10 @@
     const nav = document.getElementById('nav');
     const hamburger = document.getElementById("hamburger");
     
-    // ★変更点: ナビゲーション位置を動的に調整する関数 ★
+    // ★ 修正/変更点: ナビゲーション位置を動的に調整する関数 ★
     function updateNavPosition() {
-        // navはcommon.jsで読み込まれるヘッダーに含まれるため、ここではquerySelectorで取得
-        const dynamicNav = document.querySelector('nav');
-        if (header && dynamicNav) {
-            dynamicNav.style.top = header.offsetHeight + 'px';
+        if (header && nav) {
+            nav.style.top = header.offsetHeight + 'px';
         }
     }
 
@@ -242,25 +249,22 @@
       }
     });
 
+    if (hamburger && nav) {
+        hamburger.addEventListener("click", () => {
+            nav.classList.toggle("show");
+            updateNavPosition();
+        });
+    }
+    window.addEventListener('resize', updateNavPosition);
+
     document.addEventListener("DOMContentLoaded", () => {
       loadGameFromFirebase(); 
-      setupHeader('header-admin.html'); 
       
-      // ★変更点: ヘッダーの高さ調整リスナーを設定 ★
-      window.addEventListener('resize', updateNavPosition);
-      
-      // ハンバーガーメニューがcommon.jsで読み込まれた後でリスナーを追加
-      setTimeout(() => {
-          const dynamicHamburger = document.querySelector('.hamburger');
-          const dynamicNav = document.querySelector('nav');
-          if (dynamicHamburger && dynamicNav) {
-            dynamicHamburger.addEventListener("click", () => {
-                dynamicNav.classList.toggle("show");
-                updateNavPosition();
-            });
-          }
-          updateNavPosition();
-      }, 50); // header-admin.htmlの読み込みを待つ
+      // ★★★ 最終修正: 初期ロード時にメニューを確実に閉じる ★★★
+      if (nav) {
+          nav.classList.remove("show");
+      }
+      updateNavPosition(); 
     });
   </script>
 </body>
