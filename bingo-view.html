@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ビンゴ抽選結果表示</title>
+  <title>きゃたんのビンゴゲーム</title>
   
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
@@ -101,36 +101,16 @@
         }
         
         // **********************************************
-        // ★ 確定時のアニメーションロジック (参加者側) ★
+        // ★ 確定時のアニメーション判定 ★
         // **********************************************
         const latestNumInt = parseInt(currentDisplay);
         
         // 新しい番号が確定したかどうかの判定 (NaNでないことも確認)
         const isNewDrawn = drawnNumbers.includes(latestNumInt) && !lastDrawnNumbers.includes(latestNumInt) && !isNaN(latestNumInt);
         
-        // --- 確定アニメーションの適用 ---
-        if (isNewDrawn) {
-            // 1. 最新番号エリアのアニメーション
-            latestNumberEl.classList.add('stop-highlight');
-            
-            // 2. ボード上のセルアニメーション
-            // セルはIDで確実に検索
-            const finalCell = document.getElementById(`cell-${latestNumInt}`); 
-            if (finalCell) {
-                finalCell.classList.add('stop-flash');
-            }
-            
-            // アニメーションクラスを解除 (0.5秒後に実行)
-            setTimeout(() => {
-                latestNumberEl.classList.remove('stop-highlight');
-                if (finalCell) {
-                    finalCell.classList.remove('stop-flash');
-                }
-            }, 500);
-        }
-        // **********************************************
-
+        
         // --- ボードの更新 ---
+        // ボードを空にして再描画
         numberBoardEl.innerHTML = '';
         
         for (let i = 1; i <= maxNumber; i++) {
@@ -142,6 +122,11 @@
             
             if (drawnNumbers.includes(i)) {
                 cell.classList.add('drawn');
+                
+                // ★ 確定したセルにアニメーションクラスを追加 ★
+                if (isNewDrawn && i === latestNumInt) {
+                    cell.classList.add('stop-flash');
+                }
             }
             
             numberBoardEl.appendChild(cell);
@@ -153,6 +138,28 @@
             }
         }
         
+        // **********************************************
+        // ★ 確定アニメーションの実行と解除（番号エリア） ★
+        // **********************************************
+        if (isNewDrawn) {
+            // 1. 最新番号エリアのアニメーション
+            latestNumberEl.classList.add('stop-highlight');
+            
+            // アニメーションクラスを解除 (0.5秒後に実行)
+            setTimeout(() => {
+                latestNumberEl.classList.remove('stop-highlight');
+                
+                // **重要**: ボード側の stop-flash クラスは、再描画時に一度だけ付与され、CSSアニメーション終了後に自動的に消えるため、JSで消す必要はありません。
+                // ただし、念のため、確実に消したい場合は以下のように記述することも可能ですが、
+                // 今回は再描画で毎回DOMが置き換わるため、このsetTimeout内でのボードセル削除は不要です。
+                
+                // const finalCell = document.getElementById(`cell-${latestNumInt}`); 
+                // if (finalCell) {
+                //     finalCell.classList.remove('stop-flash');
+                // }
+            }, 500);
+        }
+
         // 確定番号リストを更新
         lastDrawnNumbers = drawnNumbers;
     }
