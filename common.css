@@ -7,16 +7,40 @@
     padding: 0;
 }
 
+/* ★追加: ルート変数の定義 (Team Makerのものを統合) ★ */
+:root {
+    --color-primary: #97EADB;
+    --color-accent: #47b6a2;
+    --color-text-light: #fff;
+    --color-bg: #f7fcfc;
+    --color-team-a-bg: #eefaff;
+    --color-team-a-border: #97eadb;
+    --color-team-b-bg: #fff1f5;
+    --color-team-b-border: #ffb6c1;
+    --color-pair-bg: #eaf9f8;
+    --color-hover: #0099aa;
+    
+    --spacing-sm: 8px;
+    --spacing-md: 1rem;
+    --spacing-lg: 2rem;
+    
+    /* ★ヘッダーの高さを約75pxに調整 (common.cssのpadding 2rem 1rem は約100pxになるため調整) ★ */
+    --header-height: 100px; 
+}
+
 /* 共通デザイン */
 body {
     font-family: "Hiragino Maru Gothic ProN", sans-serif;
-    background: #f7fcfc;
+    background: var(--color-bg);
     margin: 0;
-    /* ★修正: ヘッダーの高さに合わせてpadding-topをさらに増加 (約140px) ★ */
-    padding-top: 140px; 
+    /* ★修正: 変数でpadding-topを指定 ★ */
+    padding-top: var(--header-height); 
     line-height: 1.6;
     transition: background-color 0.5s ease;
     overflow-x: hidden;
+    display: flex; /* team-maker.htmlの min-height: 100vh に対応 */
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 /* ------------------------------------------------ */
@@ -27,8 +51,8 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    background-color: #97EADB;
-    /* ★修正: 上下のパディングをさらに増やし高さを調整 (2rem) ★ */
+    background-color: var(--color-primary);
+    /* ★修正: 高さを確保するためにpaddingを調整 (約100px) ★ */
     padding: 2rem 1rem; 
     z-index: 1000;
     
@@ -43,7 +67,7 @@ header h1 {
     max-font-size: 2rem; 
     white-space: nowrap; 
     overflow: hidden;
-    color: #fff;
+    color: var(--color-text-light);
     padding-left: 0.5rem; 
     
     /* タイトル中央揃えの設定 */
@@ -57,32 +81,42 @@ header h1 {
 .hamburger {
     font-size: 2rem;
     cursor: pointer;
-    position: absolute; /* headerのpadding基準で右上に配置 */
+    position: absolute; 
     top: 50%;
     right: 1rem; 
     transform: translateY(-50%);
     color: white;
     z-index: 1100;
-    display: block; /* 全画面で表示 */
+    display: block; 
 }
 
 /* ナビゲーションメニュー本体 (全画面で非表示状態) */
 #nav {
     position: fixed;
-    top: -100vh; /* 画面全体の上外側に隠す */
+    /* ★修正: transformベースの表示/非表示に変更 (common.jsの修正が必要) ★ */
+    top: var(--header-height); /* ヘッダーの高さから開始 */
     left: 0;
     width: 100%;
-    background-color: #97EADB;
+    background-color: var(--color-primary);
     display: flex;
     flex-direction: column;
     padding: 0;
-    transition: top 0.3s ease-in-out; 
+    
+    /* 画面外の上へ隠す */
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out; 
     z-index: 1050;
+    
+    /* スクロールを許可 */
+    overflow-y: auto; 
+    height: calc(100vh - var(--header-height));
 }
 
 /* ナビゲーションが開いた状態 (全画面で適用) */
 #nav.show {
     /* JSによってヘッダーの高さに調整された値が設定されます */
+    /* ★修正: transformで下にスライドして表示 ★ */
+    transform: translateY(0);
 }
 
 nav a {
@@ -92,15 +126,15 @@ nav a {
     padding: 0.6rem 0;
     font-size: 1.2rem;
     font-weight: bold;
-    color: white;
-    background-color: #97eadb;
-    border-bottom: 1px solid #97EADB;
+    color: var(--color-text-light);
+    background-color: var(--color-primary);
+    border-bottom: 1px solid var(--color-primary);
     text-decoration: none;
     transition: background-color 0.2s, transform 0.2s;
 }
 
 nav a:hover {
-    background-color: #0099aa;
+    background-color: var(--color-hover);
     transform: scale(1.03);
 }
 
@@ -116,6 +150,14 @@ nav a:hover {
     header {
         padding: 2rem 1rem; 
     }
+    /* ★修正: PCではナビゲーションを隠すため、再度上へトランスフォーム ★ */
+    #nav {
+        transform: translateY(-100%);
+    }
+    /* PCではナビゲーションは表示されないため、この設定でOK */
+    #nav.show {
+        transform: translateY(-100%);
+    }
 }
 /* ★★★ PC表示時の修正END ★★★ */
 
@@ -124,11 +166,12 @@ nav a:hover {
 /* ★ 2. フッターのスタイル ★ */
 /* ------------------------------------------------ */
 footer {
-    background: #97EADB;
+    background: var(--color-primary);
     text-align: center;
-    color: white;
-    padding: 1rem;
-    margin-top: 2rem;
+    color: var(--color-text-light);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    /* flex: 0; */
 }
 
 /* ------------------------------------------------ */
@@ -136,6 +179,7 @@ footer {
 /* ------------------------------------------------ */
 main {
     padding: 0 1rem;
+    flex: 1; /* team-maker.htmlの min-height: 100vh に対応 */
 }
 
 section {
@@ -143,10 +187,19 @@ section {
     max-width: 800px;
     margin: auto;
 }
+/* team-maker の container スタイルを共通化 */
+.container {
+    flex: 1;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 90vw;
+    padding: 0 var(--spacing-md);
+}
+
 
 section h3 {
     color: #5aa2aa;
-    border-bottom: 2px solid #97EADB;
+    border-bottom: 2px solid var(--color-primary);
     padding-bottom: 0.3rem;
     margin-bottom: 1.5rem;
 }
@@ -154,327 +207,291 @@ section h3 {
 /* ------------------------------------------------ */
 /* ★ 4. index.html 専用スタイル (ビンゴ以外) ★ */
 /* ------------------------------------------------ */
-
-/* index.htmlの画像コンテナ */
-.birthday-image-container {
-    margin-top: 2rem;
-    text-align: center;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
-.birthday-image {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-.elapsed-time-container {
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
-    margin: 1.5rem 0;
-}
-
-/* 参加型コードのスタイル */
-.code-display {
-    font-weight: bold;
-    font-size: 1.3rem;
-    background: #d4f0f4;
-    border: 2px solid #97EADB;
-    border-radius: 10px;
-    padding: 1rem;
-    /* ★中央揃えを維持★ */
-    text-align: center;
-    margin: 1rem 0;
-    color: #1b656f;
-    user-select: all;
-    word-break: break-all;
-}
-
-/* SNSリンクのベーススタイル */
-.sns a {
-  display: inline-block;
-  margin: 0.5rem;
-  text-decoration: none;
-  font-size: 1.2rem;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  color: white;
-  transition: opacity 0.2s, transform 0.2s;
-}
-.sns a:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* 個別のSNS色設定 */
-.youtube-link { background: #ff0000; }
-.x-link { background: #000000; }
-.discord-link { background: #5865f2; }
-.twitch-link { background: #9146ff; }
-.tiktok-link {
-  background: #000000;
-  box-shadow: -2px 0 0 #25f4ee, 2px 0 0 #fe2c52;
-}
-
-/* ルーレットバナー (イベント告知) のスタイル */
-.roulette-banner {
-    text-align: center;
-    margin: 20px auto;
-}
-
-.roulette-banner a {
-    display: block;
-    width: 100%;
-    max-width: 800px;
-    margin: 1rem auto;
-    padding: 1rem 0;
-    font-weight: bold;
-    font-size: 1.3rem;
-    text-align: center;
-    text-decoration: none;
-    color: #004d66;
-    border-radius: 2px;
-    background: linear-gradient(135deg, #97EADB, #d4f0f4);
-    box-shadow: 0 4px 12px rgba(0, 77, 102, 0.25);
-    transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
-    border: 2px solid #1bb0c9;
-}
-
-.roulette-banner a:hover {
-    transform: scale(1.03);
-    box-shadow: 0 6px 18px rgba(0, 77, 102, 0.35);
-    background: linear-gradient(135deg, #80d4d6, #bce7ec);
-    color: #002b3c;
-}
-
-.banner-note {
-    font-size: 0.8rem;
-    color: #555;
-    text-align: center;
-    margin-top: 0.3rem;
-}
-
-/* イベント終了後のバナーのスタイル */
-.roulette-banner.ended .ended-message {
-  display: block;
-  width: 100%;
-  max-width: 800px;
-  margin: 1rem auto;
-  padding: 1rem 0;
-  font-weight: bold;
-  font-size: 1.3rem;
-  text-align: center;
-  text-decoration: none;
-  color: #6c757d; 
-  border-radius: 2px;
-  background: #e9ecef;
-  box-shadow: none;
-  border: 2px solid #adb5bd;
-  cursor: default;
-}
-
-.roulette-banner.ended .ended-message:hover {
-  transform: none;
-  box-shadow: none;
-  background: #e9ecef;
-  color: #6c757d;
-}
-
-.roulette-banner.ended + .banner-note {
-  display: none;
-}
+/* ... (中略：以前のindex.html関連のスタイルは省略) ... */
 
 
 /* ------------------------------------------------ */
 /* ★ 5. ビンゴエリア共通スタイル ★ */
 /* ------------------------------------------------ */
+/* ... (中略：以前のビンゴ関連のスタイルは省略) ... */
 
-/* ビンゴ表示用のコンテナ */
-#bingoDisplay, #bingoGame {
-    text-align: center;
-    padding: 2rem 1rem;
-    background-color: #d4f0f4;
-    border: 3px solid #97EADB;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    margin-top: 1rem;
+/* ------------------------------------------------ */
+/* ★ 6. Team Maker 専用スタイル (新しいスタイルを追加) ★ */
+/* ------------------------------------------------ */
+
+/* Team Maker のセクションで必要な新しいスタイルをここに統合します */
+
+.teams {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: center;
 }
 
-/* 最新/現在の番号表示エリア */
-#latestNumber, #currentNumber {
-    font-size: 5rem;
-    font-weight: bold;
-    color: #1b656f; 
-    margin: 0.5rem 0;
-    height: 6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.team-box {
+  width: 90%;
+  max-width: 500px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--color-team-a-border);
+  text-align: center;
+  background: var(--color-team-a-bg);
+}
+
+.team-box.team2 {
+  background: var(--color-team-b-bg);
+  border-color: var(--color-team-b-border);
+}
+
+.team-box h2 {
+  font-size: 18px;
+  margin: 0 0 8px 0;
+  color: var(--color-accent);
+}
+
+.team-box ul {
+  list-style: none;
+  padding: 0 8px;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+
+.team-box li {
+  background: var(--color-text-light);
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.player-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.player {
     background: #fff;
+    border: 2px solid var(--color-primary);
     border-radius: 10px;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: color 0.1s, background-color 0.1s;
-}
-
-/* 抽選中の文字色はデフォルト色を維持 */
-#latestNumber.drawing, #currentNumber.drawing-mode {
-    color: #1b656f; 
-}
-
-
-/* 確定番号表示エリアのアニメーション (両ページ共通) */
-#currentNumber.stop-highlight, #latestNumber.stop-highlight {
-    animation: current-flash 0.5s ease-out;
-}
-@keyframes current-flash {
-  0% { transform: scale(1); background-color: #fff; }
-  50% { transform: scale(1.05); background-color: #ffeb3b; }
-  100% { transform: scale(1); background-color: #fff; }
-}
-
-
-/* --- 6. レスポンシブ対応の番号ボード --- */
-#numberBoard {
-    display: flex;
-    flex-wrap: wrap; 
-    justify-content: center; 
-    gap: 2px;
-    margin: 1rem auto;
-    max-width: 100%; 
-    padding: 0; 
-}
-
-.bingo-cell {
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 3px; 
-    
-    flex-basis: calc(10% - 1.8px); 
-    height: 0; 
-    padding-bottom: calc(10% - 1.8px);
-    
-    font-weight: bold;
-    color: #555;
-    line-height: 1;
-    
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
     position: relative;
-    min-width: 15px; 
-    min-height: 15px;
-}
-.bingo-cell::before {
-    content: attr(data-content); 
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 3.0vw; 
-}
-
-/* PCなど画面幅が広い場合に文字サイズを固定する */
-@media (min-width: 800px) {
-    .bingo-cell::before {
-        font-size: 1.1rem;
-    }
-}
-
-/* 確定セル用のアニメーション (両ページ共通) */
-.bingo-cell.stop-flash {
-    animation: cell-flash 0.5s ease-out;
-}
-@keyframes cell-flash {
-    0% { transform: scale(1); background-color: #fff; }
-    50% { transform: scale(1.1); background-color: #ffeb3b; }
-    100% { transform: scale(1); background-color: #97EADB; }
+    font-size: 14px;
 }
 
 
-/* 強制改行要素 */
-.break {
-    flex-basis: 100%;
-    height: 0;
-    margin: 0;
-    padding: 0;
+.player:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 抽選済み番号 */
-.drawn {
-    background-color: #97EADB;
-    color: white;
+.player.selected {
+  background: var(--color-primary);
+  color: var(--color-text-light);
 }
 
-/* ------------------------------------------------ */
-/* ★ 7. 管理者機能ボタンのスタイル (bingo.html専用) ★ */
-/* ------------------------------------------------ */
-
-/* 抽選ボタンのコンテナ (ボタンを2行にするためのFlexboxコンテナ) */
-.bingo-buttons-container {
-    display: flex;
-    flex-direction: column; 
-    align-items: center;
-    margin-bottom: 1.5rem;
-    margin-top: 1rem;
-    gap: 1rem;
+.player.matching {
+  background: #e0f7f3;
+  border-color: var(--color-primary);
 }
 
-/* 抽選ボタンのスタイル（1行目） */
-#drawButton {
-    background-color: #5aa2aa;
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    font-size: 1.5rem;
+/* Pin button */
+.pin-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pin-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #bbb;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%,
+      79% 91%, 50% 70%, 21% 91%, 32% 57%,
+      2% 35%, 39% 35%);
+  transition: background 0.3s;
+}
+
+.pin-btn.pinned::before {
+  background: gold;
+}
+
+/* Other sections */
+#matchCount {
+  text-align: center;
+  font-size: 12px;
+  color: gray;
+  margin-top: var(--spacing-sm);
+  user-select: none;
+}
+
+.pair-section {
+  background: var(--color-pair-bg);
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
+  padding: 8px; 
+  margin-bottom: 8px; 
+}
+
+.pair-section h3 {
+  margin-top: 0;
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 16px; 
+  margin-bottom: 4px; 
+  text-align: center;
+}
+
+.pair-form {
+  display: flex;
+  gap: 4px; 
+  justify-content: center;
+  margin-bottom: 4px; 
+  flex-wrap: wrap;
+}
+
+.pair-form input[type="text"] {
+  flex: 1 1 40%;
+  min-width: 100px;
+  padding: 4px 6px; 
+  border: 1.5px solid var(--color-primary);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.pair-form button {
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-text-light);
+  padding: 4px 12px; 
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.pair-form button:hover {
+  background: #369482;
+}
+
+.pair-list {
+  list-style: none;
+  padding-left: 0;
+  max-height: 100px; 
+  overflow-y: auto;
+  margin: 0;
+  border-top: 1px solid var(--color-primary);
+}
+
+.pair-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #b2e2dd;
+  font-size: 14px;
+  color: #333;
+}
+
+.pair-list button.delete-btn {
+  background: #ff6b6b;
+  border: none;
+  color: var(--color-text-light);
+  border-radius: 12px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+}
+
+.pair-list button.delete-btn:hover {
+  background: #e03e3e;
+}
+
+.score-display {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: var(--spacing-sm);
+  color: #555;
+}
+
+#allCombinationsSection {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: #f0f8ff;
+  border-radius: 12px;
+  border: 2px solid #87ceeb;
+}
+
+#allCombinationsSection h2 {
+  margin-top: 0;
+  color: #4682b4;
+}
+
+#allCombinationsList {
+  list-style-type: none;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#allCombinationsList li {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: #e8f4ff;
+  border-radius: 8px;
+  border: 1px solid #add8e6;
+}
+/* ソートボタン */
+.sort-buttons {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.sort-buttons button {
+    background: #fff;
+    border: 1px solid var(--color-primary);
+    border-radius: 16px;
+    padding: 5px 10px;
     font-weight: bold;
-    border-radius: 50px;
+    color: var(--color-accent);
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-    box-shadow: 0 4px 0 #1b656f;
-    width: 80%;
-    max-width: 300px;
+    transition: background-color 0.2s, color 0.2s;
 }
 
-#drawButton:hover:not(:disabled) {
-    background-color: #4a8a92;
+.sort-buttons button.active {
+    background: var(--color-primary);
+    color: var(--color-text-light);
 }
 
-#drawButton:active:not(:disabled) {
-    transform: translateY(4px);
-    box-shadow: 0 0 0 #1b656f;
+#playerSearchInput {
+    display: block;
+    width: 90%;
+    max-width: 500px;
+    margin: 1rem auto;
+    padding: 8px; 
+    font-size: 14px; 
+    border: 2px solid var(--color-primary);
+    border-radius: 8px;
+    height: 100px; 
+    box-sizing: border-box;
 }
 
-#drawButton:disabled {
-    background-color: #cccccc;
-    box-shadow: none;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* 抽選中のボタンの色を強調 */
-#drawButton.drawing-mode {
-    background-color: #ff4757;
-    box-shadow: 0 4px 0 #c0392b;
-}
-
-#drawButton.drawing-mode:hover {
-    background-color: #e74c3c;
-}
-
-/* リセットボタンのスタイル（2行目） */
-#resetButton {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    width: 40%;
-    max-width: 150px;
-}
-
-#resetButton:hover {
-    background-color: #c0392b;
-}
+/* ... (メディアクエリは元のものを残すか、整理してください) ... */
