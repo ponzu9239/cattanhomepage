@@ -1,4 +1,4 @@
-/* common.css: 全ページ共通スタイル (ビンゴ、ホーム画面対応) */
+　/* common.css: 全ページ共通スタイル (ビンゴ、ホーム画面対応) */
 
 /* ボックスモデルの統一 */
 * {
@@ -34,12 +34,11 @@ header {
 
 header h1 {
     margin: 0;
-    /* ★変更点: レスポンシブ対応と改行禁止 ★ */
+    /* レスポンシブ対応と改行禁止 */
     font-size: 5vw; 
     max-font-size: 2rem; 
     white-space: nowrap; 
     overflow: hidden;
-    /* --------------------------------------------- */
     color: #fff;
 }
 
@@ -56,9 +55,8 @@ header h1 {
     cursor: pointer;
     position: absolute;
     top: 50%;
-    /* ★変更点: 右端に寄せる (3rem -> 1rem) ★ */
+    /* 修正済み: 右端に寄せる */
     right: 1rem; 
-    /* ------------------- */
     color: white;
     transform: translateY(-50%);
     z-index: 1100;
@@ -79,7 +77,7 @@ nav {
 }
 
 nav.show {
-    /* JSで上書きされますが、CSSでも最低値を設定 */
+    /* JSでヘッダーの高さに基づいて動的に上書きされます */
     top: 75px; 
 }
 
