@@ -1013,57 +1013,36 @@ h1 {
 }
 
 .bingo-banner a {
-  display: inline-block;
-  padding: 20px 40px;
-  font-size: 1.5rem;
+  display: block;
+  width: 100%;               /* 横幅いっぱい */
+  padding: 20px 0;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #fff;
   text-decoration: none;
   border-radius: 16px;
+  text-align: center;
+  line-height: 1.4;
   position: relative;
   overflow: hidden;
-  text-align: center;
-  line-height: 1.4; /* 行間調整 */
-  
-  background: linear-gradient(135deg, #ffb347, #ffcc33, #ff6f61);
-  background-size: 400% 400%;
-  animation: bingoGradient 8s ease infinite;
-  
-  box-shadow: 0 8px 20px rgba(255, 179, 71, 0.5), 0 0 15px rgba(255, 111, 97, 0.3);
+
+  /* ピンク系グラデーション */
+  background: linear-gradient(270deg, #ff9aa2, #ffb7b2, #ffcad4, #ffe0e6, #ff9aa2);
+  background-size: 1200% 1200%; /* グラデーションを広くして流れるように */
+  animation: pinkGradient 10s ease infinite;
+
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
-/* 光る擬似要素 */
-.bingo-banner a::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
-  transform: rotate(45deg);
-  opacity: 0.3;
-  animation: bingoShine 3s linear infinite;
-  pointer-events: none;
-}
-
-/* hover効果 */
 .bingo-banner a:hover {
-  transform: scale(1.1);
-  box-shadow: 0 12px 28px rgba(255, 179, 71, 0.7), 0 0 20px rgba(255, 111, 97, 0.5);
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
 /* グラデーションアニメーション */
-@keyframes bingoGradient {
+@keyframes pinkGradient {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
-}
-
-/* 光るアニメーション */
-@keyframes bingoShine {
-  0% { transform: rotate(45deg) translate(-200%, -200%); }
-  50% { transform: rotate(45deg) translate(200%, 200%); }
-  100% { transform: rotate(45deg) translate(-200%, -200%); }
 }
