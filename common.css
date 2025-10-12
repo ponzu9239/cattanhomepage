@@ -56,7 +56,7 @@ header h1 {
     cursor: pointer;
     position: absolute;
     top: 50%;
-    right: 3rem;
+    right: 1rem;
     color: white;
     transform: translateY(-50%);
     z-index: 1100;
