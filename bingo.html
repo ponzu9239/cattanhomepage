@@ -25,8 +25,10 @@
         <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">引かれた番号</p>
         <div id="currentNumber">--</div>
 
-        <button id="drawButton">番号を引く！</button>
-        <button id="resetButton">リセット</button>
+        <div class="bingo-buttons-container">
+            <button id="drawButton">番号を引く！</button>
+            <button id="resetButton">リセット</button>
+        </div>
 
         <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">すでに引かれた番号一覧 (1〜75)</h4>
         <div id="numberBoard">
@@ -139,7 +141,7 @@
       isDrawing = true;
       drawButton.textContent = 'ストップ！';
       drawButton.classList.add('drawing-mode');
-      currentNumberEl.classList.remove('stop-highlight'); // 既存アニメーションクラスを削除
+      currentNumberEl.classList.remove('stop-highlight');
 
       animationInterval = setInterval(() => {
         const randomIndex = Math.floor(Math.random() * availableNumbers.length);
@@ -147,7 +149,6 @@
           const displayNum = availableNumbers[randomIndex];
           currentNumberEl.textContent = displayNum;
           
-          // アニメーション中の数字もFirebaseに書き込み、参加者ページに反映させる
           bingoRef.update({ currentDisplay: displayNum });
         } else {
           stopAndDrawNumber();
@@ -163,7 +164,6 @@
       animationInterval = null;
       isDrawing = false;
       
-      // ゲーム終了チェック
       if (availableNumbers.length === 0) {
         const finalNum = drawnNumbers[drawnNumbers.length - 1] || '--';
         currentNumberEl.textContent = finalNum;
@@ -171,14 +171,12 @@
         return;
       }
 
-      // 抽選番号を確定
       const randomIndex = Math.floor(Math.random() * availableNumbers.length);
       const drawnNumber = availableNumbers[randomIndex];
 
       availableNumbers.splice(randomIndex, 1);
       drawnNumbers.push(drawnNumber);
 
-      // Firebaseに確定番号を保存
       saveToFirebase({ 
           drawnNumbers: drawnNumbers, 
           currentDisplay: drawnNumber 
@@ -224,15 +222,13 @@
 
     resetButton.addEventListener('click', () => {
       if (confirm('ビンゴゲームをリセットしますか？全ての抽選結果が消えます。')) {
-        // Firebaseのデータを初期化
         bingoRef.set({ drawnNumbers: [], currentDisplay: '--' });
       }
     });
 
     document.addEventListener("DOMContentLoaded", () => {
-      loadGameFromFirebase(); // ゲームの状態をFirebaseから読み込み
+      loadGameFromFirebase(); 
 
-      // ★ 管理者用ヘッダーを読み込むための呼び出し ★
       setupHeader('header-admin.html');
     });
   </script>
