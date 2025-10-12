@@ -1012,26 +1012,57 @@ h1 {
     display: none; 
 }
 
-/* イベントバナー */
+/* 🌟豪華なイベントバナー */
 .event-banner {
   display: block;
-  margin: 20px auto;
-  padding: 25px 0;
-  max-width: 700px;
+  margin: 30px auto;
+  padding: 35px 0;
+  max-width: 750px;
   text-align: center;
-  font-size: 1.6rem;
-  font-weight: 600;
+  font-size: 1.8rem;
+  font-weight: 700;
   color: #fff;
   text-decoration: none;
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  background: rgba(59, 130, 246, 0.25); /* 半透明ブルー */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
-  transition: all 0.3s ease;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(0, 150, 255, 0.4), rgba(180, 70, 255, 0.4));
+  backdrop-filter: blur(12px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 30px rgba(100, 180, 255, 0.5);
+  transition: all 0.4s ease;
+}
+
+/* バナーの中を流れる光のエフェクト */
+.event-banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: 0.8s;
+}
+
+.event-banner:hover::before {
+  left: 125%;
 }
 
 .event-banner:hover {
-  background: rgba(59, 130, 246, 0.4);
-  transform: scale(1.03);
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(120, 200, 255, 0.8);
+  background: linear-gradient(135deg, rgba(80, 160, 255, 0.6), rgba(200, 100, 255, 0.6));
+}
+
+.banner-text {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
 }
