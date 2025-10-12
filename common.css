@@ -903,45 +903,41 @@ h1 {
 .bingo-banner {
   display: block;
   width: 100%;
-  padding: 24px 0;
+  padding: 20px 0;
   text-align: center;
-  background: linear-gradient(135deg, #ff9aa2, #ffcad4, #ffb7b2);
-  border: 4px solid #ff7f9a;
-  border-radius: 16px;
-  color: #fff;
-  font-weight: 900;
-  line-height: 1.2;
-  text-transform: uppercase;
-  text-decoration: none; /* 下線消す */
+  background: linear-gradient(135deg, #ff9ccf, #ff70a6, #ff4d94);
+  color: white;
   font-size: 2rem;
-  cursor: pointer;
-
-  /* 文字装飾を豪華に */
-  text-shadow:
-    0 1px 0 #fff,
-    0 2px 0 #ffcad4,
-    0 3px 0 #ffb7b2,
-    0 4px 0 #ff9aa2,
-    0 5px 10px rgba(0,0,0,0.3),
-    0 0 8px #fff,
-    0 0 12px #ffb7b2,
-    0 0 16px #ff9aa2;
-  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.6);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.bingo-banner:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 25px rgba(255, 105, 180, 0.8);
+  font-weight: bold;
+  border: 3px solid #ff70a6;
+  border-radius: 16px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .bingo-banner .small {
   display: block;
   font-size: 1.2rem;
-  font-weight: 700;
-  color: #fffde7;
-  text-shadow: 0 1px 0 #fff, 0 2px 0 #ffcad4;
-  opacity: 0.8; /* 控えめ */
+  font-weight: normal;
+  margin-top: 8px;
+  color: rgba(255,255,255,0.9);
+}
+
+/* きらめきアニメーション（背景に軽く光が動く） */
+.bingo-banner::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+  transform: rotate(45deg);
+  animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
 }
