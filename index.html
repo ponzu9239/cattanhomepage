@@ -90,8 +90,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
-    <script src="common.js"></script>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
@@ -111,7 +109,7 @@
         const header = document.querySelector('header');
         
         // ----------------------------------------------------------------------
-        // ★ 変更点: ナビゲーション位置を動的に調整する関数 ★
+        // ★ 修正/変更点: ナビゲーション位置を動的に調整し、隙間をなくす ★
         // ----------------------------------------------------------------------
         function updateNavPosition() {
             if (header && nav) {
@@ -121,7 +119,7 @@
         }
 
         // ----------------------------------------------------------------------
-        // 配信URLと参加コードの読み込みロジック
+        // 配信URLと参加コードの読み込みロジック (変更なし)
         // ----------------------------------------------------------------------
         dbRef.on("value", (snapshot) => {
             const data = snapshot.val() || {};
@@ -177,28 +175,19 @@
         if (hamburger && nav) {
             hamburger.addEventListener("click", () => {
                 nav.classList.toggle("show");
-                // ★変更点: 開閉時に高さを調整 ★
                 updateNavPosition(); 
-
-                const links = nav.querySelectorAll("a");
-                links.forEach((link, index) => {
-                    if (nav.classList.contains("show")) {
-                        link.style.opacity = "1";
-                        link.style.transform = "translateY(0)";
-                    } else {
-                        link.style.opacity = "0";
-                        link.style.transform = "translateY(-20px)";
-                        link.style.transitionDelay = "0s";
-                    }
-                });
+                // ナビゲーションリンクのアニメーションロジックは削除（簡略化）
             });
         }
         
-        // 画面サイズ変更時とDOM読み込み完了時にも高さを更新
+        // 画面サイズ変更時にも高さを更新
         window.addEventListener('resize', updateNavPosition);
+        
         document.addEventListener("DOMContentLoaded", () => {
-            // common.js内のsetupHeaderは仮定
-            setupHeader('header-user.html'); 
+            // ★★★ 最終修正: 初期ロード時にメニューを確実に閉じる ★★★
+            if (nav) {
+                nav.classList.remove("show");
+            }
             updateNavPosition(); // 初期ロード時にも実行
         });
         
