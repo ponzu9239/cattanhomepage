@@ -104,93 +104,94 @@
         firebase.initializeApp(firebaseConfig);
 
         const dbRef = firebase.database().ref("/cattan");
-        const hamburger = document.getElementById("hamburger");
-        const nav = document.getElementById("nav");
-        const header = document.querySelector('header');
         
         // ----------------------------------------------------------------------
-        // ★ 修正/変更点: ナビゲーション位置を動的に調整し、隙間をなくす ★
+        // DOMContentLoaded で実行されるメインロジック
         // ----------------------------------------------------------------------
-        function updateNavPosition() {
-            if (header && nav) {
-                // ヘッダーの実際の高さを取得し、navのtopに設定
-                nav.style.top = header.offsetHeight + 'px';
-            }
-        }
-
-        // ----------------------------------------------------------------------
-        // 配信URLと参加コードの読み込みロジック (変更なし)
-        // ----------------------------------------------------------------------
-        dbRef.on("value", (snapshot) => {
-            const data = snapshot.val() || {};
-
-            const code = data.code || "現在、参加型カスタムは行われておりません。";
-            const codeEl = document.getElementById("participantCodeDisplay");
-            codeEl.textContent = code;
-
-            const url = data.stream || "現在、配信は行われていません。";
-            const container = document.getElementById("videoContainer");
-
-            if (!url || url === "現在、配信は行われていません。") {
-                container.textContent = "現在、配信は行われていません。";
-                return;
-            }
-
-            let iframeSrc = "";
-            let isTwitch = url.includes("twitch.tv");
-            
-            if (url.includes("youtube.com") || url.includes("youtu.be")) {
-                let videoId = "";
-                const ytMatch = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
-                if (ytMatch) {
-                    videoId = ytMatch[1];
-                } else {
-                    const liveMatch = url.match(/live\/([a-zA-Z0-9_-]+)/);
-                    if (liveMatch) videoId = liveMatch[1];
-                }
-                if (videoId) {
-                    iframeSrc = `https://www.youtube.com/embed/${videoId}`;
-                } else {
-                    iframeSrc = url;
-                }
-            } else if (isTwitch) {
-                const twitchMatch = url.match(/twitch.tv\/([^\/]+)/);
-                const channelName = twitchMatch ? twitchMatch[1] : null;
-                if (channelName) {
-                    const parentDomain = location.hostname;
-                    iframeSrc = `https://player.twitch.tv/?channel=${channelName}&parent=${parentDomain}&autoplay=false`;
-                } else {
-                    iframeSrc = url;
-                }
-            } else {
-                iframeSrc = url;
-            }
-
-            container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
-        });
-
-        // ----------------------------------------------------------------------
-        // イベントリスナー
-        // ----------------------------------------------------------------------
-        if (hamburger && nav) {
-            hamburger.addEventListener("click", () => {
-                nav.classList.toggle("show");
-                updateNavPosition(); 
-                // ナビゲーションリンクのアニメーションロジックは削除（簡略化）
-            });
-        }
-        
-        // 画面サイズ変更時にも高さを更新
-        window.addEventListener('resize', updateNavPosition);
-        
         document.addEventListener("DOMContentLoaded", () => {
-            // ★★★ 最終修正: 初期ロード時にメニューを確実に閉じる ★★★
-            if (nav) {
-                nav.classList.remove("show");
+            const hamburger = document.getElementById("hamburger");
+            const nav = document.getElementById("nav");
+            const header = document.querySelector('header');
+            
+            // ナビゲーション位置を動的に調整する関数
+            function updateNavPosition() {
+                if (header && nav) {
+                    // ヘッダーの実際の高さを取得し、navのtopに設定
+                    nav.style.top = header.offsetHeight + 'px';
+                }
             }
-            updateNavPosition(); // 初期ロード時にも実行
+
+            // ★★★ 修正箇所: 初期ロード時にメニューを確実に閉じる ★★★
+            if (nav) {
+                nav.classList.remove("show"); 
+            }
+            updateNavPosition(); // 初期位置を設定
+            
+            // ----------------------------------------------------------------------
+            // イベントリスナーの登録
+            // ----------------------------------------------------------------------
+            if (hamburger && nav) {
+                // ハンバーガーアイコンクリック時の動作
+                hamburger.addEventListener("click", () => {
+                    nav.classList.toggle("show");
+                    updateNavPosition(); // 開閉時にも高さを再調整
+                });
+            }
+            
+            // 画面サイズ変更時にも高さを更新
+            window.addEventListener('resize', updateNavPosition);
+
+            // ----------------------------------------------------------------------
+            // Firebaseの配信URLと参加コードの読み込みロジック 
+            // ----------------------------------------------------------------------
+            dbRef.on("value", (snapshot) => {
+                const data = snapshot.val() || {};
+
+                const code = data.code || "現在、参加型カスタムは行われておりません。";
+                const codeEl = document.getElementById("participantCodeDisplay");
+                codeEl.textContent = code;
+
+                const url = data.stream || "現在、配信は行われていません。";
+                const container = document.getElementById("videoContainer");
+
+                if (!url || url === "現在、配信は行われていません。") {
+                    container.textContent = "現在、配信は行われていません。";
+                    return;
+                }
+
+                let iframeSrc = "";
+                let isTwitch = url.includes("twitch.tv");
+                
+                if (url.includes("youtube.com") || url.includes("youtu.be")) {
+                    let videoId = "";
+                    const ytMatch = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
+                    if (ytMatch) {
+                        videoId = ytMatch[1];
+                    } else {
+                        const liveMatch = url.match(/live\/([a-zA-Z0-9_-]+)/);
+                        if (liveMatch) videoId = liveMatch[1];
+                    }
+                    if (videoId) {
+                        iframeSrc = `https://www.youtube.com/embed/${videoId}`;
+                    } else {
+                        iframeSrc = url;
+                    }
+                } else if (isTwitch) {
+                    const twitchMatch = url.match(/twitch.tv\/([^\/]+)/);
+                    const channelName = twitchMatch ? twitchMatch[1] : null;
+                    if (channelName) {
+                        const parentDomain = location.hostname;
+                        iframeSrc = `https://player.twitch.tv/?channel=${channelName}&parent=${parentDomain}&autoplay=false`;
+                    } else {
+                        iframeSrc = url;
+                    }
+                } else {
+                    iframeSrc = url;
+                }
+
+                container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
+            });
         });
-        
     </script>
 </body>
 </html>
