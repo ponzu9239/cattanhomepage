@@ -1,4 +1,4 @@
-　<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -12,6 +12,17 @@
   <meta property="og:image:height" content="630">
 
   <link rel="stylesheet" href="common.css">
+  
+  <style>
+    /* 参加者ページとして、管理者ボタンを非表示にするためのCSS */
+    #drawButton, #resetButton {
+      display: none !important;
+    }
+    /* ボタン削除に伴い、マージンを調整 */
+    #bingoDisplay {
+      padding-bottom: 3rem; 
+    }
+  </style>
 
 </head>
 
@@ -20,7 +31,7 @@
 
   <main>
     <section id="bingo">
-      <h3>📢 抽選結果 📢</h3>
+      <h3>📢 発表中の番号 📢</h3>
 
       <div id="bingoDisplay">
         <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">現在の表示番号</p>
@@ -55,21 +66,22 @@
       measurementId: "G-ZNGEZZWMTP"
     };
 
-    // Firebase初期化とデータベース参照の取得
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const bingoRef = db.ref('bingo'); // /bingo 全体を監視
+    const bingoRef = db.ref('bingo'); 
 
     const maxNumber = 75;
     const latestNumberEl = document.getElementById('latestNumber');
     const numberBoardEl = document.getElementById('numberBoard');
 
-    // ボードの描画処理 (常に10個/行、Flexbox対応)
+    let lastDrawnNumbers = []; 
+
+    // ボードの描画処理
     function renderBoard(drawnNumbers, currentDisplay) {
         // --- 最新表示の更新 ---
         latestNumberEl.textContent = currentDisplay !== '--' ? currentDisplay : '--';
         
-        // 抽選中かどうかを判断し、表示に反映
+        // 抽選中かどうかの判断
         const isDrawing = !drawnNumbers.includes(parseInt(currentDisplay)) && currentDisplay !== '--';
         
         if (isDrawing) {
@@ -77,6 +89,33 @@
         } else {
             latestNumberEl.classList.remove('drawing');
         }
+        
+        // **********************************************
+        // ★ 確定時のアニメーションロジック (参加者側) ★
+        // **********************************************
+        const latestNumInt = parseInt(currentDisplay);
+        
+        const isNewDrawn = drawnNumbers.includes(latestNumInt) && !lastDrawnNumbers.includes(latestNumInt);
+        
+        if (isNewDrawn) {
+            // 1. 最新番号エリアのアニメーション
+            latestNumberEl.classList.add('stop-highlight');
+            
+            // 2. ボード上のセルアニメーション
+            const finalCell = numberBoardEl.querySelector(`[data-content="${latestNumInt}"]`);
+            if (finalCell) {
+                finalCell.classList.add('stop-flash');
+            }
+            
+            // アニメーションクラスを解除
+            setTimeout(() => {
+                latestNumberEl.classList.remove('stop-highlight');
+                if (finalCell) {
+                    finalCell.classList.remove('stop-flash');
+                }
+            }, 500);
+        }
+        // **********************************************
 
         // --- ボードの更新 ---
         numberBoardEl.innerHTML = '';
@@ -86,20 +125,20 @@
             cell.className = 'bingo-cell';
             cell.setAttribute('data-content', i);
             
-            // 抽選済みの数字ならスタイルを適用
             if (drawnNumbers.includes(i)) {
                 cell.classList.add('drawn');
             }
             
             numberBoardEl.appendChild(cell);
 
-            // 10個ごとに改行要素を挿入 (11個目が2行目になるように)
             if (i % 10 === 0 && i < maxNumber) {
                 const breakEl = document.createElement('div');
                 breakEl.className = 'break';
                 numberBoardEl.appendChild(breakEl);
             }
         }
+        
+        lastDrawnNumbers = drawnNumbers;
     }
 
     // Firebaseのデータ変更をリアルタイムで監視し、画面を自動更新
@@ -109,17 +148,12 @@
         const currentDisplay = data.currentDisplay || '--'; 
 
         renderBoard(drawnNumbers, currentDisplay);
-        console.log("Firebaseから最新のデータを受信しました。");
     }, (error) => {
         console.error("Firebaseからのデータ受信エラー:", error);
     });
     
     document.addEventListener("DOMContentLoaded", () => {
-        // ★ 共通JSの setupHeader 関数を呼び出してヘッダー/フッターを読み込む ★
-        // 参加者ページなので 'header-user.html' を指定
         setupHeader('header-user.html');
-        
-        // 元のHTMLにあったハンバーガーメニューのJSロジックはcommon.jsのsetupHeader()内に統合されました。
     });
 
   </script>
