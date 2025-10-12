@@ -1,4 +1,4 @@
-/* common.css: 全ページ共通スタイル (PCでスライドメニュー有効化) */
+/* common.css: 全ページ共通スタイル (タイトル中央揃え & スライドメニュー有効化) */
 
 /* ボックスモデルの統一 */
 * {
@@ -31,18 +31,26 @@ header {
     z-index: 1000;
     
     display: flex;
-    justify-content: space-between; 
+    /* タイトル中央揃えのため、justify-contentはcenterに調整 */
+    justify-content: center; 
     align-items: center;
 }
 
 header h1 {
     margin: 0;
+    /* レスポンシブ対応と改行禁止 */
     font-size: 5vw; 
     max-font-size: 2rem; 
     white-space: nowrap; 
     overflow: hidden;
     color: #fff;
     padding-left: 0.5rem; 
+    
+    /* ★タイトル中央揃えの修正点★ */
+    text-align: center; /* テキストを中央寄せ */
+    width: 100%; /* 親要素の幅を占有 */
+    position: absolute; /* ハンバーガーアイコンの上に重ならないように（実質中央配置） */
+    left: 0;
 }
 
 /* ハンバーガーメニューアイコン (全画面で表示) */
@@ -61,8 +69,8 @@ header h1 {
 /* ナビゲーションメニュー本体 (全画面で非表示状態) */
 #nav {
     position: fixed;
-    /* ★CRITICAL FIX: これが初期の非表示状態 (上端外) ★ */
-    top: -100vh; /* 画面全体の上外側に隠す */
+    /* ★初期の非表示状態 (上端外) ★ */
+    top: -100vh; 
     left: 0;
     width: 100%;
     background-color: #97EADB;
@@ -77,7 +85,7 @@ header h1 {
 
 /* ナビゲーションが開いた状態 (全画面で適用) */
 #nav.show {
-    /* JSによってヘッダーの高さに調整された値が設定されます */
+    /* JSによってヘッダーの高さに調整された値が設定されます (例: top: 75px;) */
 }
 
 nav a {
@@ -100,28 +108,17 @@ nav a:hover {
 }
 
 
-/* ★★★ PC表示時の修正（幅800px以上） ★★★ */
+/* ★★★ PC表示時の調整（幅800px以上） ★★★ */
 @media (min-width: 800px) {
     /* 広い画面での文字サイズを固定 */
     header h1 {
         font-size: 2rem; 
     }
     
-    /* PCでもハンバーガーアイコン、ナビゲーションの挙動はモバイルと同じ */
-    
     /* ヘッダーのレイアウト調整 */
     header {
         padding: 0.8rem 1rem;
     }
-    
-    /* PCでのリンクスタイル (縦並び/スライドを維持しつつ、PC表示として見栄えを調整するならここを修正) */
-    nav a {
-        /* PCでもリンク全体にホバー効果が適用されるように調整を維持 */
-        padding: 0.6rem 0;
-        border-bottom: 1px solid #97EADB; 
-    }
-    
-    /* PCではコンテンツのスクロールバーを非表示にする設定を削除 */
 }
 /* ★★★ PC表示時の修正END ★★★ */
 
