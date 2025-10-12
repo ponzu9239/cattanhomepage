@@ -1,4 +1,6 @@
-/* common.css の内容 */
+/* common.css: 全ページ共通スタイル */
+
+/* ボックスモデルの統一 */
 * {
     box-sizing: border-box; 
 }
@@ -13,7 +15,9 @@ body {
     overflow-x: hidden;
 }
 
-/* ★ ヘッダーのCSS ★ */
+/* ------------------------------------------------ */
+/* ★ 1. ヘッダー/ナビゲーションのスタイル ★ */
+/* ------------------------------------------------ */
 header {
     position: fixed;
     top: 0;
@@ -31,6 +35,7 @@ header h1 {
     color: #fff;
 }
 
+/* ハンバーガーメニューアイコン */
 .hamburger {
     font-size: 2rem;
     cursor: pointer;
@@ -42,6 +47,7 @@ header h1 {
     z-index: 1100;
 }
 
+/* ナビゲーションメニュー本体 */
 nav {
     position: fixed;
     top: -100%;
@@ -78,7 +84,9 @@ nav a:hover {
     transform: scale(1.03);
 }
 
-/* ★ フッターのCSS ★ */
+/* ------------------------------------------------ */
+/* ★ 2. フッターのスタイル ★ */
+/* ------------------------------------------------ */
 footer {
     background: #97EADB;
     text-align: center;
@@ -87,7 +95,9 @@ footer {
     margin-top: 2rem;
 }
 
-/* セクションの共通スタイル */
+/* ------------------------------------------------ */
+/* ★ 3. セクションと見出しのスタイル ★ */
+/* ------------------------------------------------ */
 section {
     padding: 2rem;
     max-width: 800px;
@@ -99,6 +109,10 @@ section h3 {
     border-bottom: 2px solid #97EADB;
     padding-bottom: 0.3rem;
 }
+
+/* ------------------------------------------------ */
+/* ★ 4. ホーム画面固有要素のスタイル ★ */
+/* ------------------------------------------------ */
 
 /* 参加型コードのスタイル */
 .code-display {
@@ -115,7 +129,7 @@ section h3 {
     word-break: break-all;
 }
 
-/* SNSスタイル */
+/* SNSリンクのスタイル */
 .sns a {
   display: inline-block;
   margin: 0.5rem;
@@ -126,6 +140,7 @@ section h3 {
   color: white;
 }
 
+/* 個別の色設定 */
 .youtube-link {
   background: #ff0000;
 }
@@ -214,4 +229,175 @@ section h3 {
 
 .roulette-banner.ended + .banner-note {
   display: none;
+}
+
+
+/* ------------------------------------------------ */
+/* ★ 5. ビンゴページ固有要素のスタイル ★ */
+/* ------------------------------------------------ */
+
+/* ビンゴコントロールと表示エリア */
+#bingoGame {
+    text-align: center;
+    padding: 2rem 1rem;
+    background-color: #d4f0f4;
+    border: 3px solid #97EADB;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+}
+
+#currentNumber {
+    font-size: 5rem;
+    font-weight: bold;
+    color: #1b656f;
+    margin: 0.5rem 0;
+    height: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+/* 抽選番号確定時のアニメーション */
+#currentNumber.stop-highlight {
+    animation: current-flash 0.5s ease-out;
+}
+@keyframes current-flash {
+  0% { transform: scale(1); background-color: #fff; }
+  50% { transform: scale(1.05); background-color: #ffeb3b; }
+  100% { transform: scale(1); background-color: #fff; }
+}
+
+
+/* 抽選ボタン (管理者ページ用 - 参加者ページでは非表示推奨) */
+#drawButton {
+    background-color: #5aa2aa;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 0 #1b656f;
+}
+
+#drawButton:hover:not(:disabled) {
+    background-color: #4a8a92;
+}
+
+#drawButton:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #1b656f;
+}
+
+#drawButton:disabled {
+    background-color: #cccccc;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 抽選中のボタンの色を強調 */
+#drawButton.drawing-mode {
+    background-color: #ff4757;
+    box-shadow: 0 4px 0 #c0392b;
+}
+
+#drawButton.drawing-mode:hover {
+    background-color: #e74c3c;
+}
+
+
+/* --- レスポンシブ対応の番号ボード --- */
+#numberBoard {
+    display: flex;
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 2px;
+    margin: 1rem auto;
+    max-width: 100%; 
+    padding: 0; 
+}
+
+.bingo-cell {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px; 
+    
+    /* 10個/行にするための計算 */
+    flex-basis: calc(10% - 1.8px); 
+    height: 0; 
+    padding-bottom: calc(10% - 1.8px);
+    
+    font-weight: bold;
+    color: #555;
+    line-height: 1;
+    
+    position: relative;
+    min-width: 15px; 
+    min-height: 15px;
+}
+.bingo-cell::before {
+    content: attr(data-content); 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3.0vw; 
+}
+
+/* 確定番号セル用のアニメーション */
+.bingo-cell.stop-flash {
+    animation: cell-flash 0.5s ease-out;
+}
+@keyframes cell-flash {
+    0% { transform: scale(1); background-color: #fff; }
+    50% { transform: scale(1.1); background-color: #ffeb3b; }
+    100% { transform: scale(1); background-color: #97EADB; }
+}
+
+
+/* PCなど画面幅が広い場合に文字サイズを固定する */
+@media (min-width: 800px) {
+    .bingo-cell::before {
+        font-size: 1.1rem;
+    }
+}
+
+/* 強制改行要素 */
+.break {
+    flex-basis: 100%;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* 抽選済み番号 */
+.drawn {
+    background-color: #97EADB;
+    color: white;
+}
+
+/* リセットボタン (管理者ページ用 - 参加者ページでは非表示推奨) */
+#resetButton {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 1rem;
+}
+
+#resetButton:hover {
+    background-color: #c0392b;
 }
