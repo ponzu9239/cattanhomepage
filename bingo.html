@@ -135,7 +135,20 @@
       background: #fff;
       border-radius: 10px;
       box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+      /* ★ ストップ時のアニメーションを適用するための準備 */
+      transition: all 0.2s ease;
     }
+    
+    /* ★ 抽選番号確定時のアニメーション (結果表示ページと共通) */
+    #currentNumber.stop-highlight {
+        animation: current-flash 0.5s ease-out;
+    }
+    @keyframes current-flash {
+      0% { transform: scale(1); background-color: #fff; }
+      50% { transform: scale(1.05); background-color: #ffeb3b; }
+      100% { transform: scale(1); background-color: #fff; }
+    }
+
 
     #drawButton {
       background-color: #5aa2aa;
@@ -214,9 +227,19 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        /* フォントサイズをvw単位にしてセルサイズに応じて変化 */
         font-size: 3.0vw; 
     }
+
+    /* ★ 確定番号セル用のアニメーション */
+    .bingo-cell.stop-flash {
+        animation: cell-flash 0.5s ease-out;
+    }
+    @keyframes cell-flash {
+        0% { transform: scale(1); background-color: #fff; }
+        50% { transform: scale(1.1); background-color: #ffeb3b; }
+        100% { transform: scale(1); background-color: #97EADB; }
+    }
+
 
     /* PCなど画面幅が広い場合に文字サイズを固定する */
     @media (min-width: 800px) {
@@ -237,7 +260,8 @@
     .drawn {
       background-color: #97EADB;
       color: white;
-      animation: flash 0.5s ease-out;
+      /* 元のflashアニメーションは上書きされましたが、残しておきます */
+      /* animation: flash 0.5s ease-out; */
     }
 
     @keyframes flash {
@@ -324,7 +348,7 @@
 
   <script>
     // ----------------------------------------------------------------------
-    // 🎨 あなたのFirebase設定 (元の機能は一切変更していません)
+    // 🎨 あなたのFirebase設定 
     // ----------------------------------------------------------------------
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
@@ -356,7 +380,7 @@
     const statusMessageEl = document.getElementById('statusMessage');
     const resetButton = document.getElementById('resetButton');
 
-    // ボードの描画処理 (Flexbox対応と改行要素の追加を維持)
+    // ボードの描画処理
     function renderBoard(numbers) {
       numberBoardEl.innerHTML = '';
       for (let i = 1; i <= maxNumber; i++) {
@@ -387,9 +411,8 @@
       });
     }
 
-    // Firebaseからデータを読み込み、ゲーム状態を更新 (元の機能を維持)
+    // Firebaseからデータを読み込み、ゲーム状態を更新
     function loadGameFromFirebase() {
-      // on('value')を使ってリアルタイム同期を維持
       bingoRef.on('value', (snapshot) => {
         const data = snapshot.val() || {};
         const storedNumbers = data.drawnNumbers || [];
@@ -403,7 +426,8 @@
         // UIを更新
         currentNumberEl.textContent = currentDisplay;
         drawButton.disabled = false;
-        drawButton.textContent = isDrawing ? 'ストップ！' : '番号を引く！'; // アニメーション中のボタンテキストを維持
+        drawButton.textContent = isDrawing ? 'ストップ！' : '番号を引く！';
+        
         if (isDrawing) {
             drawButton.classList.add('drawing-mode');
         } else {
@@ -422,13 +446,14 @@
       });
     }
 
-    // 数字を高速で切り替えるアニメーション開始 (元の機能を維持)
+    // 数字を高速で切り替えるアニメーション開始
     function startAnimation() {
       if (availableNumbers.length === 0) return;
 
       isDrawing = true;
       drawButton.textContent = 'ストップ！';
       drawButton.classList.add('drawing-mode');
+      currentNumberEl.classList.remove('stop-highlight'); // アニメーションをリセット
 
       // 50ミリ秒ごとに数字を更新し、Firebaseにも書き込む
       animationInterval = setInterval(() => {
@@ -437,7 +462,6 @@
           const displayNum = availableNumbers[randomIndex];
           currentNumberEl.textContent = displayNum;
           
-          // Viewにリアルタイムで反映するため、Firebaseに書き込む
           bingoRef.update({ currentDisplay: displayNum });
         } else {
           stopAndDrawNumber();
@@ -445,7 +469,7 @@
       }, 50);
     }
 
-    // 抽選を確定してアニメーションを停止 (元の機能を維持)
+    // 抽選を確定してアニメーションを停止
     function stopAndDrawNumber() {
       if (!animationInterval) return;
 
@@ -474,10 +498,29 @@
           currentDisplay: drawnNumber 
       });
 
+      // --- ★ アニメーションを適用 ★ ---
+      currentNumberEl.textContent = drawnNumber;
+      currentNumberEl.classList.add('stop-highlight');
+      setTimeout(() => {
+        currentNumberEl.classList.remove('stop-highlight');
+      }, 500); // 0.5秒後にクラスを削除
+
+      // ボード上のセルにもアニメーションを適用
+      const finalCell = document.getElementById(`cell-${drawnNumber}`);
+      if (finalCell) {
+          finalCell.classList.add('stop-flash');
+          setTimeout(() => {
+              finalCell.classList.remove('stop-flash');
+          }, 500);
+      }
+      // ------------------------------------
+
       // UIの最終更新は loadGameFromFirebase の on('value')リスナーに任せる
+      drawButton.textContent = '次の番号を引く！';
+      drawButton.classList.remove('drawing-mode');
     }
 
-    // 番号を引く処理 (ボタンクリック) (元の機能を維持)
+    // 番号を引く処理 (ボタンクリック)
     drawButton.addEventListener('click', () => {
       if (availableNumbers.length === 0) {
         return;
@@ -490,18 +533,16 @@
       }
     });
 
-    // リセットボタンの処理 (元の機能を維持)
+    // リセットボタンの処理
     resetButton.addEventListener('click', () => {
       if (confirm('ビンゴゲームをリセットしますか？全ての抽選結果が消えます。')) {
-        // Firebaseのデータもリセット
         bingoRef.set({ drawnNumbers: [], currentDisplay: '--' });
-        // loadGameFromFirebaseのリスナーが自動的にUIを更新
       }
     });
 
     // ページの読み込み完了時にゲームを初期化
     document.addEventListener("DOMContentLoaded", () => {
-      loadGameFromFirebase(); // Firebaseからデータを読み込んでゲーム開始
+      loadGameFromFirebase();
 
       // ハンバーガーメニューのロジック
       const hamburger = document.getElementById("hamburger");
