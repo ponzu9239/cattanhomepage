@@ -141,31 +141,15 @@
         color: #5aa2aa;
     }
 
-    /* --- レスポンシブ対応の番号ボード Flexboxに変更 (10区切り対応) --- */
+    /* --- レスポンシブ対応の番号ボード Flexboxに変更 (10個ごと改行) --- */
     #numberBoard {
-      /* Flexコンテナではない。ここに各行のコンテナ(.number-row)が入る */
-      max-width: 100%; 
-      margin: 1rem auto;
-      padding: 0 10px; /* 画面端との隙間を確保 */
-    }
-
-    .number-row {
       display: flex;
-      flex-wrap: wrap; 
-      justify-content: center; 
+      flex-wrap: wrap; /* セルを次の行に折り返す */
+      justify-content: center; /* 中央揃えにする */
       gap: 5px;
-      margin-bottom: 10px; /* 行間にスペース */
-    }
-
-    .row-label {
-        font-weight: bold;
-        color: #1b656f;
-        background-color: #97EADB33; /* 薄い背景 */
-        padding: 5px 10px;
-        margin-bottom: 5px;
-        border-radius: 5px;
-        width: 100%;
-        text-align: left;
+      margin: 1rem auto;
+      max-width: 100%; 
+      padding: 0 10px; 
     }
 
     .bingo-cell {
@@ -194,7 +178,7 @@
         transform: translate(-50%, -50%);
     }
 
-    /* 画面が狭い場合の対応 (Flex-basisを調整して列数を減らす) */
+    /* 画面が狭い場合の対応 */
     @media (max-width: 580px) {
         .bingo-cell {
             /* 7列表示に変更 */
@@ -231,7 +215,7 @@
       <a href="roulette.html">イベント</a>
       <a href="team-view.html">チーム分けを見る</a>
       <a href="data-view.html">カスタム結果を見る</a>
-    </nav>
+    </nav>  
   </header>
 
   <main>
@@ -283,7 +267,7 @@
     const numberBoardEl = document.getElementById('numberBoard');
     const statusMessageEl = document.getElementById('statusMessage');
 
-    // ボードの描画処理 (10区切り、Flexbox対応)
+    // ボードの描画処理 (10個ごと改行、Flexbox対応)
     function renderBoard(drawnNumbers, currentDisplay) {
         // --- 最新表示の更新 ---
         latestNumberEl.textContent = currentDisplay !== '--' ? currentDisplay : '--';
@@ -297,35 +281,20 @@
             latestNumberEl.classList.remove('drawing');
         }
 
-        // --- ボードの更新 (10区切り) ---
+        // --- ボードの更新 ---
         numberBoardEl.innerHTML = '';
         
-        for (let startNum = 1; startNum <= maxNumber; startNum += 10) {
-            const endNum = Math.min(startNum + 9, maxNumber);
+        for (let i = 1; i <= maxNumber; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'bingo-cell';
+            cell.setAttribute('data-content', i);
             
-            const rowContainer = document.createElement('div');
-            rowContainer.className = 'number-row';
-            
-            // ラベルの追加 (例: 1-10)
-            const label = document.createElement('div');
-            label.className = 'row-label';
-            label.textContent = `${startNum} - ${endNum}`;
-            numberBoardEl.appendChild(label);
-
-            for (let i = startNum; i <= endNum; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'bingo-cell';
-                // セルのtextContentの代わりにdata-content属性を使用
-                cell.setAttribute('data-content', i);
-                
-                // 抽選済みの数字ならスタイルを適用
-                if (drawnNumbers.includes(i)) {
-                    cell.classList.add('drawn');
-                }
-                
-                rowContainer.appendChild(cell);
+            // 抽選済みの数字ならスタイルを適用
+            if (drawnNumbers.includes(i)) {
+                cell.classList.add('drawn');
             }
-            numberBoardEl.appendChild(rowContainer);
+            
+            numberBoardEl.appendChild(cell);
         }
         
         // --- ステータスメッセージの更新 ---
@@ -333,11 +302,9 @@
              statusMessageEl.textContent = `次の抽選番号を高速準備中です... (確定済:${drawnNumbers.length}個)`;
         } else if (drawnNumbers.length === maxNumber) {
             statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
-        } else if (drawnNumbers.length > 0) {
-            const lastDrawn = drawnNumbers[drawnNumbers.length - 1];
-            statusMessageEl.textContent = `最新の確定番号: ${lastDrawn} (全${drawnNumbers.length}個)`;
         } else {
-            statusMessageEl.textContent = 'まだ抽選は開始されていません。';
+            // 最新の確定番号に関するメッセージは削除されました。
+            statusMessageEl.textContent = `抽選進行中 (確定済:${drawnNumbers.length}個)`;
         }
     }
 
