@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ビンゴゲーム - きゃたんのひみつきち</title>
+  <link rel="icon" href="IMG_4666.png" type="image/png">
+  <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <style>
+    /* 元のデザインを流用 */
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      margin: 0;
+      padding-top: 100px;
+      transition: background-color 0.5s ease;
+      overflow-x: hidden;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .hamburger {
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
+
+    nav {
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      transition: top 0.3s ease;
+      z-index: 1050;
+    }
+
+    nav.show {
+      top: 75px;
+    }
+
+    nav a {
+      display: block;
+      text-align: center;
+      margin: 0;
+      padding: 0.6rem 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background-color: #97eadb;
+      border-bottom: 1px solid #97EADB;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    nav a:hover {
+      background-color: #0099aa;
+      transform: scale(1.03);
+    }
+
+    footer {
+      background: #97EADB;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+
+    section {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    section h3 {
+      color: #5aa2aa;
+      border-bottom: 2px solid #97EADB;
+      padding-bottom: 0.3rem;
+    }
+
+    /* ビンゴゲーム用の追加スタイル */
+    #bingoGame {
+      text-align: center;
+      padding: 2rem 1rem;
+      background-color: #d4f0f4;
+      border: 3px solid #97EADB;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      margin-top: 1rem;
+    }
+
+    #currentNumber {
+      font-size: 5rem;
+      font-weight: bold;
+      color: #1b656f;
+      margin: 0.5rem 0;
+      height: 6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #drawButton {
+      background-color: #5aa2aa;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 0 #1b656f;
+    }
+
+    #drawButton:hover {
+      background-color: #4a8a92;
+    }
+
+    #drawButton:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #1b656f;
+    }
+    
+    #drawButton:disabled {
+        background-color: #cccccc;
+        box-shadow: none;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    #numberBoard {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr); /* 10列で表示 */
+      gap: 5px;
+      margin-top: 1rem;
+      max-width: 550px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .bingo-cell {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 0.5rem 0;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #555;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1 / 1; /* 正方形にする */
+    }
+
+    .drawn {
+      background-color: #97EADB;
+      color: white;
+      animation: flash 0.5s ease-out;
+    }
+
+    @keyframes flash {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(151, 234, 219, 0.7);
+      }
+
+      50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px 5px rgba(151, 234, 219, 0.9);
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(151, 234, 219, 0);
+      }
+    }
+    
+    .status-message {
+        margin-top: 1rem;
+        font-weight: bold;
+        color: #e74c3c;
+    }
+    
+    #resetButton {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-top: 1rem;
+    }
+    #resetButton:hover {
+        background-color: #c0392b;
+    }
+
+  </style>
+
+</head>
+
+<body>
+  <header>
+    <h1>ビンゴゲーム</h1>
+    <div class="hamburger" id="hamburger">☰</div>
+    <nav id="nav">
+      <a href="index.html">ホーム</a>
+      <a href="roulette.html">イベント</a>
+      <a href="team-view.html">チーム分けを見る</a>
+      <a href="data-view.html">カスタム結果を見る</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="bingo">
+      <h3>🎉 ビンゴ抽選会場 🎉</h3>
+
+      <div id="bingoGame">
+        <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">次に抽選される番号</p>
+        <div id="currentNumber">--</div>
+
+        <button id="drawButton">番号を引く！</button>
+        <div id="statusMessage" class="status-message"></div>
+        
+        <button id="resetButton">リセット</button>
+
+        <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem;">出た番号一覧 (1〜75)</h4>
+        <div id="numberBoard">
+          </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>ド天然のきゃたん</p>
+  </footer>
+
+  <script>
+    // ビンゴゲームのロジック
+    const maxNumber = 75;
+    let availableNumbers = []; // まだ引かれていない番号の配列
+    let drawnNumbers = []; // 既に引かれた番号の配列
+
+    const currentNumberEl = document.getElementById('currentNumber');
+    const drawButton = document.getElementById('drawButton');
+    const numberBoardEl = document.getElementById('numberBoard');
+    const statusMessageEl = document.getElementById('statusMessage');
+    const resetButton = document.getElementById('resetButton');
+
+    // 初期化関数
+    function initializeGame() {
+      availableNumbers = Array.from({ length: maxNumber }, (_, i) => i + 1); // [1, 2, ..., 75]
+      drawnNumbers = [];
+      statusMessageEl.textContent = '';
+      currentNumberEl.textContent = '--';
+      drawButton.disabled = false;
+      
+      // 番号ボードを生成・更新
+      numberBoardEl.innerHTML = '';
+      for (let i = 1; i <= maxNumber; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bingo-cell';
+        cell.id = `cell-${i}`;
+        cell.textContent = i;
+        numberBoardEl.appendChild(cell);
+      }
+    }
+
+    // 番号を引く処理
+    drawButton.addEventListener('click', () => {
+      if (availableNumbers.length === 0) {
+        statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
+        drawButton.disabled = true;
+        return;
+      }
+
+      // 抽選
+      const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+      const drawnNumber = availableNumbers[randomIndex];
+
+      // 配列から削除し、引かれた配列に追加
+      availableNumbers.splice(randomIndex, 1);
+      drawnNumbers.push(drawnNumber);
+
+      // 表示を更新
+      currentNumberEl.textContent = drawnNumber;
+      statusMessageEl.textContent = `${drawnNumbers.length}個目の数字: ${drawnNumber}`;
+
+      // ボード上のセルをハイライト
+      const cellEl = document.getElementById(`cell-${drawnNumber}`);
+      if (cellEl) {
+        cellEl.classList.add('drawn');
+      }
+
+      if (availableNumbers.length === 0) {
+        statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
+        drawButton.disabled = true;
+      }
+    });
+
+    // リセットボタンの処理
+    resetButton.addEventListener('click', () => {
+        if(confirm('ビンゴゲームをリセットしますか？全ての抽選結果が消えます。')){
+            initializeGame();
+        }
+    });
+
+    // ページの読み込み完了時にゲームを初期化
+    document.addEventListener("DOMContentLoaded", initializeGame);
+
+    // ハンバーガーメニューのロジック (元のコードから流用)
+    const hamburger = document.getElementById("hamburger");
+    const nav = document.getElementById("nav");
+
+    hamburger.addEventListener("click", () => {
+      nav.classList.toggle("show");
+    });
+    
+    // 他の元のJavaScriptロジック（Firebaseや誕生日のチェックなど）は、このビンゴページでは省略しています。
+    // もし必要であれば、この <script> タグ内に追加してください。
+
+  </script>
+</body>
+
+</html>
