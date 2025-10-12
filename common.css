@@ -1,4 +1,4 @@
-　/* common.css: 全ページ共通スタイル (ビンゴ、ホーム画面対応) */
+/* common.css: 全ページ共通スタイル (ビンゴ、ホーム画面対応) */
 
 /* ボックスモデルの統一 */
 * {
@@ -42,29 +42,24 @@ header h1 {
     color: #fff;
 }
 
-/* 広い画面での文字サイズを固定 */
-@media (min-width: 800px) {
-    header h1 {
-        font-size: 2rem; 
-    }
-}
-
 /* ハンバーガーメニューアイコン */
 .hamburger {
     font-size: 2rem;
     cursor: pointer;
     position: absolute;
     top: 50%;
-    /* 修正済み: 右端に寄せる */
     right: 1rem; 
     color: white;
     transform: translateY(-50%);
     z-index: 1100;
+    /* 修正前：デフォルトで表示 (モバイル向け) */
+    display: block; 
 }
 
 /* ナビゲーションメニュー本体 */
 nav {
     position: fixed;
+    /* CRITICAL FIX: 初期状態は画面外 */
     top: -100%;
     left: 0;
     width: 100%;
@@ -74,6 +69,8 @@ nav {
     padding: 0;
     transition: top 0.3s ease;
     z-index: 1050;
+    /* 修正前：デフォルトで表示 (モバイル向け) */
+    display: flex;
 }
 
 nav.show {
@@ -99,6 +96,69 @@ nav a:hover {
     background-color: #0099aa;
     transform: scale(1.03);
 }
+
+
+/* ★★★ PC表示時の修正（幅800px以上） ★★★ */
+@media (min-width: 800px) {
+    /* 広い画面での文字サイズを固定 */
+    header h1 {
+        font-size: 2rem; 
+    }
+    
+    /* PCではハンバーガーメニューアイコンを非表示 */
+    .hamburger {
+        display: none; 
+    }
+
+    /* PCではナビゲーションメニューをヘッダー内に表示（固定を解除） */
+    nav {
+        /* position: fixed; を解除 */
+        position: static; 
+        /* top: -100%; を解除 */
+        top: auto;
+        flex-direction: row; /* 横並び */
+        justify-content: flex-end; /* 右寄せ */
+        width: auto;
+        padding: 0 1rem;
+        /* ナビゲーションをヘッダーの右側に配置するためのFlexbox調整 */
+        align-items: center; 
+        
+        /* ヘッダー全体をFlexbox化してh1とnavを横並びにする */
+        /* これはheader要素のスタイルをcommon.css外で上書きする必要がありますが、
+           今回は最低限navの表示を修正するため、navのスタイルを static に変更します。*/
+    }
+    
+    /* PC表示時に nav.show のスタイルを無効化 */
+    nav.show {
+        top: auto; 
+    }
+    
+    /* PCではaタグを横並びにするため、marginを調整 */
+    nav a {
+        display: inline-block;
+        border-bottom: none;
+        margin-left: 1.5rem; /* リンク間のスペース */
+        padding: 0.2rem 0;
+        background-color: transparent;
+    }
+    
+    nav a:hover {
+        background-color: transparent;
+        color: #e5f7f8; /* ホバー時の色 */
+        transform: none;
+    }
+    
+    /* 800px以上の画面で header を flex に変更する必要がある */
+    /* header を flex-container にするスタイルを追記/修正 */
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 1rem; /* パディングを少し調整 */
+    }
+}
+/* ★★★ PC表示時の修正END ★★★ */
+
 
 /* ------------------------------------------------ */
 /* ★ 2. フッターのスタイル ★ */
