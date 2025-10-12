@@ -141,16 +141,31 @@
         color: #5aa2aa;
     }
 
-    /* --- レスポンシブ対応の番号ボード Flexboxに変更 --- */
+    /* --- レスポンシブ対応の番号ボード Flexboxに変更 (10区切り対応) --- */
     #numberBoard {
-      display: flex; /* Flexboxに変更 */
-      flex-wrap: wrap; /* セルを次の行に折り返す */
-      justify-content: center; /* 中央揃えにする */
-      gap: 5px;
-      margin-top: 1rem;
+      /* Flexコンテナではない。ここに各行のコンテナ(.number-row)が入る */
       max-width: 100%; 
-      margin-left: auto;
-      margin-right: auto;
+      margin: 1rem auto;
+      padding: 0 10px; /* 画面端との隙間を確保 */
+    }
+
+    .number-row {
+      display: flex;
+      flex-wrap: wrap; 
+      justify-content: center; 
+      gap: 5px;
+      margin-bottom: 10px; /* 行間にスペース */
+    }
+
+    .row-label {
+        font-weight: bold;
+        color: #1b656f;
+        background-color: #97EADB33; /* 薄い背景 */
+        padding: 5px 10px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+        width: 100%;
+        text-align: left;
     }
 
     .bingo-cell {
@@ -177,6 +192,24 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+    }
+
+    /* 画面が狭い場合の対応 (Flex-basisを調整して列数を減らす) */
+    @media (max-width: 580px) {
+        .bingo-cell {
+            /* 7列表示に変更 */
+            flex-basis: calc(14.28% - 4.28px); 
+            padding-bottom: calc(14.28% - 4.28px);
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .bingo-cell {
+            /* 6列表示に変更 */
+            flex-basis: calc(16.66% - 4.16px); 
+            padding-bottom: calc(16.66% - 4.16px);
+        }
     }
     /* --- Flexbox対応CSS終了 --- */
 
@@ -250,7 +283,7 @@
     const numberBoardEl = document.getElementById('numberBoard');
     const statusMessageEl = document.getElementById('statusMessage');
 
-    // ボードの描画処理 (Flexbox対応)
+    // ボードの描画処理 (10区切り、Flexbox対応)
     function renderBoard(drawnNumbers, currentDisplay) {
         // --- 最新表示の更新 ---
         latestNumberEl.textContent = currentDisplay !== '--' ? currentDisplay : '--';
@@ -264,20 +297,35 @@
             latestNumberEl.classList.remove('drawing');
         }
 
-        // --- ボードの更新 ---
+        // --- ボードの更新 (10区切り) ---
         numberBoardEl.innerHTML = '';
-        for (let i = 1; i <= maxNumber; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'bingo-cell';
-            // セルのtextContentの代わりにdata-content属性を使用
-            cell.setAttribute('data-content', i);
+        
+        for (let startNum = 1; startNum <= maxNumber; startNum += 10) {
+            const endNum = Math.min(startNum + 9, maxNumber);
             
-            // 抽選済みの数字ならスタイルを適用 (抽選会場と同じデザイン)
-            if (drawnNumbers.includes(i)) {
-                cell.classList.add('drawn');
+            const rowContainer = document.createElement('div');
+            rowContainer.className = 'number-row';
+            
+            // ラベルの追加 (例: 1-10)
+            const label = document.createElement('div');
+            label.className = 'row-label';
+            label.textContent = `${startNum} - ${endNum}`;
+            numberBoardEl.appendChild(label);
+
+            for (let i = startNum; i <= endNum; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'bingo-cell';
+                // セルのtextContentの代わりにdata-content属性を使用
+                cell.setAttribute('data-content', i);
+                
+                // 抽選済みの数字ならスタイルを適用
+                if (drawnNumbers.includes(i)) {
+                    cell.classList.add('drawn');
+                }
+                
+                rowContainer.appendChild(cell);
             }
-            
-            numberBoardEl.appendChild(cell);
+            numberBoardEl.appendChild(rowContainer);
         }
         
         // --- ステータスメッセージの更新 ---
