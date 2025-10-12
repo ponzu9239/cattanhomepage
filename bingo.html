@@ -171,12 +171,14 @@
     }
 
 
+    /* --- レスポンシブ対応の番号ボード Flexboxに変更 --- */
     #numberBoard {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
+      display: flex; /* Flexboxに変更 */
+      flex-wrap: wrap; /* セルを次の行に折り返す */
+      justify-content: center; /* 中央揃えにする */
       gap: 5px;
       margin-top: 1rem;
-      max-width: 550px;
+      max-width: 100%;
       margin-left: auto;
       margin-right: auto;
     }
@@ -185,16 +187,29 @@
       background-color: #fff;
       border: 1px solid #ccc;
       border-radius: 5px;
-      padding: 0.5rem 0;
+      /* 画面幅に応じて伸縮し、常に10列になるように設定 */
+      flex-basis: calc(10% - 4.5px); 
+      height: 0; 
+      padding-bottom: calc(10% - 4.5px); /* アスペクト比を保つ */
+      
       font-weight: bold;
       font-size: 1.1rem;
       color: #555;
       line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      aspect-ratio: 1 / 1;
+      
+      /* テキストを中央に配置する設定 */
+      position: relative; 
     }
+    .bingo-cell::before {
+        /* JSで設定したdata-content属性の値(数字)を表示 */
+        content: attr(data-content); 
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    /* --- Flexbox対応CSS終了 --- */
+
 
     .drawn {
       background-color: #97EADB;
@@ -318,14 +333,16 @@
     const statusMessageEl = document.getElementById('statusMessage');
     const resetButton = document.getElementById('resetButton');
 
-    // ボードの描画処理
+    // ボードの描画処理 (Flexbox対応)
     function renderBoard(numbers) {
       numberBoardEl.innerHTML = '';
       for (let i = 1; i <= maxNumber; i++) {
         const cell = document.createElement('div');
         cell.className = 'bingo-cell';
         cell.id = `cell-${i}`;
-        cell.textContent = i;
+        // セルのtextContentの代わりにdata-content属性を使用
+        cell.setAttribute('data-content', i); 
+        
         if (numbers.includes(i)) {
           cell.classList.add('drawn');
         }
