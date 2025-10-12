@@ -905,15 +905,19 @@ h1 {
   width: 100%;
   padding: 20px 0;
   text-align: center;
-  background: linear-gradient(135deg, #ff9ccf, #ff70a6, #ff4d94);
-  color: white;
-  font-size: 2rem;
+  background: linear-gradient(135deg, #ff9fc1, #f7a6d2);
+  color: #fff;
   font-weight: bold;
-  border: 3px solid #ff70a6;
-  border-radius: 16px;
+  border: 3px solid #ff7aa3;
+  border-radius: 12px;
   text-decoration: none;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 6px 15px rgba(255, 100, 180, 0.5);
+  font-size: clamp(16px, 4vw, 28px); /* 画面幅に応じて自動調整 */
+}
+
+.bingo-banner span {
+  display: block;
+  font-size: clamp(12px, 2.5vw, 18px); /* 小さい文字も自動調整 */
 }
 
 .bingo-banner .small {
