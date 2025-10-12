@@ -900,149 +900,57 @@ h1 {
 
 
 
-/* ------------------------------------------------ */
-/* ★ 9. ビンゴイベントバナーのスタイル (index.html専用) ★ */
-/* ------------------------------------------------ */
-
-.bingo-event-banner {
-    text-align: center;
-    margin: 30px auto;
-}
-
-.bingo-event-banner a {
-    display: block;
-    width: 100%;
-    max-width: 800px;
-    margin: var(--spacing-md) auto 0;
-    
-    /* デザインの基盤 */
-    font-weight: bold;
-    text-align: center;
-    text-decoration: none;
-    color: #004d66; /* 濃い青緑系の文字色に変更 */
-    border-radius: 12px;
-    overflow: hidden;
-    
-    /* ★修正点: 透明感のある明るいグラデーションに変更★ */
-    background: linear-gradient(135deg, rgba(151, 234, 219, 0.7) 0%, rgba(200, 250, 240, 0.9) 100%);
-    /* ★修正点: 影を淡く、奥行きのあるデザインに変更★ */
-    box-shadow: 0 10px 30px rgba(0, 77, 102, 0.15), 0 0 0 4px rgba(151, 234, 219, 0.5); /* 枠線のような効果 */
-    border: 1px solid rgba(151, 234, 219, 0.8);
-    
-    position: relative;
-    padding: 25px 15px; /* パディングを増やしてゆったりと */
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.bingo-event-banner a:hover {
-    transform: translateY(-5px); /* 浮き上がり強調 */
-    /* ★修正点: ホバー時の影を深く、枠を強調★ */
-    box-shadow: 0 18px 40px rgba(0, 77, 102, 0.25), 0 0 0 4px var(--color-primary); 
-}
-
-.main-title {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 10px 0;
-    /* ★修正点: 文字の影を淡く、清潔感を損なわないように★ */
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5); 
-}
-
-.title-main {
-    font-size: 2.0rem; /* サイズアップ */
-    line-height: 1.2;
-    padding: 5px 0;
-    color: #1b656f; /* 濃い青緑 */
-}
-
-.title-sub {
-    font-size: 1.1rem;
-    font-weight: 500;
-    /* ★修正点: 背景を白く、わずかに透明にして区別★ */
-    background-color: rgba(255, 255, 255, 0.7); 
-    padding: 3px 12px;
-    border-radius: 20px;
-    margin-top: 8px;
-    color: #004d66;
-    border: 1px solid rgba(255, 255, 255, 0.9);
-}
-
-.icon-text {
-    position: absolute;
-    top: -1px;
-    right: -1px;
-    /* ★修正点: 透明感のある明るいアクセントカラーに変更★ */
-    background: rgba(255, 87, 34, 0.9); /* オレンジレッド系 */
-    color: white;
-    padding: 5px 15px;
-    font-size: 0.8rem;
-    font-style: italic;
-    font-weight: 700;
-    border-bottom-left-radius: 12px;
-    box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.2);
-    /* 開催中アイコンをより目立たせるための傾き */
-    transform: rotate(2deg);
-    transform-origin: 100% 0%;
-}
-
-.link-text {
-    font-size: 1.2rem;
-    margin-top: 15px;
-    padding: 8px;
-    /* ★修正点: 薄い白色の半透明背景で視認性アップ★ */
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 8px;
-    display: inline-block;
-    color: #004d66;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* 既存のバナー注釈スタイルはそのまま */
-.bingo-event-banner + .banner-note {
-    font-size: 0.9rem;
-    color: #555;
-    text-align: center;
-    margin-top: 10px;
-    display: block;
-}
-
-/* 既存のルーレットバナー終了時のスタイルを削除（または非表示） */
-.roulette-banner.ended {
-    display: none; 
-}
-
 .bingo-banner a {
   display: block;
-  width: 100%;               /* 横幅いっぱい */
-  padding: 20px 0;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #fff;
+  width: 100%;
+  padding: 25px 0;
+  font-size: 2rem;
+  font-weight: 900;
   text-decoration: none;
-  border-radius: 16px;
+  border-radius: 20px;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.3;
   position: relative;
   overflow: hidden;
 
-  /* ピンク系グラデーション */
+  /* 背景グラデーションアニメーション */
   background: linear-gradient(270deg, #ff9aa2, #ffb7b2, #ffcad4, #ffe0e6, #ff9aa2);
-  background-size: 1200% 1200%; /* グラデーションを広くして流れるように */
-  animation: pinkGradient 10s ease infinite;
+  background-size: 1500% 1500%;
+  animation: pinkGradient 8s ease infinite;
 
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-  transition: transform 0.3s, box-shadow 0.3s;
+  /* 立体的な縁 */
+  border: 5px solid #ff4a70;
+  box-shadow: 0 0 15px #ff4a70, 0 0 30px #ff9aa2, 0 8px 25px rgba(0,0,0,0.25);
+
+  /* 文字にグラデーション */
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-image: linear-gradient(90deg, #fff0ff, #ffb6c1, #ffe0e6);
+  text-shadow:
+    0 0 5px #fff,
+    0 0 10px #ffb6c1,
+    0 0 20px #ff9aa2,
+    0 0 40px #ff4a70;
+  animation: textGlow 2s ease-in-out infinite alternate;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
 }
 
 .bingo-banner a:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  transform: scale(1.08);
+  box-shadow: 0 0 25px #ff4a70, 0 0 50px #ff9aa2, 0 10px 35px rgba(0,0,0,0.35);
+  border-color: #ff1a50;
 }
 
-/* グラデーションアニメーション */
+/* 背景グラデーションアニメーション */
 @keyframes pinkGradient {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* 文字の光アニメーション */
+@keyframes textGlow {
+  0% { text-shadow: 0 0 5px #fff, 0 0 10px #ffb6c1, 0 0 20px #ff9aa2, 0 0 40px #ff4a70; }
+  100% { text-shadow: 0 0 10px #fff, 0 0 20px #ffb6c1, 0 0 40px #ff9aa2, 0 0 60px #ff4a70; }
 }
