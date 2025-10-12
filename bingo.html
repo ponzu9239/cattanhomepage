@@ -4,19 +4,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ビンゴ抽選結果表示</title>
+  <title>きゃたんのビンゴゲーム</title>
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
   <style>
-    /* 共通デザインの流用 */
+    /* ------------------------------------------------ */
+    /* デザイン統一のためのCSS調整 */
+    /* ------------------------------------------------ */
+    * {
+        box-sizing: border-box; 
+    }
+
+    /* 共通デザイン */
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
       background: #f7fcfc;
       margin: 0;
       padding-top: 100px;
+      transition: background-color 0.5s ease;
       overflow-x: hidden;
     }
 
@@ -104,8 +112,8 @@
       padding-bottom: 0.3rem;
     }
 
-    /* ビンゴ表示用のスタイル */
-    #bingoDisplay {
+    /* ビンゴコントロールと表示エリア */
+    #bingoGame {
       text-align: center;
       padding: 2rem 1rem;
       background-color: #d4f0f4;
@@ -115,7 +123,7 @@
       margin-top: 1rem;
     }
 
-    #latestNumber {
+    #currentNumber {
       font-size: 5rem;
       font-weight: bold;
       color: #1b656f;
@@ -127,20 +135,55 @@
       background: #fff;
       border-radius: 10px;
       box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-      transition: color 0.1s, background-color 0.1s;
     }
 
-    /* 抽選中の表示スタイル */
-    #latestNumber.drawing {
-        color: #ff4757;
+    #drawButton {
+      background-color: #5aa2aa;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 0 #1b656f;
     }
-    
-    /* --- レスポンシブ対応の番号ボード Flexbox (強制10個/行) --- */
+
+    #drawButton:hover:not(:disabled) {
+      background-color: #4a8a92;
+    }
+
+    #drawButton:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #1b656f;
+    }
+
+    #drawButton:disabled {
+      background-color: #cccccc;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 抽選中のボタンの色を強調 */
+    #drawButton.drawing-mode {
+      background-color: #ff4757;
+      box-shadow: 0 4px 0 #c0392b;
+    }
+
+    #drawButton.drawing-mode:hover {
+      background-color: #e74c3c;
+    }
+
+
+    /* --- レスポンシブ対応の番号ボード Flexbox (余白あり・強制10個/行) --- */
     #numberBoard {
       display: flex;
       flex-wrap: wrap; 
       justify-content: center; 
-      gap: 0; /* 隙間を完全になくす */
+      gap: 2px; /* 隙間を2pxに設定 */
       margin: 1rem auto;
       max-width: 100%; 
       padding: 0; 
@@ -149,11 +192,13 @@
     .bingo-cell {
       background-color: #fff;
       border: 1px solid #ccc;
-      /* 隙間がないため、borderを考慮してわずかに小さくする */
-      flex-basis: 9.95%; /* 100% / 10 = 10% よりわずかに小さくして余裕を持たせる */
+      border-radius: 3px; 
+      
+      /* 10% - (9 * 2px) / 10 = 10% - 1.8px */
+      flex-basis: calc(10% - 1.8px); 
       
       height: 0; 
-      padding-bottom: 9.95%; /* アスペクト比を保つ */
+      padding-bottom: calc(10% - 1.8px); /* アスペクト比を保つ */
       
       font-weight: bold;
       color: #555;
@@ -169,11 +214,17 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        /* 画面幅が狭くなると文字も自動縮小 */
-        font-size: 3.5vw; 
-        max-font-size: 1.1rem;
+        /* フォントサイズをvw単位にしてセルサイズに応じて変化 */
+        font-size: 3.0vw; 
     }
 
+    /* PCなど画面幅が広い場合に文字サイズを固定する */
+    @media (min-width: 800px) {
+        .bingo-cell::before {
+            font-size: 1.1rem; /* 800pxを超えたらフォントサイズを固定 */
+        }
+    }
+    
     /* 強制改行要素 */
     .break {
         flex-basis: 100%;
@@ -186,6 +237,46 @@
     .drawn {
       background-color: #97EADB;
       color: white;
+      animation: flash 0.5s ease-out;
+    }
+
+    @keyframes flash {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(151, 234, 219, 0.7);
+      }
+
+      50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px 5px rgba(151, 234, 219, 0.9);
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(151, 234, 219, 0);
+      }
+    }
+
+    .status-message {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #e74c3c;
+    }
+
+    #resetButton {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 1rem;
+    }
+
+    #resetButton:hover {
+      background-color: #c0392b;
     }
   </style>
 
@@ -193,28 +284,33 @@
 
 <body>
   <header>
-    <h1>ビンゴ抽選結果</h1>
+    <h1>ビンゴゲーム</h1>
     <div class="hamburger" id="hamburger">☰</div>
     <nav id="nav">
-      <a href="bingo.html">抽選会場へ</a> 
+      <a href="bingo-view.html">抽選結果を見る</a>
       <a href="index.html">ホーム</a>
       <a href="roulette.html">イベント</a>
       <a href="team-view.html">チーム分けを見る</a>
       <a href="data-view.html">カスタム結果を見る</a>
-    </nav>  
+    </nav>
   </header>
 
   <main>
     <section id="bingo">
-      <h3>📢 発表中の番号 📢</h3>
+      <h3>🎉 ビンゴ抽選 🎉</h3>
 
-      <div id="bingoDisplay">
-        <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">現在の表示番号</p>
-        <div id="latestNumber">--</div>
+      <div id="bingoGame">
+        <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">引かれた番号</p>
+        <div id="currentNumber">--</div>
 
-        <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">出た番号一覧 (1〜75)</h4>
+        <button id="drawButton">番号を引く！</button>
+        <div id="statusMessage" class="status-message"></div>
+
+        <button id="resetButton">リセット</button>
+
+        <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">すでに引かれた番号一覧 (1〜75)</h4>
         <div id="numberBoard">
-          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -228,7 +324,7 @@
 
   <script>
     // ----------------------------------------------------------------------
-    // 🎨 あなたのFirebase設定 (抽選会場ページと同じ設定)
+    // 🎨 あなたのFirebase設定 (元の機能は一切変更していません)
     // ----------------------------------------------------------------------
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
@@ -245,72 +341,176 @@
     // Firebase初期化とデータベース参照の取得
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const bingoRef = db.ref('bingo'); // /bingo 全体を監視
+    const bingoRef = db.ref('bingo'); 
 
+    // --- ビンゴゲームの状態変数 ---
     const maxNumber = 75;
-    const latestNumberEl = document.getElementById('latestNumber');
+    let availableNumbers = [];
+    let drawnNumbers = [];
+    let animationInterval = null;
+    let isDrawing = false;
+
+    const currentNumberEl = document.getElementById('currentNumber');
+    const drawButton = document.getElementById('drawButton');
     const numberBoardEl = document.getElementById('numberBoard');
+    const statusMessageEl = document.getElementById('statusMessage');
+    const resetButton = document.getElementById('resetButton');
 
-    // ボードの描画処理 (常に10個/行、Flexbox対応)
-    function renderBoard(drawnNumbers, currentDisplay) {
-        // --- 最新表示の更新 ---
-        latestNumberEl.textContent = currentDisplay !== '--' ? currentDisplay : '--';
+    // ボードの描画処理 (Flexbox対応と改行要素の追加を維持)
+    function renderBoard(numbers) {
+      numberBoardEl.innerHTML = '';
+      for (let i = 1; i <= maxNumber; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bingo-cell';
+        cell.id = `cell-${i}`;
+        cell.setAttribute('data-content', i); 
         
-        // 抽選中かどうかを判断し、表示に反映
-        const isDrawing = !drawnNumbers.includes(parseInt(currentDisplay)) && currentDisplay !== '--';
-        
-        if (isDrawing) {
-            latestNumberEl.classList.add('drawing');
-        } else {
-            latestNumberEl.classList.remove('drawing');
+        if (numbers.includes(i)) {
+          cell.classList.add('drawn');
         }
+        numberBoardEl.appendChild(cell);
 
-        // --- ボードの更新 ---
-        numberBoardEl.innerHTML = '';
-        
-        for (let i = 1; i <= maxNumber; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'bingo-cell';
-            cell.setAttribute('data-content', i);
-            
-            // 抽選済みの数字ならスタイルを適用
-            if (drawnNumbers.includes(i)) {
-                cell.classList.add('drawn');
-            }
-            
-            numberBoardEl.appendChild(cell);
-
-            // 10個ごとに改行要素を挿入 (11個目が2行目になるように)
-            if (i % 10 === 0 && i < maxNumber) {
-                const breakEl = document.createElement('div');
-                breakEl.className = 'break';
-                numberBoardEl.appendChild(breakEl);
-            }
+        // 10個ごとに改行要素を挿入
+        if (i % 10 === 0 && i < maxNumber) {
+            const breakEl = document.createElement('div');
+            breakEl.className = 'break';
+            numberBoardEl.appendChild(breakEl);
         }
+      }
     }
 
-    // Firebaseのデータ変更をリアルタイムで監視し、画面を自動更新
-    bingoRef.on('value', (snapshot) => {
+    // 抽選結果をFirebaseに保存
+    function saveToFirebase(data) {
+      bingoRef.update(data).catch(error => {
+        console.error("Firebaseへの書き込みに失敗しました:", error);
+        statusMessageEl.textContent = "⚠️ 保存エラーが発生しました。";
+      });
+    }
+
+    // Firebaseからデータを読み込み、ゲーム状態を更新 (元の機能を維持)
+    function loadGameFromFirebase() {
+      // on('value')を使ってリアルタイム同期を維持
+      bingoRef.on('value', (snapshot) => {
         const data = snapshot.val() || {};
-        const drawnNumbers = data.drawnNumbers || [];
-        const currentDisplay = data.currentDisplay || '--'; 
+        const storedNumbers = data.drawnNumbers || [];
+        const currentDisplay = data.currentDisplay || '--';
 
-        renderBoard(drawnNumbers, currentDisplay);
-        console.log("Firebaseから最新のデータを受信しました。");
-    }, (error) => {
-        console.error("Firebaseからのデータ受信エラー:", error);
+        // 状態変数を更新
+        drawnNumbers = storedNumbers;
+        const allNumbers = Array.from({ length: maxNumber }, (_, i) => i + 1);
+        availableNumbers = allNumbers.filter(n => !drawnNumbers.includes(n));
+
+        // UIを更新
+        currentNumberEl.textContent = currentDisplay;
+        drawButton.disabled = false;
+        drawButton.textContent = isDrawing ? 'ストップ！' : '番号を引く！'; // アニメーション中のボタンテキストを維持
+        if (isDrawing) {
+            drawButton.classList.add('drawing-mode');
+        } else {
+            drawButton.classList.remove('drawing-mode');
+        }
+        
+        renderBoard(drawnNumbers);
+
+        if (availableNumbers.length === 0) {
+          statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
+          drawButton.disabled = true;
+          drawButton.textContent = 'ゲーム終了';
+        } else {
+          statusMessageEl.textContent = drawnNumbers.length > 0 && !isDrawing ? `前回の数字: ${drawnNumbers[drawnNumbers.length - 1]}` : (isDrawing ? '抽選中...' : '');
+        }
+      });
+    }
+
+    // 数字を高速で切り替えるアニメーション開始 (元の機能を維持)
+    function startAnimation() {
+      if (availableNumbers.length === 0) return;
+
+      isDrawing = true;
+      drawButton.textContent = 'ストップ！';
+      drawButton.classList.add('drawing-mode');
+
+      // 50ミリ秒ごとに数字を更新し、Firebaseにも書き込む
+      animationInterval = setInterval(() => {
+        const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+        if (availableNumbers.length > 0) {
+          const displayNum = availableNumbers[randomIndex];
+          currentNumberEl.textContent = displayNum;
+          
+          // Viewにリアルタイムで反映するため、Firebaseに書き込む
+          bingoRef.update({ currentDisplay: displayNum });
+        } else {
+          stopAndDrawNumber();
+        }
+      }, 50);
+    }
+
+    // 抽選を確定してアニメーションを停止 (元の機能を維持)
+    function stopAndDrawNumber() {
+      if (!animationInterval) return;
+
+      clearInterval(animationInterval);
+      animationInterval = null;
+      isDrawing = false;
+
+      if (availableNumbers.length === 0) {
+        const finalNum = drawnNumbers[drawnNumbers.length - 1] || '--';
+        currentNumberEl.textContent = finalNum;
+        saveToFirebase({ currentDisplay: finalNum });
+        return;
+      }
+
+      // 最終的な抽選を行う
+      const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+      const drawnNumber = availableNumbers[randomIndex];
+
+      // 配列を更新
+      availableNumbers.splice(randomIndex, 1);
+      drawnNumbers.push(drawnNumber);
+
+      // Firebaseにデータを保存 (確定番号と最終表示を同時に更新)
+      saveToFirebase({ 
+          drawnNumbers: drawnNumbers, 
+          currentDisplay: drawnNumber 
+      });
+
+      // UIの最終更新は loadGameFromFirebase の on('value')リスナーに任せる
+    }
+
+    // 番号を引く処理 (ボタンクリック) (元の機能を維持)
+    drawButton.addEventListener('click', () => {
+      if (availableNumbers.length === 0) {
+        return;
+      }
+
+      if (!isDrawing) {
+        startAnimation();
+      } else {
+        stopAndDrawNumber();
+      }
     });
-    
+
+    // リセットボタンの処理 (元の機能を維持)
+    resetButton.addEventListener('click', () => {
+      if (confirm('ビンゴゲームをリセットしますか？全ての抽選結果が消えます。')) {
+        // Firebaseのデータもリセット
+        bingoRef.set({ drawnNumbers: [], currentDisplay: '--' });
+        // loadGameFromFirebaseのリスナーが自動的にUIを更新
+      }
+    });
+
+    // ページの読み込み完了時にゲームを初期化
     document.addEventListener("DOMContentLoaded", () => {
-        // ハンバーガーメニューのロジック
-        const hamburger = document.getElementById("hamburger");
-        const nav = document.getElementById("nav");
+      loadGameFromFirebase(); // Firebaseからデータを読み込んでゲーム開始
 
-        hamburger.addEventListener("click", () => {
-          nav.classList.toggle("show");
-        });
+      // ハンバーガーメニューのロジック
+      const hamburger = document.getElementById("hamburger");
+      const nav = document.getElementById("nav");
+
+      hamburger.addEventListener("click", () => {
+        nav.classList.toggle("show");
+      });
     });
-
   </script>
 </body>
 
