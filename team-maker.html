@@ -8,505 +8,12 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
   <title>いい感じにチーム分けしてくれるやつ</title>
-  <style>
-:root {
-  /* Colors */
-  --color-primary: #97EADB;
-  --color-accent: #47b6a2;
-  --color-text-light: #fff;
-  --color-bg: #f7fcfc;
-  --color-team-a-bg: #eefaff;
-  --color-team-a-border: #97eadb;
-  --color-team-b-bg: #fff1f5;
-  --color-team-b-border: #ffb6c1;
-  --color-pair-bg: #eaf9f8;
-  --color-hover: #0099aa;
   
-  /* Spacing */
-  --spacing-sm: 8px;
-  --spacing-md: 1rem;
-  --spacing-lg: 2rem;
-  
-  /* Other */
-  --header-height: 75px;
-}
-
-/* Base styles */
-body {
-  font-family: "Hiragino Maru Gothic ProN", sans-serif;
-  background-color: var(--color-bg);
-  margin: 0;
-  padding-top: var(--header-height);
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-.container {
-  flex: 1;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 90vw;
-  padding: 0 var(--spacing-md);
-}
-
-
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background-color: #97EADB;
-      padding: 1rem;
-      text-align: center;
-      z-index: 1000;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #fff;
-    }
-
-    /* ハンバーガーアイコン */
-    .hamburger {
-      font-size: 2rem;
-      cursor: pointer;
-      position: absolute;
-      top: 50%;
-      right: 3rem;
-      color: white;
-      transform: translateY(-50%);
-      z-index: 1100;
-    }
-
-nav {
-  position: fixed;
-  top: 75px; /* ヘッダーの下に固定 */
-  left: 0;
-  width: 100%;
-  background-color: #97EADB;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  /* メニューを隠すための transform */
-  transform: translateY(-100vh);
-  transition: transform 0.3s ease;
-  z-index: 1050;
-}
-
-nav.show {
-  /* showクラスが付くと、メニューがスライドして表示される */
-  transform: translateY(0);
-}
-
-nav a {
-  display: block;
-  text-align: center;
-  margin: 0;
-  padding: 0.6rem 0;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: white;
-  background-color: #97eadb;
-  border-bottom: 1px solid #97EADB;
-  text-decoration: none;
-  transition: background-color 0.2s, transform 0.2s;
-}
-
-nav a:hover {
-  background-color: #0099aa;
-  transform: scale(1.03);
-}
-/* Main content sections */
-h1 {
-  text-align: center;
-  color: var(--color-accent);
-  margin-bottom: 12px;
-}
-
-.method-select {
-  text-align: center;
-  margin: 18px 0 12px 0;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.method-select label {
-  margin: 0 var(--spacing-sm);
-  font-weight: bold;
-  color: var(--color-accent);
-  cursor: pointer;
-  user-select: none;
-  background: var(--color-text-light);
-  padding: 5px 10px;
-  border-radius: 16px;
-  border: 1.5px solid var(--color-primary);
-  font-size: 14px;
-}
-
-.teams {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 16px;
-  align-items: center;
-}
-
-.team-box {
-  width: 90%;
-  max-width: 500px;
-  padding: 12px;
-  border-radius: 12px;
-  border: 2px solid var(--color-team-a-border);
-  text-align: center;
-  background: var(--color-team-a-bg);
-}
-
-.team-box.team2 {
-  background: var(--color-team-b-bg);
-  border-color: var(--color-team-b-border);
-}
-
-.team-box h2 {
-  font-size: 18px;
-  margin: 0 0 8px 0;
-  color: var(--color-accent);
-}
-
-.team-box ul {
-  list-style: none;
-  padding: 0 8px;
-  margin: 0;
-  display: grid;
-  /* 常に2列で固定 */
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  box-sizing: border-box;
-}
-
-
-.team-box li {
-  background: var(--color-text-light);
-  border: 1.5px solid #ddd;
-  border-radius: 8px;
-  padding: 6px;
-  font-size: 15px;
-  font-weight: 500;
-  text-align: center;
-}
-
-      .player-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 12px;
-        margin-bottom: 20px;
-      }
-
-      .player {
-        background: #fff;
-        border: 2px solid #97eadb;
-        border-radius: 10px;
-        padding: 10px 6px;
-        text-align: center;
-        cursor: pointer;
-        transition: transform 0.15s, box-shadow 0.15s;
-        position: relative;
-        font-size: 14px;
-      }
-
-
-.player:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.player.selected {
-  background: var(--color-primary);
-  color: var(--color-text-light);
-}
-
-.player.matching {
-  background: #e0f7f3;
-  border-color: var(--color-primary);
-}
-
-/* Pin button */
-.pin-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 20px;
-  height: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.pin-btn::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: #bbb;
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%,
-      79% 91%, 50% 70%, 21% 91%, 32% 57%,
-      2% 35%, 39% 35%);
-  transition: background 0.3s;
-}
-
-.pin-btn.pinned::before {
-  background: gold;
-}
-
-/* Other sections */
-#matchCount {
-  text-align: center;
-  font-size: 12px;
-  color: gray;
-  margin-top: var(--spacing-sm);
-  user-select: none;
-}
-
-.pair-section {
-  background: var(--color-pair-bg);
-  border: 2px solid var(--color-primary);
-  border-radius: 12px;
-  padding: 8px; /* 修正 */
-  margin-bottom: 8px; /* 修正 */
-}
-
-.pair-section h3 {
-  margin-top: 0;
-  color: var(--color-accent);
-  font-weight: 700;
-  font-size: 16px; /* 修正 */
-  margin-bottom: 4px; /* 修正 */
-  text-align: center;
-}
-
-.pair-form {
-  display: flex;
-  gap: 4px; /* 修正 */
-  justify-content: center;
-  margin-bottom: 4px; /* 修正 */
-  flex-wrap: wrap;
-}
-
-.pair-form input[type="text"] {
-  flex: 1 1 40%;
-  min-width: 100px;
-  padding: 4px 6px; /* 修正 */
-  border: 1.5px solid var(--color-primary);
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.pair-form button {
-  background: var(--color-accent);
-  border: none;
-  color: var(--color-text-light);
-  padding: 4px 12px; /* 修正 */
-  border-radius: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.pair-form button:hover {
-  background: #369482;
-}
-
-.pair-list {
-  list-style: none;
-  padding-left: 0;
-  max-height: 100px; /* 修正 */
-  overflow-y: auto;
-  margin: 0;
-  border-top: 1px solid var(--color-primary);
-}
-
-.pair-list li {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 1px solid #b2e2dd;
-  font-size: 14px;
-  color: #333;
-}
-
-.pair-list button.delete-btn {
-  background: #ff6b6b;
-  border: none;
-  color: var(--color-text-light);
-  border-radius: 12px;
-  padding: 2px 8px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.3s;
-}
-
-.pair-list button.delete-btn:hover {
-  background: #e03e3e;
-}
-
-.score-display {
-  font-size: 1rem;
-  font-weight: bold;
-  margin-top: var(--spacing-sm);
-  color: #555;
-}
-
-#allCombinationsSection {
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-md);
-  background: #f0f8ff;
-  border-radius: 12px;
-  border: 2px solid #87ceeb;
-}
-
-#allCombinationsSection h2 {
-  margin-top: 0;
-  color: #4682b4;
-}
-
-#allCombinationsList {
-  list-style-type: none;
-  padding: 0;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-#allCombinationsList li {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background: #e8f4ff;
-  border-radius: 8px;
-  border: 1px solid #add8e6;
-}
-
-/* Footer */
-footer {
-  background: var(--color-primary);
-  text-align: center;
-  color: var(--color-text-light);
-  padding: var(--spacing-md);
-  margin-top: var(--spacing-lg);
-}
-
-/* Media Queries */
-@media (max-width: 991px) {
-  .player {
-    flex: 1 1 calc((100% - 12px * 2) / 3);
-  }
-}
-
-@media (max-width: 767px) {
-  .player {
-    flex: 1 1 calc((100% - 12px) / 2);
-  }
-}
-
-@media (max-width: 599px) {
-  h1 {
-    font-size: 22px;
-  }
-
-  .team-box h2 {
-    font-size: 16px;
-  }
-
-  .team-box li {
-    font-size: 14px;
-    padding: 5px;
-  }
-
-  .pair-form {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .pair-form input[type="text"] {
-    flex: none;
-    width: 80%;
-  }
-
-  .player {
-    flex: 1 1 100%;
-    max-width: 100%;
-  }
-}
-
-.sort-buttons {
-    text-align: center;
-    margin-bottom: 12px;
-}
-
-.sort-buttons button {
-    background: #fff;
-    border: 1px solid var(--color-primary);
-    border-radius: 16px;
-    padding: 5px 10px;
-    font-weight: bold;
-    color: var(--color-accent);
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.sort-buttons button.active {
-    background: var(--color-primary);
-    color: var(--color-text-light);
-}
-
-#playerSearchInput {
-    display: block;
-    width: 90%;
-    max-width: 500px;
-    margin: 1rem auto;
-    padding: 8px; /* 修正 */
-    font-size: 14px; /* 修正 */
-    border: 2px solid var(--color-primary);
-    border-radius: 8px;
-    height: 100px; /* 修正 */
-    box-sizing: border-box;
-}
-
-#playerList.loading::before {
-    content: '読み込み中...';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1.2em;
-    color: #47b6a2;
-}
-
-#playerList.loading {
-    min-height: 100px;
-    position: relative;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-}
-  </style>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <link rel="stylesheet" href="common.css">
 </head>
 
 <body>
-  <header>
-    <h1>ド天然のきゃたん</h1>
-    <div class="hamburger" id="hamburger">☰</div>
-    <nav id="nav">
-      <a href="index.html">ホーム</a>
-      <a href="roulette.html">イベント</a>
-      <a href="team-view.html">チーム分けを見る</a>
-      <a href="data-view.html">カスタム結果を見る</a>
-      <a href="admin2.html">管理画面</a>
-      <a href="team-maker.html">チーム分けする</a>
-    </nav>
-  </header>
+  <div id="header-placeholder"></div>
 
   <main>
     <div class="container">
@@ -579,11 +86,29 @@ footer {
     </div>
   </main>
 
-  <footer>
-    <p>ド天然のきゃたん</p>
-  </footer>
+  <div id="footer-placeholder"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  
+  <script src="common.js"></script>
 
   <script>
+    // ----------------------------------------------------------------------
+    // ★追加: 共通処理の呼び出し ★
+    // ----------------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+        // 管理者用ヘッダー（header-admin.htmlなど）を読み込む
+        // 🚨 以前のヘッダーは "カスタマーセンターのきゃたん" でしたが、このページでは "ド天然のきゃたん" が使われています。
+        // ヘッダーファイル名をご自身のプロジェクトに合わせて変更してください。
+        // ここでは仮に 'header-admin-team.html' とし、管理者リンクを持つと想定します。
+        setupHeader('header-admin.html'); 
+        
+        // ページ固有の初期化ロジック
+        initializePage();
+    });
+    // ----------------------------------------------------------------------
+    
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -595,7 +120,7 @@ footer {
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
+    // ... (以降の全てのロジックは変更なしでそのまま残します) ...
     function getDeviceId() {
       let baseId = localStorage.getItem("deviceId");
       if (!baseId) {
@@ -1361,32 +886,16 @@ footer {
       });
     }
 
-    initializePage();
-
     document.querySelectorAll('input[name="method"]').forEach(radio => {
       radio.addEventListener("change", () => {
         makeTeams();
       });
     });
 
-    const hamburger = document.getElementById("hamburger");
-    const nav = document.getElementById("nav");
-
-    hamburger.addEventListener("click", () => {
-      nav.classList.toggle("show");
-      const links = nav.querySelectorAll("a");
-      links.forEach((link, index) => {
-        if (nav.classList.contains("show")) {
-          link.style.opacity = "1";
-          link.style.transform = "translateY(0)";
-        } else {
-          link.style.opacity = "0";
-          link.style.transform = "translateY(-20px)";
-          link.style.transitionDelay = "0s";
-        }
-      });
-    });
-
+    // ★削除: common.js に移譲されたヘッダー/ナビゲーションのイベントリスナーは削除します。
+    // const hamburger = document.getElementById("hamburger");
+    // const nav = document.getElementById("nav");
+    // hamburger.addEventListener("click", ... );
   </script>
 </body>
 </html>
