@@ -135,27 +135,25 @@
         color: #ff4757;
     }
     
-    /* --- レスポンシブ対応の番号ボード Flexbox (常に10個/行) --- */
+    /* --- レスポンシブ対応の番号ボード Flexbox (強制10個/行) --- */
     #numberBoard {
       display: flex;
       flex-wrap: wrap; 
       justify-content: center; 
-      gap: 3px; /* 隙間を3pxに縮小 */
+      gap: 0; /* 隙間を完全になくす */
       margin: 1rem auto;
       max-width: 100%; 
-      padding: 0; /* paddingを削除してボード幅を最大化 */
+      padding: 0; 
     }
 
     .bingo-cell {
       background-color: #fff;
       border: 1px solid #ccc;
-      border-radius: 5px;
-      /* 常に10列にするための計算式を調整 */
-      /* 100%を10等分し、その間の gap(3px)×9つ分=27px を10で割って 2.7px */
-      flex-basis: calc(10% - 2.7px); 
+      /* 隙間がないため、borderを考慮してわずかに小さくする */
+      flex-basis: 9.95%; /* 100% / 10 = 10% よりわずかに小さくして余裕を持たせる */
       
       height: 0; 
-      padding-bottom: calc(10% - 2.7px); /* アスペクト比を保つ */
+      padding-bottom: 9.95%; /* アスペクト比を保つ */
       
       font-weight: bold;
       color: #555;
