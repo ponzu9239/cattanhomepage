@@ -1,4 +1,4 @@
-/* common.css: 全ページ共通スタイル (ビンゴ、ホーム画面対応) */
+/* common.css: 全ページ共通スタイル (ナビゲーション修正版) */
 
 /* ボックスモデルの統一 */
 * {
@@ -12,14 +12,14 @@ body {
     font-family: "Hiragino Maru Gothic ProN", sans-serif;
     background: #f7fcfc;
     margin: 0;
-    padding-top: 100px;
+    padding-top: 100px; /* ★ヘッダーの高さに合わせて設定★ */
     line-height: 1.6;
     transition: background-color 0.5s ease;
     overflow-x: hidden;
 }
 
 /* ------------------------------------------------ */
-/* ★ 1. ヘッダー/ナビゲーションのスタイル ★ */
+/* ★ 1. ヘッダー/ナビゲーションのスタイル (デフォルト: モバイル優先) ★ */
 /* ------------------------------------------------ */
 header {
     position: fixed;
@@ -28,39 +28,41 @@ header {
     width: 100%;
     background-color: #97EADB;
     padding: 1rem;
-    text-align: center;
     z-index: 1000;
+    
+    /* PC表示を考慮してデフォルトでFlexboxにしておく */
+    display: flex;
+    justify-content: space-between; /* h1とハンバーガーを左右に配置 */
+    align-items: center;
 }
 
 header h1 {
+    /* モバイルでの位置調整 */
     margin: 0;
-    /* レスポンシブ対応と改行禁止 */
     font-size: 5vw; 
     max-font-size: 2rem; 
     white-space: nowrap; 
     overflow: hidden;
     color: #fff;
+    /* ヘッダー内に余裕を持たせる */
+    padding-left: 0.5rem; 
 }
 
-/* ハンバーガーメニューアイコン */
+/* ハンバーガーメニューアイコン (モバイルでのみ表示) */
 .hamburger {
     font-size: 2rem;
     cursor: pointer;
-    position: absolute;
-    top: 50%;
-    right: 1rem; 
+    position: relative; /* fixedからrelativeに変更 */
     color: white;
-    transform: translateY(-50%);
     z-index: 1100;
-    /* 修正前：デフォルトで表示 (モバイル向け) */
-    display: block; 
+    padding-right: 0.5rem; 
 }
 
-/* ナビゲーションメニュー本体 */
-nav {
+/* ナビゲーションメニュー本体 (モバイル: 非表示状態) */
+#nav {
     position: fixed;
-    /* CRITICAL FIX: 初期状態は画面外 */
-    top: -100%;
+    /* ★CRITICAL FIX: これが初期の非表示状態★ */
+    top: -100%; 
     left: 0;
     width: 100%;
     background-color: #97EADB;
@@ -69,13 +71,13 @@ nav {
     padding: 0;
     transition: top 0.3s ease;
     z-index: 1050;
-    /* 修正前：デフォルトで表示 (モバイル向け) */
-    display: flex;
+    /* モバイルでは h1 の下に隠れる */
 }
 
-nav.show {
+/* ナビゲーションが開いた状態 (モバイルのみ適用) */
+#nav.show {
     /* JSでヘッダーの高さに基づいて動的に上書きされます */
-    top: 75px; 
+    /* top: 75px; */ 
 }
 
 nav a {
@@ -109,52 +111,44 @@ nav a:hover {
     .hamburger {
         display: none; 
     }
+    
+    /* ヘッダーのレイアウト調整 */
+    header {
+        padding: 0.8rem 1rem;
+        justify-content: space-between; /* h1とnavを左右に配置 */
+    }
 
-    /* PCではナビゲーションメニューをヘッダー内に表示（固定を解除） */
-    nav {
-        /* position: fixed; を解除 */
+    /* PCではナビゲーションメニューをヘッダー内に表示し、常時ONにする */
+    #nav {
+        /* position: fixed; を解除し、常時表示 */
         position: static; 
-        /* top: -100%; を解除 */
-        top: auto;
-        flex-direction: row; /* 横並び */
-        justify-content: flex-end; /* 右寄せ */
+        top: auto; /* 非表示設定を解除 */
         width: auto;
-        padding: 0 1rem;
-        /* ナビゲーションをヘッダーの右側に配置するためのFlexbox調整 */
-        align-items: center; 
-        
-        /* ヘッダー全体をFlexbox化してh1とnavを横並びにする */
-        /* これはheader要素のスタイルをcommon.css外で上書きする必要がありますが、
-           今回は最低限navの表示を修正するため、navのスタイルを static に変更します。*/
+        flex-direction: row; /* 横並び */
+        /* ヘッダーの高さに合わせる */
+        display: flex !important; /* JSによる display: none を上書きする可能性を考慮 */
+        padding: 0;
+        transition: none; /* 開閉アニメーションを無効化 */
     }
     
-    /* PC表示時に nav.show のスタイルを無効化 */
-    nav.show {
+    /* nav.show のスタイルはPCでは適用されない */
+    #nav.show {
         top: auto; 
     }
     
-    /* PCではaタグを横並びにするため、marginを調整 */
+    /* PCではaタグを横並びにするため、スタイルを調整 */
     nav a {
         display: inline-block;
         border-bottom: none;
         margin-left: 1.5rem; /* リンク間のスペース */
-        padding: 0.2rem 0;
+        padding: 0.2rem 0.5rem;
         background-color: transparent;
     }
     
     nav a:hover {
-        background-color: transparent;
-        color: #e5f7f8; /* ホバー時の色 */
+        background-color: #0099aa; /* PCでもホバーは色を変える */
+        color: white;
         transform: none;
-    }
-    
-    /* 800px以上の画面で header を flex に変更する必要がある */
-    /* header を flex-container にするスタイルを追記/修正 */
-    header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.8rem 1rem; /* パディングを少し調整 */
     }
 }
 /* ★★★ PC表示時の修正END ★★★ */
