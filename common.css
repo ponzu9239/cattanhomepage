@@ -12,8 +12,8 @@ body {
     font-family: "Hiragino Maru Gothic ProN", sans-serif;
     background: #f7fcfc;
     margin: 0;
-    /* ★修正: ヘッダーの高さに合わせてpadding-topを増加 (約120px) ★ */
-    padding-top: 120px; 
+    /* ★修正: ヘッダーの高さに合わせてpadding-topをさらに増加 (約140px) ★ */
+    padding-top: 140px; 
     line-height: 1.6;
     transition: background-color 0.5s ease;
     overflow-x: hidden;
@@ -28,12 +28,11 @@ header {
     left: 0;
     width: 100%;
     background-color: #97EADB;
-    /* ★修正: 上下のパディングを増やし高さを調整 ★ */
-    padding: 1.5rem 1rem; 
+    /* ★修正: 上下のパディングをさらに増やし高さを調整 (2rem) ★ */
+    padding: 2rem 1rem; 
     z-index: 1000;
     
     display: flex;
-    /* タイトル中央揃えのため、justify-contentはcenter */
     justify-content: center; 
     align-items: center;
 }
@@ -47,7 +46,7 @@ header h1 {
     color: #fff;
     padding-left: 0.5rem; 
     
-    /* ★タイトル中央揃えの設定★ */
+    /* タイトル中央揃えの設定 */
     text-align: center; 
     width: 100%; 
     position: absolute; 
@@ -115,7 +114,7 @@ nav a:hover {
     
     /* PCでもヘッダーパディングを維持 */
     header {
-        padding: 1.5rem 1rem; 
+        padding: 2rem 1rem; 
     }
 }
 /* ★★★ PC表示時の修正END ★★★ */
@@ -186,6 +185,7 @@ section h3 {
     border: 2px solid #97EADB;
     border-radius: 10px;
     padding: 1rem;
+    /* ★中央揃えを維持★ */
     text-align: center;
     margin: 1rem 0;
     color: #1b656f;
