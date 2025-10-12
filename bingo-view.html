@@ -1,234 +1,26 @@
-<!DOCTYPE html>
+　<!DOCTYPE html>
 <html lang="ja">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ビンゴ抽選結果表示</title>
+  <title>きゃたんのビンゴゲーム</title>
+  
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
-  <style>
-    /* ------------------------------------------------ */
-    /* 1. 全要素に box-sizing を適用して厳密に計算 */
-    /* ------------------------------------------------ */
-    * {
-        box-sizing: border-box; 
-    }
-
-    /* 共通デザインの流用 */
-    body {
-      font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background: #f7fcfc;
-      margin: 0;
-      padding-top: 100px;
-      overflow-x: hidden;
-    }
-
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background-color: #97EADB;
-      padding: 1rem;
-      text-align: center;
-      z-index: 1000;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #fff;
-    }
-
-    .hamburger {
-      font-size: 2rem;
-      cursor: pointer;
-      position: absolute;
-      top: 50%;
-      right: 3rem;
-      color: white;
-      transform: translateY(-50%);
-      z-index: 1100;
-    }
-
-    nav {
-      position: fixed;
-      top: -100%;
-      left: 0;
-      width: 100%;
-      background-color: #97EADB;
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-      transition: top 0.3s ease;
-      z-index: 1050;
-    }
-
-    nav.show {
-      top: 75px;
-    }
-
-    nav a {
-      display: block;
-      text-align: center;
-      margin: 0;
-      padding: 0.6rem 0;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: white;
-      background-color: #97eadb;
-      border-bottom: 1px solid #97EADB;
-      text-decoration: none;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-
-    nav a:hover {
-      background-color: #0099aa;
-      transform: scale(1.03);
-    }
-
-    footer {
-      background: #97EADB;
-      text-align: center;
-      color: white;
-      padding: 1rem;
-      margin-top: 2rem;
-    }
-
-    section {
-      padding: 2rem;
-      max-width: 800px;
-      margin: auto;
-    }
-
-    section h3 {
-      color: #5aa2aa;
-      border-bottom: 2px solid #97EADB;
-      padding-bottom: 0.3rem;
-    }
-
-    /* ビンゴ表示用のスタイル */
-    #bingoDisplay {
-      text-align: center;
-      padding: 2rem 1rem;
-      background-color: #d4f0f4;
-      border: 3px solid #97EADB;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      margin-top: 1rem;
-    }
-
-    #latestNumber {
-      font-size: 5rem;
-      font-weight: bold;
-      color: #1b656f;
-      margin: 0.5rem 0;
-      height: 6rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-      transition: color 0.1s, background-color 0.1s;
-    }
-
-    /* 抽選中の表示スタイル */
-    #latestNumber.drawing {
-        color: #ff4757;
-    }
-    
-    /* --- レスポンシブ対応の番号ボード Flexbox (余白あり・強制10個/行) --- */
-    #numberBoard {
-      display: flex;
-      flex-wrap: wrap; 
-      justify-content: center; 
-      gap: 2px; /* 隙間を2pxに設定 */
-      margin: 1rem auto;
-      max-width: 100%; 
-      padding: 0; 
-    }
-
-    .bingo-cell {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 3px; 
-
-      /* ---------------------------------------------------- */
-      /* 2. 隙間(2px)を考慮して10個が100%に収まるように計算 */
-      /* ---------------------------------------------------- */
-      /* 10% - (9 * 2px) / 10 = 10% - 1.8px */
-      flex-basis: calc(10% - 1.8px); 
-      
-      height: 0; 
-      padding-bottom: calc(10% - 1.8px); /* アスペクト比を保つ */
-      
-      font-weight: bold;
-      color: #555;
-      line-height: 1;
-      
-      position: relative;
-      min-width: 15px; 
-      min-height: 15px;
-    }
-    .bingo-cell::before {
-        content: attr(data-content); 
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        /* ---------------------------------------------------- */
-        /* 3. フォントサイズをvw単位にしてセルサイズに応じて変化 */
-        /* ---------------------------------------------------- */
-        font-size: 3.0vw; /* ビューポート幅の3.0%を基準とする */
-    }
-
-    /* ------------------------------------------------ */
-    /* 4. PCなど画面幅が広い場合に文字サイズを固定する */
-    /* ------------------------------------------------ */
-    @media (min-width: 800px) {
-        .bingo-cell::before {
-            font-size: 1.1rem; /* 800pxを超えたらフォントサイズを固定 */
-        }
-    }
-
-    /* 強制改行要素 */
-    .break {
-        flex-basis: 100%;
-        height: 0;
-        margin: 0;
-        padding: 0;
-    }
-    /* --- Flexbox対応CSS終了 --- */
-
-    .drawn {
-      background-color: #97EADB;
-      color: white;
-    }
-  </style>
+  <link rel="stylesheet" href="common.css">
 
 </head>
 
 <body>
-  <header>
-    <h1>ビンゴ抽選結果</h1>
-    <div class="hamburger" id="hamburger">☰</div>
-    <nav id="nav">
-      <a href="bingo.html">抽選会場へ</a> 
-      <a href="index.html">ホーム</a>
-      <a href="roulette.html">イベント</a>
-      <a href="team-view.html">チーム分けを見る</a>
-      <a href="data-view.html">カスタム結果を見る</a>
-    </nav>  
-  </header>
+  <div id="header-placeholder"></div>
 
   <main>
     <section id="bingo">
-      <h3>📢 発表中の番号 📢</h3>
+      <h3>📢 抽選結果 📢</h3>
 
       <div id="bingoDisplay">
         <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">現在の表示番号</p>
@@ -241,16 +33,16 @@
     </section>
   </main>
 
-  <footer>
-    <p>ド天然のきゃたん</p>
-  </footer>
+  <div id="footer-placeholder"></div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
+  <script src="common.js"></script>
+
   <script>
     // ----------------------------------------------------------------------
-    // 🎨 あなたのFirebase設定 (抽選会場ページと同じ設定)
+    // 🎨 Firebase設定
     // ----------------------------------------------------------------------
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
@@ -262,7 +54,6 @@
       appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
       measurementId: "G-ZNGEZZWMTP"
     };
-    // ----------------------------------------------------------------------
 
     // Firebase初期化とデータベース参照の取得
     firebase.initializeApp(firebaseConfig);
@@ -324,13 +115,11 @@
     });
     
     document.addEventListener("DOMContentLoaded", () => {
-        // ハンバーガーメニューのロジック
-        const hamburger = document.getElementById("hamburger");
-        const nav = document.getElementById("nav");
-
-        hamburger.addEventListener("click", () => {
-          nav.classList.toggle("show");
-        });
+        // ★ 共通JSの setupHeader 関数を呼び出してヘッダー/フッターを読み込む ★
+        // 参加者ページなので 'header-user.html' を指定
+        setupHeader('header-user.html');
+        
+        // 元のHTMLにあったハンバーガーメニューのJSロジックはcommon.jsのsetupHeader()内に統合されました。
     });
 
   </script>
