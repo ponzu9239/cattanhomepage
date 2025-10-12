@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>きゃたんのビンゴゲーム</title>
+  <title>ビンゴ抽選結果表示</title>
   
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
@@ -14,11 +14,10 @@
   <link rel="stylesheet" href="common.css">
   
   <style>
-    /* 参加者ページとして、管理者ボタンを非表示にするためのCSS */
+    /* 参加者ページとして、管理者ボタンを非表示にする */
     #drawButton, #resetButton {
       display: none !important;
     }
-    /* ボタンコンテナも非表示にする */
     .bingo-buttons-container {
         display: none !important;
     }
@@ -82,17 +81,28 @@
     const maxNumber = 75;
     const latestNumberEl = document.getElementById('latestNumber');
     const numberBoardEl = document.getElementById('numberBoard');
-
-    // 前回データを保持 (アニメーション判定用)
     let lastDrawnNumbers = []; 
+    
+    // ヘッダー高さ調整用のDOM要素
+    const header = document.querySelector('header');
+    
+    // ★変更点: ナビゲーション位置を動的に調整する関数 ★
+    function updateNavPosition() {
+        const dynamicNav = document.querySelector('nav');
+        if (header && dynamicNav) {
+            dynamicNav.style.top = header.offsetHeight + 'px';
+        }
+    }
+
 
     // ボードの描画処理
     function renderBoard(drawnNumbers, currentDisplay) {
-        // --- 最新表示の更新 ---
         latestNumberEl.textContent = currentDisplay !== '--' ? currentDisplay : '--';
         
-        // 抽選中かどうかの判断
-        const isDrawing = !drawnNumbers.includes(parseInt(currentDisplay)) && currentDisplay !== '--';
+        const latestNumInt = parseInt(currentDisplay);
+        const isNewDrawn = drawnNumbers.includes(latestNumInt) && !lastDrawnNumbers.includes(latestNumInt) && !isNaN(latestNumInt);
+        
+        const isDrawing = !drawnNumbers.includes(latestNumInt) && currentDisplay !== '--';
         
         if (isDrawing) {
             latestNumberEl.classList.add('drawing');
@@ -100,23 +110,12 @@
             latestNumberEl.classList.remove('drawing');
         }
         
-        // **********************************************
-        // ★ 確定時のアニメーション判定 ★
-        // **********************************************
-        const latestNumInt = parseInt(currentDisplay);
-        
-        // 新しい番号が確定したかどうかの判定 (NaNでないことも確認)
-        const isNewDrawn = drawnNumbers.includes(latestNumInt) && !lastDrawnNumbers.includes(latestNumInt) && !isNaN(latestNumInt);
-        
-        
         // --- ボードの更新 ---
-        // ボードを空にして再描画
         numberBoardEl.innerHTML = '';
         
         for (let i = 1; i <= maxNumber; i++) {
             const cell = document.createElement('div');
             cell.className = 'bingo-cell';
-            // ★ アニメーションのためのID付与が必須 ★
             cell.id = `cell-${i}`; 
             cell.setAttribute('data-content', i);
             
@@ -142,25 +141,13 @@
         // ★ 確定アニメーションの実行と解除（番号エリア） ★
         // **********************************************
         if (isNewDrawn) {
-            // 1. 最新番号エリアのアニメーション
             latestNumberEl.classList.add('stop-highlight');
             
-            // アニメーションクラスを解除 (0.5秒後に実行)
             setTimeout(() => {
                 latestNumberEl.classList.remove('stop-highlight');
-                
-                // **重要**: ボード側の stop-flash クラスは、再描画時に一度だけ付与され、CSSアニメーション終了後に自動的に消えるため、JSで消す必要はありません。
-                // ただし、念のため、確実に消したい場合は以下のように記述することも可能ですが、
-                // 今回は再描画で毎回DOMが置き換わるため、このsetTimeout内でのボードセル削除は不要です。
-                
-                // const finalCell = document.getElementById(`cell-${latestNumInt}`); 
-                // if (finalCell) {
-                //     finalCell.classList.remove('stop-flash');
-                // }
             }, 500);
         }
 
-        // 確定番号リストを更新
         lastDrawnNumbers = drawnNumbers;
     }
 
@@ -177,6 +164,22 @@
     
     document.addEventListener("DOMContentLoaded", () => {
         setupHeader('header-user.html');
+        
+        // ★変更点: ヘッダーの高さ調整リスナーを設定 ★
+        window.addEventListener('resize', updateNavPosition);
+        
+        // ハンバーガーメニューがcommon.jsで読み込まれた後でリスナーを追加
+        setTimeout(() => {
+            const dynamicHamburger = document.querySelector('.hamburger');
+            const dynamicNav = document.querySelector('nav');
+            if (dynamicHamburger && dynamicNav) {
+                dynamicHamburger.addEventListener("click", () => {
+                    dynamicNav.classList.toggle("show");
+                    updateNavPosition();
+                });
+            }
+            updateNavPosition();
+        }, 50); // header-user.htmlの読み込みを待つ
     });
 
   </script>
