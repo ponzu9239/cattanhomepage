@@ -11,6 +11,13 @@
   <meta property="og:image:height" content="630">
 
   <style>
+    /* ------------------------------------------------ */
+    /* 1. 全要素に box-sizing を適用して強制的に収める */
+    /* ------------------------------------------------ */
+    * {
+        box-sizing: border-box; 
+    }
+
     /* 共通デザインの流用 */
     body {
       font-family: "Hiragino Maru Gothic ProN", sans-serif;
@@ -142,6 +149,7 @@
       justify-content: center; 
       gap: 0; /* 隙間を完全になくす */
       margin: 1rem auto;
+      /* 親要素の padding を調整することで、ボード全体を幅いっぱいに使う */
       max-width: 100%; 
       padding: 0; 
     }
@@ -149,11 +157,15 @@
     .bingo-cell {
       background-color: #fff;
       border: 1px solid #ccc;
-      /* 隙間がないため、borderを考慮してわずかに小さくする */
-      flex-basis: 9.95%; /* 100% / 10 = 10% よりわずかに小さくして余裕を持たせる */
+      border-radius: 0; /* 完全にくっつけるため角丸も一旦排除 */
+
+      /* ---------------------------------------------------- */
+      /* 2. ぴったり10%を割り当てる (box-sizing のおかげで収まる) */
+      /* ---------------------------------------------------- */
+      flex-basis: 10%; 
       
       height: 0; 
-      padding-bottom: 9.95%; /* アスペクト比を保つ */
+      padding-bottom: 10%; /* アスペクト比を保つ */
       
       font-weight: bold;
       color: #555;
