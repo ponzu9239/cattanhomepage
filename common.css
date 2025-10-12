@@ -128,7 +128,7 @@ section h3 {
 #latestNumber, #currentNumber {
     font-size: 5rem;
     font-weight: bold;
-    color: #1b656f;
+    color: #1b656f; /* 抽選中もデフォルト色を維持 */
     margin: 0.5rem 0;
     height: 6rem;
     display: flex;
@@ -140,10 +140,11 @@ section h3 {
     transition: color 0.1s, background-color 0.1s;
 }
 
-/* 抽選中/アニメーション前の表示スタイル */
+/* 抽選中の文字色を赤くしないよう、該当スタイルを削除 (またはデフォルト色を再指定) */
 #latestNumber.drawing, #currentNumber.drawing-mode {
-    color: #ff4757;
+    color: #1b656f; 
 }
+
 
 /* 確定番号表示エリアのアニメーション (両ページ共通) */
 #currentNumber.stop-highlight, #latestNumber.stop-highlight {
@@ -229,6 +230,17 @@ section h3 {
 /* ★ 6. 管理者機能ボタンのスタイル (bingo.html専用) ★ */
 /* ------------------------------------------------ */
 
+/* 抽選ボタンのコンテナ (ボタンを2行にするためのFlexboxコンテナ) */
+.bingo-buttons-container {
+    display: flex;
+    flex-direction: column; /* 縦に並べる (2行) */
+    align-items: center;
+    margin-bottom: 1.5rem;
+    margin-top: 1rem;
+    gap: 1rem; /* ボタン間のスペース */
+}
+
+/* 抽選ボタンのスタイル（1行目） */
 #drawButton {
     background-color: #5aa2aa;
     color: white;
@@ -239,8 +251,10 @@ section h3 {
     border-radius: 50px;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
-    margin-bottom: 1.5rem;
+    /* margin-bottom はコンテナのgapで制御 */
     box-shadow: 0 4px 0 #1b656f;
+    width: 80%; /* 幅を調整 */
+    max-width: 300px;
 }
 
 #drawButton:hover:not(:disabled) {
@@ -269,6 +283,7 @@ section h3 {
     background-color: #e74c3c;
 }
 
+/* リセットボタンのスタイル（2行目） */
 #resetButton {
     background-color: #e74c3c;
     color: white;
@@ -278,7 +293,9 @@ section h3 {
     border-radius: 25px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: 1rem;
+    margin-top: 0; /* コンテナのgapで制御 */
+    width: 40%; /* 幅を調整 */
+    max-width: 150px;
 }
 
 #resetButton:hover {
