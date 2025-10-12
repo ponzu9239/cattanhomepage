@@ -897,3 +897,101 @@ h1 {
     max-width: 100%;
   }
 }
+
+
+/* ------------------------------------------------ */
+/* ★ 9. ビンゴイベントバナーのスタイル (index.html専用) ★ */
+/* ------------------------------------------------ */
+
+.bingo-event-banner {
+    text-align: center;
+    margin: 30px auto;
+}
+
+.bingo-event-banner a {
+    display: block;
+    width: 100%;
+    max-width: 800px;
+    margin: var(--spacing-md) auto 0;
+    
+    /* デザインの基盤 */
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    color: var(--color-text-light); /* 白文字 */
+    border-radius: 12px;
+    overflow: hidden; /* 子要素の影をクリップ */
+    
+    /* グラデーションとボックスシャドウ */
+    background: linear-gradient(135deg, #16a085 0%, #2ecc71 100%); /* 鮮やかな緑系のグラデーション */
+    box-shadow: 0 10px 25px rgba(22, 160, 133, 0.4), 0 3px 0 #1abc9c; /* 下部に強調された影 */
+    
+    position: relative;
+    padding: 20px 10px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.bingo-event-banner a:hover {
+    transform: translateY(-4px); /* 浮き上がるアニメーション */
+    box-shadow: 0 15px 30px rgba(22, 160, 133, 0.5), 0 3px 0 #1abc9c;
+}
+
+.main-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* 文字の影 */
+}
+
+.title-main {
+    font-size: 1.8rem;
+    line-height: 1.2;
+    padding: 5px 0;
+}
+
+.title-sub {
+    font-size: 1rem;
+    font-weight: normal;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 2px 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+.icon-text {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #e74c3c; /* 赤い「開催中！」バッジ */
+    color: white;
+    padding: 5px 15px;
+    font-size: 0.8rem;
+    font-style: italic;
+    font-weight: 700;
+    border-bottom-left-radius: 12px;
+    box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.link-text {
+    font-size: 1.1rem;
+    margin-top: 15px;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/* 既存のバナー注釈スタイルを上書き/統合 */
+.bingo-event-banner + .banner-note {
+    font-size: 0.9rem;
+    color: #555;
+    text-align: center;
+    margin-top: 10px;
+    display: block; /* HTMLの変更に合わせて表示を確実にする */
+}
+
+/* 既存のルーレットバナー終了時のスタイルを削除（または非表示） */
+.roulette-banner.ended {
+    display: none; /* 古いバナーが誤って表示されないようにする */
+}
