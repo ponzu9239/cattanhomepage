@@ -1,180 +1,207 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>きゃたんのひみつきち</title>
-  
-  <link rel="stylesheet" href="common.css">
-  
-  <link rel="icon" href="IMG_4666.png" type="image/png">
-  <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-
-  </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>きゃたんのひみつきち</title>
+    <link rel="icon" href="IMG_4666.png" type="image/png">
+    <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    
+    <link rel="stylesheet" href="common.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
 
 <body>
-  <div id="header-placeholder"></div>
+    <header>
+        <h1>ド天然のきゃたん</h1>
+        <div class="hamburger" id="hamburger">☰</div>
+        <nav id="nav">
+            <a href="index.html">ホーム</a>
+            <a href="roulette.html">イベント</a>
+            <a href="team-view.html">チーム分けを見る</a>
+            <a href="data-view.html">カスタム結果を見る</a>
+        </nav>
+    </header>
 
-  <main>
+    <main>
+        <div class="birthday-image-container">
+          <img src="IMG_4607.JPG" alt="きゃたんイラスト" class="birthday-image">
+        </div>
     
-    <section id="profile">
-      <h3>🐱 プロフィール</h3>
-      <p>
-        猫botです。(ストリーマー)APEXカスタムのオーガナイザー🐾参加型を中心にYouTubeで配信中│最高同時視聴915人│配信総視聴者数80万人OVER|TOP配信者になる│game￤│APEX│Minecraft│原神│プロセカ│第五人格│雀魂│PUBG│フォールガイズ│スマブラ│ディスコサーバー開設🐾
-      </p>
-    </section>
+        <div class="elapsed-time-container">
+          <div>24時間配信完走！</div>
+        </div>
 
-    <section id="liveVideo" style="max-width: 800px; margin: auto;">
-      <h3>🎥 配信中の動画</h3>
-      <div id="videoContainer">
-        読み込み中...
-      </div>
-    </section>
+        <section id="profile">
+            <h3>🐱 プロフィール</h3>
+            <p>
+                猫botです。(ストリーマー)APEXカスタムのオーガナイザー🐾参加型を中心にYouTubeで配信中│最高同時視聴915人│配信総視聴者数80万人OVER|TOP配信者になる│game￤│APEX│Minecraft│原神│プロセカ│第五人格│雀魂│PUBG│フォールガイズ│スマブラ│ディスコサーバー開設🐾
+            </p>
+        </section>
 
-    <section id="code">
-      <h3>🆔 参加コード</h3>
-      <p id="participantCodeDisplay" class="code-display">読み込み中...</p>
-    </section>
+        <section id="liveVideo" style="max-width: 800px; margin: auto;">
+            <h3>🎥 配信中の動画</h3>
+            <div id="videoContainer">
+                読み込み中...
+            </div>
+        </section>
 
-    <section id="rules">
-      <h3>📝　参加型配信のルール</h3>
-      <ul>
-        <li>チャンネル登録＆高評価ポチッとな( ｡･･｡)ﾉ凸</li>
-        <li>discordに入るのも必須です！リンクはプロフィールにあります🔗</li>
-        <li>参加者のみVCでしゃべるのOKです🙆‍♀️聞き専でも️⭕️</li>
-        <li>VCあがって配信閉じることはしないでください❌</li>
-      </ul>
-    </section>
+        <section id="code">
+            <h3>🆔 参加コード</h3>
+            <p id="participantCodeDisplay" class="code-display">読み込み中...</p>
+        </section>
 
-<section id="event">
-  <h3>🌟イベント</h3>
-  <div class="roulette-banner ended">
-    <div class="ended-message">
-      きゃたんのPayPayルーレット<br>🍧イベントは終了しました🍉
-    </div>
-  </div>
-</section>
+        <section id="rules">
+            <h3>📝　参加型配信のルール</h3>
+            <ul>
+                <li>チャンネル登録＆高評価ポチッとな( ｡･ω･｡)ﾉ凸</li>
+                <li>discordに入るのも必須です！リンクはプロフィールにあります🔗</li>
+                <li>参加者のみVCでしゃべるのOKです🙆‍♀️聞き専でも️⭕️</li>
+                <li>VCあがって配信閉じることはしないでください❌</li>
+            </ul>
+        </section>
 
+        <section id="event">
+            <h3>🌟イベント</h3>
+            <div class="roulette-banner ended">
+                <div class="ended-message">
+                    きゃたんのPayPayルーレット<br>🍧イベントは終了しました🍉
+                </div>
+            </div>
+        </section>
 
-<section id="sns" class="sns">
-  <h3>🐾 SNSリンク</h3>
-  <a href="https://www.youtube.com/@catiffanygame" class="youtube-link">YouTube</a>
-  <a href="https://x.com/catiffanygame" class="x-link">X（旧Twitter）</a>
-  <a href="https://discord.com/invite/hhF9xhMaJc" class="discord-link">Discord</a>
-  <a href="https://www.twitch.tv/catkungame" class="twitch-link">Twitch</a>
-  <a href="https://www.tiktok.com/@catiffanygame?_t=ZS-8xKiPhVrRxq&_r=1" class="tiktok-link">TikTok</a>
-</section>
-　
-  </main>
+        <section id="sns" class="sns">
+            <h3>🐾 SNSリンク</h3>
+            <a href="https://www.youtube.com/@catiffanygame" class="youtube-link"><i class="fab fa-youtube"></i> YouTube</a>
+            <a href="https://x.com/catiffanygame" class="x-link"><i class="fab fa-twitter"></i> X（旧Twitter）</a>
+            <a href="https://discord.com/invite/hhF9xhMaJc" class="discord-link"><i class="fab fa-discord"></i> Discord</a>
+            <a href="https://www.twitch.tv/catkungame" class="twitch-link"><i class="fab fa-twitch"></i> Twitch</a>
+            <a href="https://www.tiktok.com/@catiffanygame?_t=ZS-8xKiPhVrRxq&_r=1" class="tiktok-link"><i class="fab fa-tiktok"></i> TikTok</a>
+        </section>
+    </main>
 
-  <div id="footer-placeholder"></div>
+    <footer>
+        <p>ド天然のきゃたん</p>
+    </footer>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
-  <script src="common.js"></script>
+    <script src="common.js"></script>
 
-  <script>
-    // ----------------------------------------------------------------------
-    // 🎨 あなたのFirebase設定
-    // ----------------------------------------------------------------------
-    const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.appspot.com",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
-    };
-    firebase.initializeApp(firebaseConfig);
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+            authDomain: "catiffanygame.firebaseapp.com",
+            databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+            projectId: "catiffanygame",
+            storageBucket: "catiffanygame.appspot.com",
+            messagingSenderId: "166871605809",
+            appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+            measurementId: "G-ZNGEZZWMTP"
+        };
+        firebase.initializeApp(firebaseConfig);
 
-    const dbRef = firebase.database().ref("/cattan");
-    const winnerEl = document.getElementById("winnerName"); // このページには要素がない可能性あり
-    const winnerRef = firebase.database().ref("/roulette/winner");
-
-    // ★ ページ固有のロジック (参加コード、動画埋め込み、ルーレット勝者表示) ★
-
-    // ルーレット勝者表示ロジック (winnerElがある場合のみ動作)
-    winnerRef.on("value", (snapshot) => {
-      const winners = snapshot.val();
-      if (winnerEl) {
-        if (winners) {
-          const keys = Object.keys(winners);
-          if (keys.length > 0) {
-            keys.sort();
-            const latestWinner = winners[keys[keys.length - 1]];
-            winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
-            // updateProbabilityBar(latestWinner); // 呼び出し元の関数は削除しています
-            winnerEl.classList.remove("animate-winner");
-            void winnerEl.offsetWidth;
-            winnerEl.classList.add("animate-winner");
-            return;
-          }
+        const dbRef = firebase.database().ref("/cattan");
+        const hamburger = document.getElementById("hamburger");
+        const nav = document.getElementById("nav");
+        const header = document.querySelector('header');
+        
+        // ----------------------------------------------------------------------
+        // ★ 変更点: ナビゲーション位置を動的に調整する関数 ★
+        // ----------------------------------------------------------------------
+        function updateNavPosition() {
+            if (header && nav) {
+                // ヘッダーの実際の高さを取得し、navのtopに設定
+                nav.style.top = header.offsetHeight + 'px';
+            }
         }
-        winnerEl.textContent = "まだ抽選が行われていません。";
-      }
-    });
 
-    // 配信情報と参加コードのロジック
-    dbRef.on("value", (snapshot) => {
-      const data = snapshot.val() || {};
+        // ----------------------------------------------------------------------
+        // 配信URLと参加コードの読み込みロジック
+        // ----------------------------------------------------------------------
+        dbRef.on("value", (snapshot) => {
+            const data = snapshot.val() || {};
 
-      const code = data.code || "現在、参加型カスタムは行われておりません。";
-      const codeEl = document.getElementById("participantCodeDisplay");
-      if (codeEl) codeEl.textContent = code;
+            const code = data.code || "現在、参加型カスタムは行われておりません。";
+            const codeEl = document.getElementById("participantCodeDisplay");
+            codeEl.textContent = code;
 
-      const url = data.stream || "現在、配信は行われていません。";
-      const container = document.getElementById("videoContainer");
+            const url = data.stream || "現在、配信は行われていません。";
+            const container = document.getElementById("videoContainer");
 
-      if (!container) return; // コンテナがない場合は処理しない
+            if (!url || url === "現在、配信は行われていません。") {
+                container.textContent = "現在、配信は行われていません。";
+                return;
+            }
 
-      if (!url || url === "現在、配信は行われていません。") {
-        container.textContent = "現在、配信は行われていません。";
-        return;
-      }
+            let iframeSrc = "";
+            let isTwitch = url.includes("twitch.tv");
+            
+            if (url.includes("youtube.com") || url.includes("youtu.be")) {
+                let videoId = "";
+                const ytMatch = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
+                if (ytMatch) {
+                    videoId = ytMatch[1];
+                } else {
+                    const liveMatch = url.match(/live\/([a-zA-Z0-9_-]+)/);
+                    if (liveMatch) videoId = liveMatch[1];
+                }
+                if (videoId) {
+                    iframeSrc = `https://www.youtube.com/embed/${videoId}`;
+                } else {
+                    iframeSrc = url;
+                }
+            } else if (isTwitch) {
+                const twitchMatch = url.match(/twitch.tv\/([^\/]+)/);
+                const channelName = twitchMatch ? twitchMatch[1] : null;
+                if (channelName) {
+                    const parentDomain = location.hostname;
+                    iframeSrc = `https://player.twitch.tv/?channel=${channelName}&parent=${parentDomain}&autoplay=false`;
+                } else {
+                    iframeSrc = url;
+                }
+            } else {
+                iframeSrc = url;
+            }
 
-      let iframeSrc = "";
-      if (url.includes("youtube.com") || url.includes("youtu.be")) {
-        let videoId = "";
-        const ytMatch = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
-        if (ytMatch) {
-          videoId = ytMatch[1];
-        } else {
-          const liveMatch = url.match(/live\/([a-zA-Z0-9_-]+)/);
-          if (liveMatch) videoId = liveMatch[1];
+            container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
+        });
+
+        // ----------------------------------------------------------------------
+        // イベントリスナー
+        // ----------------------------------------------------------------------
+        if (hamburger && nav) {
+            hamburger.addEventListener("click", () => {
+                nav.classList.toggle("show");
+                // ★変更点: 開閉時に高さを調整 ★
+                updateNavPosition(); 
+
+                const links = nav.querySelectorAll("a");
+                links.forEach((link, index) => {
+                    if (nav.classList.contains("show")) {
+                        link.style.opacity = "1";
+                        link.style.transform = "translateY(0)";
+                    } else {
+                        link.style.opacity = "0";
+                        link.style.transform = "translateY(-20px)";
+                        link.style.transitionDelay = "0s";
+                    }
+                });
+            });
         }
-        if (videoId) {
-          iframeSrc = `https://www.youtube.com/embed/${videoId}`;
-        } else {
-          iframeSrc = url;
-        }
-      } else if (url.includes("twitch.tv")) {
-        const twitchMatch = url.match(/twitch.tv\/([^\/]+)/);
-        const channelName = twitchMatch ? twitchMatch[1] : null;
-        if (channelName) {
-          const parentDomain = location.hostname;
-          iframeSrc = `https://player.twitch.tv/?channel=${channelName}&parent=${parentDomain}`;
-        } else {
-          iframeSrc = url;
-        }
-      } else {
-        iframeSrc = url;
-      }
-
-      container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
-    });
-
-    // ★ 共通JSの setupHeader 関数を呼び出してヘッダー/フッターを読み込む ★
-    document.addEventListener("DOMContentLoaded", () => {
-      // 参加者ページなので、'header-user.html'を読み込む
-      setupHeader('header-user.html');
-    });
-  </script>
+        
+        // 画面サイズ変更時とDOM読み込み完了時にも高さを更新
+        window.addEventListener('resize', updateNavPosition);
+        document.addEventListener("DOMContentLoaded", () => {
+            // common.js内のsetupHeaderは仮定
+            setupHeader('header-user.html'); 
+            updateNavPosition(); // 初期ロード時にも実行
+        });
+        
+    </script>
 </body>
-
 </html>
