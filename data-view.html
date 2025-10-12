@@ -4,514 +4,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ビンゴ抽選結果表示</title>
+  
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-  <title>カスタム結果閲覧ページ</title>
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <link rel="stylesheet" href="common.css">
+  
   <style>
-     body {
-      font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background: #f7fcfc;
-      margin: 0;
-      padding-top: 100px;
+    /* 参加者ページとして、管理者ボタンを非表示にするためのCSS */
+    /* common.cssに定義されている#drawButtonと#resetButtonを非表示にする */
+    #drawButton, #resetButton {
+      display: none !important;
     }
-
-    .container {
-      max-width: 500px;
-      margin: 30px auto;
-      background: none;
-      box-shadow: none;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-    }
-
-   h1 {
-      text-align: center;
-      color: #47b6a2;
-    }
-    
-        header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background-color: #97EADB;
-      padding: 1rem;
-      text-align: center;
-      z-index: 1000;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #fff;
-    }
-
-    /* ハンバーガーメニューのスタイル */
-    .hamburger {
-      font-size: 2rem;
-      cursor: pointer;
-      position: absolute;
-      top: 50%;
-      right: 3rem;
-      color: white;
-      transform: translateY(-50%);
-      z-index: 1100;
-    }
-
-    nav {
-      position: fixed;
-      top: -100%;
-      left: 0;
-      width: 100%;
-      background-color: #97EADB;
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-      transition: top 0.3s ease;
-      z-index: 1050;
-    }
-
-    nav.show {
-      top: 75px;
-    }
-
-    nav a {
-      display: block;
-      text-align: center;
-      margin: 0;
-      padding: 0.6rem 0;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: white;
-      background-color: #97eadb;
-      border-bottom: 1px solid #97EADB;
-      text-decoration: none;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-
-    nav a:hover {
-      background-color: #0099aa;
-      transform: scale(1.03);
-    }
-
-    /* フッターのスタイル */
-    footer {
-      background: #97EADB;
-      text-align: center;
-      color: white;
-      padding: 1rem;
-      margin-top: 2rem;
-    }
-
-    .match-search {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .match-search input {
-      width: 80px;
-      padding: 8px;
-      border: 1px solid #97eadb;
-      border-radius: 6px;
-      text-align: center;
-    }
-
-    .match-search button {
-      padding: 8px 15px;
-      background-color: #97eadb;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .match-search button:hover {
-      background-color: #7dd2c3;
-    }
-
-    .navigation-buttons {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      gap: 10px;
-    }
-
-    .navigation-buttons button {
-      flex-grow: 1;
-      padding: 10px;
-      background-color: #97eadb;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .navigation-buttons button:hover {
-      background-color: #7dd2c3;
-    }
-
-    .teams {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-    }
-
-    .team-box {
-      background: #eefaff;
-      padding: 10px;
-      border-radius: 8px;
-      border: 2px solid #97eadb;
-      position: relative;
-    }
-
-    .team-box.team2 {
-      background: #fff1f5;
-      border-color: #ffb6c1;
-    }
-
-    .team-box.winner {
-      border-color: #ffc107;
-      box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
-    }
-
-    .team-box.winner .kills,
-    .team-box.winner h2 {
-      color: #ffc107;
-    }
-
-    .winner-mark {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      font-size: 24px;
-      color: #ffc107;
-      font-weight: bold;
-    }
-
-    .team-box h2 {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 0 8px 0;
-      color: #47b6a2;
-    }
-
-    .team-box.team2 h2 {
-      color: #ffb6c1;
-    }
-
-    .player-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .player-list li {
-      background: #fff;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      padding: 6px;
-      text-align: center;
-    }
-
-    .kills {
-      font-size: 24px;
-      font-weight: bold;
-      color: #444;
-      margin-top: 5px;
-    }
-
-    .team-box.team1 h2,
-    .team-box.team1 .kills {
-      color: #47b6a2;
-    }
-
-    .team-box.team2 h2,
-    .team-box.team2 .kills {
-      color: #ffb6c1;
-    }
-
-    .match-number {
-      font-size: 20px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 15px;
-    }
-
-    #loading-status {
-      text-align: center;
-      color: #666;
-      margin-top: 20px;
-    }
-
-    .auto-update-option {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 5px;
-      margin-top: 10px;
-      margin-bottom: 10px; /* ここを変更 */
+    /* ボタン削除に伴い、マージンを調整 */
+    #bingoDisplay {
+      padding-bottom: 3rem; 
     }
   </style>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 
 <body>
-    <header>
-    <h1>ド天然のきゃたん</h1>
-    <div class="hamburger" id="hamburger">☰</div>
-    <nav id="nav">
-      <a href="index.html">ホーム</a>
-      <a href="roulette.html">イベント</a>
-      <a href="team-view.html">チーム分けを見る</a>
-      <a href="data-view.html">カスタム結果を見る</a>
-    </nav>
-  </header>
-      <h1>カスタム結果</h1>
-  <div class="container">
+  <div id="header-placeholder"></div>
 
+  <main>
+    <section id="bingo">
+      <h3>📢 発表中の番号 📢</h3>
 
-    <div class="match-search">
-      <label for="match-no-input">試合番号：</label>
-      <input type="number" id="match-no-input" placeholder="番号を入力" min="1" />
-      <button onclick="goToMatchNumber()">表示</button>
-    </div>
+      <div id="bingoDisplay">
+        <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">現在の表示番号</p>
+        <div id="latestNumber">--</div>
 
-    <div class="auto-update-option">
-      <label for="auto-update-checkbox">最新の試合を見る</label>
-      <input type="checkbox" id="auto-update-checkbox" checked>
-    </div>
-    
-    <div class="navigation-buttons">
-      <button onclick="navigateMatch('previous')" id="prev-btn">前の試合</button>
-      <button onclick="navigateMatch('next')" id="next-btn">次の試合</button>
-    </div>
+        <button id="drawButton"></button>
+        <button id="resetButton"></button>
 
-    <div id="loading-status">試合データを読み込み中...</div>
-    <div id="match-view" style="display: none;">
-      <div class="teams">
-        <div class="team-box team1" id="team1-box">
-          <h2>チーム1</h2>
-          <p class="kills">キル数：<span id="teamA-kills"></span></p>
-          <ul id="teamA-players" class="player-list"></ul>
-        </div>
-        <div class="team-box team2" id="team2-box">
-          <h2>チーム2</h2>
-          <p class="kills">キル数：<span id="teamB-kills"></span></p>
-          <ul id="teamB-players" class="player-list"></ul>
-        </div>
+        <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">出た番号一覧 (1〜75)</h4>
+        <div id="numberBoard">
+          </div>
       </div>
-    </div>
-  </div>
-  <footer>
-    <p>ド天然のきゃたん</p>
-  </footer>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+  <script src="common.js"></script>
 
   <script>
+    // ----------------------------------------------------------------------
+    // 🎨 Firebase設定
+    // ----------------------------------------------------------------------
     const firebaseConfig = {
-      apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
-      authDomain: "match-result-ea475.firebaseapp.com",
-      databaseURL: "https://match-result-ea475-default-rtdb.firebaseio.com",
-      projectId: "match-result-ea475",
-      storageBucket: "match-result-ea475.firebasestorage.app",
-      messagingSenderId: "759877853492",
-      appId: "1:759877853492:web:a10935960bf8230af90561"
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.firebasestorage.app",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+      measurementId: "G-ZNGEZZWMTP"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const bingoRef = db.ref('bingo'); 
 
-    let allMatches = [];
-    let playerReadings = {}; // プレイヤーの読み方データを格納する
-    let currentMatchIndex = -1;
-    let autoUpdateEnabled = true;
+    const maxNumber = 75;
+    const latestNumberEl = document.getElementById('latestNumber');
+    const numberBoardEl = document.getElementById('numberBoard');
 
-    const autoUpdateCheckbox = document.getElementById("auto-update-checkbox");
+    // ★ グローバル変数として前回の確定番号を保持し、アニメーション判定に使用 ★
+    let lastDrawnNumbers = []; 
 
-    // --- データを一括で取得する
-    Promise.all([
-      db.ref("apex_results").orderByChild("matchNumber").once("value"),
-      db.ref("player_readings").once("value")
-    ]).then(snapshots => {
-      const resultsSnapshot = snapshots[0];
-      const readingsSnapshot = snapshots[1];
-      
-      if (resultsSnapshot.exists()) {
-        const data = resultsSnapshot.val();
-        allMatches = Object.values(data);
-        allMatches.sort((a, b) => a.matchNumber - b.matchNumber);
-      }
-      
-      if (readingsSnapshot.exists()) {
-        playerReadings = readingsSnapshot.val();
-      }
-
-      if (allMatches.length > 0) {
-        currentMatchIndex = allMatches.length - 1;
-        displayMatch(currentMatchIndex);
-      } else {
-        document.getElementById("loading-status").innerText = "保存された試合データがありません。";
-      }
-
-      document.getElementById("loading-status").style.display = "none";
-      document.getElementById("match-view").style.display = "block";
-
-      // データのリアルタイム更新を監視
-      db.ref("apex_results").orderByChild("matchNumber").on("value", updatePage);
-      db.ref("player_readings").on("value", updatePage);
-    }).catch(error => {
-      console.error("データの読み込み中にエラーが発生しました:", error);
-      document.getElementById("loading-status").innerText = "データの読み込み中にエラーが発生しました。";
-    });
-
-    // --- ページを更新する関数
-    function updatePage(snapshot) {
-      if (snapshot.ref.key === "apex_results") {
-        if (snapshot.exists()) {
-          allMatches = Object.values(snapshot.val());
-          allMatches.sort((a, b) => a.matchNumber - b.matchNumber);
+    // ボードの描画処理
+    function renderBoard(drawnNumbers, currentDisplay) {
+        // --- 最新表示の更新 ---
+        latestNumberEl.textContent = currentDisplay !== '--' ? currentDisplay : '--';
+        
+        // 抽選中かどうかの判断
+        const isDrawing = !drawnNumbers.includes(parseInt(currentDisplay)) && currentDisplay !== '--';
+        
+        if (isDrawing) {
+            latestNumberEl.classList.add('drawing');
         } else {
-          allMatches = [];
+            latestNumberEl.classList.remove('drawing');
         }
-      } else if (snapshot.ref.key === "player_readings") {
-        playerReadings = snapshot.val() || {};
-      }
+        
+        // **********************************************
+        // ★ 確定時のアニメーションロジック (参加者側) ★
+        // **********************************************
+        const latestNumInt = parseInt(currentDisplay);
+        
+        // 新しい番号が確定したかどうかの判定ロジック
+        const isNewDrawn = drawnNumbers.includes(latestNumInt) && !lastDrawnNumbers.includes(latestNumInt);
+        
+        if (isNewDrawn) {
+            // 1. 最新番号エリアのアニメーション
+            latestNumberEl.classList.add('stop-highlight');
+            
+            // 2. ボード上のセルアニメーション
+            const finalCell = numberBoardEl.querySelector(`[data-content="${latestNumInt}"]`);
+            if (finalCell) {
+                finalCell.classList.add('stop-flash');
+            }
+            
+            // アニメーションクラスを解除
+            setTimeout(() => {
+                latestNumberEl.classList.remove('stop-highlight');
+                if (finalCell) {
+                    finalCell.classList.remove('stop-flash');
+                }
+            }, 500);
+        }
+        // **********************************************
 
-      if (autoUpdateEnabled) {
-        currentMatchIndex = allMatches.length - 1;
-      }
-      
-      displayMatch(currentMatchIndex);
+        // --- ボードの更新 ---
+        numberBoardEl.innerHTML = '';
+        
+        for (let i = 1; i <= maxNumber; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'bingo-cell';
+            cell.setAttribute('data-content', i);
+            
+            if (drawnNumbers.includes(i)) {
+                cell.classList.add('drawn');
+            }
+            
+            numberBoardEl.appendChild(cell);
+
+            if (i % 10 === 0 && i < maxNumber) {
+                const breakEl = document.createElement('div');
+                breakEl.className = 'break';
+                numberBoardEl.appendChild(breakEl);
+            }
+        }
+        
+        // **最後に、現在の確定番号リストを次回判定用に保存**
+        lastDrawnNumbers = drawnNumbers;
     }
 
-    // --- 最新の試合を見るチェックボックスのイベントリスナー
-    autoUpdateCheckbox.addEventListener('change', () => {
-      autoUpdateEnabled = autoUpdateCheckbox.checked;
-      if (autoUpdateEnabled) {
-        currentMatchIndex = allMatches.length - 1;
-        displayMatch(currentMatchIndex);
-      }
+    // Firebaseのデータ変更をリアルタイムで監視し、画面を自動更新
+    bingoRef.on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const drawnNumbers = data.drawnNumbers || [];
+        const currentDisplay = data.currentDisplay || '--'; 
+
+        renderBoard(drawnNumbers, currentDisplay);
+    }, (error) => {
+        console.error("Firebaseからのデータ受信エラー:", error);
     });
-
-    // --- 試合番号から試合を表示する ---
-    function goToMatchNumber() {
-      const inputNumber = Number(document.getElementById("match-no-input").value);
-      const index = allMatches.findIndex(match => match.matchNumber === inputNumber);
-      if (index !== -1) {
-        currentMatchIndex = index;
-        displayMatch(currentMatchIndex);
-        autoUpdateEnabled = false;
-        autoUpdateCheckbox.checked = false;
-      } else {
-        alert("指定された試合番号は見つかりませんでした。");
-      }
-    }
-
-    // --- 試合データを表示する ---
-    function displayMatch(index) {
-      if (index >= 0 && index < allMatches.length) {
-        const match = allMatches[index];
-        document.getElementById("match-no-input").value = match.matchNumber;
-
-        document.getElementById("teamA-kills").innerText = match.teamAKills;
-        document.getElementById("teamB-kills").innerText = match.teamBKills;
-        
-        const sortedTeamA = [...match.teamA].sort((a, b) => {
-          const readingA = playerReadings[a]?.reading || a;
-          const readingB = playerReadings[b]?.reading || b;
-          return readingA.localeCompare(readingB, 'ja', { sensitivity: 'base' });
-        });
-
-        const sortedTeamB = [...match.teamB].sort((a, b) => {
-          const readingA = playerReadings[a]?.reading || a;
-          const readingB = playerReadings[b]?.reading || b;
-          return readingA.localeCompare(readingB, 'ja', { sensitivity: 'base' });
-        });
-        
-        renderPlayers("teamA-players", sortedTeamA);
-        renderPlayers("teamB-players", sortedTeamB);
-
-        const team1Box = document.getElementById("team1-box");
-        const team2Box = document.getElementById("team2-box");
-
-        team1Box.classList.remove("winner");
-        team2Box.classList.remove("winner");
-        const existingMarks = document.querySelectorAll(".winner-mark");
-        existingMarks.forEach(mark => mark.remove());
-
-        if (match.teamAKills > match.teamBKills) {
-          team1Box.classList.add("winner");
-          team1Box.insertAdjacentHTML('beforeend', '<div class="winner-mark">🏆</div>');
-        } else if (match.teamBKills > match.teamAKills) {
-          team2Box.classList.add("winner");
-          team2Box.insertAdjacentHTML('beforeend', '<div class="winner-mark">🏆</div>');
-        }
-
-        document.getElementById("prev-btn").disabled = index === 0;
-        document.getElementById("next-btn").disabled = index === allMatches.length - 1;
-        
-        if (index === allMatches.length - 1) {
-          autoUpdateEnabled = true;
-          autoUpdateCheckbox.checked = true;
-        }
-      }
-    }
-
-    // --- プレイヤーリストを描画する ---
-    function renderPlayers(elementId, players) {
-      const ul = document.getElementById(elementId);
-      ul.innerHTML = "";
-      players.forEach(player => {
-        const li = document.createElement("li");
-        li.innerText = player;
-        ul.appendChild(li);
-      });
-    }
-
-    // --- 試合を切り替える ---
-    function navigateMatch(direction) {
-      if (direction === "next" && currentMatchIndex < allMatches.length - 1) {
-        currentMatchIndex++;
-      } else if (direction === "previous" && currentMatchIndex > 0) {
-        currentMatchIndex--;
-      }
-      displayMatch(currentMatchIndex);
-      autoUpdateEnabled = false;
-      autoUpdateCheckbox.checked = false;
-    }
     
-        const hamburger = document.getElementById("hamburger");
-    const nav = document.getElementById("nav");
-
-    hamburger.addEventListener("click", () => {
-      nav.classList.toggle("show");
-
-      const links = nav.querySelectorAll("a");
-      links.forEach((link, index) => {
-        if (nav.classList.contains("show")) {
-          link.style.opacity = "1";
-          link.style.transform = "translateY(0)";
-        } else {
-          link.style.opacity = "0";
-          link.style.transform = "translateY(-20px)";
-          link.style.transitionDelay = "0s";
-        }
-      });
+    document.addEventListener("DOMContentLoaded", () => {
+        // ★ 参加者用ヘッダーを読み込むための呼び出し ★
+        setupHeader('header-user.html');
     });
+
   </script>
 </body>
 
