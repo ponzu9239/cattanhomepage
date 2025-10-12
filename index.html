@@ -100,41 +100,13 @@
         // DOMContentLoaded で実行されるメインロジック
         // ----------------------------------------------------------------------
         document.addEventListener("DOMContentLoaded", () => {
-            // ★★★ 共通ヘッダーを読み込む処理 ★★★
-            setupHeader('header-placeholder', 'header-user.html', () => {
-                // ヘッダー読み込み完了後の初期化処理
-                const hamburger = document.getElementById("hamburger");
-                const nav = document.getElementById("nav");
-                const header = document.querySelector('header');
-
-                // ナビゲーション位置を動的に調整する関数 (headerとnavがDOMに追加された後に定義)
-                function updateNavPosition() {
-                    if (header && nav) {
-                        nav.style.top = header.offsetHeight + 'px';
-                    }
-                }
-
-                // 初期ロード時にメニューを確実に閉じる
-                if (nav) {
-                    nav.classList.remove("show"); 
-                }
-                updateNavPosition(); // 初期位置を設定
-                
-                // イベントリスナーの登録
-                if (hamburger && nav) {
-                    hamburger.addEventListener("click", () => {
-                        nav.classList.toggle("show");
-                        updateNavPosition(); 
-                    });
-                }
-                window.addEventListener('resize', updateNavPosition);
-            });
             
-            // ★★★ 共通フッターを読み込む処理 ★★★
-            setupFooter('footer-placeholder', 'footer.html');
+            // ★★★ common.js の setupHeader を呼び出し、ヘッダーとフッターをロード ★★★
+            // 'header-user.html' が読み込まれ、ハンバーガーメニューの初期化が行われる
+            setupHeader('header-user.html'); 
 
             // ----------------------------------------------------------------------
-            // Firebaseの配信URLと参加コードの読み込みロジック 
+            // Firebaseの配信URLと参加コードの読み込みロジック (コンテンツロジック)
             // ----------------------------------------------------------------------
             dbRef.on("value", (snapshot) => {
                 const data = snapshot.val() || {};
@@ -150,14 +122,20 @@
                     container.textContent = "現在、配信は行われていません。";
                     return;
                 }
-
+                
+                // 動画URLからiframeを作成するロジック
                 let iframeSrc = "";
                 let isTwitch = url.includes("twitch.tv");
                 
                 if (url.includes("youtube.com") || url.includes("youtu.be")) {
                     let videoId = "";
                     const ytMatch = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
-                    // ... (動画ID抽出ロジックは省略) ...
+                    if (ytMatch) {
+                        videoId = ytMatch[1];
+                    } else {
+                        const liveMatch = url.match(/live\/([a-zA-Z0-9_-]+)/);
+                        if (liveMatch) videoId = liveMatch[1];
+                    }
                     if (videoId) {
                         iframeSrc = `https://www.youtube.com/embed/${videoId}`;
                     } else {
