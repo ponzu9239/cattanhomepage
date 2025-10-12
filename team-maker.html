@@ -10,6 +10,9 @@
   <title>いい感じにチーム分けしてくれるやつ</title>
   
   <link rel="stylesheet" href="common.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 
 <body>
@@ -88,27 +91,22 @@
 
   <div id="footer-placeholder"></div>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  
   <script src="common.js"></script>
 
   <script>
     // ----------------------------------------------------------------------
-    // ★追加: 共通処理の呼び出し ★
+    // ★追加: 共通処理の呼び出しと、ページ固有の初期化 ★
     // ----------------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", () => {
-        // 管理者用ヘッダー（header-admin.htmlなど）を読み込む
-        // 🚨 以前のヘッダーは "カスタマーセンターのきゃたん" でしたが、このページでは "ド天然のきゃたん" が使われています。
-        // ヘッダーファイル名をご自身のプロジェクトに合わせて変更してください。
-        // ここでは仮に 'header-admin-team.html' とし、管理者リンクを持つと想定します。
+        // 管理者用ヘッダーを読み込み (header-admin.htmlを想定)
         setupHeader('header-admin.html'); 
         
-        // ページ固有の初期化ロジック
+        // ページ固有の初期化ロジックを実行
         initializePage();
     });
     // ----------------------------------------------------------------------
     
+    // ... (以降のすべてのロジックは変更なしでそのまま残します) ...
     const firebaseConfig = {
       apiKey: "AIzaSyBbHLIr4GWkZ3Mfbg3M8wOY68X1ITrE-yw",
       authDomain: "match-result-ea475.firebaseapp.com",
@@ -120,7 +118,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    // ... (以降の全てのロジックは変更なしでそのまま残します) ...
+
     function getDeviceId() {
       let baseId = localStorage.getItem("deviceId");
       if (!baseId) {
@@ -131,7 +129,6 @@
     }
     const deviceId = getDeviceId();
     
-    // 選択されたプレイヤー、ペアの情報をlocalStorageから読み込まないように変更
     let selectedPlayers = [];
     let pinned = JSON.parse(localStorage.getItem("pinnedPlayers") || "[]");
     let separatePairs = [];
@@ -891,11 +888,6 @@
         makeTeams();
       });
     });
-
-    // ★削除: common.js に移譲されたヘッダー/ナビゲーションのイベントリスナーは削除します。
-    // const hamburger = document.getElementById("hamburger");
-    // const nav = document.getElementById("nav");
-    // hamburger.addEventListener("click", ... );
   </script>
 </body>
 </html>
