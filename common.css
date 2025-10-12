@@ -912,28 +912,36 @@ h1 {
   font-weight: 900;
   line-height: 1.2;
   text-transform: uppercase;
+  text-decoration: none; /* 下線消す */
+  font-size: 2rem;
+  cursor: pointer;
+
+  /* 文字装飾を豪華に */
   text-shadow:
     0 1px 0 #fff,
     0 2px 0 #ffcad4,
     0 3px 0 #ffb7b2,
     0 4px 0 #ff9aa2,
-    0 5px 10px rgba(0,0,0,0.3);
+    0 5px 10px rgba(0,0,0,0.3),
+    0 0 8px #fff,
+    0 0 12px #ffb7b2,
+    0 0 16px #ff9aa2;
+  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.6);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
   transition: transform 0.3s, box-shadow 0.3s;
-  cursor: pointer;
-  font-size: 2rem; /* 上段の文字サイズ */
-}
-
-.bingo-banner .small {
-  display: block;
-  font-size: 1.2rem; /* 下段を小さめに */
-  font-weight: 700;
-  text-shadow: 0 1px 0 #fff, 0 2px 0 #ffcad4;
 }
 
 .bingo-banner:hover {
   transform: scale(1.05);
-  box-shadow: 0 12px 28px rgba(255, 105, 180, 0.6);
+  box-shadow: 0 10px 25px rgba(255, 105, 180, 0.8);
+}
+
+.bingo-banner .small {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fffde7;
+  text-shadow: 0 1px 0 #fff, 0 2px 0 #ffcad4;
+  opacity: 0.8; /* 控えめ */
 }
