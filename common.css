@@ -1012,51 +1012,58 @@ h1 {
     display: none; 
 }
 
-/* 🌟豪華なイベントバナー */
-.event-banner {
-  display: block;
-  margin: 30px auto;
-  padding: 35px 0;
-  max-width: 750px;
-  text-align: center;
-  font-size: 1.8rem;
+.bingo-banner a {
+  display: inline-block;
+  padding: 20px 40px;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #fff;
   text-decoration: none;
-  border-radius: 20px;
+  border-radius: 16px;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(0, 150, 255, 0.4), rgba(180, 70, 255, 0.4));
-  backdrop-filter: blur(12px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 30px rgba(100, 180, 255, 0.5);
-  transition: all 0.4s ease;
+  text-align: center;
+  line-height: 1.4; /* 行間調整 */
+  
+  background: linear-gradient(135deg, #ffb347, #ffcc33, #ff6f61);
+  background-size: 400% 400%;
+  animation: bingoGradient 8s ease infinite;
+  
+  box-shadow: 0 8px 20px rgba(255, 179, 71, 0.5), 0 0 15px rgba(255, 111, 97, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-/* バナーの中を流れる光のエフェクト */
-.event-banner::before {
+/* 光る擬似要素 */
+.bingo-banner a::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: -75%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.7),
-    transparent
-  );
-  transform: skewX(-25deg);
-  transition: 0.8s;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+  transform: rotate(45deg);
+  opacity: 0.3;
+  animation: bingoShine 3s linear infinite;
+  pointer-events: none;
 }
 
-.event-banner:hover::before {
-  left: 125%;
+/* hover効果 */
+.bingo-banner a:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 28px rgba(255, 179, 71, 0.7), 0 0 20px rgba(255, 111, 97, 0.5);
 }
 
-.event-banner:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 40px rgba(120, 200, 255, 0.8);
-  background: linear-gradient(135deg, rgba(80, 160, 255, 0.6), rgba(200, 100, 255, 0.6));
+/* グラデーションアニメーション */
+@keyframes bingoGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 光るアニメーション */
+@keyframes bingoShine {
+  0% { transform: rotate(45deg) translate(-200%, -200%); }
+  50% { transform: rotate(45deg) translate(200%, 200%); }
+  100% { transform: rotate(45deg) translate(-200%, -200%); }
 }
