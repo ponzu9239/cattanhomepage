@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ビンゴ抽選結果表示</title>
+  <title>きゃたんのビンゴゲーム</title>
   
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
@@ -15,7 +15,6 @@
   
   <style>
     /* 参加者ページとして、管理者ボタンを非表示にするためのCSS */
-    /* common.cssに定義されている#drawButtonと#resetButtonを非表示にする */
     #drawButton, #resetButton {
       display: none !important;
     }
@@ -37,9 +36,6 @@
       <div id="bingoDisplay">
         <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">現在の表示番号</p>
         <div id="latestNumber">--</div>
-
-        <button id="drawButton"></button>
-        <button id="resetButton"></button>
 
         <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">出た番号一覧 (1〜75)</h4>
         <div id="numberBoard">
@@ -78,7 +74,6 @@
     const latestNumberEl = document.getElementById('latestNumber');
     const numberBoardEl = document.getElementById('numberBoard');
 
-    // ★ グローバル変数として前回の確定番号を保持し、アニメーション判定に使用 ★
     let lastDrawnNumbers = []; 
 
     // ボードの描画処理
@@ -100,7 +95,6 @@
         // **********************************************
         const latestNumInt = parseInt(currentDisplay);
         
-        // 新しい番号が確定したかどうかの判定ロジック
         const isNewDrawn = drawnNumbers.includes(latestNumInt) && !lastDrawnNumbers.includes(latestNumInt);
         
         if (isNewDrawn) {
@@ -144,7 +138,6 @@
             }
         }
         
-        // **最後に、現在の確定番号リストを次回判定用に保存**
         lastDrawnNumbers = drawnNumbers;
     }
 
@@ -160,7 +153,6 @@
     });
     
     document.addEventListener("DOMContentLoaded", () => {
-        // ★ 参加者用ヘッダーを読み込むための呼び出し ★
         setupHeader('header-user.html');
     });
 
