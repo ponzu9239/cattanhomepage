@@ -135,17 +135,13 @@
         color: #ff4757;
     }
     
-    #statusMessage {
-        margin-top: 1rem;
-        font-weight: bold;
-        color: #5aa2aa;
-    }
-
-    /* --- レスポンシブ対応の番号ボード Flexboxに変更 (10個ごと改行) --- */
+    /* ステータスメッセージ要素自体を削除または非表示にするため、CSSは不要 */
+    
+    /* --- レスポンシブ対応の番号ボード Flexbox (10個ごと改行) --- */
     #numberBoard {
       display: flex;
-      flex-wrap: wrap; /* セルを次の行に折り返す */
-      justify-content: center; /* 中央揃えにする */
+      flex-wrap: wrap; 
+      justify-content: center; 
       gap: 5px;
       margin: 1rem auto;
       max-width: 100%; 
@@ -156,21 +152,19 @@
       background-color: #fff;
       border: 1px solid #ccc;
       border-radius: 5px;
-      /* 画面幅に応じて伸縮し、常に10列になるように設定 */
+      /* 常に10列になるように設定 (Flex-basisを10%に固定) */
       flex-basis: calc(10% - 4.5px); 
       height: 0; 
-      padding-bottom: calc(10% - 4.5px); /* アスペクト比を保つ */
+      padding-bottom: calc(10% - 4.5px); 
       
       font-weight: bold;
       font-size: 1.1rem;
       color: #555;
       line-height: 1;
       
-      /* テキストを中央に配置する設定 */
       position: relative;
     }
     .bingo-cell::before {
-        /* JSで設定したdata-content属性の値(数字)を表示 */
         content: attr(data-content); 
         position: absolute;
         top: 50%;
@@ -178,21 +172,18 @@
         transform: translate(-50%, -50%);
     }
 
-    /* 画面が狭い場合の対応 */
-    @media (max-width: 580px) {
-        .bingo-cell {
-            /* 7列表示に変更 */
-            flex-basis: calc(14.28% - 4.28px); 
-            padding-bottom: calc(14.28% - 4.28px);
-            font-size: 0.9rem;
-        }
+    /* 強制改行要素 */
+    .break {
+        flex-basis: 100%;
+        height: 0;
+        margin: 0;
+        padding: 0;
     }
 
-    @media (max-width: 400px) {
+    /* 画面が狭い場合の対応 (セルのサイズは維持し、ボード全体が中央に集約される) */
+    @media (max-width: 600px) {
         .bingo-cell {
-            /* 6列表示に変更 */
-            flex-basis: calc(16.66% - 4.16px); 
-            padding-bottom: calc(16.66% - 4.16px);
+            font-size: 0.9rem;
         }
     }
     /* --- Flexbox対応CSS終了 --- */
@@ -225,8 +216,6 @@
       <div id="bingoDisplay">
         <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">現在の表示番号</p>
         <div id="latestNumber">--</div>
-        <p id="statusMessage">読み込み中...</p>
-
         <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">出た番号一覧 (1〜75)</h4>
         <div id="numberBoard">
           </div>
@@ -265,7 +254,7 @@
     const maxNumber = 75;
     const latestNumberEl = document.getElementById('latestNumber');
     const numberBoardEl = document.getElementById('numberBoard');
-    const statusMessageEl = document.getElementById('statusMessage');
+    // const statusMessageEl = document.getElementById('statusMessage'); // ステータスメッセージは使用しない
 
     // ボードの描画処理 (10個ごと改行、Flexbox対応)
     function renderBoard(drawnNumbers, currentDisplay) {
@@ -295,31 +284,30 @@
             }
             
             numberBoardEl.appendChild(cell);
+
+            // 10個ごとに改行要素を挿入 (11個目が2行目になるように)
+            if (i % 10 === 0 && i < maxNumber) {
+                const breakEl = document.createElement('div');
+                breakEl.className = 'break';
+                numberBoardEl.appendChild(breakEl);
+            }
         }
         
-        // --- ステータスメッセージの更新 ---
-        if (isDrawing) {
-             statusMessageEl.textContent = `次の抽選番号を高速準備中です... (確定済:${drawnNumbers.length}個)`;
-        } else if (drawnNumbers.length === maxNumber) {
-            statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
-        } else {
-            // 最新の確定番号に関するメッセージは削除されました。
-            statusMessageEl.textContent = `抽選進行中 (確定済:${drawnNumbers.length}個)`;
-        }
+        // --- ステータスメッセージの更新ロジックは削除されます ---
     }
 
     // Firebaseのデータ変更をリアルタイムで監視し、画面を自動更新
     bingoRef.on('value', (snapshot) => {
         const data = snapshot.val() || {};
         const drawnNumbers = data.drawnNumbers || [];
-        // currentDisplay は高速で更新される数字、または最終確定数字
         const currentDisplay = data.currentDisplay || '--'; 
 
         renderBoard(drawnNumbers, currentDisplay);
         console.log("Firebaseから最新のデータを受信しました。");
     }, (error) => {
         console.error("Firebaseからのデータ受信エラー:", error);
-        statusMessageEl.textContent = "⚠️ データ読み込みエラーが発生しました。リロードしてください。";
+        // エラーメッセージは、必要に応じて画面のどこか (例: latestNumberEl) に表示しても良いですが、
+        // 今回はメッセージ要素自体を削除したため、コンソールログのみとします。
     });
     
     document.addEventListener("DOMContentLoaded", () => {
