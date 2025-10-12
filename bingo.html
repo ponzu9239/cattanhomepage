@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>きゃたんのビンゴ抽選会場 (管理者)</title>
+  <title>きゃたんのビンゴ抽選</title>
 
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
@@ -76,13 +76,27 @@
     const drawButton = document.getElementById('drawButton');
     const numberBoardEl = document.getElementById('numberBoard');
     const resetButton = document.getElementById('resetButton');
+    
+    // ヘッダー高さ調整用のDOM要素
+    const header = document.querySelector('header');
+    const nav = document.getElementById('nav');
+    const hamburger = document.getElementById("hamburger");
+    
+    // ★変更点: ナビゲーション位置を動的に調整する関数 ★
+    function updateNavPosition() {
+        // navはcommon.jsで読み込まれるヘッダーに含まれるため、ここではquerySelectorで取得
+        const dynamicNav = document.querySelector('nav');
+        if (header && dynamicNav) {
+            dynamicNav.style.top = header.offsetHeight + 'px';
+        }
+    }
 
     function renderBoard(numbers) {
       numberBoardEl.innerHTML = '';
       for (let i = 1; i <= maxNumber; i++) {
         const cell = document.createElement('div');
         cell.className = 'bingo-cell';
-        cell.id = `cell-${i}`;
+        cell.id = `cell-${i}`; 
         cell.setAttribute('data-content', i); 
         
         if (numbers.includes(i)) {
@@ -104,7 +118,6 @@
       });
     }
 
-    // Firebaseのデータ変更を監視し、画面を更新
     function loadGameFromFirebase() {
       bingoRef.on('value', (snapshot) => {
         const data = snapshot.val() || {};
@@ -120,8 +133,10 @@
         drawButton.textContent = isDrawing ? 'ストップ！' : '番号を引く！';
         
         if (isDrawing) {
+            currentNumberEl.classList.add('drawing-mode');
             drawButton.classList.add('drawing-mode');
         } else {
+            currentNumberEl.classList.remove('drawing-mode');
             drawButton.classList.remove('drawing-mode');
         }
         
@@ -134,13 +149,13 @@
       });
     }
 
-    // 抽選アニメーションを開始
     function startAnimation() {
       if (availableNumbers.length === 0) return;
 
       isDrawing = true;
       drawButton.textContent = 'ストップ！';
       drawButton.classList.add('drawing-mode');
+      currentNumberEl.classList.add('drawing-mode');
       currentNumberEl.classList.remove('stop-highlight');
 
       animationInterval = setInterval(() => {
@@ -156,7 +171,6 @@
       }, 50);
     }
 
-    // 抽選を停止し、番号を確定
     function stopAndDrawNumber() {
       if (!animationInterval) return;
 
@@ -184,8 +198,9 @@
 
       currentNumberEl.textContent = drawnNumber;
       
-      // ★ アニメーションの実行 ★
+      // アニメーションの実行
       currentNumberEl.classList.add('stop-highlight');
+      currentNumberEl.classList.remove('drawing-mode');
       
       const finalCell = document.getElementById(`cell-${drawnNumber}`);
       if (finalCell) {
@@ -198,6 +213,7 @@
         if (finalCell) {
             finalCell.classList.remove('stop-flash');
         }
+        finalCell.classList.add('drawn'); 
       }, 500);
 
       drawButton.textContent = '次の番号を引く！';
@@ -228,8 +244,23 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       loadGameFromFirebase(); 
-
-      setupHeader('header-admin.html');
+      setupHeader('header-admin.html'); 
+      
+      // ★変更点: ヘッダーの高さ調整リスナーを設定 ★
+      window.addEventListener('resize', updateNavPosition);
+      
+      // ハンバーガーメニューがcommon.jsで読み込まれた後でリスナーを追加
+      setTimeout(() => {
+          const dynamicHamburger = document.querySelector('.hamburger');
+          const dynamicNav = document.querySelector('nav');
+          if (dynamicHamburger && dynamicNav) {
+            dynamicHamburger.addEventListener("click", () => {
+                dynamicNav.classList.toggle("show");
+                updateNavPosition();
+            });
+          }
+          updateNavPosition();
+      }, 50); // header-admin.htmlの読み込みを待つ
     });
   </script>
 </body>
