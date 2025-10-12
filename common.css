@@ -1,4 +1,4 @@
-/* common.css: 全ページ共通スタイル (タイトル中央揃え & スライドメニュー有効化) */
+/* common.css: 全ページ共通スタイル (タイトル中央揃え & 高くなったヘッダー) */
 
 /* ボックスモデルの統一 */
 * {
@@ -12,7 +12,8 @@ body {
     font-family: "Hiragino Maru Gothic ProN", sans-serif;
     background: #f7fcfc;
     margin: 0;
-    padding-top: 100px; /* ヘッダーの高さに合わせて設定 */
+    /* ★修正: ヘッダーの高さに合わせてpadding-topを増加 (約120px) ★ */
+    padding-top: 120px; 
     line-height: 1.6;
     transition: background-color 0.5s ease;
     overflow-x: hidden;
@@ -27,18 +28,18 @@ header {
     left: 0;
     width: 100%;
     background-color: #97EADB;
-    padding: 1rem;
+    /* ★修正: 上下のパディングを増やし高さを調整 ★ */
+    padding: 1.5rem 1rem; 
     z-index: 1000;
     
     display: flex;
-    /* タイトル中央揃えのため、justify-contentはcenterに調整 */
+    /* タイトル中央揃えのため、justify-contentはcenter */
     justify-content: center; 
     align-items: center;
 }
 
 header h1 {
     margin: 0;
-    /* レスポンシブ対応と改行禁止 */
     font-size: 5vw; 
     max-font-size: 2rem; 
     white-space: nowrap; 
@@ -46,10 +47,10 @@ header h1 {
     color: #fff;
     padding-left: 0.5rem; 
     
-    /* ★タイトル中央揃えの修正点★ */
-    text-align: center; /* テキストを中央寄せ */
-    width: 100%; /* 親要素の幅を占有 */
-    position: absolute; /* ハンバーガーアイコンの上に重ならないように（実質中央配置） */
+    /* ★タイトル中央揃えの設定★ */
+    text-align: center; 
+    width: 100%; 
+    position: absolute; 
     left: 0;
 }
 
@@ -69,23 +70,20 @@ header h1 {
 /* ナビゲーションメニュー本体 (全画面で非表示状態) */
 #nav {
     position: fixed;
-    /* ★初期の非表示状態 (上端外) ★ */
-    top: -100vh; 
+    top: -100vh; /* 画面全体の上外側に隠す */
     left: 0;
     width: 100%;
     background-color: #97EADB;
-    /* メニュー項目を縦並びにする */
     display: flex;
     flex-direction: column;
     padding: 0;
-    /* スライドアニメーション */
     transition: top 0.3s ease-in-out; 
     z-index: 1050;
 }
 
 /* ナビゲーションが開いた状態 (全画面で適用) */
 #nav.show {
-    /* JSによってヘッダーの高さに調整された値が設定されます (例: top: 75px;) */
+    /* JSによってヘッダーの高さに調整された値が設定されます */
 }
 
 nav a {
@@ -115,9 +113,9 @@ nav a:hover {
         font-size: 2rem; 
     }
     
-    /* ヘッダーのレイアウト調整 */
+    /* PCでもヘッダーパディングを維持 */
     header {
-        padding: 0.8rem 1rem;
+        padding: 1.5rem 1rem; 
     }
 }
 /* ★★★ PC表示時の修正END ★★★ */
