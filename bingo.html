@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>きゃたんのビンゴ抽選</title>
+  <title>きゃたんのビンゴ抽選会場 (管理者)</title>
 
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
@@ -12,8 +12,7 @@
   <meta property="og:image:height" content="630">
 
   <link rel="stylesheet" href="common.css">
-
-  </head>
+</head>
 
 <body>
   <div id="header-placeholder"></div>
@@ -140,7 +139,7 @@
       isDrawing = true;
       drawButton.textContent = 'ストップ！';
       drawButton.classList.add('drawing-mode');
-      currentNumberEl.classList.remove('stop-highlight');
+      currentNumberEl.classList.remove('stop-highlight'); // 既存アニメーションクラスを削除
 
       animationInterval = setInterval(() => {
         const randomIndex = Math.floor(Math.random() * availableNumbers.length);
@@ -187,19 +186,21 @@
 
       currentNumberEl.textContent = drawnNumber;
       
-      // アニメーションの実行
+      // ★ アニメーションの実行 ★
       currentNumberEl.classList.add('stop-highlight');
-      setTimeout(() => {
-        currentNumberEl.classList.remove('stop-highlight');
-      }, 500);
-
+      
       const finalCell = document.getElementById(`cell-${drawnNumber}`);
       if (finalCell) {
           finalCell.classList.add('stop-flash');
-          setTimeout(() => {
-              finalCell.classList.remove('stop-flash');
-          }, 500);
       }
+
+      // アニメーションクラスを解除
+      setTimeout(() => {
+        currentNumberEl.classList.remove('stop-highlight');
+        if (finalCell) {
+            finalCell.classList.remove('stop-flash');
+        }
+      }, 500);
 
       drawButton.textContent = '次の番号を引く！';
       drawButton.classList.remove('drawing-mode');
