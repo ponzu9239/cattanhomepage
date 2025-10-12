@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ビンゴ抽選結果表示</title>
+  <link rel="icon" href="IMG_4666.png" type="image/png">
+  <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <style>
+    /* 共通デザインの流用 */
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      margin: 0;
+      padding-top: 100px;
+      overflow-x: hidden;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .hamburger {
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
+
+    nav {
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      transition: top 0.3s ease;
+      z-index: 1050;
+    }
+
+    nav.show {
+      top: 75px;
+    }
+
+    nav a {
+      display: block;
+      text-align: center;
+      margin: 0;
+      padding: 0.6rem 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background-color: #97eadb;
+      border-bottom: 1px solid #97EADB;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    nav a:hover {
+      background-color: #0099aa;
+      transform: scale(1.03);
+    }
+
+    footer {
+      background: #97EADB;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+
+    section {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    section h3 {
+      color: #5aa2aa;
+      border-bottom: 2px solid #97EADB;
+      padding-bottom: 0.3rem;
+    }
+
+    /* ビンゴ表示用のスタイル */
+    #bingoDisplay {
+      text-align: center;
+      padding: 2rem 1rem;
+      background-color: #d4f0f4;
+      border: 3px solid #97EADB;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      margin-top: 1rem;
+    }
+
+    #latestNumber {
+      font-size: 8rem;
+      font-weight: bold;
+      color: #1b656f;
+      margin: 0.5rem 0;
+      height: 9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    #statusMessage {
+        margin-top: 1rem;
+        font-weight: bold;
+        color: #5aa2aa;
+    }
+
+    #numberBoard {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+      margin-top: 1rem;
+      max-width: 550px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .bingo-cell {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 0.5rem 0;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #555;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1 / 1;
+    }
+
+    .drawn {
+      background-color: #97EADB;
+      color: white;
+    }
+    
+    /* 最新の数字を強調 */
+    .latest-drawn {
+        background-color: #ff8c00;
+        color: white;
+        border: 3px solid #e95400;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+
+</head>
+
+<body>
+  <header>
+    <h1>ビンゴ抽選結果</h1>
+    <div class="hamburger" id="hamburger">☰</div>
+    <nav id="nav">
+      <a href="bingo.html">抽選会場へ</a> 
+      <a href="index.html">ホーム</a>
+      <a href="roulette.html">イベント</a>
+      <a href="team-view.html">チーム分けを見る</a>
+      <a href="data-view.html">カスタム結果を見る</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="bingo">
+      <h3>📢 発表中の番号 📢</h3>
+
+      <div id="bingoDisplay">
+        <p id="statusMessage">読み込み中...</p>
+        <div id="latestNumber">--</div>
+
+        <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">出た番号一覧 (1〜75)</h4>
+        <div id="numberBoard">
+          </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>ド天然のきゃたん</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+  <script>
+    // ----------------------------------------------------------------------
+    // 🎨 あなたのFirebase設定 (抽選会場ページと同じ設定)
+    // ----------------------------------------------------------------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.firebasestorage.app",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+      measurementId: "G-ZNGEZZWMTP"
+    };
+    // ----------------------------------------------------------------------
+
+    // Firebase初期化とデータベース参照の取得
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const bingoRef = db.ref('bingo/drawnNumbers'); // 抽選会場ページと同じパス
+
+    const maxNumber = 75;
+    const latestNumberEl = document.getElementById('latestNumber');
+    const numberBoardEl = document.getElementById('numberBoard');
+    const statusMessageEl = document.getElementById('statusMessage');
+
+    // ボードの描画処理
+    function renderBoard(drawnNumbers) {
+        numberBoardEl.innerHTML = '';
+        let latestNumber = null;
+        if (drawnNumbers.length > 0) {
+            // 最新の数字を取得
+            latestNumber = drawnNumbers[drawnNumbers.length - 1];
+        }
+
+        // ボードを生成
+        for (let i = 1; i <= maxNumber; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'bingo-cell';
+            cell.textContent = i;
+            
+            // 抽選済みの数字ならスタイルを適用
+            if (drawnNumbers.includes(i)) {
+                cell.classList.add('drawn');
+            }
+            // 最新の数字ならさらに強調スタイルを適用
+            if (i === latestNumber) {
+                cell.classList.add('latest-drawn');
+            }
+            
+            numberBoardEl.appendChild(cell);
+        }
+        
+        // 最新の数字とメッセージを更新
+        latestNumberEl.textContent = latestNumber !== null ? latestNumber : '--';
+        if (drawnNumbers.length > 0 && drawnNumbers.length < maxNumber) {
+            statusMessageEl.textContent = `現在 ${drawnNumbers.length} 個の数字が出ています。`;
+        } else if (drawnNumbers.length === maxNumber) {
+            statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
+        } else {
+            statusMessageEl.textContent = 'まだ抽選は開始されていません。';
+        }
+    }
+
+    // Firebaseのデータ変更をリアルタイムで監視し、画面を自動更新
+    bingoRef.on('value', (snapshot) => {
+        const drawnNumbers = snapshot.val() || [];
+        renderBoard(drawnNumbers);
+        console.log("Firebaseから最新のデータを受信しました。");
+    }, (error) => {
+        console.error("Firebaseからのデータ受信エラー:", error);
+        statusMessageEl.textContent = "⚠️ データ読み込みエラーが発生しました。リロードしてください。";
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        // ハンバーガーメニューのロジック
+        const hamburger = document.getElementById("hamburger");
+        const nav = document.getElementById("nav");
+
+        hamburger.addEventListener("click", () => {
+          nav.classList.toggle("show");
+        });
+    });
+
+  </script>
+</body>
+
+</html>
