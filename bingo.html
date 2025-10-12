@@ -144,25 +144,35 @@
       box-shadow: 0 4px 0 #1b656f;
     }
 
-    #drawButton:hover {
+    #drawButton:hover:not(:disabled) {
       background-color: #4a8a92;
     }
 
-    #drawButton:active {
+    #drawButton:active:not(:disabled) {
       transform: translateY(4px);
       box-shadow: 0 0 0 #1b656f;
     }
-    
+
     #drawButton:disabled {
-        background-color: #cccccc;
-        box-shadow: none;
-        cursor: not-allowed;
-        transform: none;
+      background-color: #cccccc;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
     }
+
+    /* 抽選中のボタンの色を強調 */
+    #drawButton.drawing-mode {
+      background-color: #ff4757; /* ストップボタンは目立つ色に */
+      box-shadow: 0 4px 0 #c0392b;
+    }
+    #drawButton.drawing-mode:hover {
+      background-color: #e74c3c;
+    }
+
 
     #numberBoard {
       display: grid;
-      grid-template-columns: repeat(10, 1fr); /* 10列で表示 */
+      grid-template-columns: repeat(10, 1fr);
       gap: 5px;
       margin-top: 1rem;
       max-width: 550px;
@@ -182,7 +192,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      aspect-ratio: 1 / 1; /* 正方形にする */
+      aspect-ratio: 1 / 1;
     }
 
     .drawn {
@@ -207,35 +217,35 @@
         box-shadow: 0 0 0 0 rgba(151, 234, 219, 0);
       }
     }
-    
+
     .status-message {
-        margin-top: 1rem;
-        font-weight: bold;
-        color: #e74c3c;
-    }
-    
-    #resetButton {
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        margin-top: 1rem;
-    }
-    #resetButton:hover {
-        background-color: #c0392b;
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #e74c3c;
     }
 
+    #resetButton {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 1rem;
+    }
+
+    #resetButton:hover {
+      background-color: #c0392b;
+    }
   </style>
 
 </head>
 
 <body>
   <header>
-    <h1>ド天然のきゃたん</h1>
+    <h1>ビンゴゲーム</h1>
     <div class="hamburger" id="hamburger">☰</div>
     <nav id="nav">
       <a href="index.html">ホーム</a>
@@ -250,15 +260,15 @@
       <h3>🎉 ビンゴ抽選 🎉</h3>
 
       <div id="bingoGame">
-        <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">次に抽選される番号</p>
+        <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">引かれた番号</p>
         <div id="currentNumber">--</div>
 
         <button id="drawButton">番号を引く！</button>
         <div id="statusMessage" class="status-message"></div>
-        
+
         <button id="resetButton">リセット</button>
 
-        <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem;">出た番号一覧 (1〜75)</h4>
+        <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">すでに引かれた番号一覧 (1〜75)</h4>
         <div id="numberBoard">
           </div>
       </div>
@@ -274,6 +284,8 @@
     const maxNumber = 75;
     let availableNumbers = []; // まだ引かれていない番号の配列
     let drawnNumbers = []; // 既に引かれた番号の配列
+    let animationInterval = null; // アニメーションのIDを保持 (null:停止中, ID:実行中)
+    let isDrawing = false; // 抽選アニメーション中かどうか
 
     const currentNumberEl = document.getElementById('currentNumber');
     const drawButton = document.getElementById('drawButton');
@@ -283,12 +295,21 @@
 
     // 初期化関数
     function initializeGame() {
+      // アニメーションが動いていたら停止
+      if (animationInterval) {
+        clearInterval(animationInterval);
+        animationInterval = null;
+      }
+
       availableNumbers = Array.from({ length: maxNumber }, (_, i) => i + 1); // [1, 2, ..., 75]
       drawnNumbers = [];
       statusMessageEl.textContent = '';
       currentNumberEl.textContent = '--';
       drawButton.disabled = false;
-      
+      drawButton.textContent = '番号を引く！'; // ボタンのテキストをリセット
+      drawButton.classList.remove('drawing-mode');
+      isDrawing = false;
+
       // 番号ボードを生成・更新
       numberBoardEl.innerHTML = '';
       for (let i = 1; i <= maxNumber; i++) {
@@ -300,15 +321,49 @@
       }
     }
 
-    // 番号を引く処理
-    drawButton.addEventListener('click', () => {
-      if (availableNumbers.length === 0) {
-        statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
-        drawButton.disabled = true;
-        return;
-      }
+    // 数字を高速で切り替えるアニメーション開始
+    function startAnimation() {
+      // まだ引かれていない番号がない場合は何もしない
+      if (availableNumbers.length === 0) return;
 
-      // 抽選
+      isDrawing = true;
+      drawButton.textContent = 'ストップ！';
+      drawButton.classList.add('drawing-mode');
+
+      // 50ミリ秒ごとに数字をランダムに切り替え
+      animationInterval = setInterval(() => {
+        // availableNumbersの中からランダムに選び、表示する
+        const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+        // availableNumbersが空になる可能性をチェック
+        if (availableNumbers.length > 0) {
+            const displayNum = availableNumbers[randomIndex];
+            currentNumberEl.textContent = displayNum;
+        } else {
+            // 念のため、抽選中に全ての数字が引かれた場合の処理
+            stopAndDrawNumber();
+        }
+      }, 50);
+    }
+
+    // 抽選を確定してアニメーションを停止
+    function stopAndDrawNumber() {
+      if (!animationInterval) return; // アニメーションが動いていない場合は何もしない
+
+      clearInterval(animationInterval);
+      animationInterval = null;
+      isDrawing = false;
+
+      // まだ引かれていない番号がない場合は終了
+      if (availableNumbers.length === 0) {
+          currentNumberEl.textContent = drawnNumbers[drawnNumbers.length - 1] || '--'; // 最後の数字を表示
+          statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
+          drawButton.disabled = true;
+          drawButton.textContent = 'ゲーム終了';
+          drawButton.classList.remove('drawing-mode');
+          return;
+      }
+      
+      // 最終的な抽選を行う（アニメーションの最後の表示とは限らない）
       const randomIndex = Math.floor(Math.random() * availableNumbers.length);
       const drawnNumber = availableNumbers[randomIndex];
 
@@ -316,9 +371,11 @@
       availableNumbers.splice(randomIndex, 1);
       drawnNumbers.push(drawnNumber);
 
-      // 表示を更新
+      // 最終結果を表示
       currentNumberEl.textContent = drawnNumber;
-      statusMessageEl.textContent = `${drawnNumbers.length}個目の数字: ${drawnNumber}`;
+      statusMessageEl.textContent = `🎉 ${drawnNumbers.length}個目の数字は ${drawnNumber} です！`;
+      drawButton.textContent = '次の番号を引く！';
+      drawButton.classList.remove('drawing-mode');
 
       // ボード上のセルをハイライト
       const cellEl = document.getElementById(`cell-${drawnNumber}`);
@@ -326,33 +383,47 @@
         cellEl.classList.add('drawn');
       }
 
+      // すべての番号が引かれた場合の処理
       if (availableNumbers.length === 0) {
         statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
         drawButton.disabled = true;
+        drawButton.textContent = 'ゲーム終了';
+      }
+    }
+
+    // 番号を引く処理 (ボタンクリック)
+    drawButton.addEventListener('click', () => {
+      if (availableNumbers.length === 0) {
+        // すでにゲーム終了
+        return;
+      }
+
+      if (!isDrawing) {
+        // 抽選スタート (最初のクリック)
+        startAnimation();
+      } else {
+        // 抽選ストップ (2回目のクリック)
+        stopAndDrawNumber();
       }
     });
 
     // リセットボタンの処理
     resetButton.addEventListener('click', () => {
-        if(confirm('ビンゴゲームをリセットしますか？全ての抽選結果が消えます。')){
-            initializeGame();
-        }
+      if (confirm('ビンゴゲームをリセットしますか？全ての抽選結果が消えます。')) {
+        initializeGame();
+      }
     });
 
     // ページの読み込み完了時にゲームを初期化
     document.addEventListener("DOMContentLoaded", initializeGame);
 
-    // ハンバーガーメニューのロジック (元のコードから流用)
+    // ハンバーガーメニューのロジック
     const hamburger = document.getElementById("hamburger");
     const nav = document.getElementById("nav");
 
     hamburger.addEventListener("click", () => {
       nav.classList.toggle("show");
     });
-    
-    // 他の元のJavaScriptロジック（Firebaseや誕生日のチェックなど）は、このビンゴページでは省略しています。
-    // もし必要であれば、この <script> タグ内に追加してください。
-
   </script>
 </body>
 
