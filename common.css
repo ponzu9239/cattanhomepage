@@ -1,8 +1,10 @@
-/* common.css: 全ページ共通スタイル */
+/* common.css: 全ページ共通スタイル (ビンゴ、ホーム画面対応) */
 
 /* ボックスモデルの統一 */
 * {
     box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
 }
 
 /* 共通デザイン */
@@ -11,6 +13,8 @@ body {
     background: #f7fcfc;
     margin: 0;
     padding-top: 100px;
+    line-height: 1.6;
+    transition: background-color 0.5s ease;
     overflow-x: hidden;
 }
 
@@ -95,10 +99,14 @@ footer {
 }
 
 /* ------------------------------------------------ */
-/* ★ 3. セクションと見出しのスタイル ★ */
+/* ★ 3. セクションと見出しのスタイル (共通) ★ */
 /* ------------------------------------------------ */
+main {
+    padding: 0 1rem;
+}
+
 section {
-    padding: 2rem;
+    padding: 2rem 1rem;
     max-width: 800px;
     margin: auto;
 }
@@ -107,10 +115,157 @@ section h3 {
     color: #5aa2aa;
     border-bottom: 2px solid #97EADB;
     padding-bottom: 0.3rem;
+    margin-bottom: 1.5rem;
 }
 
 /* ------------------------------------------------ */
-/* ★ 4. ビンゴエリア共通スタイル (抽選中/結果表示) ★ */
+/* ★ 4. index.html 専用スタイル ★ */
+/* ------------------------------------------------ */
+
+/* 画像コンテナ (誕生日ではない通常時も使用される可能性のあるスタイルのみ残す) */
+.birthday-image-container {
+    margin-top: 2rem;
+    text-align: center;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.birthday-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.elapsed-time-container {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin: 1.5rem 0;
+}
+
+
+/* 参加型コードのスタイル */
+.code-display {
+    font-weight: bold;
+    font-size: 1.3rem;
+    background: #d4f0f4;
+    border: 2px solid #97EADB;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    margin: 1rem 0;
+    color: #1b656f;
+    user-select: all;
+    word-break: break-all;
+}
+
+/* SNSリンクのベーススタイル */
+.sns a {
+  display: inline-block;
+  margin: 0.5rem;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  color: white;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.sns a:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* 個別のSNS色設定 */
+.youtube-link {
+  background: #ff0000;
+}
+.x-link {
+  background: #000000;
+}
+.discord-link {
+  background: #5865f2;
+}
+.twitch-link {
+  background: #9146ff;
+}
+.tiktok-link {
+  background: #000000;
+  box-shadow: -2px 0 0 #25f4ee, 2px 0 0 #fe2c52;
+}
+
+
+/* ルーレットバナー (イベント告知) のスタイル */
+.roulette-banner {
+    text-align: center;
+    margin: 20px auto;
+}
+
+.roulette-banner a {
+    display: block;
+    width: 100%;
+    max-width: 800px;
+    margin: 1rem auto;
+    padding: 1rem 0;
+    font-weight: bold;
+    font-size: 1.3rem;
+    text-align: center;
+    text-decoration: none;
+    color: #004d66;
+    border-radius: 2px;
+    background: linear-gradient(135deg, #97EADB, #d4f0f4);
+    box-shadow: 0 4px 12px rgba(0, 77, 102, 0.25);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+    border: 2px solid #1bb0c9;
+}
+
+.roulette-banner a:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 18px rgba(0, 77, 102, 0.35);
+    background: linear-gradient(135deg, #80d4d6, #bce7ec);
+    color: #002b3c;
+}
+
+.banner-note {
+    font-size: 0.8rem;
+    color: #555;
+    text-align: center;
+    margin-top: 0.3rem;
+}
+
+/* イベント終了後のバナーのスタイル */
+.roulette-banner.ended .ended-message {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  margin: 1rem auto;
+  padding: 1rem 0;
+  font-weight: bold;
+  font-size: 1.3rem;
+  text-align: center;
+  text-decoration: none;
+  color: #6c757d; 
+  border-radius: 2px;
+  background: #e9ecef;
+  box-shadow: none;
+  border: 2px solid #adb5bd;
+  cursor: default;
+}
+
+.roulette-banner.ended .ended-message:hover {
+  transform: none;
+  box-shadow: none;
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+.roulette-banner.ended + .banner-note {
+  display: none;
+}
+
+
+/* ------------------------------------------------ */
+/* ★ 5. ビンゴエリア共通スタイル (抽選中/結果表示) ★ */
 /* ------------------------------------------------ */
 
 /* ビンゴ表示用のコンテナ */
@@ -128,7 +283,7 @@ section h3 {
 #latestNumber, #currentNumber {
     font-size: 5rem;
     font-weight: bold;
-    color: #1b656f; /* 抽選中もデフォルト色を維持 */
+    color: #1b656f; 
     margin: 0.5rem 0;
     height: 6rem;
     display: flex;
@@ -140,7 +295,7 @@ section h3 {
     transition: color 0.1s, background-color 0.1s;
 }
 
-/* 抽選中の文字色を赤くしないよう、該当スタイルを削除 (またはデフォルト色を再指定) */
+/* 抽選中の文字色はデフォルト色を維持 */
 #latestNumber.drawing, #currentNumber.drawing-mode {
     color: #1b656f; 
 }
@@ -157,7 +312,7 @@ section h3 {
 }
 
 
-/* --- 5. レスポンシブ対応の番号ボード --- */
+/* --- 6. レスポンシブ対応の番号ボード --- */
 #numberBoard {
     display: flex;
     flex-wrap: wrap; 
@@ -227,17 +382,17 @@ section h3 {
 }
 
 /* ------------------------------------------------ */
-/* ★ 6. 管理者機能ボタンのスタイル (bingo.html専用) ★ */
+/* ★ 7. 管理者機能ボタンのスタイル (bingo.html専用) ★ */
 /* ------------------------------------------------ */
 
 /* 抽選ボタンのコンテナ (ボタンを2行にするためのFlexboxコンテナ) */
 .bingo-buttons-container {
     display: flex;
-    flex-direction: column; /* 縦に並べる (2行) */
+    flex-direction: column; 
     align-items: center;
     margin-bottom: 1.5rem;
     margin-top: 1rem;
-    gap: 1rem; /* ボタン間のスペース */
+    gap: 1rem;
 }
 
 /* 抽選ボタンのスタイル（1行目） */
@@ -251,9 +406,8 @@ section h3 {
     border-radius: 50px;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
-    /* margin-bottom はコンテナのgapで制御 */
     box-shadow: 0 4px 0 #1b656f;
-    width: 80%; /* 幅を調整 */
+    width: 80%;
     max-width: 300px;
 }
 
@@ -293,8 +447,7 @@ section h3 {
     border-radius: 25px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: 0; /* コンテナのgapで制御 */
-    width: 40%; /* 幅を調整 */
+    width: 40%;
     max-width: 150px;
 }
 
