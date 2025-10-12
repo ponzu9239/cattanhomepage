@@ -115,9 +115,8 @@
       margin-top: 1rem;
     }
 
-    /* 抽選会場と同じスタイルで統一 (currentNumberと同じ) */
     #latestNumber {
-      font-size: 5rem; 
+      font-size: 5rem;
       font-weight: bold;
       color: #1b656f;
       margin: 0.5rem 0;
@@ -128,15 +127,12 @@
       background: #fff;
       border-radius: 10px;
       box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-      /* 高速切り替え中は色を付けて抽選中を強調 */
       transition: color 0.1s, background-color 0.1s;
     }
 
     /* 抽選中の表示スタイル */
     #latestNumber.drawing {
         color: #ff4757;
-        /* アニメーションの有無は好みで調整 */
-        /* animation: pulse 0.5s infinite; */
     }
     
     #statusMessage {
@@ -145,13 +141,14 @@
         color: #5aa2aa;
     }
 
-    /* 抽選会場と同じスタイルで統一 */
+    /* --- レスポンシブ対応の番号ボード Flexboxに変更 --- */
     #numberBoard {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
+      display: flex; /* Flexboxに変更 */
+      flex-wrap: wrap; /* セルを次の行に折り返す */
+      justify-content: center; /* 中央揃えにする */
       gap: 5px;
       margin-top: 1rem;
-      max-width: 550px;
+      max-width: 100%; 
       margin-left: auto;
       margin-right: auto;
     }
@@ -160,18 +157,29 @@
       background-color: #fff;
       border: 1px solid #ccc;
       border-radius: 5px;
-      padding: 0.5rem 0;
+      /* 画面幅に応じて伸縮し、常に10列になるように設定 */
+      flex-basis: calc(10% - 4.5px); 
+      height: 0; 
+      padding-bottom: calc(10% - 4.5px); /* アスペクト比を保つ */
+      
       font-weight: bold;
       font-size: 1.1rem;
       color: #555;
       line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      aspect-ratio: 1 / 1;
+      
+      /* テキストを中央に配置する設定 */
+      position: relative;
     }
+    .bingo-cell::before {
+        /* JSで設定したdata-content属性の値(数字)を表示 */
+        content: attr(data-content); 
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    /* --- Flexbox対応CSS終了 --- */
 
-    /* 抽選会場と同じスタイルで統一 */
     .drawn {
       background-color: #97EADB;
       color: white;
@@ -242,17 +250,18 @@
     const numberBoardEl = document.getElementById('numberBoard');
     const statusMessageEl = document.getElementById('statusMessage');
 
-    // ボードの描画処理
+    // ボードの描画処理 (Flexbox対応)
     function renderBoard(drawnNumbers, currentDisplay) {
         // --- 最新表示の更新 ---
         latestNumberEl.textContent = currentDisplay !== '--' ? currentDisplay : '--';
         
         // 抽選中かどうかを判断し、表示に反映
-        if (drawnNumbers.includes(currentDisplay) || currentDisplay === '--') {
-            latestNumberEl.classList.remove('drawing');
-        } else {
-            // currentDisplay が確定番号に含まれていなければ、高速切り替え中と見なす
+        const isDrawing = !drawnNumbers.includes(parseInt(currentDisplay)) && currentDisplay !== '--';
+        
+        if (isDrawing) {
             latestNumberEl.classList.add('drawing');
+        } else {
+            latestNumberEl.classList.remove('drawing');
         }
 
         // --- ボードの更新 ---
@@ -260,7 +269,8 @@
         for (let i = 1; i <= maxNumber; i++) {
             const cell = document.createElement('div');
             cell.className = 'bingo-cell';
-            cell.textContent = i;
+            // セルのtextContentの代わりにdata-content属性を使用
+            cell.setAttribute('data-content', i);
             
             // 抽選済みの数字ならスタイルを適用 (抽選会場と同じデザイン)
             if (drawnNumbers.includes(i)) {
@@ -271,16 +281,13 @@
         }
         
         // --- ステータスメッセージの更新 ---
-        if (drawnNumbers.length > 0 && drawnNumbers.length < maxNumber) {
-            const lastDrawn = drawnNumbers[drawnNumbers.length - 1];
-            // 高速切り替え中でなければ、最新の確定番号をメッセージに表示
-            if (!latestNumberEl.classList.contains('drawing')) {
-                statusMessageEl.textContent = `最新の確定番号: ${lastDrawn} (全${drawnNumbers.length}個)`;
-            } else {
-                statusMessageEl.textContent = `次の抽選番号を高速準備中です... (確定済:${drawnNumbers.length}個)`;
-            }
+        if (isDrawing) {
+             statusMessageEl.textContent = `次の抽選番号を高速準備中です... (確定済:${drawnNumbers.length}個)`;
         } else if (drawnNumbers.length === maxNumber) {
             statusMessageEl.textContent = 'すべての番号が出ました！ゲーム終了です。';
+        } else if (drawnNumbers.length > 0) {
+            const lastDrawn = drawnNumbers[drawnNumbers.length - 1];
+            statusMessageEl.textContent = `最新の確定番号: ${lastDrawn} (全${drawnNumbers.length}個)`;
         } else {
             statusMessageEl.textContent = 'まだ抽選は開始されていません。';
         }
