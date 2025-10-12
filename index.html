@@ -5,369 +5,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>きゃたんのひみつきち</title>
+  
+  <link rel="stylesheet" href="common.css">
+  
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 
-  <style>
-    /* 全体に適用されるスタイル */
-    body {
-      font-family: "Hiragino Maru Gothic ProN", sans-serif;
-      background: #f7fcfc;
-      margin: 0;
-      padding-top: 100px;
-      transition: background-color 0.5s ease;
-      overflow-x: hidden; /* この行で横方向の余白を強制的に非表示にする */
-    }
-
-    /* ヘッダーのスタイル */
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background-color: #97EADB;
-      padding: 1rem;
-      text-align: center;
-      z-index: 1000;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #fff;
-    }
-
-    /* ハンバーガーメニューのスタイル */
-    .hamburger {
-      font-size: 2rem;
-      cursor: pointer;
-      position: absolute;
-      top: 50%;
-      right: 3rem;
-      color: white;
-      transform: translateY(-50%);
-      z-index: 1100;
-    }
-
-    nav {
-      position: fixed;
-      top: -100%;
-      left: 0;
-      width: 100%;
-      background-color: #97EADB;
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-      transition: top 0.3s ease;
-      z-index: 1050;
-    }
-
-    nav.show {
-      top: 75px;
-    }
-
-    nav a {
-      display: block;
-      text-align: center;
-      margin: 0;
-      padding: 0.6rem 0;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: white;
-      background-color: #97eadb;
-      border-bottom: 1px solid #97EADB;
-      text-decoration: none;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-
-    nav a:hover {
-      background-color: #0099aa;
-      transform: scale(1.03);
-    }
-
-    /* フッターのスタイル */
-    footer {
-      background: #97EADB;
-      text-align: center;
-      color: white;
-      padding: 1rem;
-      margin-top: 2rem;
-    }
-
-    /* セクションの共通スタイル */
-    section {
-      padding: 2rem;
-      max-width: 800px;
-      margin: auto;
-    }
-
-    section h3 {
-      color: #5aa2aa;
-      border-bottom: 2px solid #97EADB;
-      padding-bottom: 0.3rem;
-    }
-
-    /* 参加型コードのスタイル */
-    .code-display {
-      font-weight: bold;
-      font-size: 1.3rem;
-      background: #d4f0f4;
-      border: 2px solid #97EADB;
-      border-radius: 10px;
-      padding: 1rem;
-      text-align: center;
-      margin: 1rem 0;
-      color: #1b656f;
-      user-select: all;
-      word-break: break-all;
-    }
-
-/* 元の共通スタイル */
-.sns a {
-  display: inline-block;
-  margin: 0.5rem;
-  text-decoration: none;
-  font-size: 1.2rem;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  color: white;
-}
-
-/* 個別の色設定を追加 */
-.youtube-link {
-  background: #ff0000; /* YouTubeのブランドカラー */
-}
-
-.x-link {
-  background: #000000; /* X（旧Twitter）のブランドカラー */
-}
-
-.discord-link {
-  background: #5865f2; /* Discordのブランドカラー */
-}
-
-.twitch-link {
-  background: #9146ff; /* Twitchのブランドカラー */
-}
-
-.tiktok-link {
-  background: #000000;
-  box-shadow: -2px 0 0 #25f4ee, 2px 0 0 #fe2c52;
-}
-
-
-
-    .roulette-banner {
-      text-align: center;
-      margin: 20px auto;
-    }
-
-    .roulette-banner a {
-      display: block;
-      width: 100%;
-      max-width: 800px;
-      margin: 1rem auto;
-      padding: 1rem 0;
-      font-weight: bold;
-      font-size: 1.3rem;
-      text-align: center;
-      text-decoration: none;
-      color: #004d66;
-      border-radius: 2px;
-      background: linear-gradient(135deg, #97EADB, #d4f0f4);
-      box-shadow: 0 4px 12px rgba(0, 77, 102, 0.25);
-      transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
-      border: 2px solid #1bb0c9;
-    }
-
-    .roulette-banner a:hover {
-      transform: scale(1.03);
-      box-shadow: 0 6px 18px rgba(0, 77, 102, 0.35);
-      background: linear-gradient(135deg, #80d4d6, #bce7ec);
-      color: #002b3c;
-    }
-
-    .banner-note {
-      font-size: 0.8rem;
-      color: #555;
-      text-align: center;
-      margin-top: 0.3rem;
-    }
-
-    /* 誕生日仕様のスタイル */
-    body.birthday-mode {
-      background-color: #ffe8f4;
-      color: #7a1548;
-      background-image:
-        radial-gradient(circle, #ff69b4 1px, transparent 1px),
-        radial-gradient(circle, #ffd700 1.5px, transparent 1.5px),
-        linear-gradient(to bottom, #ffe8f4, #ffc0cb);
-      background-size: 100px 100px, 120px 120px, cover;
-      background-position: 0 0, 60px 60px, 0 0;
-      animation: confetti 5s linear infinite;
-    }
-
-    @keyframes confetti {
-      from {
-        background-position: 0 0, 60px 60px, 0 0;
-      }
-
-      to {
-        background-position: 100px 100px, 160px 160px, 0 200%;
-      }
-    }
-
-    .birthday-banner {
-      background: linear-gradient(135deg, #ffc0cb, #ff69b4);
-      color: #fff;
-      font-weight: bold;
-      text-align: center;
-      padding: 10px 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      animation: sparkle 1s ease-in-out infinite alternate;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-      display: none;
-      margin-top: 75px;
-      white-space: nowrap;
-      font-size: 7vw;
-      min-font-size: 1.5rem;
-    }
-
-    .birthday-image-container {
-      margin-top: 2rem;
-      text-align: center;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .birthday-image {
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .elapsed-time-container {
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #333;
-      margin: 1.5rem 0;
-    }
-
-    body.birthday-mode .birthday-banner {
-      display: block;
-    }
-
-    @keyframes sparkle {
-      from {
-        transform: scale(1);
-      }
-
-      to {
-        transform: scale(1.03);
-      }
-    }
-
-    body.birthday-mode .elapsed-time-container {
-      color: #c71585;
-    }
-
-    body.birthday-mode .code-display {
-      background: linear-gradient(145deg, #fff0f5, #ffebcd);
-      border-color: #f778a1;
-      color: #c71585;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    body.birthday-mode .sns a {
-      background: #ff69b4;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-      border-radius: 999px;
-      transition: transform 0.2s, background 0.2s;
-    }
-
-    body.birthday-mode .sns a:hover {
-      background: #ff1493;
-      transform: translateY(-3px);
-      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
-    }
-
-    body.birthday-mode .roulette-banner a {
-      background: linear-gradient(135deg, #ffb6c1, #ff69b4);
-      border: 2px solid #ff1493;
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    body.birthday-mode .roulette-banner a:hover {
-      background: linear-gradient(135deg, #ff69b4, #ff1493);
-      color: #fff;
-    }
-    
-    /* イベント終了後のバナーのスタイル */
-.roulette-banner.ended .ended-message {
-  display: block;
-  width: 100%;
-  max-width: 800px;
-  margin: 1rem auto;
-  padding: 1rem 0;
-  font-weight: bold;
-  font-size: 1.3rem;
-  text-align: center;
-  text-decoration: none;
-  color: #6c757d; /* グレーアウトした文字色 */
-  border-radius: 2px;
-  background: #e9ecef; /* グレーアウトした背景色 */
-  box-shadow: none; /* シャドウを削除 */
-  border: 2px solid #adb5bd; /* グレーの枠線 */
-  cursor: default; /* マウスカーソルをデフォルトに */
-}
-
-.roulette-banner.ended .ended-message:hover {
-  transform: none; /* ホバー時の変形を無効に */
-  box-shadow: none; /* ホバー時のシャドウも削除 */
-  background: #e9ecef; /* ホバー時の背景色もグレーのまま */
-  color: #6c757d;
-}
-
-.roulette-banner.ended + .banner-note {
-  display: none; /* 「クリックするとページに移動します」の注釈を非表示に */
-}
-
-  </style>
-
-</head>
+  </head>
 
 <body>
-  <header>
-    <h1>ド天然のきゃたん</h1>
-    <div class="hamburger" id="hamburger">☰</div>
-    <nav id="nav">
-      <a href="index.html">ホーム</a>
-      <a href="roulette.html">イベント</a>
-      <a href="team-view.html">チーム分けを見る</a>
-      <a href="data-view.html">カスタム結果を見る</a>
-    </nav>
-  </header>
+  <div id="header-placeholder"></div>
 
   <main>
-    <div class="birthday-banner">
-      🎉 HAPPY BIRTHDAY 🎉
-    </div>
-
-    <div class="birthday-image-container">
-      <img src="IMG_4607.JPG" alt="きゃたん誕生日イラスト" class="birthday-image">
-    </div>
-
-    <div class="elapsed-time-container">
-      <div>24時間配信完走！</div>
-    </div>
-
+    
     <section id="profile">
       <h3>🐱 プロフィール</h3>
       <p>
@@ -390,7 +42,7 @@
     <section id="rules">
       <h3>📝　参加型配信のルール</h3>
       <ul>
-        <li>チャンネル登録＆高評価ポチッとな( ｡･ω･｡)ﾉ凸</li>
+        <li>チャンネル登録＆高評価ポチッとな( ｡･･｡)ﾉ凸</li>
         <li>discordに入るのも必須です！リンクはプロフィールにあります🔗</li>
         <li>参加者のみVCでしゃべるのOKです🙆‍♀️聞き専でも️⭕️</li>
         <li>VCあがって配信閉じることはしないでください❌</li>
@@ -418,35 +70,17 @@
 　
   </main>
 
-  <footer>
-    <p>ド天然のきゃたん</p>
-  </footer>
+  <div id="footer-placeholder"></div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
+  <script src="common.js"></script>
+
   <script>
-    function checkBirthday() {
-      const today = new Date();
-      const month = today.getMonth() + 1;
-      const day = today.getDate();
-      const birthdayBanner = document.querySelector('.birthday-banner');
-
-      if (month === 8 && day === 23) {
-        document.body.classList.add("birthday-mode");
-        if (birthdayBanner) {
-          birthdayBanner.style.display = 'block';
-        }
-      } else {
-        document.body.classList.remove("birthday-mode");
-        if (birthdayBanner) {
-          birthdayBanner.style.display = 'none';
-        }
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", checkBirthday);
-
+    // ----------------------------------------------------------------------
+    // 🎨 あなたのFirebase設定
+    // ----------------------------------------------------------------------
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
       authDomain: "catiffanygame.firebaseapp.com",
@@ -460,39 +94,44 @@
     firebase.initializeApp(firebaseConfig);
 
     const dbRef = firebase.database().ref("/cattan");
-
-    const winnerEl = document.getElementById("winnerName");
+    const winnerEl = document.getElementById("winnerName"); // このページには要素がない可能性あり
     const winnerRef = firebase.database().ref("/roulette/winner");
 
+    // ★ ページ固有のロジック (参加コード、動画埋め込み、ルーレット勝者表示) ★
+
+    // ルーレット勝者表示ロジック (winnerElがある場合のみ動作)
     winnerRef.on("value", (snapshot) => {
       const winners = snapshot.val();
-      if (winners) {
-        const keys = Object.keys(winners);
-        if (keys.length > 0) {
-          keys.sort();
-          const latestWinner = winners[keys[keys.length - 1]];
-          winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
-          updateProbabilityBar(latestWinner);
-
-          winnerEl.classList.remove("animate-winner");
-          void winnerEl.offsetWidth;
-          winnerEl.classList.add("animate-winner");
-
-          return;
+      if (winnerEl) {
+        if (winners) {
+          const keys = Object.keys(winners);
+          if (keys.length > 0) {
+            keys.sort();
+            const latestWinner = winners[keys[keys.length - 1]];
+            winnerEl.textContent = `🎊 ${latestWinner} 🎊`;
+            // updateProbabilityBar(latestWinner); // 呼び出し元の関数は削除しています
+            winnerEl.classList.remove("animate-winner");
+            void winnerEl.offsetWidth;
+            winnerEl.classList.add("animate-winner");
+            return;
+          }
         }
+        winnerEl.textContent = "まだ抽選が行われていません。";
       }
-      winnerEl.textContent = "まだ抽選が行われていません。";
     });
 
+    // 配信情報と参加コードのロジック
     dbRef.on("value", (snapshot) => {
       const data = snapshot.val() || {};
 
       const code = data.code || "現在、参加型カスタムは行われておりません。";
       const codeEl = document.getElementById("participantCodeDisplay");
-      codeEl.textContent = code;
+      if (codeEl) codeEl.textContent = code;
 
       const url = data.stream || "現在、配信は行われていません。";
       const container = document.getElementById("videoContainer");
+
+      if (!container) return; // コンテナがない場合は処理しない
 
       if (!url || url === "現在、配信は行われていません。") {
         container.textContent = "現在、配信は行われていません。";
@@ -530,25 +169,11 @@
       container.innerHTML = `<iframe src="${iframeSrc}" width="100%" height="315" frameborder="0" allowfullscreen></iframe>`;
     });
 
-    const hamburger = document.getElementById("hamburger");
-    const nav = document.getElementById("nav");
-
-    hamburger.addEventListener("click", () => {
-      nav.classList.toggle("show");
-
-      const links = nav.querySelectorAll("a");
-      links.forEach((link, index) => {
-        if (nav.classList.contains("show")) {
-          link.style.opacity = "1";
-          link.style.transform = "translateY(0)";
-        } else {
-          link.style.opacity = "0";
-          link.style.transform = "translateY(-20px)";
-          link.style.transitionDelay = "0s";
-        }
-      });
+    // ★ 共通JSの setupHeader 関数を呼び出してヘッダー/フッターを読み込む ★
+    document.addEventListener("DOMContentLoaded", () => {
+      // 参加者ページなので、'header-user.html'を読み込む
+      setupHeader('header-user.html');
     });
-
   </script>
 </body>
 
