@@ -1,4 +1,4 @@
-/* common.css: ビンゴ結果表示ページ (bingo-view.html) に必要なスタイルを含む共通CSS */
+/* common.css: 全ページ共通スタイル */
 
 /* ボックスモデルの統一 */
 * {
@@ -109,13 +109,12 @@ section h3 {
     padding-bottom: 0.3rem;
 }
 
-
 /* ------------------------------------------------ */
-/* ★ 4. ビンゴ結果表示エリアのスタイル (bingo-view) ★ */
+/* ★ 4. ビンゴエリア共通スタイル (抽選中/結果表示) ★ */
 /* ------------------------------------------------ */
 
 /* ビンゴ表示用のコンテナ */
-#bingoDisplay, #bingoGame { /* bingo.html (管理者用) の #bingoGame も含む */
+#bingoDisplay, #bingoGame {
     text-align: center;
     padding: 2rem 1rem;
     background-color: #d4f0f4;
@@ -125,8 +124,8 @@ section h3 {
     margin-top: 1rem;
 }
 
-/* 現在の最新番号表示エリア */
-#latestNumber, #currentNumber { /* bingo.html (管理者用) の #currentNumber も含む */
+/* 最新/現在の番号表示エリア */
+#latestNumber, #currentNumber {
     font-size: 5rem;
     font-weight: bold;
     color: #1b656f;
@@ -141,14 +140,23 @@ section h3 {
     transition: color 0.1s, background-color 0.1s;
 }
 
-/* 抽選中の表示スタイル */
-#latestNumber.drawing {
+/* 抽選中/アニメーション前の表示スタイル */
+#latestNumber.drawing, #currentNumber.drawing-mode {
     color: #ff4757;
 }
 
-/* ---------------------------------------------------- */
-/* --- 5. レスポンシブ対応の番号ボード Flexbox --- */
-/* ---------------------------------------------------- */
+/* 確定番号表示エリアのアニメーション (両ページ共通) */
+#currentNumber.stop-highlight, #latestNumber.stop-highlight {
+    animation: current-flash 0.5s ease-out;
+}
+@keyframes current-flash {
+  0% { transform: scale(1); background-color: #fff; }
+  50% { transform: scale(1.05); background-color: #ffeb3b; }
+  100% { transform: scale(1); background-color: #fff; }
+}
+
+
+/* --- 5. レスポンシブ対応の番号ボード --- */
 #numberBoard {
     display: flex;
     flex-wrap: wrap; 
@@ -164,11 +172,9 @@ section h3 {
     border: 1px solid #ccc;
     border-radius: 3px; 
     
-    /* 10個/行にするための計算: 10% - (9 * 2px) / 10 */
     flex-basis: calc(10% - 1.8px); 
-    
     height: 0; 
-    padding-bottom: calc(10% - 1.8px); /* アスペクト比を保つ */
+    padding-bottom: calc(10% - 1.8px);
     
     font-weight: bold;
     color: #555;
@@ -194,6 +200,17 @@ section h3 {
     }
 }
 
+/* 確定セル用のアニメーション (両ページ共通) */
+.bingo-cell.stop-flash {
+    animation: cell-flash 0.5s ease-out;
+}
+@keyframes cell-flash {
+    0% { transform: scale(1); background-color: #fff; }
+    50% { transform: scale(1.1); background-color: #ffeb3b; }
+    100% { transform: scale(1); background-color: #97EADB; }
+}
+
+
 /* 強制改行要素 */
 .break {
     flex-basis: 100%;
@@ -206,4 +223,64 @@ section h3 {
 .drawn {
     background-color: #97EADB;
     color: white;
+}
+
+/* ------------------------------------------------ */
+/* ★ 6. 管理者機能ボタンのスタイル (bingo.html専用) ★ */
+/* ------------------------------------------------ */
+
+#drawButton {
+    background-color: #5aa2aa;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 0 #1b656f;
+}
+
+#drawButton:hover:not(:disabled) {
+    background-color: #4a8a92;
+}
+
+#drawButton:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #1b656f;
+}
+
+#drawButton:disabled {
+    background-color: #cccccc;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 抽選中のボタンの色を強調 */
+#drawButton.drawing-mode {
+    background-color: #ff4757;
+    box-shadow: 0 4px 0 #c0392b;
+}
+
+#drawButton.drawing-mode:hover {
+    background-color: #e74c3c;
+}
+
+#resetButton {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 1rem;
+}
+
+#resetButton:hover {
+    background-color: #c0392b;
 }
