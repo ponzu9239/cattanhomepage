@@ -102,21 +102,24 @@ header h1 {
     top: -100vh; 
     left: 0;
     width: 100%;
-    background-color: var(--color-primary); /* 変数に変更 */
+    /* ★修正: 背景を透明にし、項目の背景のみ表示させる★ */
+    background-color: transparent; 
     display: flex;
     flex-direction: column;
     padding: 0;
     transition: top 0.3s ease-in-out; 
     z-index: 1050;
-    /* ★追加: スクロール可能にする設定 ★ */
-    overflow-y: auto; 
-    height: calc(100vh - var(--header-fixed-height));
+    /* ★修正: 高さをコンテンツに合わせるため、heightを削除し、overflow-yをhiddenにする★ */
+    overflow-y: hidden; 
 }
 
 /* ナビゲーションが開いた状態 (全画面で適用) */
 #nav.show {
     /* JSによってヘッダーの高さに調整された値が設定されます */
     top: var(--header-fixed-height);
+    /* ★修正: コンテンツの高さ以上に広がらないように max-heightで制御します。★ */
+    max-height: calc(100vh - var(--header-fixed-height));
+    overflow-y: auto; /* メニューが多い場合はスクロールできるように戻します */
 }
 
 nav a {
@@ -127,8 +130,10 @@ nav a {
     font-size: 1.2rem;
     font-weight: bold;
     color: white;
-    background-color: var(--color-primary); /* 変数に変更 */
-    border-bottom: 1px solid var(--color-primary); /* 変数に変更 */
+    /* ★修正: リンク自体に背景色を設定することで、項目部分のみ着色する (変更なし)★ */
+    background-color: var(--color-primary); 
+    /* ★修正: ボーダーの色を透明にすることで、項目間の区切りをなくす★ */
+    border-bottom: 1px solid transparent; 
     text-decoration: none;
     transition: background-color 0.2s, transform 0.2s;
 }
