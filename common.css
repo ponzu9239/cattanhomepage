@@ -1011,3 +1011,27 @@ h1 {
 .roulette-banner.ended {
     display: none; 
 }
+
+/* イベントバナー */
+.event-banner {
+  display: block;
+  margin: 20px auto;
+  padding: 25px 0;
+  max-width: 700px;
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  background: rgba(59, 130, 246, 0.25); /* 半透明ブルー */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+.event-banner:hover {
+  background: rgba(59, 130, 246, 0.4);
+  transform: scale(1.03);
+}
