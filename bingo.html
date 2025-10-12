@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>きゃたんのビンゴ抽選会場 (管理者)</title>
+  <title>きゃたんのビンゴ抽選</title>
 
   <link rel="icon" href="IMG_4666.png" type="image/png">
   <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
@@ -15,16 +15,7 @@
 </head>
 
 <body>
-  <header>
-      <h1>ド天然のきゃたん</h1>
-      <div class="hamburger" id="hamburger">☰</div>
-      <nav id="nav">
-          <a href="index.html">ホーム</a>
-          <a href="roulette.html">イベント</a>
-          <a href="team-view.html">チーム分けを見る</a>
-          <a href="data-view.html">カスタム結果を見る</a>
-      </nav>
-  </header>
+  <div id="header-placeholder"></div>
 
   <main>
     <section id="bingo">
@@ -46,12 +37,12 @@
     </section>
   </main>
 
-  <footer>
-      <p>ド天然のきゃたん</p>
-  </footer>
+  <div id="footer-placeholder"></div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+  <script src="common.js"></script>
 
   <script>
     // ----------------------------------------------------------------------
@@ -86,17 +77,7 @@
     const numberBoardEl = document.getElementById('numberBoard');
     const resetButton = document.getElementById('resetButton');
     
-    // ヘッダー高さ調整用のDOM要素
-    const header = document.querySelector('header');
-    const nav = document.getElementById('nav');
-    const hamburger = document.getElementById("hamburger");
-    
-    // ★ 修正/変更点: ナビゲーション位置を動的に調整する関数 ★
-    function updateNavPosition() {
-        if (header && nav) {
-            nav.style.top = header.offsetHeight + 'px';
-        }
-    }
+    // ヘッダー/ナビゲーション関連のDOM要素は、common.jsの setupHeader が処理するため削除
 
     function renderBoard(numbers) {
       numberBoardEl.innerHTML = '';
@@ -248,23 +229,15 @@
         bingoRef.set({ drawnNumbers: [], currentDisplay: '--' });
       }
     });
-
-    if (hamburger && nav) {
-        hamburger.addEventListener("click", () => {
-            nav.classList.toggle("show");
-            updateNavPosition();
-        });
-    }
-    window.addEventListener('resize', updateNavPosition);
+    
+    // ヘッダー/ナビゲーションのイベントリスナーは common.js の setupHeader に移譲されるため削除
+    // document.addEventListener("DOMContentLoaded" イベント内で common.js の処理が実行されるため、その後の処理を記述
 
     document.addEventListener("DOMContentLoaded", () => {
-      loadGameFromFirebase(); 
+      // ★ 修正: common.js の setupHeader を実行し、管理者ヘッダーを読み込む ★
+      setupHeader('header-admin.html'); // 管理者ヘッダーファイルを指定
       
-      // ★★★ 最終修正: 初期ロード時にメニューを確実に閉じる ★★★
-      if (nav) {
-          nav.classList.remove("show");
-      }
-      updateNavPosition(); 
+      loadGameFromFirebase(); 
     });
   </script>
 </body>
