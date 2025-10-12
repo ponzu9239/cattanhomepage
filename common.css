@@ -1,4 +1,4 @@
-/* common.css: 全ページ共通スタイル (ナビゲーション修正版) */
+/* common.css: 全ページ共通スタイル (PCでスライドメニュー有効化) */
 
 /* ボックスモデルの統一 */
 * {
@@ -12,14 +12,14 @@ body {
     font-family: "Hiragino Maru Gothic ProN", sans-serif;
     background: #f7fcfc;
     margin: 0;
-    padding-top: 100px; /* ★ヘッダーの高さに合わせて設定★ */
+    padding-top: 100px; /* ヘッダーの高さに合わせて設定 */
     line-height: 1.6;
     transition: background-color 0.5s ease;
     overflow-x: hidden;
 }
 
 /* ------------------------------------------------ */
-/* ★ 1. ヘッダー/ナビゲーションのスタイル (デフォルト: モバイル優先) ★ */
+/* ★ 1. ヘッダー/ナビゲーションのスタイル (全画面共通) ★ */
 /* ------------------------------------------------ */
 header {
     position: fixed;
@@ -30,54 +30,54 @@ header {
     padding: 1rem;
     z-index: 1000;
     
-    /* PC表示を考慮してデフォルトでFlexboxにしておく */
     display: flex;
-    justify-content: space-between; /* h1とハンバーガーを左右に配置 */
+    justify-content: space-between; 
     align-items: center;
 }
 
 header h1 {
-    /* モバイルでの位置調整 */
     margin: 0;
     font-size: 5vw; 
     max-font-size: 2rem; 
     white-space: nowrap; 
     overflow: hidden;
     color: #fff;
-    /* ヘッダー内に余裕を持たせる */
     padding-left: 0.5rem; 
 }
 
-/* ハンバーガーメニューアイコン (モバイルでのみ表示) */
+/* ハンバーガーメニューアイコン (全画面で表示) */
 .hamburger {
     font-size: 2rem;
     cursor: pointer;
-    position: relative; /* fixedからrelativeに変更 */
+    position: absolute; /* headerのpadding基準で右上に配置 */
+    top: 50%;
+    right: 1rem; 
+    transform: translateY(-50%);
     color: white;
     z-index: 1100;
-    padding-right: 0.5rem; 
+    display: block; /* 全画面で表示 */
 }
 
-/* ナビゲーションメニュー本体 (モバイル: 非表示状態) */
+/* ナビゲーションメニュー本体 (全画面で非表示状態) */
 #nav {
     position: fixed;
-    /* ★CRITICAL FIX: これが初期の非表示状態★ */
-    top: -100%; 
+    /* ★CRITICAL FIX: これが初期の非表示状態 (上端外) ★ */
+    top: -100vh; /* 画面全体の上外側に隠す */
     left: 0;
     width: 100%;
     background-color: #97EADB;
+    /* メニュー項目を縦並びにする */
     display: flex;
     flex-direction: column;
     padding: 0;
-    transition: top 0.3s ease;
+    /* スライドアニメーション */
+    transition: top 0.3s ease-in-out; 
     z-index: 1050;
-    /* モバイルでは h1 の下に隠れる */
 }
 
-/* ナビゲーションが開いた状態 (モバイルのみ適用) */
+/* ナビゲーションが開いた状態 (全画面で適用) */
 #nav.show {
-    /* JSでヘッダーの高さに基づいて動的に上書きされます */
-    /* top: 75px; */ 
+    /* JSによってヘッダーの高さに調整された値が設定されます */
 }
 
 nav a {
@@ -107,49 +107,21 @@ nav a:hover {
         font-size: 2rem; 
     }
     
-    /* PCではハンバーガーメニューアイコンを非表示 */
-    .hamburger {
-        display: none; 
-    }
+    /* PCでもハンバーガーアイコン、ナビゲーションの挙動はモバイルと同じ */
     
     /* ヘッダーのレイアウト調整 */
     header {
         padding: 0.8rem 1rem;
-        justify-content: space-between; /* h1とnavを左右に配置 */
-    }
-
-    /* PCではナビゲーションメニューをヘッダー内に表示し、常時ONにする */
-    #nav {
-        /* position: fixed; を解除し、常時表示 */
-        position: static; 
-        top: auto; /* 非表示設定を解除 */
-        width: auto;
-        flex-direction: row; /* 横並び */
-        /* ヘッダーの高さに合わせる */
-        display: flex !important; /* JSによる display: none を上書きする可能性を考慮 */
-        padding: 0;
-        transition: none; /* 開閉アニメーションを無効化 */
     }
     
-    /* nav.show のスタイルはPCでは適用されない */
-    #nav.show {
-        top: auto; 
-    }
-    
-    /* PCではaタグを横並びにするため、スタイルを調整 */
+    /* PCでのリンクスタイル (縦並び/スライドを維持しつつ、PC表示として見栄えを調整するならここを修正) */
     nav a {
-        display: inline-block;
-        border-bottom: none;
-        margin-left: 1.5rem; /* リンク間のスペース */
-        padding: 0.2rem 0.5rem;
-        background-color: transparent;
+        /* PCでもリンク全体にホバー効果が適用されるように調整を維持 */
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #97EADB; 
     }
     
-    nav a:hover {
-        background-color: #0099aa; /* PCでもホバーは色を変える */
-        color: white;
-        transform: none;
-    }
+    /* PCではコンテンツのスクロールバーを非表示にする設定を削除 */
 }
 /* ★★★ PC表示時の修正END ★★★ */
 
@@ -322,7 +294,7 @@ section h3 {
 
 
 /* ------------------------------------------------ */
-/* ★ 5. ビンゴエリア共通スタイル (抽選中/結果表示) ★ */
+/* ★ 5. ビンゴエリア共通スタイル ★ */
 /* ------------------------------------------------ */
 
 /* ビンゴ表示用のコンテナ */
