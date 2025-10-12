@@ -2,498 +2,316 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>きゃたんのビンゴゲーム</title>
-    <link rel="icon" href="IMG_4666.png" type="image/png">
-    <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ビンゴ抽選結果表示</title>
+  <link rel="icon" href="IMG_4666.png" type="image/png">
+  <meta property="og:image" content="https://www.yourwebsite.com/無題12_20250907003655.jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 
-    <style>
-        /* ------------------------------------------------ */
-        /* 1. 全要素に box-sizing を適用して厳密に計算 */
-        /* ------------------------------------------------ */
-        * {
-            box-sizing: border-box; 
-        }
-        
-        /* 共通デザイン */
-        body {
-            font-family: "Hiragino Maru Gothic ProN", sans-serif;
-            background: #f7fcfc;
-            margin: 0;
-            padding-top: 100px;
-            overflow-x: hidden;
-        }
+  <style>
+    /* 共通デザインの流用 */
+    body {
+      font-family: "Hiragino Maru Gothic ProN", sans-serif;
+      background: #f7fcfc;
+      margin: 0;
+      padding-top: 100px;
+      overflow-x: hidden;
+    }
 
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #97EADB;
-            padding: 1rem;
-            text-align: center;
-            z-index: 1000;
-        }
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      padding: 1rem;
+      text-align: center;
+      z-index: 1000;
+    }
 
-        header h1 {
-            margin: 0;
-            font-size: 2rem;
-            color: #fff;
-        }
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #fff;
+    }
 
-        .hamburger {
-            font-size: 2rem;
-            cursor: pointer;
-            position: absolute;
-            top: 50%;
-            right: 3rem;
-            color: white;
-            transform: translateY(-50%);
-            z-index: 1100;
-        }
+    .hamburger {
+      font-size: 2rem;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      right: 3rem;
+      color: white;
+      transform: translateY(-50%);
+      z-index: 1100;
+    }
 
-        nav {
-            position: fixed;
-            top: -100%;
-            left: 0;
-            width: 100%;
-            background-color: #97EADB;
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            transition: top 0.3s ease;
-            z-index: 1050;
-        }
+    nav {
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      background-color: #97EADB;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      transition: top 0.3s ease;
+      z-index: 1050;
+    }
 
-        nav.show {
-            top: 75px;
-        }
+    nav.show {
+      top: 75px;
+    }
 
-        nav a {
-            display: block;
-            text-align: center;
-            margin: 0;
-            padding: 0.6rem 0;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: white;
-            background-color: #97eadb;
-            border-bottom: 1px solid #97EADB;
-            text-decoration: none;
-            transition: background-color 0.2s, transform 0.2s;
-        }
+    nav a {
+      display: block;
+      text-align: center;
+      margin: 0;
+      padding: 0.6rem 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background-color: #97eadb;
+      border-bottom: 1px solid #97EADB;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.2s;
+    }
 
-        nav a:hover {
-            background-color: #0099aa;
-            transform: scale(1.03);
-        }
+    nav a:hover {
+      background-color: #0099aa;
+      transform: scale(1.03);
+    }
 
-        footer {
-            background: #97EADB;
-            text-align: center;
-            color: white;
-            padding: 1rem;
-            margin-top: 2rem;
-        }
+    footer {
+      background: #97EADB;
+      text-align: center;
+      color: white;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
 
-        section {
-            padding: 2rem;
-            max-width: 800px;
-            margin: auto;
-        }
+    section {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
 
-        section h3 {
-            color: #5aa2aa;
-            border-bottom: 2px solid #97EADB;
-            padding-bottom: 0.3rem;
-        }
+    section h3 {
+      color: #5aa2aa;
+      border-bottom: 2px solid #97EADB;
+      padding-bottom: 0.3rem;
+    }
 
-        /* ビンゴコントロールと表示エリア */
-        #bingoControls {
-            text-align: center;
-            padding: 2rem 1rem;
-            background-color: #d4f0f4;
-            border: 3px solid #97EADB;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin-top: 1rem;
-        }
+    /* ビンゴ表示用のスタイル */
+    #bingoDisplay {
+      text-align: center;
+      padding: 2rem 1rem;
+      background-color: #d4f0f4;
+      border: 3px solid #97EADB;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      margin-top: 1rem;
+    }
 
-        #latestNumber {
-            font-size: 5rem;
-            font-weight: bold;
-            color: #1b656f;
-            margin: 0.5rem 0;
-            height: 6rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: color 0.1s, background-color 0.1s;
-        }
-        
-        /* 抽選中の表示スタイル */
-        #latestNumber.drawing {
-            color: #ff4757;
-        }
+    #latestNumber {
+      font-size: 5rem;
+      font-weight: bold;
+      color: #1b656f;
+      margin: 0.5rem 0;
+      height: 6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: color 0.1s, background-color 0.1s;
+    }
 
-        #drawButton, #resetButton {
-            padding: 0.8rem 1.5rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-            margin: 0.5rem;
-        }
+    /* 抽選中の表示スタイル */
+    #latestNumber.drawing {
+        color: #ff4757;
+    }
+    
+    /* --- レスポンシブ対応の番号ボード Flexbox (強制10個/行) --- */
+    #numberBoard {
+      display: flex;
+      flex-wrap: wrap; 
+      justify-content: center; 
+      gap: 0; /* 隙間を完全になくす */
+      margin: 1rem auto;
+      max-width: 100%; 
+      padding: 0; 
+    }
 
-        #drawButton {
-            background-color: #1b656f;
-            color: white;
-            box-shadow: 0 4px #103e44;
-        }
+    .bingo-cell {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      /* 隙間がないため、borderを考慮してわずかに小さくする */
+      flex-basis: 9.95%; /* 100% / 10 = 10% よりわずかに小さくして余裕を持たせる */
+      
+      height: 0; 
+      padding-bottom: 9.95%; /* アスペクト比を保つ */
+      
+      font-weight: bold;
+      color: #555;
+      line-height: 1;
+      
+      position: relative;
+      min-width: 15px; 
+      min-height: 15px;
+    }
+    .bingo-cell::before {
+        content: attr(data-content); 
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        /* 画面幅が狭くなると文字も自動縮小 */
+        font-size: 3.5vw; 
+        max-font-size: 1.1rem;
+    }
 
-        #drawButton:hover {
-            background-color: #2a8b96;
-        }
+    /* 強制改行要素 */
+    .break {
+        flex-basis: 100%;
+        height: 0;
+        margin: 0;
+        padding: 0;
+    }
+    /* --- Flexbox対応CSS終了 --- */
 
-        #drawButton:active {
-            box-shadow: 0 1px #103e44;
-            transform: translateY(3px);
-        }
-        
-        #resetButton {
-            background-color: #ff4757;
-            color: white;
-            box-shadow: 0 4px #cc3844;
-        }
-
-        #resetButton:hover {
-            background-color: #ff6874;
-        }
-
-        #resetButton:active {
-            box-shadow: 0 1px #cc3844;
-            transform: translateY(3px);
-        }
-
-
-        /* --- レスポンシブ対応の番号ボード Flexbox (余白あり・強制10個/行) --- */
-        #numberBoard {
-            display: flex;
-            flex-wrap: wrap; 
-            justify-content: center; 
-            gap: 2px; /* 隙間を2pxに設定 */
-            margin: 1rem auto;
-            max-width: 100%; 
-            padding: 0; 
-        }
-
-        .bingo-cell {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 3px; 
-            
-            /* 10% - (9 * 2px) / 10 = 10% - 1.8px */
-            flex-basis: calc(10% - 1.8px); 
-            
-            height: 0; 
-            padding-bottom: calc(10% - 1.8px); /* アスペクト比を保つ */
-            
-            font-weight: bold;
-            color: #555;
-            line-height: 1;
-            
-            position: relative;
-            min-width: 15px; 
-            min-height: 15px;
-        }
-        .bingo-cell::before {
-            content: attr(data-content); 
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            /* フォントサイズをvw単位にしてセルサイズに応じて変化 */
-            font-size: 3.0vw; 
-        }
-
-        /* PCなど画面幅が広い場合に文字サイズを固定する */
-        @media (min-width: 800px) {
-            .bingo-cell::before {
-                font-size: 1.1rem; /* 800pxを超えたらフォントサイズを固定 */
-            }
-        }
-
-        /* 強制改行要素 */
-        .break {
-            flex-basis: 100%;
-            height: 0;
-            margin: 0;
-            padding: 0;
-        }
-        /* --- Flexbox対応CSS終了 --- */
-
-        .drawn {
-            background-color: #97EADB;
-            color: white;
-        }
-    </style>
+    .drawn {
+      background-color: #97EADB;
+      color: white;
+    }
+  </style>
 
 </head>
 
 <body>
-    <header>
-        <h1>ド天然のきゃたん</h1>
-        <div class="hamburger" id="hamburger">☰</div>
-        <nav id="nav">
-            <a href="bingo-view.html">抽選結果を見る</a>
-            <a href="index.html">ホーム</a>
-            <a href="roulette.html">イベント</a>
-            <a href="team-view.html">チーム分けを見る</a>
-            <a href="data-view.html">カスタム結果を見る</a>
-        </nav>
-    </header>
+  <header>
+    <h1>ビンゴ抽選結果</h1>
+    <div class="hamburger" id="hamburger">☰</div>
+    <nav id="nav">
+      <a href="bingo.html">抽選会場へ</a> 
+      <a href="index.html">ホーム</a>
+      <a href="roulette.html">イベント</a>
+      <a href="team-view.html">チーム分けを見る</a>
+      <a href="data-view.html">カスタム結果を見る</a>
+    </nav>  
+  </header>
 
-    <main>
-        <section id="bingo">
-            <h3>🎰 抽選コントロール 🎰</h3>
+  <main>
+    <section id="bingo">
+      <h3>📢 発表中の番号 📢</h3>
 
-            <div id="bingoControls">
-                <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">現在の表示番号</p>
-                <div id="latestNumber">--</div>
-                <p id="statusMessage">初期化中...</p>
+      <div id="bingoDisplay">
+        <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">現在の表示番号</p>
+        <div id="latestNumber">--</div>
 
-                <div style="margin-top: 1.5rem;">
-                    <button id="drawButton">次の番号を引く</button>
-                    <button id="resetButton">リセット</button>
-                </div>
+        <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">出た番号一覧 (1〜75)</h4>
+        <div id="numberBoard">
+          </div>
+      </div>
+    </section>
+  </main>
 
-                <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">出た番号一覧 (1〜75)</h4>
-                <div id="numberBoard">
-                    </div>
-            </div>
-        </section>
-    </main>
+  <footer>
+    <p>ド天然のきゃたん</p>
+  </footer>
 
-    <footer>
-        <p>ド天然のきゃたん</p>
-    </footer>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script>
+    // ----------------------------------------------------------------------
+    // 🎨 あなたのFirebase設定 (抽選会場ページと同じ設定)
+    // ----------------------------------------------------------------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.firebasestorage.app",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+      measurementId: "G-ZNGEZZWMTP"
+    };
+    // ----------------------------------------------------------------------
 
-    <script>
-        // ----------------------------------------------------------------------
-        // 🎨 あなたのFirebase設定
-        // ----------------------------------------------------------------------
-        const firebaseConfig = {
-            apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-            authDomain: "catiffanygame.firebaseapp.com",
-            databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-            projectId: "catiffanygame",
-            storageBucket: "catiffanygame.firebasestorage.app",
-            messagingSenderId: "166871605809",
-            appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-            measurementId: "G-ZNGEZZWMTP"
-        };
-        // ----------------------------------------------------------------------
+    // Firebase初期化とデータベース参照の取得
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const bingoRef = db.ref('bingo'); // /bingo 全体を監視
 
+    const maxNumber = 75;
+    const latestNumberEl = document.getElementById('latestNumber');
+    const numberBoardEl = document.getElementById('numberBoard');
 
-        // Firebase初期化とデータベース参照の取得
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const bingoRef = db.ref('bingo');
-
-        const maxNumber = 75;
-        const allNumbers = Array.from({ length: maxNumber }, (_, i) => i + 1);
-
-        const latestNumberEl = document.getElementById('latestNumber');
-        const drawButton = document.getElementById('drawButton');
-        const resetButton = document.getElementById('resetButton');
-        const numberBoardEl = document.getElementById('numberBoard');
-        const statusMessageEl = document.getElementById('statusMessage');
-
-        let isDrawing = false;
-        let drawnNumbers = [];
-        let availableNumbers = [];
-
-        // --- ボードの描画処理 ---
-        function renderBoard(currentDisplay) {
-            // --- 最新表示の更新 ---
-            latestNumberEl.textContent = currentDisplay !== '--' ? currentDisplay : '--';
-            
-            // 抽選中のアニメーション設定
-            const isDisplayDrawing = !drawnNumbers.includes(parseInt(currentDisplay)) && currentDisplay !== '--';
-            if (isDisplayDrawing) {
-                latestNumberEl.classList.add('drawing');
-                statusMessageEl.textContent = "抽選進行中...";
-            } else {
-                latestNumberEl.classList.remove('drawing');
-                if (drawnNumbers.length === maxNumber) {
-                    statusMessageEl.textContent = "🎉 すべての番号が出ました！";
-                    drawButton.disabled = true;
-                } else {
-                    statusMessageEl.textContent = `抽選済: ${drawnNumbers.length}個`;
-                }
-            }
-
-
-            // --- ボードの更新 ---
-            numberBoardEl.innerHTML = '';
-            
-            for (let i = 1; i <= maxNumber; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'bingo-cell';
-                cell.setAttribute('data-content', i);
-                
-                // 抽選済みの数字ならスタイルを適用
-                if (drawnNumbers.includes(i)) {
-                    cell.classList.add('drawn');
-                }
-                
-                numberBoardEl.appendChild(cell);
-
-                // 10個ごとに改行要素を挿入 (11個目が2行目になるように)
-                if (i % 10 === 0 && i < maxNumber) {
-                    const breakEl = document.createElement('div');
-                    breakEl.className = 'break';
-                    numberBoardEl.appendChild(breakEl);
-                }
-            }
-        }
-
-        // --- 抽選処理 ---
-        function drawNextNumber() {
-            if (isDrawing || availableNumbers.length === 0) return;
-
-            isDrawing = true;
-            drawButton.disabled = true;
-            statusMessageEl.textContent = "抽選進行中...";
+    // ボードの描画処理 (常に10個/行、Flexbox対応)
+    function renderBoard(drawnNumbers, currentDisplay) {
+        // --- 最新表示の更新 ---
+        latestNumberEl.textContent = currentDisplay !== '--' ? currentDisplay : '--';
+        
+        // 抽選中かどうかを判断し、表示に反映
+        const isDrawing = !drawnNumbers.includes(parseInt(currentDisplay)) && currentDisplay !== '--';
+        
+        if (isDrawing) {
             latestNumberEl.classList.add('drawing');
-
-            const rollDuration = 3000; // 3秒間ルーレットを回す
-            let startTime = Date.now();
-            let lastDisplay = null;
-
-            // データベースに「抽選中」のステータスとダミー番号を書き込み
-            bingoRef.update({
-                isDrawing: true,
-                currentDisplay: 'ROLLING' // 抽選中を示す特別な値
-            });
-
-            // ルーレットアニメーション
-            const interval = setInterval(() => {
-                const now = Date.now();
-                if (now - startTime < rollDuration) {
-                    // 抽選可能な番号からランダムに表示
-                    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-                    const rollingNumber = availableNumbers[randomIndex];
-                    latestNumberEl.textContent = rollingNumber;
-                    lastDisplay = rollingNumber;
-                } else {
-                    clearInterval(interval);
-                    
-                    // 最終結果を決定
-                    const finalIndex = Math.floor(Math.random() * availableNumbers.length);
-                    const finalNumber = availableNumbers[finalIndex];
-
-                    // drawnNumbersとavailableNumbersを更新
-                    drawnNumbers.push(finalNumber);
-                    drawnNumbers.sort((a, b) => a - b);
-                    availableNumbers = availableNumbers.filter(n => n !== finalNumber);
-
-                    // データベースに最終結果を書き込み
-                    bingoRef.update({
-                        drawnNumbers: drawnNumbers,
-                        currentDisplay: finalNumber.toString(),
-                        isDrawing: false,
-                        availableNumbers: availableNumbers
-                    }).then(() => {
-                        console.log(`番号 ${finalNumber} が確定しました。`);
-                        
-                        // UIの最終更新はon('value')リスナーに任せる
-                        isDrawing = false;
-                        if (availableNumbers.length > 0) {
-                            drawButton.disabled = false;
-                        }
-                    }).catch(error => {
-                        console.error("Firebaseへの書き込みエラー:", error);
-                        isDrawing = false;
-                        drawButton.disabled = false;
-                    });
-                }
-            }, 100); // 100msごとに番号を更新
+        } else {
+            latestNumberEl.classList.remove('drawing');
         }
 
-        // --- リセット処理 ---
-        function resetBingo() {
-            if (isDrawing) return;
+        // --- ボードの更新 ---
+        numberBoardEl.innerHTML = '';
+        
+        for (let i = 1; i <= maxNumber; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'bingo-cell';
+            cell.setAttribute('data-content', i);
             
-            if (confirm("本当にビンゴの抽選結果をすべてリセットしますか？")) {
-                bingoRef.set({
-                    drawnNumbers: [],
-                    availableNumbers: allNumbers,
-                    currentDisplay: '--',
-                    isDrawing: false
-                }).then(() => {
-                    alert("ビンゴ抽選がリセットされました。");
-                    drawButton.disabled = false;
-                    // UIの更新はon('value')リスナーに任せる
-                }).catch(error => {
-                    console.error("Firebaseへのリセットエラー:", error);
-                });
+            // 抽選済みの数字ならスタイルを適用
+            if (drawnNumbers.includes(i)) {
+                cell.classList.add('drawn');
+            }
+            
+            numberBoardEl.appendChild(cell);
+
+            // 10個ごとに改行要素を挿入 (11個目が2行目になるように)
+            if (i % 10 === 0 && i < maxNumber) {
+                const breakEl = document.createElement('div');
+                breakEl.className = 'break';
+                numberBoardEl.appendChild(breakEl);
             }
         }
+    }
 
-        // --- Firebaseのデータ変更をリアルタイムで監視 ---
-        bingoRef.on('value', (snapshot) => {
-            const data = snapshot.val() || {
-                drawnNumbers: [],
-                availableNumbers: allNumbers,
-                currentDisplay: '--'
-            };
+    // Firebaseのデータ変更をリアルタイムで監視し、画面を自動更新
+    bingoRef.on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const drawnNumbers = data.drawnNumbers || [];
+        const currentDisplay = data.currentDisplay || '--'; 
 
-            drawnNumbers = data.drawnNumbers || [];
-            availableNumbers = data.availableNumbers || allNumbers;
-            const currentDisplay = data.currentDisplay || '--';
-            const drawingStatus = data.isDrawing || false;
+        renderBoard(drawnNumbers, currentDisplay);
+        console.log("Firebaseから最新のデータを受信しました。");
+    }, (error) => {
+        console.error("Firebaseからのデータ受信エラー:", error);
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        // ハンバーガーメニューのロジック
+        const hamburger = document.getElementById("hamburger");
+        const nav = document.getElementById("nav");
 
-            // UIの更新
-            renderBoard(currentDisplay);
-
-            // ボタンの状態更新
-            if (drawingStatus || drawnNumbers.length === maxNumber) {
-                drawButton.disabled = true;
-            } else {
-                drawButton.disabled = false;
-            }
-        }, (error) => {
-            console.error("Firebaseからのデータ受信エラー:", error);
-            statusMessageEl.textContent = "エラー: データの読み込みに失敗しました。";
-            drawButton.disabled = true;
+        hamburger.addEventListener("click", () => {
+          nav.classList.toggle("show");
         });
+    });
 
-        // --- イベントリスナー ---
-        document.addEventListener("DOMContentLoaded", () => {
-            drawButton.addEventListener('click', drawNextNumber);
-            resetButton.addEventListener('click', resetBingo);
-
-            // ハンバーガーメニューのロジック
-            const hamburger = document.getElementById("hamburger");
-            const nav = document.getElementById("nav");
-
-            hamburger.addEventListener("click", () => {
-                nav.classList.toggle("show");
-            });
-        });
-    </script>
+  </script>
 </body>
 
 </html>
