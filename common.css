@@ -941,3 +941,11 @@ h1 {
   0% { transform: translateX(-100%) rotate(45deg); }
   100% { transform: translateX(100%) rotate(45deg); }
 }
+
+.banner-note {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #888888;
+  margin-top: 6px;
+  font-family: "Hiragino Maru Gothic ProN", sans-serif;
+}
