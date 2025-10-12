@@ -1,11 +1,10 @@
-// common.js の内容
+// common.js の内容 (PC/モバイル統合版)
 
 // ヘッダー/フッターを読み込み、指定された要素に挿入する関数
 async function loadComponent(placeholderId, url) {
     try {
         const response = await fetch(url);
         
-        // file://プロトコル対策: ネットワーク応答がない場合を考慮
         if (!response.ok) {
             console.warn(`Failed to fetch ${url} (HTTP status: ${response.status}). If you are running locally via 'file://' protocol, this is expected.`);
             return false; 
@@ -19,7 +18,6 @@ async function loadComponent(placeholderId, url) {
         return true;
 
     } catch (error) {
-        // ネットワークエラー、CORSエラーなどが発生した場合
         console.error("Error loading component:", url, error);
         return false; 
     }
@@ -27,7 +25,7 @@ async function loadComponent(placeholderId, url) {
 
 /**
  * ヘッダー/フッターを読み込み、読み込み完了後にハンバーガーメニューのイベントを設定する関数。
- * 非同期処理(await)を使用することで、DOM要素が存在することを保証する。
+ * 全ての画面サイズで同じスライド挙動を適用する。
  * @param {string} headerFile 読み込むヘッダーHTMLファイル名
  */
 async function setupHeader(headerFile) {
@@ -39,31 +37,44 @@ async function setupHeader(headerFile) {
     
     // 3. ヘッダーがDOMに挿入されたことを確認してから、イベントを設定
     if (headerLoaded) {
-        // DOM要素を再取得 (header-user.htmlの内容がinnerHTMLで挿入された後)
+        // DOM要素を再取得
         const hamburger = document.getElementById("hamburger");
         const nav = document.getElementById("nav");
         const header = document.querySelector('header');
         
-        // ナビゲーション位置を動的に調整する関数
+        // ナビゲーションが開く位置を動的に計算する関数 (PC/モバイル共通)
         function updateNavPosition() {
             if (header && nav) {
-                nav.style.top = header.offsetHeight + 'px';
+                const headerHeight = header.offsetHeight;
+                
+                // navが開いている場合 (showクラスがついている場合)
+                if (nav.classList.contains('show')) {
+                     // ヘッダーの高さ分だけ下にスライドさせる
+                    nav.style.top = headerHeight + 'px'; 
+                } else {
+                    // 閉じている場合は画面外 (-100vh) にスライドさせる
+                     nav.style.top = '-100vh'; 
+                }
             }
         }
         
         if (hamburger && nav) {
-            // ★ 修正箇所: 初期ロード時にメニューを確実に閉じる ★
+            // 初期ロード時にメニューを確実に閉じる
             nav.classList.remove("show"); 
-            updateNavPosition(); // 初期位置を設定
-            
-            // ハンバーガーメニューのイベントを設定
+            updateNavPosition(); // 初期位置をCSSの設定(-100vh)に戻す
+
+            // イベントリスナーの登録
             hamburger.addEventListener("click", () => {
                 nav.classList.toggle("show");
                 updateNavPosition(); // 開閉時にも高さを再調整
             });
             
             // 画面サイズ変更時にも高さを更新
-            window.addEventListener('resize', updateNavPosition);
+            window.addEventListener('resize', () => {
+                // サイズ変更時にメニューを閉じ、位置を再設定
+                nav.classList.remove("show"); 
+                updateNavPosition();
+            });
         } else {
              console.warn("Hamburger or Nav elements not found after header load. Check 'header-user.html'.");
         }
