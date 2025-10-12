@@ -1,4 +1,4 @@
-// common.js の内容 (PC/モバイル統合版)
+// common.js の内容 (PC/モバイル統合版 - transformベースのナビゲーションに修正)
 
 // ヘッダー/フッターを読み込み、指定された要素に挿入する関数
 async function loadComponent(placeholderId, url) {
@@ -25,7 +25,7 @@ async function loadComponent(placeholderId, url) {
 
 /**
  * ヘッダー/フッターを読み込み、読み込み完了後にハンバーガーメニューのイベントを設定する関数。
- * 全ての画面サイズで同じスライド挙動を適用する。
+ * CSSをtransformベースの開閉ロジックに変更したため、JSからはCSSクラスをトグルするのみに変更。
  * @param {string} headerFile 読み込むヘッダーHTMLファイル名
  */
 async function setupHeader(headerFile) {
@@ -40,43 +40,25 @@ async function setupHeader(headerFile) {
         // DOM要素を再取得
         const hamburger = document.getElementById("hamburger");
         const nav = document.getElementById("nav");
-        const header = document.querySelector('header');
         
-        // ナビゲーションが開く位置を動的に計算する関数 (PC/モバイル共通)
-        function updateNavPosition() {
-            if (header && nav) {
-                const headerHeight = header.offsetHeight;
-                
-                // navが開いている場合 (showクラスがついている場合)
-                if (nav.classList.contains('show')) {
-                     // ヘッダーの高さ分だけ下にスライドさせる
-                    nav.style.top = headerHeight + 'px'; 
-                } else {
-                    // 閉じている場合は画面外 (-100vh) にスライドさせる
-                     nav.style.top = '-100vh'; 
-                }
-            }
-        }
+        // ★修正: CSSのtransformによる開閉ロジックを採用するため、動的な top の計算は不要になりました。★
         
         if (hamburger && nav) {
-            // 初期ロード時にメニューを確実に閉じる
+            // 初期ロード時にメニューを確実に閉じる (CSSのデフォルト設定に戻る)
             nav.classList.remove("show"); 
-            updateNavPosition(); // 初期位置をCSSの設定(-100vh)に戻す
 
             // イベントリスナーの登録
             hamburger.addEventListener("click", () => {
+                // show クラスをトグルするだけで、CSSの transform がアニメーションを行う
                 nav.classList.toggle("show");
-                updateNavPosition(); // 開閉時にも高さを再調整
             });
             
-            // 画面サイズ変更時にも高さを更新
+            // 画面サイズ変更時にもメニューを閉じる
             window.addEventListener('resize', () => {
-                // サイズ変更時にメニューを閉じ、位置を再設定
                 nav.classList.remove("show"); 
-                updateNavPosition();
             });
         } else {
-             console.warn("Hamburger or Nav elements not found after header load. Check 'header-user.html'.");
+             console.warn("Hamburger or Nav elements not found after header load. Check the header HTML.");
         }
     } else {
         console.error("Header file could not be loaded, skipping hamburger setup.");
