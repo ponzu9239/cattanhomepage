@@ -135,29 +135,27 @@
         color: #ff4757;
     }
     
-    /* ステータスメッセージを削除したため、要素なし */
-    
     /* --- レスポンシブ対応の番号ボード Flexbox (常に10個/行) --- */
     #numberBoard {
       display: flex;
       flex-wrap: wrap; 
       justify-content: center; 
-      gap: 5px;
+      gap: 3px; /* 隙間を3pxに縮小 */
       margin: 1rem auto;
       max-width: 100%; 
-      padding: 0; /* paddingを削除して計算を簡略化 */
+      padding: 0; /* paddingを削除してボード幅を最大化 */
     }
 
     .bingo-cell {
       background-color: #fff;
       border: 1px solid #ccc;
       border-radius: 5px;
-      /* 常に10列にするための計算式 */
-      /* 100%を10等分し、その間の gap(5px)×9つ分を均等に引く */
-      flex-basis: calc(10% - 4.5px); 
+      /* 常に10列にするための計算式を調整 */
+      /* 100%を10等分し、その間の gap(3px)×9つ分=27px を10で割って 2.7px */
+      flex-basis: calc(10% - 2.7px); 
       
       height: 0; 
-      padding-bottom: calc(10% - 4.5px); /* アスペクト比を保つ */
+      padding-bottom: calc(10% - 2.7px); /* アスペクト比を保つ */
       
       font-weight: bold;
       color: #555;
@@ -173,7 +171,7 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        /* 画面幅が狭くなると文字も自動縮小 (10個が1行に収まるようにする) */
+        /* 画面幅が狭くなると文字も自動縮小 */
         font-size: 3.5vw; 
         max-font-size: 1.1rem;
     }
@@ -215,6 +213,7 @@
       <div id="bingoDisplay">
         <p style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #5aa2aa;">現在の表示番号</p>
         <div id="latestNumber">--</div>
+
         <h4 style="color: #1b656f; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; margin-top: 2rem;">出た番号一覧 (1〜75)</h4>
         <div id="numberBoard">
           </div>
