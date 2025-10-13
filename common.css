@@ -393,7 +393,8 @@ section h3 {
 }
 
 .bingo-cell {
-    background-color: #fff;
+    /* ★修正点: 未抽選のセルの背景色を薄いグレーに変更★ */
+    background-color: #e8e8e8; 
     border: 1px solid #ccc;
     border-radius: 3px; 
     
@@ -402,12 +403,14 @@ section h3 {
     padding-bottom: calc(10% - 1.8px);
     
     font-weight: bold;
-    color: #555;
+    /* ★修正点: 文字色も少し薄い色に変更★ */
+    color: #888; 
     line-height: 1;
     
     position: relative;
     min-width: 15px; 
     min-height: 15px;
+    transition: background-color 0.3s, color 0.3s; /* トランジションを追加 */
 }
 .bingo-cell::before {
     content: attr(data-content); 
@@ -898,57 +901,121 @@ h1 {
   }
 }
 
-
-
-.bingo-banner {
-  display: block;
-  width: calc(100% - 20px); /* 左右に10pxずつだけ空ける */
-  margin: 0 auto;            /* 中央寄せ */
-  padding: 15px 10px;        /* 上下15px、左右10px */
-  text-align: center;
-  background: linear-gradient(135deg, #ff9fc1, #f7a6d2);
-  color: #fff;
-  font-weight: bold;
-  border: 3px solid #ff7aa3;
-  border-radius: 12px;
-  text-decoration: none;
-  box-shadow: 0 6px 15px rgba(255, 100, 180, 0.5);
-  font-size: clamp(20px, 4vw, 28px);
-  white-space: nowrap;       /* 改行防止 */
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* 既存のルーレットバナーのスタイルを非表示にするために残しますが、
+   新しいビンゴバナーがセクション9で定義されます。 */
+.roulette-banner.ended {
+    display: none; 
 }
 
-.bingo-banner .small {
-  display: block;
-  font-size: 1.2rem;
-  font-weight: normal;
-  margin-top: 8px;
-  color: rgba(255,255,255,0.9);
+
+/* ------------------------------------------------ */
+/* ★ 9. ビンゴイベントバナーのスタイル (index.html専用) ★ */
+/* ------------------------------------------------ */
+
+.bingo-event-banner {
+    text-align: center;
+    margin: 30px auto;
 }
 
-/* きらめきアニメーション（背景に軽く光が動く） */
-.bingo-banner::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
-  transform: rotate(45deg);
-  animation: shine 3s linear infinite;
+.bingo-event-banner a {
+    display: block;
+    width: 100%;
+    max-width: 800px;
+    margin: var(--spacing-md) auto 0;
+    
+    /* デザインの基盤 */
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    color: #004d66; /* 濃い青緑系の文字色に変更 */
+    border-radius: 12px;
+    overflow: hidden;
+    
+    /* ★修正点: 透明感のある明るいグラデーションに変更★ */
+    background: linear-gradient(135deg, rgba(151, 234, 219, 0.7) 0%, rgba(200, 250, 240, 0.9) 100%);
+    /* ★修正点: 影を淡く、奥行きのあるデザインに変更★ */
+    box-shadow: 0 10px 30px rgba(0, 77, 102, 0.15), 0 0 0 4px rgba(151, 234, 219, 0.5); /* 枠線のような効果 */
+    border: 1px solid rgba(151, 234, 219, 0.8);
+    
+    position: relative;
+    padding: 25px 15px; /* パディングを増やしてゆったりと */
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
-@keyframes shine {
-  0% { transform: translateX(-100%) rotate(45deg); }
-  100% { transform: translateX(100%) rotate(45deg); }
+.bingo-event-banner a:hover {
+    transform: translateY(-5px); /* 浮き上がり強調 */
+    /* ★修正点: ホバー時の影を深く、枠を強調★ */
+    box-shadow: 0 18px 40px rgba(0, 77, 102, 0.25), 0 0 0 4px var(--color-primary); 
 }
 
-.banner-note {
-  text-align: center;
-  font-size: 0.8rem;
-  color: #888888;
-  margin-top: 6px;
-  font-family: "Hiragino Maru Gothic ProN", sans-serif;
+.main-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px 0;
+    /* ★修正点: 文字の影を淡く、清潔感を損なわないように★ */
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5); 
+}
+
+.title-main {
+    font-size: 2.0rem; /* サイズアップ */
+    line-height: 1.2;
+    padding: 5px 0;
+    color: #1b656f; /* 濃い青緑 */
+}
+
+.title-sub {
+    font-size: 1.1rem;
+    font-weight: 500;
+    /* ★修正点: 背景を白く、わずかに透明にして区別★ */
+    background-color: rgba(255, 255, 255, 0.7); 
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-top: 8px;
+    color: #004d66;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.icon-text {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    /* ★修正点: 透明感のある明るいアクセントカラーに変更★ */
+    background: rgba(255, 87, 34, 0.9); /* オレンジレッド系 */
+    color: white;
+    padding: 5px 15px;
+    font-size: 0.8rem;
+    font-style: italic;
+    font-weight: 700;
+    border-bottom-left-radius: 12px;
+    box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.2);
+    /* 開催中アイコンをより目立たせるための傾き */
+    transform: rotate(2deg);
+    transform-origin: 100% 0%;
+}
+
+.link-text {
+    font-size: 1.2rem;
+    margin-top: 15px;
+    padding: 8px;
+    /* ★修正点: 薄い白色の半透明背景で視認性アップ★ */
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    display: inline-block;
+    color: #004d66;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* 既存のバナー注釈スタイルを上書き/統合 */
+.bingo-event-banner + .banner-note {
+    font-size: 0.9rem;
+    color: #555;
+    text-align: center;
+    margin-top: 10px;
+    display: block;
+}
+
+/* 既存のルーレットバナー終了時のスタイルを削除（または非表示） */
+.roulette-banner.ended {
+    display: none; 
 }
