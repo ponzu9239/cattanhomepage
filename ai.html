@@ -185,13 +185,23 @@ numberInput.addEventListener('input',()=>{
   checkBingo();
 });
 
-startStopBtn.addEventListener('click',()=>{
-  if(intervalId){
+startStopBtn.addEventListener('click', () => {
+  if (intervalId) {
+    // 抽選停止
     stopShuffle();
-    startStopBtn.textContent='抽選開始';
-  }else{
+    startStopBtn.textContent = '抽選開始';
+  } else {
+    // 番号入力欄をリセット
+    numberInput.value = '';
+    markedNumbers = [];
+    // すでにハイライトされているセルもリセット
+    Array.from(bingoCard.querySelectorAll('.bingo-cell')).forEach(cell => {
+      cell.classList.remove('highlight');
+    });
+
+    // 抽選開始
     startShuffle();
-    startStopBtn.textContent='停止';
+    startStopBtn.textContent = '停止';
   }
 });
 
