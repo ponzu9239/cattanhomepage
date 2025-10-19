@@ -118,16 +118,21 @@
         cardTimestamp.textContent = formatted;
     }
 
-    function highlightNumbers() {
-        const highlightValues = highlightNumbersInput.value.split(',').map(v => v.trim());
-        const cells = bingoCard.querySelectorAll('.bingo-cell');
-        cells.forEach(cell => {
-            if (highlightValues.includes(cell.textContent)) {
-                cell.classList.add('highlight');
-            }
-        });
-        drawBingoLineIfExists(highlightValues);
-    }
+function highlightNumbers() {
+    const input = highlightNumbersInput.value.replace(/\D/g,''); // 数字だけ取得
+    const highlightValues = input.split(''); // '123' -> ['1','2','3']
+
+    const cells = bingoCard.querySelectorAll('.bingo-cell');
+    cells.forEach(cell => {
+        if (highlightValues.includes(cell.textContent)) {
+            cell.classList.add('highlight');
+        } else {
+            cell.classList.remove('highlight');
+        }
+    });
+
+    drawBingoLineIfExists(highlightValues);
+}
 
     function drawBingoLineIfExists(highlightValues) {
         ctx.clearRect(0, 0, bingoLineCanvas.width, bingoLineCanvas.height);
