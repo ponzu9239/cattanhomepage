@@ -52,17 +52,12 @@ body {
 /* ★ 1. ヘッダー/ナビゲーションのスタイル (全画面共通) ★ */
 /* ------------------------------------------------ */
 header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--color-primary); 
-    padding: 2rem 1rem; 
-    z-index: 1000;
-    
-    display: flex;
-    justify-content: center; 
-    align-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 左にタイトル、右にハンバーガー */
+  background-color: #97eadb;
+  color: #fff;
+  padding: 10px 20px;
 }
 
 header h1 {
@@ -85,8 +80,8 @@ header h1 {
 .hamburger {
   font-size: 1.5rem;
   cursor: pointer;
-  color: #fff; /* 白色 */
-  margin-left: 5px; /* 左に寄せる */
+  color: #fff;
+  margin-left: 0; /* 不要 */
 }
 
 /* ナビゲーション（ドロップダウンメニュー） */
