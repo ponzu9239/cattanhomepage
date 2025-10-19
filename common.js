@@ -1,75 +1,89 @@
-/**
- * 共通ヘッダーとフッターを読み込む
- * @param {'user' | 'admin'} type - ヘッダーの種類 ('user' または 'admin')
- */
-async function setupHeader(type = 'user') {
-  const headerContainer = document.querySelector('header');
-  const footerContainer = document.querySelector('footer');
+// common.js の内容 (PC/モバイル統合版)
 
-  if (!headerContainer) return;
-
-  // ヘッダーHTMLのファイル名を決定
-  const headerFile =
-    type === 'admin' ? 'header-admin.html' : 'header-user.html';
-
-  // ヘッダーを読み込む
-  try {
-    const response = await fetch(headerFile);
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const html = await response.text();
-    headerContainer.innerHTML = html;
-  } catch (e) {
-    console.error('ヘッダー読み込み失敗:', e);
-  }
-
-  // フッターを読み込む（任意）
-  if (footerContainer) {
+// ヘッダー/フッターを読み込み、指定された要素に挿入する関数
+async function loadComponent(placeholderId, url) {
     try {
-      const response = await fetch('footer.html');
-      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-      const html = await response.text();
-      footerContainer.innerHTML = html;
-    } catch (e) {
-      console.warn('フッター読み込み失敗（footer.htmlが存在しないかも）');
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            console.warn(`Failed to fetch ${url} (HTTP status: ${response.status}). If you are running locally via 'file://' protocol, this is expected.`);
+            return false; 
+        }
+        
+        const html = await response.text();
+        const placeholder = document.getElementById(placeholderId);
+        if (placeholder) {
+            placeholder.innerHTML = html;
+        }
+        return true;
+
+    } catch (error) {
+        console.error("Error loading component:", url, error);
+        return false; 
     }
-  }
-
-  // ハンバーガーメニューの動作設定
-  initializeHamburgerMenu();
 }
 
 /**
- * ハンバーガーメニューの開閉動作を設定
+ * ヘッダー/フッターを読み込み、読み込み完了後にハンバーガーメニューのイベントを設定する関数。
+ * 全ての画面サイズで同じスライド挙動を適用する。
+ * @param {string} headerFile 読み込むヘッダーHTMLファイル名
  */
-function initializeHamburgerMenu() {
-  const hamburger = document.getElementById('hamburger');
-  const nav = document.getElementById('nav');
-  if (!hamburger || !nav) return;
+async function setupHeader(headerFile) {
+    // 1. ヘッダーを読み込む。読み込み完了を待つ (await)
+    const headerLoaded = await loadComponent('header-placeholder', headerFile);
 
-  hamburger.addEventListener('click', () => {
-    nav.classList.toggle('show');
-  });
+    // 2. フッターを読み込む (非同期で実行)
+    loadComponent('footer-placeholder', 'footer.html'); 
+    
+    // 3. ヘッダーがDOMに挿入されたことを確認してから、イベントを設定
+    if (headerLoaded) {
+        // DOM要素を再取得
+        const hamburger = document.getElementById("hamburger");
+        const nav = document.getElementById("nav");
+        const header = document.querySelector('header');
+        
+        // ナビゲーションが開く位置を動的に計算する関数 (PC/モバイル共通)
+        function updateNavPosition() {
+            if (header && nav) {
+                const headerHeight = header.offsetHeight;
+                
+                // navが開いている場合 (showクラスがついている場合)
+                if (nav.classList.contains('show')) {
+                     // ヘッダーの高さ分だけ下にスライドさせる
+                    nav.style.top = headerHeight + 'px'; 
+                } else {
+                    // 閉じている場合は画面外 (-100vh) にスライドさせる
+                     nav.style.top = '-100vh'; 
+                }
+            }
+        }
+        
+        if (hamburger && nav) {
+            // 初期ロード時にメニューを確実に閉じる
+            nav.classList.remove("show"); 
+            updateNavPosition(); // 初期位置をCSSの設定(-100vh)に戻す
+
+            // イベントリスナーの登録
+            hamburger.addEventListener("click", () => {
+                nav.classList.toggle("show");
+                updateNavPosition(); // 開閉時にも高さを再調整
+            });
+            
+            // 画面サイズ変更時にも高さを更新
+            window.addEventListener('resize', () => {
+                // サイズ変更時にメニューを閉じ、位置を再設定
+                nav.classList.remove("show"); 
+                updateNavPosition();
+            });
+        } else {
+             console.warn("Hamburger or Nav elements not found after header load. Check 'header-user.html'.");
+        }
+    } else {
+        console.error("Header file could not be loaded, skipping hamburger setup.");
+    }
 }
 
-/**
- * ページ全体の共通初期設定（必要に応じて他の機能を追加）
- */
-function setupCommonElements() {
-  initializeHamburgerMenu();
-  // ここに他の共通処理を追加してOK（例：テーマ切り替えなど）
-}
-
-/**
- * ページ読み込み時に共通CSSを適用
- */
-function applyCommonCSS() {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'style.css'; // 全ページ共通のCSSファイル
-  document.head.appendChild(link);
-}
-
-// DOM読み込み後にCSS適用（ヘッダーより先に読み込む）
-document.addEventListener('DOMContentLoaded', () => {
-  applyCommonCSS();
+// DOMContentLoadedイベントで共通処理を実行
+document.addEventListener("DOMContentLoaded", () => {
+    // このファイル内では何も実行せず、呼び出し元ページで setupHeader が実行されることを想定
 });
