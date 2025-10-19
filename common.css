@@ -1039,3 +1039,9 @@ h1 {
     width: 80%;            /* 横幅を画面サイズに応じて調整 */
     max-width: 300px;      /* 最大幅を制限 */
 }
+
+.page-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #1b656f; /* 任意 */
+}
