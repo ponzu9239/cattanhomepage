@@ -6,6 +6,9 @@
 <title>きゃたんのAPEXビンゴゲーム</title>
 <link rel="stylesheet" href="common.css">
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <div id="header-placeholder"></div>
@@ -22,12 +25,12 @@
       <div class="timestamp" id="cardTimestamp"></div>
     </section>
     
-      <input type="text" id="playerName" placeholder="名前を入力">
+    <input type="text" id="playerName" placeholder="名前を入力">
 
-      <div class="buttons">
-        <button id="startStopBtn">抽選開始</button>
-        <button id="shareBtn">ビンゴカードを共有</button>
-      </div>
+    <div class="buttons">
+      <button id="startStopBtn">抽選開始</button>
+      <button id="shareBtn">ビンゴカードを共有</button>
+    </div>
 
   </main>
 
@@ -37,6 +40,21 @@
   <script>
     setupHeader('header-user.html');
 
+    // Firebase 初期化
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+      authDomain: "catiffanygame.firebaseapp.com",
+      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+      projectId: "catiffanygame",
+      storageBucket: "catiffanygame.firebasestorage.app",
+      messagingSenderId: "166871605809",
+      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+      measurementId: "G-ZNGEZZWMTP"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const bingoCardRef = db.ref('bingoCard'); // Realtime DB のパス
+
     const bingoCard = document.getElementById('bingoCard');
     const startStopBtn = document.getElementById('startStopBtn');
     const shareBtn = document.getElementById('shareBtn');
@@ -45,6 +63,7 @@
     const cardTimestamp = document.getElementById('cardTimestamp');
 
     let intervalId = null;
+    let currentNumbers = [];
 
     // 3x3のセルを生成
     function createCells() {
@@ -65,9 +84,9 @@
     // 高速で入れ替える
     function startShuffle() {
         intervalId = setInterval(() => {
-            const nums = shuffleNumbers();
+            currentNumbers = shuffleNumbers();
             bingoCard.querySelectorAll('div').forEach((cell, i) => {
-                cell.textContent = nums[i];
+                cell.textContent = currentNumbers[i];
             });
         }, 50);
     }
@@ -77,10 +96,21 @@
         clearInterval(intervalId);
         intervalId = null;
 
+        // タイトル更新
+        const name = playerNameInput.value.trim();
+        cardTitle.textContent = name ? `${name}のカード` : 'ビンゴカード';
+
         // タイムスタンプ更新
         const now = new Date();
         const formatted = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         cardTimestamp.textContent = formatted;
+
+        // Firebase に保存
+        bingoCardRef.set({
+            numbers: currentNumbers,
+            playerName: name,
+            timestamp: formatted
+        });
     }
 
     // 名前入力でリアルタイムにタイトル更新
