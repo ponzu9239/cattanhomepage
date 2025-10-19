@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <div id="header-placeholder"></div>
+    <header></header>
 
     <main>
         <div class="birthday-image-container">
@@ -72,13 +72,17 @@
             <a href="https://www.tiktok.com/@catiffanygame?_t=ZS-8xKiPhVrRxq&_r=1" class="tiktok-link"><i class="fab fa-tiktok"></i> TikTok</a>
         </section>
     </main>
-
-    <div id="footer-placeholder"></div>
+  <footer></footer>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     
     <script src="common.js"></script>
+      <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      setupHeader("user");
+    });
+  </script>
 
     <script>
         const firebaseConfig = {
