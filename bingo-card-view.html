@@ -3,84 +3,146 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APEXビンゴチャレンジ</title>
+<title>APEXビンゴ受信</title>
 <link rel="stylesheet" href="common.css">
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <div id="header-placeholder"></div>
+<div id="header-placeholder"></div>
 
-  <main>
-    <section class="bingo-card-section">
-      <h2 class="page-title">APEXビンゴチャレンジカード</h2>
+<main>
+  <section class="bingo-card-section">
+    <h2 class="page-title">APEXビンゴ受信カード</h2>
 
-      <div id="bingoCard" class="bingo-card">
-        <!-- 3×3の数字セル -->
-      </div>
+    <div id="bingoCard" class="bingo-card">
+      <canvas id="bingoLineCanvas"></canvas>
+    </div>
 
-      <div class="timestamp" id="cardTimestamp"></div>
-    </section>
-  </main>
+    <div class="timestamp" id="cardTimestamp"></div>
+  </section>
+</main>
 
-  <div id="footer-placeholder"></div>
+<div id="footer-placeholder"></div>
 
-  <script src="common.js"></script>
-  <script>
-    setupHeader('header-user.html');
+<script src="common.js"></script>
+<script>
+setupHeader('header-user.html');
 
-    // Firebase 初期化
-    const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.firebasestorage.app",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
-    };
+// Firebase 初期化
+const firebaseConfig = {
+  apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+  authDomain: "catiffanygame.firebaseapp.com",
+  databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+  projectId: "catiffanygame",
+  storageBucket: "catiffanygame.firebasestorage.app",
+  messagingSenderId: "166871605809",
+  appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+  measurementId: "G-ZNGEZZWMTP"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const bingoCardRef = db.ref('bingoCard');
+const markedNumbersRef = db.ref('markedNumbers');
+const timestampRef = db.ref('timestamp');
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const bingoCardRef = db.ref('bingoCard'); // Realtime DB のパス
+const bingoCard = document.getElementById('bingoCard');
+const cardTimestamp = document.getElementById('cardTimestamp');
+const canvas = document.getElementById('bingoLineCanvas');
+const ctx = canvas.getContext('2d');
 
-    const bingoCard = document.getElementById('bingoCard');
-    const cardTimestamp = document.getElementById('cardTimestamp');
+function createCells() {
+  bingoCard.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('bingo-cell');
+    cell.textContent = '-';
+    bingoCard.appendChild(cell);
+  }
+  bingoCard.appendChild(canvas);
+  resizeCanvas();
+}
 
-    // 3x3のセルを生成
-    function createCells() {
-        bingoCard.innerHTML = '';
-        for (let i = 0; i < 9; i++) {
-            const cell = document.createElement('div');
-            cell.textContent = '-';
-            bingoCard.appendChild(cell);
-        }
-    }
+// 線描画
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
-    // Firebaseのデータをリアルタイムで反映
-// Firebase 初期化は送信側と同じ
-bingoCardRef.on('value', snapshot => {
-  const data = snapshot.val();
-  if (!data) return;
-  const numbers = data.numbers || [];
-  const timestamp = data.timestamp || '';
-  bingoCard.querySelectorAll('div').forEach((cell,i) => {
-    cell.textContent = numbers[i] ?? '-';
+function resizeCanvas() {
+  const rect = bingoCard.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr,dpr);
+}
+
+function drawLines() {
+  const cells = Array.from(bingoCard.querySelectorAll('.bingo-cell'));
+  const marks = cells.map(c => c.classList.contains('highlight'));
+  const lines = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  clearCanvas();
+  lines.forEach(line => {
+    if (line.every(i => marks[i])) drawBingoLine(line);
   });
-  cardTimestamp.textContent = timestamp;
+}
+
+function drawBingoLine(line) {
+  const cells = bingoCard.querySelectorAll('.bingo-cell');
+  const startCell = cells[line[0]].getBoundingClientRect();
+  const endCell = cells[line[2]].getBoundingClientRect();
+  const cardRect = bingoCard.getBoundingClientRect();
+
+  const startX = (startCell.left + startCell.right)/2 - cardRect.left;
+  const startY = (startCell.top + startCell.bottom)/2 - cardRect.top;
+  const endX = (endCell.left + endCell.right)/2 - cardRect.left;
+  const endY = (endCell.top + endCell.bottom)/2 - cardRect.top;
+
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 8;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(endX, endY);
+  ctx.stroke();
+}
+
+// 初期セル作成
+createCells();
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  drawLines();
+});
+
+// Firebase 反映
+bingoCardRef.on('value', snapshot => {
+  const data = snapshot.val() || [];
+  bingoCard.querySelectorAll('.bingo-cell').forEach((cell,i) => {
+    cell.textContent = data[i] ?? '-';
+  });
 });
 
 markedNumbersRef.on('value', snapshot => {
   const markedNumbers = snapshot.val() || [];
-  Array.from(bingoCard.children).forEach(c => c.classList.remove('highlight'));
+  Array.from(bingoCard.querySelectorAll('.bingo-cell')).forEach(c => c.classList.remove('highlight'));
   markedNumbers.forEach(num => {
-    const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === num);
+    const cell = Array.from(bingoCard.querySelectorAll('.bingo-cell')).find(c => Number(c.textContent) === num);
     if (cell) cell.classList.add('highlight');
   });
-  drawLines(); // 線描画
+  drawLines();
 });
-  </script>
+
+timestampRef.on('value', snapshot => {
+  const t = snapshot.val() || '';
+  cardTimestamp.textContent = t;
+});
+</script>
 </body>
 </html>
