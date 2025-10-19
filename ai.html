@@ -56,11 +56,12 @@
       resizeCanvas();
     }
 
-    function resizeCanvas() {
-      const rect = bingoCard.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-    }
+function resizeCanvas() {
+  const rect = bingoCard.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+  checkBingo(); // リサイズ後に既存のハイライトに合わせて線を再描画
+}
 
     function shuffleNumbers() {
       return [...Array(9)].map((_, i) => i + 1).sort(() => Math.random() - 0.5);
