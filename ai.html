@@ -87,32 +87,34 @@ function shuffleNumbers() {
 // 抽選開始（高速で入れ替わる）
 // 入力欄リセットも追加
 function startShuffle() {
-  numberInput.value = ''; // 入力欄リセット
-  markedNumbersRef.set([]); // Firebase上もリセット
   intervalId = setInterval(() => {
     currentNumbers = shuffleNumbers();
-    bingoCard.querySelectorAll('.bingo-cell').forEach((cell,i) => {
+    bingoCard.querySelectorAll('.bingo-cell').forEach((cell, i) => {
       cell.textContent = currentNumbers[i];
       cell.classList.remove('highlight');
     });
+    markedNumbers = [];
     clearCanvas();
-    currentNumbersRef.set(currentNumbers); // 高速番号をリアルタイム送信
-    timestampRef.set(new Date().toISOString());
+    
+    // 抽選中の番号だけ送信
+    currentNumbersRef.set(currentNumbers);
   }, 50);
 }
 
-// 抽選停止
 function stopShuffle() {
   clearInterval(intervalId);
   intervalId = null;
-  bingoCard.querySelectorAll('.bingo-cell').forEach((cell,i) => {
+
+  bingoCard.querySelectorAll('.bingo-cell').forEach((cell, i) => {
     cell.textContent = currentNumbers[i];
   });
+
   const now = new Date();
   const formatted = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   cardTimestamp.textContent = formatted;
 
-  bingoCardRef.set(currentNumbers);  // 抽選後の数字
+  // 抽選後の番号とタイムスタンプを送信
+  bingoCardRef.set(currentNumbers);
   timestampRef.set(formatted);
 }
 
