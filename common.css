@@ -1022,13 +1022,20 @@ h1 {
   --bingo-line-thickness: 5px;
 }
 
-/* ビンゴカード */
 .bingo-card {
   display: grid;
-  grid-template-columns: repeat(3, var(--bingo-cell-size));
-  grid-template-rows: repeat(3, var(--bingo-cell-size));
+  grid-template-columns: repeat(3, 80px);
+  grid-template-rows: repeat(3, 80px);
   gap: 5px;
-  position: relative;
+  position: relative; /* これ重要 */
+}
+
+#bingoLineCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none; /* canvas をクリック無効にする */
+  z-index: 10; /* カードの上に表示 */
 }
 
 /* ビンゴ線 共通 */
@@ -1091,8 +1098,4 @@ h1 {
 .bingo-cell.highlight {
   background-color: #FFA500; /* 明るいオレンジ */
   transition: background 0.2s; /* 光るアニメーション */
-}
-
-#bingoLineCanvas {
-  pointer-events: none; /* canvasにマウス操作をさせない */
 }
