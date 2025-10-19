@@ -12,11 +12,12 @@
 
   <main>
     <section class="bingo-card-section">
-
       <h2 id="cardTitle"></h2>
+
       <div id="bingoCard" class="bingo-card">
         <!-- 3×3の数字セルをJSで生成 -->
       </div>
+
       <div class="timestamp" id="cardTimestamp"></div>
 
       <input type="text" id="playerName" placeholder="名前を入力">
@@ -30,7 +31,11 @@
 
   <div id="footer-placeholder"></div>
 
+  <!-- common.js を読み込む -->
   <script src="common.js"></script>
+  <!-- html2canvas を読み込む -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
   <script>
     setupHeader('header-user.html');
 
@@ -95,28 +100,11 @@
         }
     });
 
-    // 共有ボタン (名前+ビンゴ+タイムスタンプ)
+    // 共有ボタン (html2canvas でそのまま画像化)
     shareBtn.addEventListener('click', async () => {
-        const element = document.createElement('div');
-        element.style.padding = '10px';
-        element.style.backgroundColor = '#fff';
-        element.style.display = 'inline-block';
+        const target = document.querySelector('.bingo-card-section'); // 名前・カード・タイムスタンプを含む要素
 
-        // 名前タイトル
-        const titleClone = cardTitle.cloneNode(true);
-        element.appendChild(titleClone);
-
-        // ビンゴカード
-        const bingoClone = bingoCard.cloneNode(true);
-        element.appendChild(bingoClone);
-
-        // タイムスタンプ
-        const timestampClone = cardTimestamp.cloneNode(true);
-        element.appendChild(timestampClone);
-
-        document.body.appendChild(element);
-
-        html2canvas(element, {backgroundColor: null}).then(canvas => {
+        html2canvas(target, { backgroundColor: null }).then(async (canvas) => {
             canvas.toBlob(async (blob) => {
                 const filesArray = [new File([blob], "bingo-card.png", {type: blob.type})];
                 if (navigator.canShare && navigator.canShare({ files: filesArray })) {
@@ -137,7 +125,6 @@
                     a.click();
                     URL.revokeObjectURL(url);
                 }
-                document.body.removeChild(element);
             });
         });
     });
