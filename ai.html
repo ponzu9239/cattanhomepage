@@ -5,82 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>きゃたんのAPEXビンゴ</title>
 <link rel="stylesheet" href="common.css">
-<style>
-  body {
-    background-color: #97eadb;
-    font-family: 'Arial', sans-serif;
-    text-align: center;
-  }
-
-  .bingo-card {
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    gap: 8px;
-    justify-content: center;
-    margin: 30px auto;
-    position: relative;
-  }
-
-  .bingo-card div {
-    width: 100px;
-    height: 100px;
-    line-height: 100px;
-    font-size: 28px;
-    background-color: white;
-    border-radius: 10px;
-    border: 2px solid #ccc;
-    font-weight: bold;
-    transition: background-color 0.3s, color 0.3s;
-  }
-
-  .marked {
-    background-color: #ffb347 !important; /* 明るいオレンジ */
-    color: white;
-  }
-
-  .bingo-line {
-    position: absolute;
-    background-color: pink;
-    transform-origin: center;
-    z-index: 5;
-    border-radius: 5px;
-  }
-
-  .buttons {
-    margin-top: 15px;
-  }
-
-  #numberInput {
-    margin-top: 10px;
-    padding: 8px 10px;
-    font-size: 18px;
-    width: 180px;
-    text-align: center;
-  }
-
-  button {
-    margin: 5px;
-    padding: 8px 15px;
-    font-size: 18px;
-    cursor: pointer;
-    border-radius: 5px;
-    border: none;
-  }
-
-  #startStopBtn {
-    background-color: #3cb371;
-    color: white;
-  }
-
-  #shareBtn {
-    background-color: #2196f3;
-    color: white;
-  }
-</style>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <main>
@@ -91,7 +15,7 @@
       <div id="bingoCard" class="bingo-card"></div>
       <div class="timestamp" id="cardTimestamp"></div>
     </section>
-    
+
     <input type="text" id="numberInput" placeholder="番号を入力（例: 123）">
 
     <div class="buttons">
@@ -99,6 +23,10 @@
       <button id="shareBtn">ビンゴカードを共有</button>
     </div>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -145,7 +73,7 @@
           cell.textContent = currentNumbers[i];
           cell.classList.remove('marked');
         });
-        removeLines();
+        removeLine();
       }, 50);
     }
 
@@ -163,37 +91,50 @@
       });
     }
 
-    function removeLines() {
-      document.querySelectorAll('.bingo-line').forEach(line => line.remove());
+    function removeLine() {
+      const line = document.querySelector('.bingo-line');
+      if(line) line.remove();
     }
 
-    function checkBingo(marked) {
+    function checkBingo(indices) {
       const lines = [
-        [0,1,2], [3,4,5], [6,7,8], // 横
-        [0,3,6], [1,4,7], [2,5,8], // 縦
-        [0,4,8], [2,4,6]           // 斜め
+        [0,1,2],[3,4,5],[6,7,8], // 横
+        [0,3,6],[1,4,7],[2,5,8], // 縦
+        [0,4,8],[2,4,6]           // 斜め
       ];
-      return lines.filter(line => line.every(i => marked.includes(i)));
+      return lines.filter(line => line.every(i => indices.includes(i)));
     }
 
-    function drawLine(type, index) {
+    function drawLine(lineType) {
+      removeLine();
       const line = document.createElement('div');
       line.classList.add('bingo-line');
-      const size = 320; // カード全体を覆う長さ
-      const thickness = 12;
-
-      line.style.width = type === 'diag' ? `${Math.sqrt(2)*size}px` : `${size}px`;
-      line.style.height = `${thickness}px`;
-      line.style.backgroundColor = 'pink';
       line.style.position = 'absolute';
-      line.style.top = '50%';
-      line.style.left = '50%';
-      line.style.transformOrigin = 'center center';
+      line.style.backgroundColor = 'pink';
+      line.style.zIndex = 10;
 
-      switch (type) {
-        case 'row': line.style.transform = `translate(-50%, ${-100 + index * 108}px)`; break;
-        case 'col': line.style.transform = `translate(-50%, -50%) rotate(90deg) translate(0, ${-100 + index * 108}px)`; break;
-        case 'diag': line.style.transform = index === 0 ? 'translate(-50%, -50%) rotate(45deg)' : 'translate(-50%, -50%) rotate(-45deg)'; break;
+      // 横
+      if(lineType.type === 'row') {
+        line.style.height = '12px';
+        line.style.width = `${bingoCard.offsetWidth + 10}px`;
+        line.style.top = `${(lineType.index * 100) + 50}px`;
+        line.style.left = `0px`;
+      }
+      // 縦
+      else if(lineType.type === 'col') {
+        line.style.width = '12px';
+        line.style.height = `${bingoCard.offsetHeight + 10}px`;
+        line.style.top = `0px`;
+        line.style.left = `${(lineType.index * 100) + 50}px`;
+      }
+      // 斜め
+      else if(lineType.type === 'diag') {
+        line.style.width = '12px';
+        line.style.height = `${Math.sqrt(2)*bingoCard.offsetWidth}px`;
+        line.style.top = '0px';
+        line.style.left = '50%';
+        line.style.transform = lineType.index === 0 ? 'rotate(45deg) translateX(-50%)' : 'rotate(-45deg) translateX(-50%)';
+        line.style.transformOrigin = 'top center';
       }
 
       bingoCard.appendChild(line);
@@ -202,28 +143,26 @@
     numberInput.addEventListener('input', () => {
       const inputNumbers = numberInput.value.split('').map(n => parseInt(n)).filter(n => !isNaN(n));
       bingoCard.querySelectorAll('div').forEach((cell, i) => {
-        if (inputNumbers.includes(currentNumbers[i])) {
-          cell.classList.add('marked');
+        if(inputNumbers.includes(currentNumbers[i])) {
+          cell.classList.add('marked'); // 明るいオレンジにする
         } else {
           cell.classList.remove('marked');
         }
       });
 
-      removeLines();
-      const markedIndices = currentNumbers
-        .map((num, idx) => inputNumbers.includes(num) ? idx : null)
-        .filter(idx => idx !== null);
+      const markedIndices = currentNumbers.map((num, idx) => inputNumbers.includes(num) ? idx : null).filter(idx => idx!==null);
       const bingos = checkBingo(markedIndices);
 
       bingos.forEach(line => {
-        if ([0,1,2].includes(line[0])) drawLine('row', Math.floor(line[0]/3));
-        else if ([0,3,6].includes(line[0])) drawLine('col', line[0]%3);
-        else drawLine('diag', line[0] === 0 ? 0 : 1);
+        // 横
+        if([0,3,6].includes(line[0])) drawLine({type:'col', index:line[0]%3});
+        else if([0,1,2].includes(line[0])) drawLine({type:'row', index:Math.floor(line[0]/3)});
+        else drawLine({type:'diag', index: line[0]===0 || line[0]===4?0:1});
       });
     });
 
     startStopBtn.addEventListener('click', () => {
-      if (intervalId) {
+      if(intervalId) {
         stopShuffle();
         startStopBtn.textContent = '抽選開始';
       } else {
