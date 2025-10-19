@@ -935,3 +935,73 @@ h1 {
   display: block;
   font-size: clamp(14px, 3vw, 18px);
 }
+
+/* --- ビンゴカード用 --- */
+.bingo-card-section {
+    max-width: 320px;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.bingo-card {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin: 1rem 0;
+}
+
+.bingo-card div {
+    background-color: #d4f0f4;
+    border: 2px solid var(--color-primary);
+    border-radius: 8px;
+    font-size: 2rem;
+    font-weight: bold;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 0.5rem;
+}
+
+.buttons button {
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: var(--color-accent);
+    color: var(--color-text-light);
+    transition: transform 0.1s, background-color 0.2s;
+}
+
+.buttons button:hover {
+    background-color: #369482;
+    transform: scale(1.05);
+}
+
+#playerName {
+    padding: 6px 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--color-primary);
+    width: 90%;
+    max-width: 250px;
+}
+
+#cardTitle {
+    margin-top: 10px;
+    color: var(--color-accent);
+}
+.timestamp {
+    font-size: 0.7rem;
+    color: #999;
+    text-align: right;
+    margin-top: 4px;
+}
