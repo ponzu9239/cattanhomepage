@@ -912,6 +912,7 @@ h1 {
     max-width: 320px;
     margin: 2rem auto;
     text-align: center;
+    position: relative;
 }
 
 .bingo-card {
@@ -962,11 +963,13 @@ h1 {
     color: var(--color-accent);
 }
 .timestamp {
-    font-size: 0.7rem;
-    color: #999;
-    text-align: right;
-    margin-top: 4px;
-}
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 14px;
+  color: #555;
+  margin: 5px;
+
 
 @keyframes flash-cell {
     0% { transform: scale(1); background-color: #d4f0f4; }
