@@ -19,6 +19,9 @@
       <canvas id="bingoLineCanvas"></canvas>
     </div>
 
+    <!-- 抽選中番号表示 -->
+    <div id="currentNumbersDisplay" style="margin: 10px 0; font-weight:bold;"></div>
+
     <div class="timestamp" id="cardTimestamp"></div>
   </section>
 </main>
@@ -43,15 +46,18 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const bingoCardRef = db.ref('bingoCard');        // 抽選後の番号
-const currentNumbersRef = db.ref('currentNumbers'); // 抽選中の高速入れ替わる番号
-const markedNumbersRef = db.ref('markedNumbers');   // 入力された番号
-const timestampRef = db.ref('timestamp');           // タイムスタンプ（抽選停止時のみ）
+const bingoCardRef = db.ref('bingoCard');        
+const currentNumbersRef = db.ref('currentNumbers'); 
+const markedNumbersRef = db.ref('markedNumbers');   
+const timestampRef = db.ref('timestamp');           
 
 const bingoCard = document.getElementById('bingoCard');
 const cardTimestamp = document.getElementById('cardTimestamp');
+const currentNumbersDisplay = document.getElementById('currentNumbersDisplay');
 const canvas = document.getElementById('bingoLineCanvas');
 const ctx = canvas.getContext('2d');
+
+let isShuffling = false;
 
 function createCells() {
   bingoCard.innerHTML = '';
@@ -121,51 +127,43 @@ window.addEventListener('resize', () => {
   drawLines();
 });
 
-// 抽選中もカードに数字を高速反映
-let isShuffling = false;
-
-// 抽選中の番号受信
-// 抽選中の番号受信
+// 抽選中番号受信
 currentNumbersRef.on('value', snapshot => {
   const currentNumbers = snapshot.val() || [];
   const cells = bingoCard.querySelectorAll('.bingo-cell');
 
   // カードに数字を反映
-  cells.forEach((cell, i) => {
+  cells.forEach((cell,i) => {
     cell.textContent = currentNumbers[i] ?? '-';
   });
 
-  // 抽選中かどうか判定
+  // 抽選中かどうか
   isShuffling = currentNumbers.length > 0;
 
   // 抽選中は線を消す
-  if (isShuffling) clearCanvas();
+  if(isShuffling) clearCanvas();
 
-  // 高速番号も下に表示
   currentNumbersDisplay.textContent = currentNumbers.length ? "抽選中: " + currentNumbers.join(", ") : "";
 });
-// 入力された番号受信
+
+// 入力番号受信
 markedNumbersRef.on('value', snapshot => {
   const markedNumbers = snapshot.val() || [];
 
   // ハイライトリセット
   Array.from(bingoCard.querySelectorAll('.bingo-cell')).forEach(c => c.classList.remove('highlight'));
   markedNumbers.forEach(num => {
-    const cell = Array.from(bingoCard.querySelectorAll('.bingo-cell'))
-                       .find(c => Number(c.textContent) === num);
-    if (cell) cell.classList.add('highlight');
+    const cell = Array.from(bingoCard.querySelectorAll('.bingo-cell')).find(c => Number(c.textContent) === num);
+    if(cell) cell.classList.add('highlight');
   });
 
-  // 抽選中は線を描かない
-  if (!isShuffling) {
-    drawLines();
-  }
+  // 抽選中でなければ線を描く
+  if(!isShuffling) drawLines();
 });
 
 // タイムスタンプは抽選後のみ
 timestampRef.on('value', snapshot => {
-  const t = snapshot.val() || '';
-  cardTimestamp.textContent = t;
+  cardTimestamp.textContent = snapshot.val() || '';
 });
 </script>
 </body>
