@@ -4,18 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>3×3 ビンゴカード作成</title>
-  <link rel="icon" href="IMG_4666.png" type="image/png" />
-  <link rel="stylesheet" href="common.css" />
+
+  <link rel="icon" href="IMG_4666.png" type="image/png">
+  <link rel="stylesheet" href="common.css">
+
   <style>
-    /* === ページ固有スタイル === */
-    #cardGenerator {
-      max-width: 400px;
-      margin: 2rem auto;
-      text-align: center;
+    /* ===== ページ固有スタイル ===== */
+    main {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 2rem 1rem;
+    }
+
+    #bingoCardContainer {
       background: #fff;
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
     }
 
     #bingoCard {
@@ -25,32 +35,32 @@
       margin-top: 1rem;
     }
 
-    .cell {
+    .bingo-cell {
       width: 100%;
       aspect-ratio: 1 / 1;
-      background: #f5f5f5;
-      border: 2px solid #5aa2aa;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       font-size: 2rem;
       font-weight: bold;
       color: #1b656f;
+      border: 2px solid #5aa2aa;
       border-radius: 8px;
+      background: #f5f5f5;
       transition: 0.2s;
     }
 
-    .cell:hover {
+    .bingo-cell:hover {
       background: #dff4f5;
       transform: scale(1.05);
     }
 
     #generateButton {
       margin-top: 1rem;
-      padding: 10px 20px;
       background: #5aa2aa;
       color: #fff;
       border: none;
+      padding: 0.6rem 1.2rem;
       border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
@@ -58,62 +68,63 @@
     }
 
     #generateButton:hover {
-      background: #479097;
+      background: #3f8e96;
     }
   </style>
 </head>
 
 <body>
-  <div id="header-placeholder"></div>
+  <header></header>
+  <nav id="nav"></nav>
 
   <main>
-    <section id="cardGenerator">
-      <h3>🎲 3×3 ビンゴカードを作ろう！</h3>
-      <p style="color:#5aa2aa; font-size:1rem;">1〜9の数字がランダムに配置されます。</p>
+    <section id="bingoCardContainer">
+      <h3>🎲 3×3 ビンゴカード作成</h3>
+      <p style="color:#5aa2aa; font-size:1rem;">1〜9 の数字をランダムに並べます！</p>
+      
       <div id="bingoCard"></div>
       <button id="generateButton">新しいカードを作成</button>
     </section>
   </main>
 
-  <div id="footer-placeholder"></div>
+  <footer></footer>
 
   <script src="common.js"></script>
   <script>
     // =============================================================
-    // 🎯 3x3 ビンゴカード作成ロジック
+    // 🎯 3×3 ビンゴカード生成ロジック
     // =============================================================
     const cardContainer = document.getElementById("bingoCard");
     const generateButton = document.getElementById("generateButton");
 
-    // 配列をシャッフルする関数
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
+    function renderCard(numbers) {
+      cardContainer.innerHTML = numbers.map(num =>
+        `<div class="bingo-cell">${num}</div>`
+      ).join('');
     }
 
-    // カード生成関数
     function generateCard() {
-      const numbers = shuffle([...Array(9)].map((_, i) => i + 1)); // 1〜9
-      cardContainer.innerHTML = "";
-
-      numbers.forEach(num => {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        cell.textContent = num;
-        cardContainer.appendChild(cell);
-      });
+      const numbers = generateRandomNumbers(9, 9); // 1〜9を9個
+      renderCard(numbers);
+      
+      // URLパラメータでシェアしたい場合
+      const cardParam = numbers.join('');
+      history.replaceState(null, '', `?card=${cardParam}`);
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupCommonElements(); // common.jsで共通要素セット
+
+      // URLからカードを読み込む（?card=付きなら再現）
+      const existingCard = loadCardFromUrl();
+      if (existingCard) {
+        renderCard(existingCard);
+      } else {
+        generateCard();
+      }
+    });
 
     generateButton.addEventListener("click", generateCard);
-
-    // 初回生成
-    document.addEventListener("DOMContentLoaded", () => {
-      setupHeader('header.html'); // common.jsでヘッダーを挿入
-      generateCard();
-    });
   </script>
 </body>
 </html>
