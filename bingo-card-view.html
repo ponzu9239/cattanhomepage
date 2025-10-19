@@ -132,21 +132,29 @@ bingoCardRef.on('value', snapshot => {
   });
 });
 
+// 現在の数字（抽選中・抽選後）を反映
+currentNumbersRef.on('value', snapshot => {
+  const numbers = snapshot.val() || [];
+  const cells = bingoCard.querySelectorAll('.bingo-cell');
+  cells.forEach((cell, i) => {
+    cell.textContent = numbers[i] ?? '-';
+    cell.classList.remove('highlight'); // 入力反映前にリセット
+  });
+});
+
+// 入力済み番号を反映
 markedNumbersRef.on('value', snapshot => {
   const markedNumbers = snapshot.val() || [];
-  Array.from(bingoCard.querySelectorAll('.bingo-cell')).forEach(c => c.classList.remove('highlight'));
+  const cells = bingoCard.querySelectorAll('.bingo-cell');
+  cells.forEach(c => c.classList.remove('highlight'));
   markedNumbers.forEach(num => {
-    const cell = Array.from(bingoCard.querySelectorAll('.bingo-cell')).find(c => Number(c.textContent) === num);
-    if (cell) cell.classList.add('highlight');
+    const cell = Array.from(cells).find(c => Number(c.textContent) === num);
+    if(cell) cell.classList.add('highlight');
   });
   drawLines();
 });
 
-currentNumbersRef.on('value', snapshot => {
-  const currentNumbers = snapshot.val() || [];
-  currentNumbersDisplay.textContent = "抽選中: " + currentNumbers.join(", ");
-});
-
+// 抽選後のタイムスタンプ
 timestampRef.on('value', snapshot => {
   const t = snapshot.val() || '';
   cardTimestamp.textContent = t;
