@@ -13,14 +13,13 @@
   <main>
     <section class="bingo-card-section">
 
+      <h2 id="cardTitle"></h2>
       <div id="bingoCard" class="bingo-card">
         <!-- 3×3の数字セルをJSで生成 -->
       </div>
+      <div class="timestamp" id="cardTimestamp"></div>
 
       <input type="text" id="playerName" placeholder="名前を入力">
-      <h2 id="cardTitle"></h2>
-
-      <div class="timestamp" id="cardTimestamp"></div>
 
       <div class="buttons">
         <button id="startStopBtn">抽選開始</button>
@@ -96,10 +95,27 @@
         }
     });
 
-    // 共有ボタン (html2canvas使用)
+    // 共有ボタン (名前+ビンゴ+タイムスタンプ)
     shareBtn.addEventListener('click', async () => {
-        // 名前入力欄、ビンゴ、タイムスタンプを含む親要素をキャプチャ
-        const element = document.querySelector('.bingo-card-section');
+        const element = document.createElement('div');
+        element.style.padding = '10px';
+        element.style.backgroundColor = '#fff';
+        element.style.display = 'inline-block';
+
+        // 名前タイトル
+        const titleClone = cardTitle.cloneNode(true);
+        element.appendChild(titleClone);
+
+        // ビンゴカード
+        const bingoClone = bingoCard.cloneNode(true);
+        element.appendChild(bingoClone);
+
+        // タイムスタンプ
+        const timestampClone = cardTimestamp.cloneNode(true);
+        element.appendChild(timestampClone);
+
+        document.body.appendChild(element);
+
         html2canvas(element, {backgroundColor: null}).then(canvas => {
             canvas.toBlob(async (blob) => {
                 const filesArray = [new File([blob], "bingo-card.png", {type: blob.type})];
@@ -121,6 +137,7 @@
                     a.click();
                     URL.revokeObjectURL(url);
                 }
+                document.body.removeChild(element);
             });
         });
     });
