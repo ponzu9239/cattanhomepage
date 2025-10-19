@@ -114,27 +114,32 @@
       });
     }
 
-    function drawBingoLine(line) {
-      const rect = bingoCard.getBoundingClientRect();
-      const cellWidth = rect.width / 3;
-      const cellHeight = rect.height / 3;
+function drawBingoLine(line) {
+  const cells = bingoCard.querySelectorAll('.bingo-cell');
 
-      const startCell = line[0];
-      const endCell = line[2];
+  // 始点と終点のセル
+  const startCell = cells[line[0]].getBoundingClientRect();
+  const endCell = cells[line[2]].getBoundingClientRect();
+  const cardRect = bingoCard.getBoundingClientRect();
 
-      const startX = (startCell % 3 + 0.5) * cellWidth;
-      const startY = (Math.floor(startCell / 3) + 0.5) * cellHeight;
-      const endX = (endCell % 3 + 0.5) * cellWidth;
-      const endY = (Math.floor(endCell / 3) + 0.5) * cellHeight;
+  // canvas 内座標に変換
+  const dpr = window.devicePixelRatio || 1;
+  const offsetX = cardRect.left;
+  const offsetY = cardRect.top;
 
-      ctx.strokeStyle = 'red';
-      ctx.lineWidth = 8;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(startX, startY);
-      ctx.lineTo(endX, endY);
-      ctx.stroke();
-    }
+  const startX = (startCell.left + startCell.right)/2 - offsetX;
+  const startY = (startCell.top + startCell.bottom)/2 - offsetY;
+  const endX = (endCell.left + endCell.right)/2 - offsetX;
+  const endY = (endCell.top + endCell.bottom)/2 - offsetY;
+
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 8;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(endX, endY);
+  ctx.stroke();
+}
 
     numberInput.addEventListener('input', () => {
       const input = numberInput.value.trim();
