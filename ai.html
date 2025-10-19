@@ -37,6 +37,23 @@
   <script>
       setupHeader('header-user.html');
   
+  // Firebase 初期化
+const firebaseConfig = {
+  apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
+  authDomain: "catiffanygame.firebaseapp.com",
+  databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
+  projectId: "catiffanygame",
+  storageBucket: "catiffanygame.firebasestorage.app",
+  messagingSenderId: "166871605809",
+  appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
+  measurementId: "G-ZNGEZZWMTP"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const bingoCardRef = db.ref('bingoCard');       // カード番号
+const markedNumbersRef = db.ref('markedNumbers'); // 入力された番号
+
     const bingoCard = document.getElementById('bingoCard');
     const startStopBtn = document.getElementById('startStopBtn');
     const shareBtn = document.getElementById('shareBtn');
@@ -197,6 +214,87 @@ function drawBingoLine(line) {
       resizeCanvas();
       checkBingo();
     });
+    
+    const bingoCardRef = db.ref('bingoCard');       // カード番号
+const markedNumbersRef = db.ref('markedNumbers'); // 入力された番号
+
+let currentNumbers = [];
+let markedNumbers = [];
+let intervalId = null;
+
+// 3x3セル生成
+function createCells() {
+  bingoCard.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('bingo-cell');
+    cell.textContent = '';
+    bingoCard.appendChild(cell);
+  }
+}
+
+// 高速シャッフル中
+function startShuffle() {
+  intervalId = setInterval(() => {
+    currentNumbers = shuffleNumbers();
+    bingoCard.querySelectorAll('.bingo-cell').forEach((cell, i) => {
+      cell.textContent = currentNumbers[i];
+      cell.classList.remove('highlight');
+    });
+    markedNumbers = [];
+    clearCanvas();
+
+    // 抽選中番号を Firebase に送信
+    bingoCardRef.update({
+      currentNumbers: currentNumbers,
+      finalNumbers: null,
+      timestamp: new Date().toLocaleString()
+    });
+    markedNumbersRef.set(markedNumbers);
+  }, 50);
+}
+
+// 抽選停止
+function stopShuffle() {
+  clearInterval(intervalId);
+  intervalId = null;
+
+  const finalNumbers = [...currentNumbers];
+  const timestamp = new Date().toLocaleString();
+
+  cardTimestamp.textContent = timestamp;
+
+  // 確定番号を Firebase に送信
+  bingoCardRef.set({
+    currentNumbers: null,
+    finalNumbers: finalNumbers,
+    timestamp: timestamp
+  });
+  markedNumbersRef.set(markedNumbers);
+}
+
+// 入力番号のリアルタイム送信
+numberInput.addEventListener('input', () => {
+  const input = numberInput.value.trim();
+  if (!input) return;
+
+  Array.from(bingoCard.querySelectorAll('.bingo-cell')).forEach(cell => cell.classList.remove('highlight'));
+  markedNumbers = [];
+
+  for (const char of input) {
+    const num = Number(char);
+    if (!isNaN(num) && currentNumbers.includes(num)) {
+      const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === num);
+      if (cell && !cell.classList.contains('highlight')) {
+        cell.classList.add('highlight');
+        markedNumbers.push(num);
+      }
+    }
+  }
+
+  // Firebase に送信
+  markedNumbersRef.set(markedNumbers);
+});
   </script>
 
 </body>
