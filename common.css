@@ -1,4 +1,4 @@
-/* common.css: 全ページ共通スタイル (全機能統合版) */
+　/* common.css: 全ページ共通スタイル (全機能統合版) */
 
 /* ボックスモデルの統一 */
 * {
@@ -28,7 +28,7 @@
     --color-team-b-bg: #fff1f5;
     --color-team-b-border: #ffb6c1;
     --color-pair-bg: #eaf9f8;
-    --header-height: 75px; /* (Team Makerの独自変数。common.cssのヘッダーとは異なる) */
+    --header-height: 75px; 
 }
 
 
@@ -368,10 +368,7 @@ section h3 {
 
 
 /* --- 6. レスポンシブ対応の番号ボード --- */
-/* ★修正: 3x3ビンゴカードのために、.bingo-boardと#numberBoardのスタイルを分離しないことで3x3を優先★ */
-/* ※ただし、以前の5x5の管理ボードではレイアウトが崩れる可能性があるため、
-     ビンゴカード専用ページ(.bingo-board)に3x3を強制するCSSを追加している前提です。
-     ここでは、最後の要望の3x3に合わせて幅を調整します。 */
+/* (3x3カード、5x5/75番号管理ボード両対応のためのスタイル) */
 #numberBoard, .bingo-board {
     display: flex;
     flex-wrap: wrap; 
@@ -383,11 +380,11 @@ section h3 {
 }
 
 .bingo-cell {
-    background-color: #fff; /* 5x5、3x3のデフォルトを白に戻します */
+    background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 3px; 
     
-    /* ★修正: 3x3ボードに対応するため33.33%弱に設定★ */
+    /* 3x3ボードの標準設定 (33.33%弱) */
     flex-basis: calc(33.333% - 1.4px); 
     height: 0; 
     padding-bottom: calc(33.333% - 1.4px);
@@ -401,19 +398,32 @@ section h3 {
     min-height: 15px;
     transition: background-color 0.3s, color 0.3s; 
 }
+
+/* 5x5ボード (bingo.htmlの#numberBoard) の設定を上書き */
+#numberBoard .bingo-cell {
+    /* 10xNのレイアウトで75マスを表現するため10%弱に設定 */
+    flex-basis: calc(10% - 1.8px); 
+    padding-bottom: calc(10% - 1.8px);
+}
+
 .bingo-cell::before {
     content: attr(data-content); 
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 8vw; /* 3x3に合わせて調整 */
+    /* 3x3ボードの文字サイズ */
+    font-size: 8vw; 
 }
 
 /* PCなど画面幅が広い場合に文字サイズを固定する */
 @media (min-width: 800px) {
     .bingo-cell::before {
-        font-size: 2rem; /* 3x3に合わせて調整 */
+        font-size: 2rem; 
+    }
+    /* 5x5ボードは小さく固定 */
+    #numberBoard .bingo-cell::before {
+        font-size: 1.1rem; 
     }
 }
 
@@ -428,7 +438,7 @@ section h3 {
 }
 
 
-/* 強制改行要素 */
+/* 強制改行要素 (5x5ボード用) */
 .break {
     flex-basis: 100%;
     height: 0;
@@ -920,4 +930,28 @@ h1 {
 .bingo-banner span {
   display: block;
   font-size: clamp(14px, 3vw, 18px);
+}
+
+/* ------------------------------------------------ */
+/* ★ 10. 共有ボタンのスタイル (bingo_card.html用) ★ */
+/* ------------------------------------------------ */
+
+/* 画像共有ボタン (最も目立つ色) */
+#shareButtonImage {
+    background-color: #1bb0c9; /* 水色系 */
+    color: white;
+}
+
+#shareButtonImage:hover {
+    background-color: #1798ac;
+}
+
+/* URL共有ボタン (画像より控えめな色) */
+#shareButtonUrl {
+    background-color: #5aa2aa; /* 再生成ボタンに近い色 */
+    color: white;
+}
+
+#shareButtonUrl:hover {
+    background-color: #4a8a92;
 }
