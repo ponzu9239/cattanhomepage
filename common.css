@@ -1044,4 +1044,12 @@ h1 {
   text-align: center;
   margin-bottom: 20px;
   color: #1b656f; /* 任意 */
+  
+  /* 画面幅に応じてフォントサイズを変化させる */
+  font-size: clamp(24px, 5vw, 48px);
+
+  /* 改行やはみ出しを防ぐ */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
