@@ -5,26 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>きゃたんのAPEXビンゴ</title>
 <link rel="stylesheet" href="common.css">
+<style>
+  body {
+    background-color: #97eadb;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+  }
+
+  .bingo-card {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 8px;
+    justify-content: center;
+    margin: 30px auto;
+    position: relative;
+  }
+
+  .bingo-card div {
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    font-size: 28px;
+    background-color: white;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .marked {
+    background-color: #ffb347 !important; /* 明るいオレンジ */
+    color: white;
+  }
+
+  .bingo-line {
+    position: absolute;
+    background-color: pink;
+    transform-origin: center;
+    z-index: 5;
+    border-radius: 5px;
+  }
+
+  .buttons {
+    margin-top: 15px;
+  }
+
+  #numberInput {
+    margin-top: 10px;
+    padding: 8px 10px;
+    font-size: 18px;
+    width: 180px;
+    text-align: center;
+  }
+
+  button {
+    margin: 5px;
+    padding: 8px 15px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+  }
+
+  #startStopBtn {
+    background-color: #3cb371;
+    color: white;
+  }
+
+  #shareBtn {
+    background-color: #2196f3;
+    color: white;
+  }
+</style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <div id="header-placeholder"></div>
-
   <main>
     <section class="bingo-card-section">
       <h1 class="page-title">APEXビンゴ 🎯</h1>
       <h2 id="cardTitle">ビンゴカード</h2>
 
       <div id="bingoCard" class="bingo-card"></div>
-
       <div class="timestamp" id="cardTimestamp"></div>
     </section>
-
-    <!-- ★ 名前欄を番号入力欄に変更 -->
-    <input type="text" id="playerName" placeholder="番号を入力（例: 123）">
+    
+    <input type="text" id="numberInput" placeholder="番号を入力（例: 123）">
 
     <div class="buttons">
       <button id="startStopBtn">抽選開始</button>
@@ -32,13 +100,7 @@
     </div>
   </main>
 
-  <div id="footer-placeholder"></div>
-
-  <script src="common.js"></script>
   <script>
-    setupHeader('header-user.html');
-
-    // Firebase 初期化
     const firebaseConfig = {
       apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
       authDomain: "catiffanygame.firebaseapp.com",
@@ -56,60 +118,110 @@
     const bingoCard = document.getElementById('bingoCard');
     const startStopBtn = document.getElementById('startStopBtn');
     const shareBtn = document.getElementById('shareBtn');
-    const playerNameInput = document.getElementById('playerName');
+    const numberInput = document.getElementById('numberInput');
     const cardTitle = document.getElementById('cardTitle');
     const cardTimestamp = document.getElementById('cardTimestamp');
 
     let intervalId = null;
     let currentNumbers = [];
 
-    // 3x3のセル生成
     function createCells() {
       bingoCard.innerHTML = '';
       for (let i = 0; i < 9; i++) {
         const cell = document.createElement('div');
-        cell.textContent = '';
         bingoCard.appendChild(cell);
       }
     }
 
-    // ランダム数字
     function shuffleNumbers() {
       const numbers = [...Array(9)].map((_, i) => i + 1);
       return numbers.sort(() => Math.random() - 0.5);
     }
 
-    // 高速入れ替え
     function startShuffle() {
       intervalId = setInterval(() => {
         currentNumbers = shuffleNumbers();
         bingoCard.querySelectorAll('div').forEach((cell, i) => {
           cell.textContent = currentNumbers[i];
+          cell.classList.remove('marked');
         });
+        removeLines();
       }, 50);
     }
 
-    // 停止
     function stopShuffle() {
       clearInterval(intervalId);
       intervalId = null;
 
-      // タイトル更新
-      cardTitle.textContent = 'ビンゴカード';
-
-      // タイムスタンプ更新
       const now = new Date();
       const formatted = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
       cardTimestamp.textContent = formatted;
 
-      // Firebase に保存
       bingoCardRef.set({
         numbers: currentNumbers,
         timestamp: formatted
       });
     }
 
-    // 開始/停止ボタン
+    function removeLines() {
+      document.querySelectorAll('.bingo-line').forEach(line => line.remove());
+    }
+
+    function checkBingo(marked) {
+      const lines = [
+        [0,1,2], [3,4,5], [6,7,8], // 横
+        [0,3,6], [1,4,7], [2,5,8], // 縦
+        [0,4,8], [2,4,6]           // 斜め
+      ];
+      return lines.filter(line => line.every(i => marked.includes(i)));
+    }
+
+    function drawLine(type, index) {
+      const line = document.createElement('div');
+      line.classList.add('bingo-line');
+      const size = 320; // カード全体を覆う長さ
+      const thickness = 12;
+
+      line.style.width = type === 'diag' ? `${Math.sqrt(2)*size}px` : `${size}px`;
+      line.style.height = `${thickness}px`;
+      line.style.backgroundColor = 'pink';
+      line.style.position = 'absolute';
+      line.style.top = '50%';
+      line.style.left = '50%';
+      line.style.transformOrigin = 'center center';
+
+      switch (type) {
+        case 'row': line.style.transform = `translate(-50%, ${-100 + index * 108}px)`; break;
+        case 'col': line.style.transform = `translate(-50%, -50%) rotate(90deg) translate(0, ${-100 + index * 108}px)`; break;
+        case 'diag': line.style.transform = index === 0 ? 'translate(-50%, -50%) rotate(45deg)' : 'translate(-50%, -50%) rotate(-45deg)'; break;
+      }
+
+      bingoCard.appendChild(line);
+    }
+
+    numberInput.addEventListener('input', () => {
+      const inputNumbers = numberInput.value.split('').map(n => parseInt(n)).filter(n => !isNaN(n));
+      bingoCard.querySelectorAll('div').forEach((cell, i) => {
+        if (inputNumbers.includes(currentNumbers[i])) {
+          cell.classList.add('marked');
+        } else {
+          cell.classList.remove('marked');
+        }
+      });
+
+      removeLines();
+      const markedIndices = currentNumbers
+        .map((num, idx) => inputNumbers.includes(num) ? idx : null)
+        .filter(idx => idx !== null);
+      const bingos = checkBingo(markedIndices);
+
+      bingos.forEach(line => {
+        if ([0,1,2].includes(line[0])) drawLine('row', Math.floor(line[0]/3));
+        else if ([0,3,6].includes(line[0])) drawLine('col', line[0]%3);
+        else drawLine('diag', line[0] === 0 ? 0 : 1);
+      });
+    });
+
     startStopBtn.addEventListener('click', () => {
       if (intervalId) {
         stopShuffle();
@@ -120,22 +232,17 @@
       }
     });
 
-    // 共有ボタン
     shareBtn.addEventListener('click', async () => {
       const element = document.querySelector('.bingo-card-section');
       html2canvas(element).then(canvas => {
         canvas.toBlob(async (blob) => {
           const filesArray = [new File([blob], "bingo-card.png", {type: blob.type})];
           if (navigator.canShare && navigator.canShare({ files: filesArray })) {
-            try {
-              await navigator.share({
-                files: filesArray,
-                title: cardTitle.textContent,
-                text: 'ビンゴカードを共有します'
-              });
-            } catch (err) {
-              alert('共有に失敗しました: ' + err);
-            }
+            await navigator.share({
+              files: filesArray,
+              title: cardTitle.textContent,
+              text: 'ビンゴカードを共有します'
+            });
           } else {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -148,67 +255,6 @@
       });
     });
 
-    // ===== 番号入力で色付け + ビンゴ線 =====
-    playerNameInput.addEventListener("input", () => {
-      const input = playerNameInput.value.replace(/[^0-9]/g, "");
-      highlightCells(input);
-    });
-
-    function highlightCells(numbers) {
-      const cells = bingoCard.querySelectorAll("div");
-      cells.forEach(cell => cell.classList.remove("highlight"));
-
-      const nums = numbers.split("").map(n => parseInt(n, 10));
-      nums.forEach(num => {
-        const index = currentNumbers.indexOf(num);
-        if (index !== -1) {
-          cells[index].classList.add("highlight");
-        }
-      });
-
-      drawBingoLineIfNeeded();
-    }
-
-    function drawBingoLineIfNeeded() {
-      document.querySelectorAll(".bingo-line").forEach(line => line.remove());
-      const cells = bingoCard.querySelectorAll("div");
-      const grid = currentNumbers.map((_, i) => cells[i].classList.contains("highlight"));
-      const lines = [
-        [0,1,2], [3,4,5], [6,7,8],
-        [0,3,6], [1,4,7], [2,5,8],
-        [0,4,8], [2,4,6]
-      ];
-
-      for (const line of lines) {
-        if (line.every(i => grid[i])) {
-          const bingoLine = document.createElement("div");
-          bingoLine.classList.add("bingo-line");
-          bingoCard.appendChild(bingoLine);
-
-          const index = lines.indexOf(line);
-          if (index < 3) { // 横
-            bingoLine.style.top = `${(index + 0.5) * 33.33}%`;
-            bingoLine.style.left = "50%";
-            bingoLine.style.transform = "translate(-50%, -50%) rotate(0deg)";
-          } else if (index < 6) { // 縦
-            bingoLine.style.left = `${(index - 3 + 0.5) * 33.33}%`;
-            bingoLine.style.top = "50%";
-            bingoLine.style.transform = "translate(-50%, -50%) rotate(90deg)";
-          } else if (index === 6) { // 斜め ↘
-            bingoLine.style.top = "50%";
-            bingoLine.style.left = "50%";
-            bingoLine.style.transform = "translate(-50%, -50%) rotate(45deg)";
-          } else { // 斜め ↙
-            bingoLine.style.top = "50%";
-            bingoLine.style.left = "50%";
-            bingoLine.style.transform = "translate(-50%, -50%) rotate(-45deg)";
-          }
-          break;
-        }
-      }
-    }
-
-    // 初期化
     createCells();
   </script>
 </body>
