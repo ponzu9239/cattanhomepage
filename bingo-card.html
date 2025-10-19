@@ -1,130 +1,37 @@
-<!DOCTYPE html>
+　<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3×3 ビンゴカード作成</title>
-
-  <link rel="icon" href="IMG_4666.png" type="image/png">
-  <link rel="stylesheet" href="common.css">
-
-  <style>
-    /* ===== ページ固有スタイル ===== */
-    main {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding: 2rem 1rem;
-    }
-
-    #bingoCardContainer {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      text-align: center;
-      max-width: 400px;
-      width: 100%;
-    }
-
-    #bingoCard {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 1rem;
-    }
-
-    .bingo-cell {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #1b656f;
-      border: 2px solid #5aa2aa;
-      border-radius: 8px;
-      background: #f5f5f5;
-      transition: 0.2s;
-    }
-
-    .bingo-cell:hover {
-      background: #dff4f5;
-      transform: scale(1.05);
-    }
-
-    #generateButton {
-      margin-top: 1rem;
-      background: #5aa2aa;
-      color: #fff;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    #generateButton:hover {
-      background: #3f8e96;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ランダムビンゴカード</title>
+<link rel="stylesheet" href="common.css">
 </head>
-
 <body>
-  <header></header>
-  <nav id="nav"></nav>
+  <div id="header-placeholder"></div>
 
   <main>
-    <section id="bingoCardContainer">
-      <h3>🎲 3×3 ビンゴカード作成</h3>
-      <p style="color:#5aa2aa; font-size:1rem;">1〜9 の数字をランダムに並べます！</p>
-      
-      <div id="bingoCard"></div>
-      <button id="generateButton">新しいカードを作成</button>
+    <section class="bingo-card-section">
+      <input type="text" id="playerName" placeholder="名前を入力">
+      <h2 id="cardTitle"></h2>
+
+      <div id="bingoCard" class="bingo-card">
+        <!-- 3×3の数字セルをJSで生成 -->
+      </div>
+
+      <div class="buttons">
+        <button id="startStopBtn">抽選開始</button>
+        <button id="shareBtn">カードを共有</button>
+      </div>
+
+      <div class="timestamp" id="cardTimestamp"></div>
     </section>
   </main>
 
-  <footer></footer>
-
+  <div id="footer-placeholder"></div>
   <script src="common.js"></script>
+  <script src="bingo-card.js"></script>
   <script>
-    // =============================================================
-    // 🎯 3×3 ビンゴカード生成ロジック
-    // =============================================================
-    const cardContainer = document.getElementById("bingoCard");
-    const generateButton = document.getElementById("generateButton");
-
-    function renderCard(numbers) {
-      cardContainer.innerHTML = numbers.map(num =>
-        `<div class="bingo-cell">${num}</div>`
-      ).join('');
-    }
-
-    function generateCard() {
-      const numbers = generateRandomNumbers(9, 9); // 1〜9を9個
-      renderCard(numbers);
-      
-      // URLパラメータでシェアしたい場合
-      const cardParam = numbers.join('');
-      history.replaceState(null, '', `?card=${cardParam}`);
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      setupCommonElements(); // common.jsで共通要素セット
-
-      // URLからカードを読み込む（?card=付きなら再現）
-      const existingCard = loadCardFromUrl();
-      if (existingCard) {
-        renderCard(existingCard);
-      } else {
-        generateCard();
-      }
-    });
-
-    generateButton.addEventListener("click", generateCard);
+    setupHeader('header-user.html');
   </script>
 </body>
 </html>
