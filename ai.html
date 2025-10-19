@@ -56,13 +56,6 @@
       resizeCanvas();
     }
 
-function resizeCanvas() {
-  const rect = bingoCard.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = rect.height;
-  checkBingo(); // リサイズ後に既存のハイライトに合わせて線を再描画
-}
-
     function shuffleNumbers() {
       return [...Array(9)].map((_, i) => i + 1).sort(() => Math.random() - 0.5);
     }
@@ -108,27 +101,43 @@ function resizeCanvas() {
       });
     }
 
-    function drawBingoLine(line) {
-      const rect = bingoCard.getBoundingClientRect();
-      const cellWidth = rect.width / 3;
-      const cellHeight = rect.height / 3;
+function resizeCanvas() {
+  const rect = bingoCard.getBoundingClientRect();
+  
+  // 高解像度ディスプレイ対応
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // 既存の変換をリセット
+  ctx.scale(dpr, dpr); // 高解像度対応
+  
+  checkBingo(); // 線を再描画
+}
 
-      const startCell = line[0];
-      const endCell = line[2];
+function drawBingoLine(line) {
+  const rect = bingoCard.getBoundingClientRect();
+  const cellWidth = rect.width / 3;
+  const cellHeight = rect.height / 3;
 
-      const startX = (startCell % 3 + 0.5) * cellWidth;
-      const startY = (Math.floor(startCell / 3) + 0.5) * cellHeight;
-      const endX = (endCell % 3 + 0.5) * cellWidth;
-      const endY = (Math.floor(endCell / 3) + 0.5) * cellHeight;
+  const startCell = line[0];
+  const endCell = line[2];
 
-      ctx.strokeStyle = 'red';
-      ctx.lineWidth = 8;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(startX, startY);
-      ctx.lineTo(endX, endY);
-      ctx.stroke();
-    }
+  const startX = (startCell % 3 + 0.5) * cellWidth;
+  const startY = (Math.floor(startCell / 3) + 0.5) * cellHeight;
+  const endX = (endCell % 3 + 0.5) * cellWidth;
+  const endY = (Math.floor(endCell / 3) + 0.5) * cellHeight;
+
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 8;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(endX, endY);
+  ctx.stroke();
+}
 
 numberInput.addEventListener('input', () => {
   const input = numberInput.value.trim();
