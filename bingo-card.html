@@ -12,7 +12,7 @@
 
   <main>
     <section class="bingo-card-section">
-      <h2 id="cardTitle">APEXビンゴカード</h2>
+      <h2 id="cardTitle">ビンゴカード</h2>
 
       <div id="bingoCard" class="bingo-card">
         <!-- 3×3の数字セルをJSで生成 -->
@@ -84,7 +84,7 @@
     // 名前入力でリアルタイムにタイトル更新
     playerNameInput.addEventListener('input', () => {
         const name = playerNameInput.value.trim();
-        cardTitle.textContent = name ? `${name}のAPEXビンゴカード` : 'APEXビンゴカード';
+        cardTitle.textContent = name ? `${name}のビンゴカード` : 'ビンゴカード';
     });
 
     // 開始/停止ボタン
