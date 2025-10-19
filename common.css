@@ -1029,3 +1029,10 @@ h1 {
     50% { transform: scale(1.1); background-color: #ffeb3b; }
     100% { transform: scale(1); background-color: #d4f0f4; }
 }
+
+/* 名前入力欄の上下に余白 */
+#playerName {
+    margin: 10px 0; /* 上下10pxの余白 */
+    padding: 5px;   /* 入力欄内の余白も少し追加 */
+    font-size: 16px;
+}
