@@ -18,9 +18,7 @@
       <h1 class="page-title">APEXビンゴ 🎯</h1>
       <h2 id="cardTitle">ビンゴカード</h2>
 
-      <div id="bingoCard" class="bingo-card">
-        <!-- 3×3の数字セルをJSで生成 -->
-      </div>
+      <div id="bingoCard" class="bingo-card"></div>
 
       <div class="timestamp" id="cardTimestamp"></div>
     </section>
@@ -31,13 +29,13 @@
       <button id="startStopBtn">抽選開始</button>
       <button id="shareBtn">ビンゴカードを共有</button>
     </div>
-
   </main>
 
   <div id="footer-placeholder"></div>
 
   <script src="common.js"></script>
   <script>
+    // ヘッダー読み込み
     setupHeader('header-user.html');
 
     // Firebase 初期化
@@ -52,8 +50,7 @@
       measurementId: "G-ZNGEZZWMTP"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const bingoCardRef = db.ref('bingoCard'); // Realtime DB のパス
+    const bingoCardRef = firebase.database().ref('bingoCard');
 
     const bingoCard = document.getElementById('bingoCard');
     const startStopBtn = document.getElementById('startStopBtn');
@@ -65,97 +62,87 @@
     let intervalId = null;
     let currentNumbers = [];
 
-    // 3x3のセルを生成
+    // 3x3セル生成
     function createCells() {
-        bingoCard.innerHTML = '';
-        for (let i = 0; i < 9; i++) {
-            const cell = document.createElement('div');
-            cell.textContent = '';
-            bingoCard.appendChild(cell);
-        }
+      bingoCard.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        bingoCard.appendChild(cell);
+      }
     }
 
-    // ランダム数字を入れる
+    // ランダム数字生成
     function shuffleNumbers() {
-        const numbers = [...Array(9)].map((_, i) => i + 1);
-        return numbers.sort(() => Math.random() - 0.5);
+      return [...Array(9)].map((_, i) => i + 1).sort(() => Math.random() - 0.5);
     }
 
-    // 高速で入れ替える
+    // 高速で数字を入れ替える
     function startShuffle() {
-        intervalId = setInterval(() => {
-            currentNumbers = shuffleNumbers();
-            bingoCard.querySelectorAll('div').forEach((cell, i) => {
-                cell.textContent = currentNumbers[i];
-            });
-        }, 50);
+      intervalId = setInterval(() => {
+        currentNumbers = shuffleNumbers();
+        bingoCard.querySelectorAll('div').forEach((cell, i) => {
+          cell.textContent = currentNumbers[i];
+        });
+      }, 50);
     }
 
     // 停止
     function stopShuffle() {
-        clearInterval(intervalId);
-        intervalId = null;
+      clearInterval(intervalId);
+      intervalId = null;
 
-        // タイトル更新
-        const name = playerNameInput.value.trim();
-        cardTitle.textContent = name ? `${name}のカード` : 'ビンゴカード';
+      const name = playerNameInput.value.trim();
+      cardTitle.textContent = name ? `${name}のカード` : 'ビンゴカード';
 
-        // タイムスタンプ更新
-        const now = new Date();
-        const formatted = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-        cardTimestamp.textContent = formatted;
+      const now = new Date();
+      const formatted = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      cardTimestamp.textContent = formatted;
 
-        // Firebase に保存
-        bingoCardRef.set({
-            numbers: currentNumbers,
-            playerName: name,
-            timestamp: formatted
-        });
+      bingoCardRef.set({
+        numbers: currentNumbers,
+        playerName: name,
+        timestamp: formatted
+      });
     }
 
-    // 名前入力でリアルタイムにタイトル更新
+    // 名前入力でタイトルをリアルタイム更新
     playerNameInput.addEventListener('input', () => {
-        const name = playerNameInput.value.trim();
-        cardTitle.textContent = name ? `${name}のカード` : 'ビンゴカード';
+      const name = playerNameInput.value.trim();
+      cardTitle.textContent = name ? `${name}のカード` : 'ビンゴカード';
     });
 
     // 開始/停止ボタン
     startStopBtn.addEventListener('click', () => {
-        if (intervalId) {
-            stopShuffle();
-            startStopBtn.textContent = '抽選開始';
-        } else {
-            startShuffle();
-            startStopBtn.textContent = '停止';
-        }
+      if (intervalId) {
+        stopShuffle();
+        startStopBtn.textContent = '抽選開始';
+      } else {
+        startShuffle();
+        startStopBtn.textContent = '停止';
+      }
     });
 
-    // 共有ボタン (html2canvas使用)
+    // 共有ボタン
     shareBtn.addEventListener('click', async () => {
-        const element = document.querySelector('.bingo-card-section');
-        html2canvas(element).then(canvas => {
-            canvas.toBlob(async (blob) => {
-                const filesArray = [new File([blob], "bingo-card.png", {type: blob.type})];
-                if (navigator.canShare && navigator.canShare({ files: filesArray })) {
-                    try {
-                        await navigator.share({
-                            files: filesArray,
-                            title: cardTitle.textContent,
-                            text: 'ビンゴカードを共有します'
-                        });
-                    } catch (err) {
-                        alert('共有に失敗しました: ' + err);
-                    }
-                } else {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'bingo-card.png';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                }
-            });
-        });
+      const element = document.querySelector('.bingo-card-section');
+      const canvas = await html2canvas(element);
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], "bingo-card.png", {type: blob.type});
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: cardTitle.textContent, text: 'ビンゴカードを共有します' });
+          } catch (err) {
+            alert('共有に失敗しました: ' + err);
+          }
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'bingo-card.png';
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      });
     });
 
     // 初期化
