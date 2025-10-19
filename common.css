@@ -1005,3 +1005,27 @@ h1 {
     text-align: right;
     margin-top: 4px;
 }
+
+/* -----------------------------
+   ビンゴカード立体・アニメーション
+----------------------------- */
+.bingo-cell {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.bingo-cell:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+    background-color: #b6e4e0;
+}
+
+.bingo-cell.active {
+    animation: flash-cell 0.5s ease-out;
+}
+
+@keyframes flash-cell {
+    0% { transform: scale(1); background-color: #d4f0f4; }
+    50% { transform: scale(1.1); background-color: #ffeb3b; }
+    100% { transform: scale(1); background-color: #d4f0f4; }
+}
