@@ -147,25 +147,24 @@
     }
 
     // 番号入力イベント（複数同時に光らせる）
-    numberInput.addEventListener('change', () => {
-        const input = numberInput.value.trim();
-        if (!input) return;
+// 番号入力イベント（入力した瞬間に反応）
+numberInput.addEventListener('input', () => {
+    const input = numberInput.value.trim();
+    if (!input) return;
 
-        // 全セルのハイライトをリセット
-        Array.from(bingoCard.children).forEach(cell => {
-            cell.classList.remove('highlight');
-        });
-
-        for (const char of input) {
-            const num = Number(char);
-            if (!isNaN(num) && currentNumbers.includes(num)) {
-                const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === num);
-                if (cell) cell.classList.add('highlight');
-            }
-        }
-
-        numberInput.value = '';
+    // 全セルのハイライトをリセット
+    Array.from(bingoCard.children).forEach(cell => {
+        cell.classList.remove('highlight');
     });
+
+    for (const char of input) {
+        const num = Number(char);
+        if (!isNaN(num) && currentNumbers.includes(num)) {
+            const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === num);
+            if (cell) cell.classList.add('highlight');
+        }
+    }
+});
 
     // 抽選ボタン
     startStopBtn.addEventListener('click', () => {
