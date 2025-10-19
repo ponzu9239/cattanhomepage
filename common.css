@@ -81,53 +81,44 @@ header h1 {
     left: 0;
 }
 
-/* ハンバーガーメニューアイコン */
+/* ハンバーガーアイコン */
 .hamburger {
+  font-size: 1.5rem;
   cursor: pointer;
-  font-size: 1.8rem;
-  user-select: none;
-  position: absolute;
-  left: 10px; /* 左に寄せる */
-  top: 15px;
-  z-index: 1000;
+  color: #fff; /* 白色 */
+  margin-left: 5px; /* 左に寄せる */
 }
 
-/* ナビゲーション */
-#nav {
+/* ナビゲーション（ドロップダウンメニュー） */
+nav#nav {
   position: absolute;
-  top: 60px; /* ヘッダー下 */
+  top: 100%;
   left: 0;
   width: 100%;
-  background-color: #ffffff; /* 背景白 */
+  display: none; /* 初期非表示 */
+  flex-direction: column;
+  background-color: #87c4c8; /* #97eadbより少し暗い色 */
+  text-align: center; /* 文字中央揃え */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 99;
+}
+
+nav#nav.show {
   display: flex;
-  flex-direction: column; /* モバイル用縦並び */
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px;
-  transform: translateY(-100vh); /* 初期は画面外 */
-  transition: transform 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  z-index: 999; /* アイコンより下 */
 }
 
-/* 表示状態 */
-#nav.show {
-  transform: translateY(0);
-}
-
-/* リンクスタイル */
-#nav a {
+/* ナビゲーションリンク */
+nav#nav a {
+  padding: 10px 0;
+  color: #fff;
   text-decoration: none;
-  color: #333333; /* 文字は濃いグレー */
   font-weight: 500;
-  padding: 5px 10px;
+  transition: background 0.2s;
 }
 
-#nav a:hover {
-  background-color: #f0f0f0; /* ホバーは薄グレー */
-  border-radius: 4px;
+nav#nav a:hover {
+  background-color: rgba(0,0,0,0.1);
 }
-
 
 /* ★★★ PC表示時の調整（幅800px以上） ★★★ */
 @media (min-width: 800px) {
