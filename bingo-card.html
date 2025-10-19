@@ -12,19 +12,20 @@
 
   <main>
     <section class="bingo-card-section">
-      <input type="text" id="playerName" placeholder="名前を入力">
       <h2 id="cardTitle"></h2>
 
       <div id="bingoCard" class="bingo-card">
         <!-- 3×3の数字セルをJSで生成 -->
       </div>
+      
+            <div class="timestamp" id="cardTimestamp"></div>
+            <input type="text" id="playerName" placeholder="名前を入力">
 
       <div class="buttons">
         <button id="startStopBtn">抽選開始</button>
         <button id="shareBtn">カードを共有</button>
       </div>
 
-      <div class="timestamp" id="cardTimestamp"></div>
     </section>
   </main>
 
