@@ -130,20 +130,17 @@
     }
 
     numberInput.addEventListener('input', () => {
-      const input = numberInput.value.trim();
+      const input = Number(numberInput.value.trim());
       if (!input) return;
 
       Array.from(bingoCard.children).forEach(cell => cell.classList.remove('highlight'));
       markedNumbers = [];
 
-      for (const char of input) {
-        const num = Number(char);
-        if (!isNaN(num) && currentNumbers.includes(num)) {
-          const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === num);
-          if (cell) {
-            cell.classList.add('highlight');
-            markedNumbers.push(num);
-          }
+      if (currentNumbers.includes(input)) {
+        const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === input);
+        if (cell) {
+          cell.classList.add('highlight');
+          markedNumbers.push(input);
         }
       }
 
