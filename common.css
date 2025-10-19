@@ -1053,3 +1053,57 @@ h1 {
   overflow-wrap: break-word;
   hyphens: auto;
 }
+
+/* -----------------------------
+   番号入力でマスを塗るスタイル
+----------------------------- */
+.bingo-cell.marked {
+    background-color: #ffa500; /* 明るいオレンジ */
+    color: white;              /* 数字を見やすく */
+    font-weight: bold;
+}
+
+/* -----------------------------
+   ビンゴ達成時の赤い線
+----------------------------- */
+.bingo-line {
+    position: absolute;
+    background-color: red;
+    z-index: 10;
+}
+
+/* 横線の場合 */
+.bingo-line.horizontal {
+    height: 5px;          /* 太さ */
+    width: 100%;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+/* 縦線の場合 */
+.bingo-line.vertical {
+    width: 5px;           /* 太さ */
+    height: 100%;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+}
+
+/* 左上→右下 斜め線 */
+.bingo-line.diagonal1 {
+    width: 5px;
+    height: 140%;         /* 対角線用に少し長め */
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+}
+
+/* 右上→左下 斜め線 */
+.bingo-line.diagonal2 {
+    width: 5px;
+    height: 140%;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-45deg);
+}
