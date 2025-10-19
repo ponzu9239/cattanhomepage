@@ -909,9 +909,10 @@ h1 {
 
 /* --- ビンゴカード用 --- */
 .bingo-card-section {
-    max-width: 320px;
-    margin: 2rem auto;
-    text-align: center;
+    display: flex;
+    flex-direction: column; /* 縦方向に並べる */
+    align-items: center;    /* 横方向中央揃え */
+    justify-content: center; /* 縦方向中央揃え（必要なら） */
 }
 
 .bingo-card {
