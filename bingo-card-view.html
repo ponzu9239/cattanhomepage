@@ -122,25 +122,33 @@ window.addEventListener('resize', () => {
 });
 
 // 抽選中もカードに数字を高速反映
+let isShuffling = false;
+
+// 抽選中の番号受信
 currentNumbersRef.on('value', snapshot => {
-  const numbers = snapshot.val() || [];
-  const cells = bingoCard.querySelectorAll('.bingo-cell');
-  cells.forEach((cell, i) => {
-    cell.textContent = numbers[i] ?? '-';
-    cell.classList.remove('highlight'); // 抽選中はハイライトリセット
-  });
+  const currentNumbers = snapshot.val() || [];
+  currentNumbersDisplay.textContent = currentNumbers.length ? "抽選中: " + currentNumbers.join(", ") : "";
+
+  // 抽選中かどうか判定
+  isShuffling = currentNumbers.length > 0;
 });
 
-// 入力済み番号のハイライト
+// 入力された番号受信
 markedNumbersRef.on('value', snapshot => {
   const markedNumbers = snapshot.val() || [];
-  const cells = bingoCard.querySelectorAll('.bingo-cell');
-  cells.forEach(c => c.classList.remove('highlight'));
+
+  // ハイライトリセット
+  Array.from(bingoCard.querySelectorAll('.bingo-cell')).forEach(c => c.classList.remove('highlight'));
   markedNumbers.forEach(num => {
-    const cell = Array.from(cells).find(c => Number(c.textContent) === num);
-    if(cell) cell.classList.add('highlight');
+    const cell = Array.from(bingoCard.querySelectorAll('.bingo-cell'))
+                       .find(c => Number(c.textContent) === num);
+    if (cell) cell.classList.add('highlight');
   });
-  drawLines();
+
+  // 抽選中は線を描かない
+  if (!isShuffling) {
+    drawLines();
+  }
 });
 
 // タイムスタンプは抽選後のみ
