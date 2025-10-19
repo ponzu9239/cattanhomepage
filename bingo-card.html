@@ -9,25 +9,24 @@
 </head>
 <body>
   <div id="header-placeholder"></div>
+
   <main>
     <section class="bingo-card-section">
-      <h2 id="cardTitle"></h2>
+      <h2 id="cardTitle">APEXビンゴカード</h2>
 
       <div id="bingoCard" class="bingo-card">
         <!-- 3×3の数字セルをJSで生成 -->
       </div>
-      
-            <div class="timestamp" id="cardTimestamp"></div>
-      </section>
-              
-            <input type="text" id="playerName" placeholder="名前を入力">
+
+      <div class="timestamp" id="cardTimestamp"></div>
+
+      <input type="text" id="playerName" placeholder="名前を入力">
 
       <div class="buttons">
         <button id="startStopBtn">抽選開始</button>
         <button id="shareBtn">カードを共有</button>
       </div>
-
-
+    </section>
   </main>
 
   <div id="footer-placeholder"></div>
@@ -76,17 +75,17 @@
         clearInterval(intervalId);
         intervalId = null;
 
-// 名前入力欄が変わったらタイトルをリアルタイムで更新
-playerNameInput.addEventListener('input', () => {
-    const name = playerNameInput.value.trim();
-    cardTitle.textContent = name ? `${name}のビンゴカード` : 'ビンゴカード';
-});
-
         // タイムスタンプ更新
         const now = new Date();
         const formatted = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         cardTimestamp.textContent = formatted;
     }
+
+    // 名前入力でリアルタイムにタイトル更新
+    playerNameInput.addEventListener('input', () => {
+        const name = playerNameInput.value.trim();
+        cardTitle.textContent = name ? `${name}のAPEXビンゴカード` : 'APEXビンゴカード';
+    });
 
     // 開始/停止ボタン
     startStopBtn.addEventListener('click', () => {
@@ -101,7 +100,6 @@ playerNameInput.addEventListener('input', () => {
 
     // 共有ボタン (html2canvas使用)
     shareBtn.addEventListener('click', async () => {
-        // bingoCardとタイトル・タイムスタンプを含む親要素をキャプチャ
         const element = document.querySelector('.bingo-card-section');
         html2canvas(element).then(canvas => {
             canvas.toBlob(async (blob) => {
