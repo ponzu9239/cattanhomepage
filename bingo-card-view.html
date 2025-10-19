@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APEXビンゴ</title>
+<title>APEXビンゴ閲覧</title>
 <link rel="stylesheet" href="common.css">
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
@@ -19,6 +18,9 @@
     <div id="bingoCard" class="bingo-card">
       <canvas id="bingoLineCanvas"></canvas>
     </div>
+
+    <!-- 高速入れ替わる番号表示 -->
+    <div id="currentNumbersDisplay" style="margin: 10px 0; font-weight:bold;"></div>
 
     <div class="timestamp" id="cardTimestamp"></div>
   </section>
@@ -45,10 +47,12 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const bingoCardRef = db.ref('bingoCard');
 const markedNumbersRef = db.ref('markedNumbers');
+const currentNumbersRef = db.ref('currentNumbers'); // 高速入れ替え番号
 const timestampRef = db.ref('timestamp');
 
 const bingoCard = document.getElementById('bingoCard');
 const cardTimestamp = document.getElementById('cardTimestamp');
+const currentNumbersDisplay = document.getElementById('currentNumbersDisplay');
 const canvas = document.getElementById('bingoLineCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -64,7 +68,6 @@ function createCells() {
   resizeCanvas();
 }
 
-// 線描画
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
@@ -114,7 +117,7 @@ function drawBingoLine(line) {
   ctx.stroke();
 }
 
-// 初期セル作成
+// 初期化
 createCells();
 window.addEventListener('resize', () => {
   resizeCanvas();
@@ -137,6 +140,11 @@ markedNumbersRef.on('value', snapshot => {
     if (cell) cell.classList.add('highlight');
   });
   drawLines();
+});
+
+currentNumbersRef.on('value', snapshot => {
+  const currentNumbers = snapshot.val() || [];
+  currentNumbersDisplay.textContent = "抽選中: " + currentNumbers.join(", ");
 });
 
 timestampRef.on('value', snapshot => {
