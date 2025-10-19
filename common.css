@@ -90,7 +90,7 @@ header h1 {
 }
 
 /* ナビゲーション（ドロップダウンメニュー） */
-nav#nav {
+#nav {
   position: absolute;
   top: 100%;
   left: 0;
@@ -103,12 +103,12 @@ nav#nav {
   z-index: 99;
 }
 
-nav#nav.show {
+#nav.show {
   display: flex;
 }
 
 /* ナビゲーションリンク */
-nav#nav a {
+#nav a {
   padding: 10px 0;
   color: #fff;
   text-decoration: none;
@@ -116,7 +116,7 @@ nav#nav a {
   transition: background 0.2s;
 }
 
-nav#nav a:hover {
+#nav a:hover {
   background-color: rgba(0,0,0,0.1);
 }
 
