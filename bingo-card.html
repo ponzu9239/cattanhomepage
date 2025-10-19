@@ -81,16 +81,7 @@
         return numbers.sort(() => Math.random() - 0.5);
     }
 
-function startShuffle() {
-  intervalId = setInterval(() => {
-    currentNumbers = shuffleNumbers();
-    bingoCard.querySelectorAll('.bingo-cell').forEach((cell, i) => {
-      cell.textContent = currentNumbers[i];
-      cell.dataset.number = currentNumbers[i];
-      cell.classList.remove('highlight');
-    });
-    drawBingoLine([]);
-
+    // 高速で入れ替える
     function startShuffle() {
         intervalId = setInterval(() => {
             currentNumbers = shuffleNumbers();
@@ -99,6 +90,7 @@ function startShuffle() {
             });
         }, 50);
     }
+
     // 停止
     function stopShuffle() {
         clearInterval(intervalId);
