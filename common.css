@@ -149,13 +149,13 @@ header h1 {
 /* ★ 2. フッターのスタイル ★ */
 /* ------------------------------------------------ */
 footer {
-  background-color: #f8f8f8; /* 背景色はお好みで */
-  padding: 10px 20px; /* 上下10px、左右20pxに調整 */
+  background-color: #97eadb; /* 指定の背景色 */
+  padding: 8px 20px; /* 上下を少し小さく */
   text-align: center;
   font-size: 0.9rem;
-  color: #666;
+  color: #fff; /* 文字を白に */
   box-sizing: border-box;
-  line-height: 1.4; /* 行間を少し詰める */
+  line-height: 1.3; /* 高さを抑える */
 }
 
 /* ------------------------------------------------ */
