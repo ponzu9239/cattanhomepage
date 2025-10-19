@@ -15,9 +15,11 @@
       <h1 class="page-title">APEXビンゴ 🎯</h1>
       <h2 id="cardTitle">ビンゴカード</h2>
 
-<div id="bingoCard" class="bingo-card">
-  <canvas id="bingoLineCanvas"></canvas>
-</div>
+      <div id="bingoCard" class="bingo-card">
+        <!-- 3x3のセルをJSで生成 -->
+        <canvas id="bingoLineCanvas"></canvas>
+      </div>
+
       <div class="timestamp" id="cardTimestamp"></div>
     </section>
     
@@ -53,6 +55,7 @@
         cell.textContent = '';
         bingoCard.appendChild(cell);
       }
+      bingoCard.appendChild(canvas); // canvas を最後に追加
       resizeCanvas();
     }
 
@@ -63,7 +66,7 @@
     function startShuffle() {
       intervalId = setInterval(() => {
         currentNumbers = shuffleNumbers();
-        bingoCard.querySelectorAll('div').forEach((cell, i) => {
+        bingoCard.querySelectorAll('.bingo-cell').forEach((cell, i) => {
           cell.textContent = currentNumbers[i];
           cell.classList.remove('highlight');
         });
@@ -76,7 +79,7 @@
       clearInterval(intervalId);
       intervalId = null;
       currentNumbers.forEach((num, i) => {
-        bingoCard.children[i].textContent = num;
+        bingoCard.querySelectorAll('.bingo-cell')[i].textContent = num;
       });
       const now = new Date();
       const formatted = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -87,80 +90,71 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
+    function resizeCanvas() {
+      const rect = bingoCard.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+    }
+
     function checkBingo() {
-      const cells = Array.from(bingoCard.children).map(c => c.classList.contains('highlight'));
+      const cells = Array.from(bingoCard.querySelectorAll('.bingo-cell')).map(c => c.classList.contains('highlight'));
       const lines = [
         [0,1,2],[3,4,5],[6,7,8],
         [0,3,6],[1,4,7],[2,5,8],
         [0,4,8],[2,4,6]
       ];
       clearCanvas();
-      resizeCanvas();
       lines.forEach(line => {
         if (line.every(i => cells[i])) drawBingoLine(line);
       });
     }
 
-function resizeCanvas() {
-  const rect = bingoCard.getBoundingClientRect();
-  
-  // 高解像度ディスプレイ対応
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  canvas.style.width = rect.width + 'px';
-  canvas.style.height = rect.height + 'px';
-  
-  ctx.setTransform(1, 0, 0, 1, 0, 0); // 既存の変換をリセット
-  ctx.scale(dpr, dpr); // 高解像度対応
-  
-  checkBingo(); // 線を再描画
-}
+    function drawBingoLine(line) {
+      const rect = bingoCard.getBoundingClientRect();
+      const cellWidth = rect.width / 3;
+      const cellHeight = rect.height / 3;
 
-function drawBingoLine(line) {
-  const rect = bingoCard.getBoundingClientRect();
-  const cellWidth = rect.width / 3;
-  const cellHeight = rect.height / 3;
+      const startCell = line[0];
+      const endCell = line[2];
 
-  const startCell = line[0];
-  const endCell = line[2];
+      const startX = (startCell % 3 + 0.5) * cellWidth;
+      const startY = (Math.floor(startCell / 3) + 0.5) * cellHeight;
+      const endX = (endCell % 3 + 0.5) * cellWidth;
+      const endY = (Math.floor(endCell / 3) + 0.5) * cellHeight;
 
-  const startX = (startCell % 3 + 0.5) * cellWidth;
-  const startY = (Math.floor(startCell / 3) + 0.5) * cellHeight;
-  const endX = (endCell % 3 + 0.5) * cellWidth;
-  const endY = (Math.floor(endCell / 3) + 0.5) * cellHeight;
-
-  ctx.strokeStyle = 'red';
-  ctx.lineWidth = 8;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(endX, endY);
-  ctx.stroke();
-}
-
-numberInput.addEventListener('input', () => {
-  const input = numberInput.value.trim();
-  if (!input) return;
-
-  // まず全セルのハイライトをクリア
-  Array.from(bingoCard.children).forEach(cell => cell.classList.remove('highlight'));
-  markedNumbers = [];
-
-  // 入力文字を1文字ずつ処理
-  for (const char of input) {
-    const num = Number(char);
-    if (!isNaN(num) && currentNumbers.includes(num)) {
-      const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === num);
-      if (cell && !cell.classList.contains('highlight')) {
-        cell.classList.add('highlight');
-        markedNumbers.push(num);
-      }
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
     }
-  }
 
-  checkBingo();
-});
+    numberInput.addEventListener('input', () => {
+      const input = numberInput.value.trim();
+      if (!input) return;
+
+      Array.from(bingoCard.querySelectorAll('.bingo-cell')).forEach(cell => cell.classList.remove('highlight'));
+      markedNumbers = [];
+
+      for (const char of input) {
+        const num = Number(char);
+        if (!isNaN(num) && currentNumbers.includes(num)) {
+          const cell = Array.from(bingoCard.querySelectorAll('.bingo-cell')).find(c => Number(c.textContent) === num);
+          if (cell && !cell.classList.contains('highlight')) {
+            cell.classList.add('highlight');
+            markedNumbers.push(num);
+          }
+        }
+      }
+      checkBingo();
+    });
 
     startStopBtn.addEventListener('click', () => {
       if (intervalId) {
@@ -192,7 +186,40 @@ numberInput.addEventListener('input', () => {
     });
 
     createCells();
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      checkBingo();
+    });
   </script>
+
+  <style>
+    .bingo-card {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      grid-template-rows: repeat(3, 80px);
+      gap: 5px;
+      position: relative;
+      margin: auto;
+    }
+
+    .bingo-cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      background-color: #fff;
+      border: 1px solid #000;
+    }
+
+    #bingoLineCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+  </style>
 </body>
 </html>
