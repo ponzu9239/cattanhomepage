@@ -44,21 +44,18 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const bingoCardRef = db.ref('bingoCard');        
-const currentNumbersRef = db.ref('currentNumbers'); 
 const markedNumbersRef = db.ref('markedNumbers');   
 const timestampRef = db.ref('timestamp');           
 
 const bingoCard = document.getElementById('bingoCard');
 const cardTimestamp = document.getElementById('cardTimestamp');
-const currentNumbersDisplay = document.getElementById('currentNumbersDisplay');
 const canvas = document.getElementById('bingoLineCanvas');
 const ctx = canvas.getContext('2d');
 
-let isShuffling = false;
-
-function createCells() {
+// ビンゴカードのセル作成
+function createCells(){
   bingoCard.innerHTML = '';
-  for (let i = 0; i < 9; i++) {
+  for(let i=0;i<9;i++){
     const cell = document.createElement('div');
     cell.classList.add('bingo-cell');
     cell.textContent = '-';
@@ -68,36 +65,25 @@ function createCells() {
   resizeCanvas();
 }
 
-function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function resizeCanvas() {
+// キャンバスをカードサイズに合わせる
+function resizeCanvas(){
   const rect = bingoCard.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  canvas.style.width = rect.width + 'px';
-  canvas.style.height = rect.height + 'px';
+  canvas.width = rect.width*dpr;
+  canvas.height = rect.height*dpr;
+  canvas.style.width = rect.width+'px';
+  canvas.style.height = rect.height+'px';
   ctx.setTransform(1,0,0,1,0,0);
   ctx.scale(dpr,dpr);
 }
 
-function drawLines() {
-  const cells = Array.from(bingoCard.querySelectorAll('.bingo-cell'));
-  const marks = cells.map(c => c.classList.contains('highlight'));
-  const lines = [
-    [0,1,2],[3,4,5],[6,7,8],
-    [0,3,6],[1,4,7],[2,5,8],
-    [0,4,8],[2,4,6]
-  ];
-  clearCanvas();
-  lines.forEach(line => {
-    if (line.every(i => marks[i])) drawBingoLine(line);
-  });
+// 線を消す
+function clearCanvas(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 }
 
-function drawBingoLine(line) {
+// ビンゴ線を描画
+function drawBingoLine(line){
   const cells = bingoCard.querySelectorAll('.bingo-cell');
   const startCell = cells[line[0]].getBoundingClientRect();
   const endCell = cells[line[2]].getBoundingClientRect();
@@ -108,59 +94,63 @@ function drawBingoLine(line) {
   const endX = (endCell.left + endCell.right)/2 - cardRect.left;
   const endY = (endCell.top + endCell.bottom)/2 - cardRect.top;
 
-  ctx.strokeStyle = 'red';
-  ctx.lineWidth = 8;
-  ctx.lineCap = 'round';
+  ctx.strokeStyle='red';
+  ctx.lineWidth=8;
+  ctx.lineCap='round';
   ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(endX, endY);
+  ctx.moveTo(startX,startY);
+  ctx.lineTo(endX,endY);
   ctx.stroke();
+}
+
+// ビンゴチェックして線を描く
+function drawLines(){
+  const cells = Array.from(bingoCard.querySelectorAll('.bingo-cell'));
+  const marks = cells.map(c=>c.classList.contains('highlight'));
+  const lines = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  clearCanvas();
+  lines.forEach(line=>{
+    if(line.every(i=>marks[i])) drawBingoLine(line);
+  });
 }
 
 // 初期化
 createCells();
-window.addEventListener('resize', () => {
-  resizeCanvas();
-  drawLines();
-});
+window.addEventListener('resize',()=>{resizeCanvas(); drawLines();});
 
-// 抽選中番号受信
-currentNumbersRef.on('value', snapshot => {
-  const currentNumbers = snapshot.val() || [];
+// 抽選後の番号受信
+bingoCardRef.on('value', snapshot=>{
+  const numbers = snapshot.val()||[];
   const cells = bingoCard.querySelectorAll('.bingo-cell');
 
-  // カードに数字を反映
-  cells.forEach((cell,i) => {
-    cell.textContent = currentNumbers[i] ?? '-';
+  cells.forEach((cell,i)=>{
+    cell.textContent = numbers[i]??'-';
   });
-
-  // 抽選中かどうか
-  isShuffling = currentNumbers.length > 0;
-
-  // 抽選中は線を消す
-  if(isShuffling) clearCanvas();
-
-  currentNumbersDisplay.textContent = currentNumbers.length ? "抽選中: " + currentNumbers.join(", ") : "";
 });
 
 // 入力番号受信
-markedNumbersRef.on('value', snapshot => {
-  const markedNumbers = snapshot.val() || [];
+markedNumbersRef.on('value', snapshot=>{
+  const marked = snapshot.val()||[];
+  const cells = Array.from(bingoCard.querySelectorAll('.bingo-cell'));
+  cells.forEach(c=>c.classList.remove('highlight'));
 
-  // ハイライトリセット
-  Array.from(bingoCard.querySelectorAll('.bingo-cell')).forEach(c => c.classList.remove('highlight'));
-  markedNumbers.forEach(num => {
-    const cell = Array.from(bingoCard.querySelectorAll('.bingo-cell')).find(c => Number(c.textContent) === num);
+  marked.forEach(num=>{
+    const cell = cells.find(c=>Number(c.textContent)===num);
     if(cell) cell.classList.add('highlight');
   });
 
-  // 抽選中でなければ線を描く
-  if(!isShuffling) drawLines();
+  // 線は常に描画
+  setTimeout(drawLines,10);
 });
 
-// タイムスタンプは抽選後のみ
-timestampRef.on('value', snapshot => {
-  cardTimestamp.textContent = snapshot.val() || '';
+// タイムスタンプ受信
+timestampRef.on('value', snapshot=>{
+  const t = snapshot.val()||'';
+  cardTimestamp.textContent = t;
 });
 </script>
 </body>
