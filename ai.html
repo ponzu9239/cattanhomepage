@@ -143,13 +143,21 @@
     }
 
     // イベント
-    numberInput.addEventListener('change', () => {
-      const num = Number(numberInput.value);
-      if (!isNaN(num) && currentNumbers.includes(num) && !markedNumbers.includes(num)) {
-        markNumber(num);
-      }
-      numberInput.value = '';
-    });
+// 番号入力イベント
+numberInput.addEventListener('change', () => {
+    const input = numberInput.value.trim();
+    if (!input) return;
+
+    // 入力文字を1文字ずつ処理
+    for (const char of input) {
+        const num = Number(char);
+        if (!isNaN(num) && currentNumbers.includes(num) && !markedNumbers.includes(num)) {
+            markNumber(num);
+        }
+    }
+
+    numberInput.value = '';
+});
 
     startStopBtn.addEventListener('click', () => {
       if (intervalId) {
