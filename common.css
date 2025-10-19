@@ -1016,57 +1016,64 @@ h1 {
     font-weight: bold;
 }
 
-/* -----------------------------
-   ビンゴ達成時の赤い線
------------------------------ */
+/* セルサイズを変数に */
+:root {
+  --bingo-cell-size: 80px;
+  --bingo-line-thickness: 5px;
+}
+
+/* ビンゴカード */
+.bingo-card {
+  display: grid;
+  grid-template-columns: repeat(3, var(--bingo-cell-size));
+  grid-template-rows: repeat(3, var(--bingo-cell-size));
+  gap: 5px;
+  position: relative;
+}
+
+/* ビンゴ線 共通 */
 .bingo-line {
-    position: absolute;
-    background-color: red;
-    z-index: 10;
+  position: absolute;
+  background-color: red;
+  z-index: 10;
 }
 
-/* 横線の場合 */
+/* 横線 */
 .bingo-line.horizontal {
-    height: 5px;          /* 太さ */
-    width: 100%;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
+  height: var(--bingo-line-thickness);
+  width: calc(var(--bingo-cell-size) * 3 + 10px); /* gapも含む */
+  top: calc(var(--bingo-cell-size) / 2 + 0px); /* 1行目なら0、2行目なら1*cell-size etc. */
+  left: 0;
+  transform: translateY(-50%);
 }
 
-/* 縦線の場合 */
+/* 縦線 */
 .bingo-line.vertical {
-    width: 5px;           /* 太さ */
-    height: 100%;
-    left: 50%;
-    top: 0;
-    transform: translateX(-50%);
+  width: var(--bingo-line-thickness);
+  height: calc(var(--bingo-cell-size) * 3 + 10px); /* gapも含む */
+  left: calc(var(--bingo-cell-size) / 2);
+  top: 0;
+  transform: translateX(-50%);
 }
 
 /* 左上→右下 斜め線 */
 .bingo-line.diagonal1 {
-    width: 5px;
-    height: 140%;         /* 対角線用に少し長め */
-    top: -20%;
-    left: 50%;
-    transform: translateX(-50%) rotate(45deg);
+  width: var(--bingo-line-thickness);
+  height: calc( var(--bingo-cell-size) * 3 + 10px );
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  transform: rotate(45deg);
 }
 
 /* 右上→左下 斜め線 */
 .bingo-line.diagonal2 {
-    width: 5px;
-    height: 140%;
-    top: -20%;
-    left: 50%;
-    transform: translateX(-50%) rotate(-45deg);
-}
-
-.bingo-card {
-  display: grid;
-  grid-template-columns: repeat(3, 80px); /* 3列 */
-  grid-template-rows: repeat(3, 80px);   /* 3行 */
-  gap: 5px;
-  position: relative; /* canvasを重ねるため */
+  width: var(--bingo-line-thickness);
+  height: calc(var(--bingo-cell-size) * 3 + 10px);
+  top: 0;
+  right: 0;
+  transform-origin: top right;
+  transform: rotate(-45deg);
 }
 
 .bingo-cell {
