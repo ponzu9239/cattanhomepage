@@ -76,9 +76,11 @@
         clearInterval(intervalId);
         intervalId = null;
 
-        // タイトル更新
-        const name = playerNameInput.value.trim();
-        cardTitle.textContent = name ? `${name}`;
+// 名前入力欄が変わったらタイトルをリアルタイムで更新
+playerNameInput.addEventListener('input', () => {
+    const name = playerNameInput.value.trim();
+    cardTitle.textContent = name ? `${name}のビンゴカード` : 'ビンゴカード';
+});
 
         // タイムスタンプ更新
         const now = new Date();
