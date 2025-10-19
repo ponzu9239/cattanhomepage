@@ -19,6 +19,64 @@
     position: absolute;
     pointer-events: none;
   }
+  
+  #bingo-card {
+  display: grid;
+  grid-template-columns: repeat(5, 60px);
+  gap: 8px;
+  justify-content: center;
+  margin: 20px auto;
+  position: relative;
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 8px;
+  line-height: 60px;
+  font-weight: bold;
+  font-size: 20px;
+  color: #333;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.cell.free {
+  background: #ffcc80;
+}
+
+.cell.active {
+  background: #ffb347; /* オレンジ寄りの色 */
+  color: white;
+}
+
+.line {
+  position: absolute;
+  height: 10px; /* 太くする */
+  background: #ff66b2; /* ピンク色 */
+  transform-origin: left center;
+  border-radius: 5px;
+  filter: drop-shadow(0 0 6px #ff99cc);
+}
+
+/* 線がカードを少しはみ出して見えるようにする */
+#bingo-card .line {
+  left: -10px;
+  right: -10px;
+}
+  
+input, button {
+  padding: 8px 12px;
+  font-size: 16px;
+  margin: 10px;
+  border-radius: 6px;
+  border: none;
+}
+
+button {
+  background: #1b656f;
+  color: white;
+  cursor: pointer;
 </style>
 </head>
 <body>
