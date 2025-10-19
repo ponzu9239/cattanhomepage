@@ -1105,3 +1105,31 @@ h1 {
     left: 50%;
     transform: translateX(-50%) rotate(-45deg);
 }
+
+.bingo-card {
+  display: grid;
+  grid-template-columns: repeat(3, 80px); /* 3列 */
+  grid-template-rows: repeat(3, 80px);   /* 3行 */
+  gap: 5px;
+  position: relative; /* canvasを重ねるため */
+}
+
+.bingo-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #000; /* 線 */
+  background-color: #fff;  /* セル色 */
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+}
+
+.bingo-cell.highlight {
+  background-color: yellow; /* 光らせる色 */
+}
+
+#bingoLineCanvas {
+  pointer-events: none; /* canvasにマウス操作をさせない */
+}
