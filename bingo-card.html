@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
-        /* ... 省略: bingo_card.html専用のスタイルは変更なし ... */
+        /* bingo_card.html専用のスタイル */
         .card-container {
             /* 画像化するコンテナのスタイル */
             max-width: 300px;
@@ -92,13 +92,13 @@
 </head>
 <body>
     <div id="header-placeholder"></div>
-
+    <nav id="nav"></nav>
     <main>
         <section class="card-generator">
             <div id="cardImageTarget" class="card-container"> 
                 <h2>あなたのビンゴカード (3×3)</h2>
                 <div id="bingoCard" class="bingo-board">
-                </div>
+                    </div>
             </div>
             
             <div class="card-buttons">
@@ -112,11 +112,11 @@
             <p id="shareError" style="text-align: center; font-size: 0.9rem; color: #ff4757; margin-top: 1rem; display: none;">
                 共有機能がブラウザでサポートされていません。
             </p>
+            
+            <div id="footer-placeholder"></div>
 
         </section>
     </main>
-    
-    <div id="footer-placeholder"></div>
 
     <script src="common.js"></script>
     <script>
@@ -129,9 +129,16 @@
         const shareMessage = document.getElementById('shareMessage');
         const shareError = document.getElementById('shareError');
         
-        // common.jsの generateRandomNumbers 関数を使用
-        // common.js内の関数名が衝突しないよう、このページのロジックを修正
-        
+        // カード生成ロジック
+        function generateRandomNumbers() {
+            let numbers = Array.from({length: 9}, (_, i) => i + 1);
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
+            return numbers;
+        }
+
         // カードレンダリングロジック
         function renderCard(cardNumbers) {
             currentCardNumbers = cardNumbers;
@@ -145,11 +152,8 @@
         }
         
         function initializeCard(initialNumbers) {
-            // common.jsで公開されている generateRandomNumbers を呼び出す
-            // 3x3 (9枚) のカードで、1から9の数字を使用
-            const numbers = initialNumbers || window.generateRandomNumbers(9, 9); 
+            const numbers = initialNumbers || generateRandomNumbers();
             renderCard(numbers);
-            
             // URLパラメータは使用しないため、シンプルなURLを維持
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
@@ -197,13 +201,6 @@
         // ★ イベントリスナー ★
         // ---------------------------------------------
         document.addEventListener('DOMContentLoaded', () => {
-            // common.js の setupHeader を実行し、ヘッダー/フッターを挿入
-            // 'header-user.html'を読み込むように指定
-            setupHeader('header-user.html'); 
-
-            // カードの初期化
-            // URLパラメータ（loadCardFromUrl）を使用するロジックは削除し、
-            // 常に新しいカードを生成するようにします。
             initializeCard(null); 
         });
         
