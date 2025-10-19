@@ -129,23 +129,28 @@
       ctx.stroke();
     }
 
-    numberInput.addEventListener('input', () => {
-      const input = Number(numberInput.value.trim());
-      if (!input) return;
+numberInput.addEventListener('input', () => {
+  const input = numberInput.value.trim();
+  if (!input) return;
 
-      Array.from(bingoCard.children).forEach(cell => cell.classList.remove('highlight'));
-      markedNumbers = [];
+  // まず全セルのハイライトをクリア
+  Array.from(bingoCard.children).forEach(cell => cell.classList.remove('highlight'));
+  markedNumbers = [];
 
-      if (currentNumbers.includes(input)) {
-        const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === input);
-        if (cell) {
-          cell.classList.add('highlight');
-          markedNumbers.push(input);
-        }
+  // 入力文字を1文字ずつ処理
+  for (const char of input) {
+    const num = Number(char);
+    if (!isNaN(num) && currentNumbers.includes(num)) {
+      const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === num);
+      if (cell && !cell.classList.contains('highlight')) {
+        cell.classList.add('highlight');
+        markedNumbers.push(num);
       }
+    }
+  }
 
-      checkBingo();
-    });
+  checkBingo();
+});
 
     startStopBtn.addEventListener('click', () => {
       if (intervalId) {
