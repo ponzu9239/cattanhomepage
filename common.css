@@ -964,7 +964,7 @@ h1 {
 .timestamp {
     font-size: 0.7rem;
     color: #999;
-    text-align: right;
+    text-align: left;
     margin-top: 4px;
 }
 
