@@ -81,58 +81,50 @@ header h1 {
     left: 0;
 }
 
-/* ハンバーガーメニューアイコン */
+/* ハンバーガーメニュー全体 */
 .hamburger {
-    font-size: 2rem;
-    cursor: pointer;
-    position: absolute; 
-    top: 50%;
-    right: 1rem; 
-    transform: translateY(-50%);
-    color: white;
-    z-index: 1100;
-    display: block; 
+  cursor: pointer;
+  font-size: 1.8rem;
+  user-select: none;
+  position: absolute;
+  left: 10px; /* ← 左に寄せる */
+  top: 15px;
+  z-index: 1000;
 }
 
-/* ナビゲーションメニュー本体 (非表示状態) */
+/* ナビゲーション */
 #nav {
-    position: fixed;
-    top: -100vh; 
-    left: 0;
-    width: 100%;
-    background-color: transparent; 
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    transition: top 0.3s ease-in-out; 
-    z-index: 1050;
-    overflow-y: hidden; 
+  position: absolute;
+  top: 60px; /* ヘッダー下あたりに出す */
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column; /* モバイル用に縦並び */
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  transform: translateY(-100vh); /* 初期は画面外 */
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* ナビゲーションが開いた状態 */
+/* 表示状態 */
 #nav.show {
-    top: var(--header-fixed-height);
-    max-height: calc(100vh - var(--header-fixed-height));
-    overflow-y: auto; 
+  transform: translateY(0);
 }
 
-nav a {
-    display: block;
-    text-align: center;
-    margin: 0;
-    padding: 0.6rem 0;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: white;
-    background-color: var(--color-primary); 
-    border-bottom: 1px solid transparent; 
-    text-decoration: none;
-    transition: background-color 0.2s, transform 0.2s;
+/* リンクスタイル */
+#nav a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  padding: 5px 10px;
 }
 
-nav a:hover {
-    background-color: var(--color-hover); 
-    transform: scale(1.03);
+#nav a:hover {
+  background-color: #f0f0f0;
+  border-radius: 4px;
 }
 
 
