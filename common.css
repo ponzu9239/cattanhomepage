@@ -392,35 +392,6 @@ section h3 {
     padding: 0; 
 }
 
-.bingo-cell {
-    /* ★修正点: 未抽選のセルの背景色を薄いグレーに変更★ */
-    background-color: #e8e8e8; 
-    border: 1px solid #ccc;
-    border-radius: 3px; 
-    
-    flex-basis: calc(10% - 1.8px); 
-    height: 0; 
-    padding-bottom: calc(10% - 1.8px);
-    
-    font-weight: bold;
-    /* ★修正点: 文字色も少し薄い色に変更★ */
-    color: #888; 
-    line-height: 1;
-    
-    position: relative;
-    min-width: 15px; 
-    min-height: 15px;
-    transition: background-color 0.3s, color 0.3s; /* トランジションを追加 */
-}
-.bingo-cell::before {
-    content: attr(data-content); 
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 3.0vw; 
-}
-
 /* PCなど画面幅が広い場合に文字サイズを固定する */
 @media (min-width: 800px) {
     .bingo-cell::before {
