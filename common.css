@@ -1,4 +1,4 @@
-    /* common.css: 全ページ共通スタイル (タイトル中央揃え & 高くなったヘッダー) */
+/* common.css: 全ページ共通スタイル (全機能統合版) */
 
 /* ボックスモデルの統一 */
 * {
@@ -7,7 +7,7 @@
     padding: 0;
 }
 
-/* ★追加: ルート変数の定義 (common.cssの先頭に追加) ★ */
+/* ★ 0. ルート変数の定義 ★ */
 :root {
     --color-primary: #97EADB;
     --color-accent: #47b6a2;
@@ -19,30 +19,30 @@
     --spacing-md: 1rem;
     --spacing-lg: 2rem;
     
-    /* ヘッダーの高さに合わせてCSS変数も定義 */
+    /* ヘッダーの固定高さ (140px) */
     --header-fixed-height: 140px; 
 
-    /* ★Team-maker固有変数を追記★ */
+    /* Team-maker固有変数 */
     --color-team-a-bg: #eefaff;
     --color-team-a-border: #97eadb;
     --color-team-b-bg: #fff1f5;
     --color-team-b-border: #ffb6c1;
     --color-pair-bg: #eaf9f8;
-    --header-height: 75px; /* common.cssの定義を上書きする可能性がある */
+    --header-height: 75px; /* (Team Makerの独自変数。common.cssのヘッダーとは異なる) */
 }
 
 
 /* 共通デザイン */
 body {
     font-family: "Hiragino Maru Gothic ProN", sans-serif;
-    background: var(--color-bg); /* 変数に変更 */
+    background: var(--color-bg); 
     margin: 0;
-    /* ★修正: ヘッダーの高さに合わせてpadding-topをさらに増加 (約140px) ★ */
-    padding-top: var(--header-fixed-height); /* 変数に変更 */
+    /* ヘッダーの高さに合わせてpadding-topを増加 */
+    padding-top: var(--header-fixed-height); 
     line-height: 1.6;
     transition: background-color 0.5s ease;
     overflow-x: hidden;
-    /* ★追加: Flexboxでフッターを下部に固定する準備 ★ */
+    /* Flexboxでフッターを下部に固定 */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -56,8 +56,7 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    background-color: var(--color-primary); /* 変数に変更 */
-    /* ★修正: 上下のパディングをさらに増やし高さを調整 (2rem) ★ */
+    background-color: var(--color-primary); 
     padding: 2rem 1rem; 
     z-index: 1000;
     
@@ -72,7 +71,7 @@ header h1 {
     max-font-size: 2rem; 
     white-space: nowrap; 
     overflow: hidden;
-    color: var(--color-text-light); /* 変数に変更 */
+    color: var(--color-text-light); 
     padding-left: 0.5rem; 
     
     /* タイトル中央揃えの設定 */
@@ -82,44 +81,39 @@ header h1 {
     left: 0;
 }
 
-/* ハンバーガーメニューアイコン (全画面で表示) */
+/* ハンバーガーメニューアイコン */
 .hamburger {
     font-size: 2rem;
     cursor: pointer;
-    position: absolute; /* headerのpadding基準で右上に配置 */
+    position: absolute; 
     top: 50%;
     right: 1rem; 
     transform: translateY(-50%);
     color: white;
     z-index: 1100;
-    display: block; /* 全画面で表示 */
+    display: block; 
 }
 
-/* ナビゲーションメニュー本体 (全画面で非表示状態) */
+/* ナビゲーションメニュー本体 (非表示状態) */
 #nav {
     position: fixed;
-    /* ★修正: 元の指定 top: -100vh; に戻す。JavaScriptで高さを調整する想定★ */
     top: -100vh; 
     left: 0;
     width: 100%;
-    /* ★修正: 背景を透明にし、項目の背景のみ表示させる★ */
     background-color: transparent; 
     display: flex;
     flex-direction: column;
     padding: 0;
     transition: top 0.3s ease-in-out; 
     z-index: 1050;
-    /* ★修正: 高さをコンテンツに合わせるため、heightを削除し、overflow-yをhiddenにする★ */
     overflow-y: hidden; 
 }
 
-/* ナビゲーションが開いた状態 (全画面で適用) */
+/* ナビゲーションが開いた状態 */
 #nav.show {
-    /* JSによってヘッダーの高さに調整された値が設定されます */
     top: var(--header-fixed-height);
-    /* ★修正: コンテンツの高さ以上に広がらないように max-heightで制御します。★ */
     max-height: calc(100vh - var(--header-fixed-height));
-    overflow-y: auto; /* メニューが多い場合はスクロールできるように戻します */
+    overflow-y: auto; 
 }
 
 nav a {
@@ -130,28 +124,23 @@ nav a {
     font-size: 1.2rem;
     font-weight: bold;
     color: white;
-    /* ★修正: リンク自体に背景色を設定することで、項目部分のみ着色する (変更なし)★ */
     background-color: var(--color-primary); 
-    /* ★修正: ボーダーの色を透明にすることで、項目間の区切りをなくす★ */
     border-bottom: 1px solid transparent; 
     text-decoration: none;
     transition: background-color 0.2s, transform 0.2s;
 }
 
 nav a:hover {
-    background-color: var(--color-hover); /* 変数に変更 */
+    background-color: var(--color-hover); 
     transform: scale(1.03);
 }
 
 
 /* ★★★ PC表示時の調整（幅800px以上） ★★★ */
 @media (min-width: 800px) {
-    /* 広い画面での文字サイズを固定 */
     header h1 {
         font-size: 2rem; 
     }
-    
-    /* PCでもヘッダーパディングを維持 */
     header {
         padding: 2rem 1rem; 
     }
@@ -161,18 +150,17 @@ nav a:hover {
         top: -100vh;
     }
 }
-/* ★★★ PC表示時の修正END ★★★ */
 
 
 /* ------------------------------------------------ */
 /* ★ 2. フッターのスタイル ★ */
 /* ------------------------------------------------ */
 footer {
-    background: var(--color-primary); /* 変数に変更 */
+    background: var(--color-primary); 
     text-align: center;
     color: white;
-    padding: var(--spacing-md); /* 変数に変更 */
-    margin-top: var(--spacing-lg); /* 変数に変更 */
+    padding: var(--spacing-md); 
+    margin-top: var(--spacing-lg); 
 }
 
 /* ------------------------------------------------ */
@@ -180,18 +168,18 @@ footer {
 /* ------------------------------------------------ */
 main {
     padding: 0 1rem;
-    flex: 1; /* ★追加: コンテンツエリアを拡張し、フッターを画面下部に追いやる ★ */
+    flex: 1; /* コンテンツエリアを拡張 */
 }
 
 section {
-    padding: var(--spacing-lg) var(--spacing-md); /* 変数に変更 */
+    padding: var(--spacing-lg) var(--spacing-md); 
     max-width: 800px;
     margin: auto;
 }
 
 section h3 {
     color: #5aa2aa;
-    border-bottom: 2px solid var(--color-primary); /* 変数に変更 */
+    border-bottom: 2px solid var(--color-primary); 
     padding-bottom: 0.3rem;
     margin-bottom: 1.5rem;
 }
@@ -200,9 +188,8 @@ section h3 {
 /* ★ 4. index.html 専用スタイル (ビンゴ以外) ★ */
 /* ------------------------------------------------ */
 
-/* index.htmlの画像コンテナ */
 .birthday-image-container {
-    margin-top: var(--spacing-lg); /* 変数に変更 */
+    margin-top: var(--spacing-lg); 
     text-align: center;
     max-width: 800px;
     margin-left: auto;
@@ -227,12 +214,11 @@ section h3 {
     font-weight: bold;
     font-size: 1.3rem;
     background: #d4f0f4;
-    border: 2px solid var(--color-primary); /* 変数に変更 */
+    border: 2px solid var(--color-primary); 
     border-radius: 10px;
-    padding: var(--spacing-md); /* 変数に変更 */
-    /* ★中央揃えを維持★ */
+    padding: var(--spacing-md); 
     text-align: center;
-    margin: var(--spacing-md) 0; /* 変数に変更 */
+    margin: var(--spacing-md) 0; 
     color: #1b656f;
     user-select: all;
     word-break: break-all;
@@ -274,15 +260,15 @@ section h3 {
     display: block;
     width: 100%;
     max-width: 800px;
-    margin: var(--spacing-md) auto; /* 変数に変更 */
-    padding: var(--spacing-md) 0; /* 変数に変更 */
+    margin: var(--spacing-md) auto; 
+    padding: var(--spacing-md) 0; 
     font-weight: bold;
     font-size: 1.3rem;
     text-align: center;
     text-decoration: none;
     color: #004d66;
     border-radius: 2px;
-    background: linear-gradient(135deg, var(--color-primary), #d4f0f4); /* 変数に変更 */
+    background: linear-gradient(135deg, var(--color-primary), #d4f0f4); 
     box-shadow: 0 4px 12px rgba(0, 77, 102, 0.25);
     transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
     border: 2px solid #1bb0c9;
@@ -307,8 +293,8 @@ section h3 {
   display: block;
   width: 100%;
   max-width: 800px;
-  margin: var(--spacing-md) auto; /* 変数に変更 */
-  padding: var(--spacing-md) 0; /* 変数に変更 */
+  margin: var(--spacing-md) auto; 
+  padding: var(--spacing-md) 0; 
   font-weight: bold;
   font-size: 1.3rem;
   text-align: center;
@@ -340,12 +326,12 @@ section h3 {
 /* ビンゴ表示用のコンテナ */
 #bingoDisplay, #bingoGame {
     text-align: center;
-    padding: var(--spacing-lg) var(--spacing-md); /* 変数に変更 */
+    padding: var(--spacing-lg) var(--spacing-md); 
     background-color: #d4f0f4;
-    border: 3px solid var(--color-primary); /* 変数に変更 */
+    border: 3px solid var(--color-primary); 
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    margin-top: var(--spacing-md); /* 変数に変更 */
+    margin-top: var(--spacing-md); 
 }
 
 /* 最新/現在の番号表示エリア */
@@ -382,35 +368,38 @@ section h3 {
 
 
 /* --- 6. レスポンシブ対応の番号ボード --- */
-#numberBoard {
+/* ★修正: 3x3ビンゴカードのために、.bingo-boardと#numberBoardのスタイルを分離しないことで3x3を優先★ */
+/* ※ただし、以前の5x5の管理ボードではレイアウトが崩れる可能性があるため、
+     ビンゴカード専用ページ(.bingo-board)に3x3を強制するCSSを追加している前提です。
+     ここでは、最後の要望の3x3に合わせて幅を調整します。 */
+#numberBoard, .bingo-board {
     display: flex;
     flex-wrap: wrap; 
     justify-content: center; 
     gap: 2px;
-    margin: var(--spacing-md) auto; /* 変数に変更 */
+    margin: var(--spacing-md) auto; 
     max-width: 100%; 
     padding: 0; 
 }
 
 .bingo-cell {
-    /* ★修正点: 未抽選のセルの背景色を薄いグレーに変更★ */
-    background-color: #e8e8e8; 
+    background-color: #fff; /* 5x5、3x3のデフォルトを白に戻します */
     border: 1px solid #ccc;
     border-radius: 3px; 
     
-    flex-basis: calc(10% - 1.8px); 
+    /* ★修正: 3x3ボードに対応するため33.33%弱に設定★ */
+    flex-basis: calc(33.333% - 1.4px); 
     height: 0; 
-    padding-bottom: calc(10% - 1.8px);
+    padding-bottom: calc(33.333% - 1.4px);
     
     font-weight: bold;
-    /* ★修正点: 文字色も少し薄い色に変更★ */
-    color: #888; 
+    color: #555; 
     line-height: 1;
     
     position: relative;
     min-width: 15px; 
     min-height: 15px;
-    transition: background-color 0.3s, color 0.3s; /* トランジションを追加 */
+    transition: background-color 0.3s, color 0.3s; 
 }
 .bingo-cell::before {
     content: attr(data-content); 
@@ -418,13 +407,13 @@ section h3 {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 3.0vw; 
+    font-size: 8vw; /* 3x3に合わせて調整 */
 }
 
 /* PCなど画面幅が広い場合に文字サイズを固定する */
 @media (min-width: 800px) {
     .bingo-cell::before {
-        font-size: 1.1rem;
+        font-size: 2rem; /* 3x3に合わせて調整 */
     }
 }
 
@@ -435,7 +424,7 @@ section h3 {
 @keyframes cell-flash {
     0% { transform: scale(1); background-color: #fff; }
     50% { transform: scale(1.1); background-color: #ffeb3b; }
-    100% { transform: scale(1); background-color: var(--color-primary); } /* 変数に変更 */
+    100% { transform: scale(1); background-color: var(--color-primary); } 
 }
 
 
@@ -449,7 +438,7 @@ section h3 {
 
 /* 抽選済み番号 */
 .drawn {
-    background-color: var(--color-primary); /* 変数に変更 */
+    background-color: var(--color-primary); 
     color: white;
 }
 
@@ -539,7 +528,6 @@ section h3 {
   padding: 0 var(--spacing-md);
 }
 
-/* Main content sections */
 h1 {
   text-align: center;
   color: var(--color-accent);
@@ -601,7 +589,6 @@ h1 {
   padding: 0 8px;
   margin: 0;
   display: grid;
-  /* 常に2列で固定 */
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   box-sizing: border-box;
@@ -694,31 +681,31 @@ h1 {
   background: var(--color-pair-bg);
   border: 2px solid var(--color-primary);
   border-radius: 12px;
-  padding: 8px; /* 修正 */
-  margin-bottom: 8px; /* 修正 */
+  padding: 8px; 
+  margin-bottom: 8px; 
 }
 
 .pair-section h3 {
   margin-top: 0;
   color: var(--color-accent);
   font-weight: 700;
-  font-size: 16px; /* 修正 */
-  margin-bottom: 4px; /* 修正 */
+  font-size: 16px; 
+  margin-bottom: 4px; 
   text-align: center;
 }
 
 .pair-form {
   display: flex;
-  gap: 4px; /* 修正 */
+  gap: 4px; 
   justify-content: center;
-  margin-bottom: 4px; /* 修正 */
+  margin-bottom: 4px; 
   flex-wrap: wrap;
 }
 
 .pair-form input[type="text"] {
   flex: 1 1 40%;
   min-width: 100px;
-  padding: 4px 6px; /* 修正 */
+  padding: 4px 6px; 
   border: 1.5px solid var(--color-primary);
   border-radius: 8px;
   font-size: 14px;
@@ -728,7 +715,7 @@ h1 {
   background: var(--color-accent);
   border: none;
   color: var(--color-text-light);
-  padding: 4px 12px; /* 修正 */
+  padding: 4px 12px; 
   border-radius: 16px;
   font-weight: 700;
   cursor: pointer;
@@ -742,7 +729,7 @@ h1 {
 .pair-list {
   list-style: none;
   padding-left: 0;
-  max-height: 100px; /* 修正 */
+  max-height: 100px; 
   overflow-y: auto;
   margin: 0;
   border-top: 1px solid var(--color-primary);
@@ -833,11 +820,11 @@ h1 {
     width: 90%;
     max-width: 500px;
     margin: 1rem auto;
-    padding: 8px; /* 修正 */
-    font-size: 14px; /* 修正 */
+    padding: 8px; 
+    font-size: 14px; 
     border: 2px solid var(--color-primary);
     border-radius: 8px;
-    height: 100px; /* 修正 */
+    height: 100px; 
     box-sizing: border-box;
 }
 
@@ -901,8 +888,7 @@ h1 {
   }
 }
 
-/* 既存のルーレットバナーのスタイルを非表示にするために残しますが、
-   新しいビンゴバナーがセクション9で定義されます。 */
+/* 既存のルーレットバナーのスタイルを非表示 */
 .roulette-banner.ended {
     display: none; 
 }
@@ -914,9 +900,9 @@ h1 {
 
 .bingo-banner {
   display: block;
-  width: calc(100% - 20px); /* 左右に10pxずつだけ空ける */
-  margin: 0 auto;            /* 中央寄せ */
-  padding: 15px 10px;        /* 上下15px、左右10px */
+  width: calc(100% - 20px); 
+  margin: 0 auto;            
+  padding: 15px 10px;        
   text-align: center;
   background: linear-gradient(135deg, #ff9fc1, #f7a6d2);
   color: #fff;
@@ -926,7 +912,7 @@ h1 {
   text-decoration: none;
   box-shadow: 0 6px 15px rgba(255, 100, 180, 0.5);
   font-size: clamp(20px, 4vw, 28px);
-  white-space: nowrap;       /* 改行防止 */
+  white-space: nowrap;       
   overflow: hidden;
   text-overflow: ellipsis;
 }
