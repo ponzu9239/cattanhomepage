@@ -1,214 +1,119 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ビンゴカード作成・共有 (3x3)</title>
-    <link rel="stylesheet" href="common.css"> 
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <style>
-        /* bingo_card.html専用のスタイル */
-        .card-container {
-            /* 画像化するコンテナのスタイル */
-            max-width: 300px;
-            margin: 2rem auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border: 3px solid #5aa2aa;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3×3 ビンゴカード作成</title>
+  <link rel="icon" href="IMG_4666.png" type="image/png" />
+  <link rel="stylesheet" href="common.css" />
+  <style>
+    /* === ページ固有スタイル === */
+    #cardGenerator {
+      max-width: 400px;
+      margin: 2rem auto;
+      text-align: center;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
 
-        .card-container h2 {
-            text-align: center;
-            color: #1b656f;
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid #97EADB;
-            padding-bottom: 0.5rem;
-        }
-        
-        /* 共有ボタンと再生成ボタンのコンテナ */
-        .card-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin: 2rem auto;
-            width: 80%;
-            max-width: 300px;
-        }
+    #bingoCard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 1rem;
+    }
 
-        /* 共有ボタンのスタイルはcommon.cssに依存 */
-        #shareButton, #regenerateButton {
-            display: block;
-            width: 100%;
-            padding: 1rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    .cell {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #f5f5f5;
+      border: 2px solid #5aa2aa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1b656f;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
 
-        /* 再生成ボタン（新しいカードを作る） */
-        #regenerateButton {
-            background-color: #5aa2aa;
-            color: white;
-        }
+    .cell:hover {
+      background: #dff4f5;
+      transform: scale(1.05);
+    }
 
-        #regenerateButton:hover {
-            background-color: #4a8a92;
-        }
+    #generateButton {
+      margin-top: 1rem;
+      padding: 10px 20px;
+      background: #5aa2aa;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
 
-        /* 3x3表示の強制 (重要) */
-        .card-container .bingo-cell {
-            flex-basis: calc(33.333% - 1.4px) !important;
-            padding-bottom: calc(33.333% - 1.4px) !important;
-        }
-
-        /* 画像生成中はボタンを無効化し、メッセージを表示するためのスタイル */
-        #shareButton.loading {
-            background-color: #cccccc !important;
-            cursor: wait !important;
-            position: relative;
-        }
-        #shareButton.loading::after {
-            content: "画像を準備中...";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(0, 0, 0, 0.1);
-            color: #333;
-            border-radius: 5px;
-        }
-    </style>
+    #generateButton:hover {
+      background: #479097;
+    }
+  </style>
 </head>
+
 <body>
-    <div id="header-placeholder"></div>
-    <nav id="nav"></nav>
-    <main>
-        <section class="card-generator">
-            <div id="cardImageTarget" class="card-container"> 
-                <h2>あなたのビンゴカード (3×3)</h2>
-                <div id="bingoCard" class="bingo-board">
-                    </div>
-            </div>
-            
-            <div class="card-buttons">
-                <button id="shareButton">このカードを画像で共有する</button>
-                <button id="regenerateButton">新しいカードを作る</button>
-            </div>
-            
-            <p id="shareMessage" style="text-align: center; font-size: 0.9rem; color: #1b656f; margin-top: 1rem; display: none;">
-                画像を共有する準備ができました！
-            </p>
-            <p id="shareError" style="text-align: center; font-size: 0.9rem; color: #ff4757; margin-top: 1rem; display: none;">
-                共有機能がブラウザでサポートされていません。
-            </p>
-            
-            <div id="footer-placeholder"></div>
+  <div id="header-placeholder"></div>
 
-        </section>
-    </main>
+  <main>
+    <section id="cardGenerator">
+      <h3>🎲 3×3 ビンゴカードを作ろう！</h3>
+      <p style="color:#5aa2aa; font-size:1rem;">1〜9の数字がランダムに配置されます。</p>
+      <div id="bingoCard"></div>
+      <button id="generateButton">新しいカードを作成</button>
+    </section>
+  </main>
 
-    <script src="common.js"></script>
-    <script>
-        // ★★★ bingo_card.html 専用のロジック ★★★
-        let currentCardNumbers = [];
-        const cardElement = document.getElementById('bingoCard');
-        const cardImageTarget = document.getElementById('cardImageTarget');
-        const shareButton = document.getElementById('shareButton');
-        const regenerateButton = document.getElementById('regenerateButton');
-        const shareMessage = document.getElementById('shareMessage');
-        const shareError = document.getElementById('shareError');
-        
-        // カード生成ロジック
-        function generateRandomNumbers() {
-            let numbers = Array.from({length: 9}, (_, i) => i + 1);
-            for (let i = numbers.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
-            }
-            return numbers;
-        }
+  <div id="footer-placeholder"></div>
 
-        // カードレンダリングロジック
-        function renderCard(cardNumbers) {
-            currentCardNumbers = cardNumbers;
-            cardElement.innerHTML = '';
-            cardNumbers.forEach((number, index) => {
-                const cell = document.createElement('div');
-                cell.classList.add('bingo-cell');
-                cell.setAttribute('data-content', number);
-                cardElement.appendChild(cell);
-            });
-        }
-        
-        function initializeCard(initialNumbers) {
-            const numbers = initialNumbers || generateRandomNumbers();
-            renderCard(numbers);
-            // URLパラメータは使用しないため、シンプルなURLを維持
-            const cleanUrl = window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-        }
+  <script src="common.js"></script>
+  <script>
+    // =============================================================
+    // 🎯 3x3 ビンゴカード作成ロジック
+    // =============================================================
+    const cardContainer = document.getElementById("bingoCard");
+    const generateButton = document.getElementById("generateButton");
 
-        // 画像生成と共有の関数
-        async function shareCardImage() {
-            if (!navigator.share || !navigator.canShare({ files: [new File([], 'a.png', { type: 'image/png' })] })) {
-                shareError.style.display = 'block';
-                return;
-            }
+    // 配列をシャッフルする関数
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
 
-            shareButton.classList.add('loading');
-            
-            try {
-                const canvas = await html2canvas(cardImageTarget, {
-                    backgroundColor: '#ffffff', 
-                    scale: 3, 
-                });
+    // カード生成関数
+    function generateCard() {
+      const numbers = shuffle([...Array(9)].map((_, i) => i + 1)); // 1〜9
+      cardContainer.innerHTML = "";
 
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                const file = new File([blob], 'bingo_card.png', { type: 'image/png' });
+      numbers.forEach(num => {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.textContent = num;
+        cardContainer.appendChild(cell);
+      });
+    }
 
-                await navigator.share({
-                    files: [file],
-                    title: '私の3x3ビンゴカード',
-                    text: '私のビンゴカードが完成しました！一緒に遊びましょう！'
-                });
+    generateButton.addEventListener("click", generateCard);
 
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('画像共有中にエラーが発生:', error);
-                    alert('画像を共有できませんでした。ブラウザの権限を確認してください。');
-                }
-            } finally {
-                shareButton.classList.remove('loading');
-                setTimeout(() => {
-                    shareMessage.style.display = 'none';
-                    shareError.style.display = 'none';
-                }, 3000);
-            }
-        }
-
-        // ---------------------------------------------
-        // ★ イベントリスナー ★
-        // ---------------------------------------------
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeCard(null); 
-        });
-        
-        regenerateButton.addEventListener('click', () => {
-            initializeCard(null); 
-        });
-
-        shareButton.addEventListener('click', shareCardImage);
-    </script>
+    // 初回生成
+    document.addEventListener("DOMContentLoaded", () => {
+      setupHeader('header.html'); // common.jsでヘッダーを挿入
+      generateCard();
+    });
+  </script>
 </body>
 </html>
