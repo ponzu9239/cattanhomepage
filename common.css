@@ -1053,3 +1053,12 @@ h1 {
   overflow-wrap: break-word;
   hyphens: auto;
 }
+
+.bingo-cell.highlight {
+    background-color: yellow;
+    transition: background-color 0.3s;
+}
+
+#bingoLineCanvas {
+    z-index: 10;
+}
