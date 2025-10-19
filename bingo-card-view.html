@@ -60,22 +60,27 @@
     }
 
     // Firebaseのデータをリアルタイムで反映
-    bingoCardRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
+// Firebase 初期化は送信側と同じ
+bingoCardRef.on('value', snapshot => {
+  const data = snapshot.val();
+  if (!data) return;
+  const numbers = data.numbers || [];
+  const timestamp = data.timestamp || '';
+  bingoCard.querySelectorAll('div').forEach((cell,i) => {
+    cell.textContent = numbers[i] ?? '-';
+  });
+  cardTimestamp.textContent = timestamp;
+});
 
-        const numbers = data.numbers || [];
-        const timestamp = data.timestamp || '';
-
-        bingoCard.querySelectorAll('div').forEach((cell, i) => {
-            cell.textContent = numbers[i] !== undefined ? numbers[i] : '-';
-        });
-
-        cardTimestamp.textContent = timestamp;
-    });
-
-    // 初期化
-    createCells();
+markedNumbersRef.on('value', snapshot => {
+  const markedNumbers = snapshot.val() || [];
+  Array.from(bingoCard.children).forEach(c => c.classList.remove('highlight'));
+  markedNumbers.forEach(num => {
+    const cell = Array.from(bingoCard.children).find(c => Number(c.textContent) === num);
+    if (cell) cell.classList.add('highlight');
+  });
+  drawLines(); // 線描画
+});
   </script>
 </body>
 </html>
