@@ -11,7 +11,6 @@
   <div id="header-placeholder"></div>
   <main>
     <section class="bingo-card-section">
-     <h1 class="page-title">APEXビンゴチャレンジ</h1> <!-- 追加 -->
       <h2 id="cardTitle"></h2>
 
       <div id="bingoCard" class="bingo-card">
@@ -79,7 +78,7 @@
 
         // タイトル更新
         const name = playerNameInput.value.trim();
-        cardTitle.textContent = name ? `${name}のビンゴカード` : 'ビンゴカード';
+        cardTitle.textContent = name ? `${name}`;
 
         // タイムスタンプ更新
         const now = new Date();
