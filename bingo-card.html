@@ -81,16 +81,23 @@
         return numbers.sort(() => Math.random() - 0.5);
     }
 
-    // 高速で入れ替える
-    function startShuffle() {
-        intervalId = setInterval(() => {
-            currentNumbers = shuffleNumbers();
-            bingoCard.querySelectorAll('div').forEach((cell, i) => {
-                cell.textContent = currentNumbers[i];
-            });
-        }, 50);
-    }
+function startShuffle() {
+  intervalId = setInterval(() => {
+    currentNumbers = shuffleNumbers();
+    bingoCard.querySelectorAll('.bingo-cell').forEach((cell, i) => {
+      cell.textContent = currentNumbers[i];
+      cell.dataset.number = currentNumbers[i];
+      cell.classList.remove('highlight');
+    });
+    drawBingoLine([]);
 
+    // 高速回転中でも定期的に送信（ここでは 200ms ごと）
+    if (!startShuffle.lastSent || Date.now() - startShuffle.lastSent > 200) {
+      saveToFirebase();
+      startShuffle.lastSent = Date.now();
+    }
+  }, 50);
+}
     // 停止
     function stopShuffle() {
         clearInterval(intervalId);
