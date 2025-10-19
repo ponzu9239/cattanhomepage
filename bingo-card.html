@@ -9,8 +9,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
-        /* bingo_card.html専用のスタイル (変更なし) */
+        /* bingo_card.html専用のスタイル */
         .card-container {
+            /* 画像化するコンテナのスタイル */
             max-width: 300px;
             margin: 2rem auto;
             padding: 20px;
@@ -61,15 +62,13 @@
             background-color: #4a8a92;
         }
 
-        /* ------------------------------------------------ */
-        /* ★ 3x3表示の強制 (重要) ★ */
-        /* ------------------------------------------------ */
+        /* 3x3表示の強制 (重要) */
         .card-container .bingo-cell {
             flex-basis: calc(33.333% - 1.4px) !important;
             padding-bottom: calc(33.333% - 1.4px) !important;
         }
 
-        /* ★画像生成中はボタンを無効化し、メッセージを表示するためのスタイル★ */
+        /* 画像生成中はボタンを無効化し、メッセージを表示するためのスタイル */
         #shareButton.loading {
             background-color: #cccccc !important;
             cursor: wait !important;
@@ -92,7 +91,8 @@
     </style>
 </head>
 <body>
-    <div id="header-placeholder"></div>
+    <header id="header-container"></header>
+    <nav id="nav"></nav>
     <main>
         <section class="card-generator">
             <div id="cardImageTarget" class="card-container"> 
@@ -115,51 +115,53 @@
 
         </section>
     </main>
-    <div id="footer-placeholder"></div>
+    <footer>
+        </footer>
 
     <script src="common.js"></script>
     <script>
+        // ★★★ bingo_card.html 専用のロジック ★★★
         let currentCardNumbers = [];
         const cardElement = document.getElementById('bingoCard');
-        const cardImageTarget = document.getElementById('cardImageTarget'); // 画像化する要素
+        const cardImageTarget = document.getElementById('cardImageTarget');
         const shareButton = document.getElementById('shareButton');
         const regenerateButton = document.getElementById('regenerateButton');
         const shareMessage = document.getElementById('shareMessage');
         const shareError = document.getElementById('shareError');
         
-        // ヘッダーセットアップ (省略可 - common.jsがあれば不要)
-        function setupHeader() { /* ... (ダミー定義) ... */ }
-        setupHeader();
+        // カード生成ロジック
+        function generateRandomNumbers() {
+            let numbers = Array.from({length: 9}, (_, i) => i + 1);
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
+            return numbers;
+        }
 
-        // ---------------------------------------------
-        // ★ 共有・生成ロジック (変更箇所) ★
-        // ---------------------------------------------
-
-        // カード生成ロジック (変更なし)
-        function generateRandomNumbers() { /* ... (変更なし) ... */ }
-        function loadCardFromUrl() { /* ... (変更なし) ... */ return null; }
-        function renderCard(cardNumbers) { /* ... (変更なし) ... */ }
-
+        // カードレンダリングロジック
+        function renderCard(cardNumbers) {
+            currentCardNumbers = cardNumbers;
+            cardElement.innerHTML = '';
+            cardNumbers.forEach((number, index) => {
+                const cell = document.createElement('div');
+                cell.classList.add('bingo-cell');
+                cell.setAttribute('data-content', number);
+                cardElement.appendChild(cell);
+            });
+        }
+        
         function initializeCard(initialNumbers) {
             const numbers = initialNumbers || generateRandomNumbers();
             renderCard(numbers);
-            
-            // ★修正: URLの更新は、共有リンクではなく「再生成したとき」にのみ行う★
-            // 画像共有ではURLは不要なため、URLパラメータからの読み込みを無効にします。
-            // URLパラメータは初期化時には読み込みますが、再生成時に上書きしないことで、
-            // ユーザーがリンクを共有しない限り、URLが汚れないようにします。
-            
-            // シンプルなURLに戻す (初回生成時のみ有効)
+            // URLパラメータは使用しないため、シンプルなURLを維持
             const cleanUrl = window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
         }
 
-        // ---------------------------------------------
-        // ★ 画像生成と共有の関数 ★
-        // ---------------------------------------------
+        // 画像生成と共有の関数
         async function shareCardImage() {
-            if (!navigator.share) {
-                // Web Share APIがサポートされていない場合
+            if (!navigator.share || !navigator.canShare({ files: [new File([], 'a.png', { type: 'image/png' })] })) {
                 shareError.style.display = 'block';
                 return;
             }
@@ -167,36 +169,26 @@
             shareButton.classList.add('loading');
             
             try {
-                // 1. html2canvasを使って、カードコンテナをCanvasに変換
                 const canvas = await html2canvas(cardImageTarget, {
-                    // 画像の背景が透明にならないように設定
                     backgroundColor: '#ffffff', 
-                    // スケーリング (高解像度の画像を作る)
                     scale: 3, 
                 });
 
-                // 2. CanvasをPNG形式のBlobデータに変換
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 const file = new File([blob], 'bingo_card.png', { type: 'image/png' });
 
-                // 3. Web Share APIを使用して画像を共有
                 await navigator.share({
                     files: [file],
                     title: '私の3x3ビンゴカード',
                     text: '私のビンゴカードが完成しました！一緒に遊びましょう！'
                 });
 
-                // 成功メッセージはWeb Share APIのモーダルで覆われるため、ここでは非表示のまま
-                // shareMessage.style.display = 'block'; 
-
             } catch (error) {
                 if (error.name !== 'AbortError') {
-                    // ユーザーが共有をキャンセルした場合はエラーにしない
                     console.error('画像共有中にエラーが発生:', error);
                     alert('画像を共有できませんでした。ブラウザの権限を確認してください。');
                 }
             } finally {
-                // 完了後、ローディング状態を解除
                 shareButton.classList.remove('loading');
                 setTimeout(() => {
                     shareMessage.style.display = 'none';
@@ -209,15 +201,13 @@
         // ★ イベントリスナー ★
         // ---------------------------------------------
         document.addEventListener('DOMContentLoaded', () => {
-            initializeCard(null); // URLからの読み込みは今回無効化しました
+            initializeCard(null); 
         });
         
-        // 再生成ボタン
         regenerateButton.addEventListener('click', () => {
             initializeCard(null); 
         });
 
-        // 共有ボタン
         shareButton.addEventListener('click', shareCardImage);
     </script>
 </body>
