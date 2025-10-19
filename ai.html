@@ -64,17 +64,16 @@ const markedNumbersRef = db.ref('markedNumbers'); // 入力された番号
     let currentNumbers = [];
     let markedNumbers = [];
 
-    function createCells() {
-      bingoCard.innerHTML = '';
-      for (let i = 0; i < 9; i++) {
-        const cell = document.createElement('div');
-        cell.classList.add('bingo-cell');
-        cell.textContent = '';
-        bingoCard.appendChild(cell);
-      }
-      bingoCard.appendChild(canvas); // canvas を最後に追加
-      resizeCanvas();
-    }
+function createCells() {
+  bingoCard.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('bingo-cell');
+    cell.textContent = '';
+    bingoCard.appendChild(cell);
+  }
+  resizeCanvas();
+}
 
     function shuffleNumbers() {
       return [...Array(9)].map((_, i) => i + 1).sort(() => Math.random() - 0.5);
@@ -117,16 +116,19 @@ function stopShuffle() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    function resizeCanvas() {
-      const rect = bingoCard.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-    }
+function resizeCanvas() {
+  const rect = bingoCard.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  canvas.style.position = 'absolute';
+  canvas.style.left = rect.left + 'px';
+  canvas.style.top = rect.top + 'px';
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+}
 
     function checkBingo() {
       const cells = Array.from(bingoCard.querySelectorAll('.bingo-cell')).map(c => c.classList.contains('highlight'));
