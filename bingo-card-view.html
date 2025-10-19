@@ -125,14 +125,25 @@ window.addEventListener('resize', () => {
 let isShuffling = false;
 
 // 抽選中の番号受信
+// 抽選中の番号受信
 currentNumbersRef.on('value', snapshot => {
   const currentNumbers = snapshot.val() || [];
-  currentNumbersDisplay.textContent = currentNumbers.length ? "抽選中: " + currentNumbers.join(", ") : "";
+  const cells = bingoCard.querySelectorAll('.bingo-cell');
+
+  // カードに数字を反映
+  cells.forEach((cell, i) => {
+    cell.textContent = currentNumbers[i] ?? '-';
+  });
 
   // 抽選中かどうか判定
   isShuffling = currentNumbers.length > 0;
-});
 
+  // 抽選中は線を消す
+  if (isShuffling) clearCanvas();
+
+  // 高速番号も下に表示
+  currentNumbersDisplay.textContent = currentNumbers.length ? "抽選中: " + currentNumbers.join(", ") : "";
+});
 // 入力された番号受信
 markedNumbersRef.on('value', snapshot => {
   const markedNumbers = snapshot.val() || [];
