@@ -42,14 +42,14 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const bingoCardRef = db.ref('bingoCard');
-const markedNumbersRef = db.ref('markedNumbers');
-const currentNumbersRef = db.ref('currentNumbers'); // 高速入れ替え番号
-const timestampRef = db.ref('timestamp');
+
+const bingoCardRef = db.ref('bingoCard');        // 抽選後の番号
+const currentNumbersRef = db.ref('currentNumbers'); // 抽選中の高速入れ替わる番号
+const markedNumbersRef = db.ref('markedNumbers');   // 入力された番号
+const timestampRef = db.ref('timestamp');           // タイムスタンプ（抽選停止時のみ）
 
 const bingoCard = document.getElementById('bingoCard');
 const cardTimestamp = document.getElementById('cardTimestamp');
-const currentNumbersDisplay = document.getElementById('currentNumbersDisplay');
 const canvas = document.getElementById('bingoLineCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -121,25 +121,17 @@ window.addEventListener('resize', () => {
   drawLines();
 });
 
-// Firebase 反映
-bingoCardRef.on('value', snapshot => {
-  const data = snapshot.val() || [];
-  bingoCard.querySelectorAll('.bingo-cell').forEach((cell,i) => {
-    cell.textContent = data[i] ?? '-';
-  });
-});
-
-// 現在の数字（抽選中・抽選後）を反映
+// 抽選中もカードに数字を高速反映
 currentNumbersRef.on('value', snapshot => {
   const numbers = snapshot.val() || [];
   const cells = bingoCard.querySelectorAll('.bingo-cell');
   cells.forEach((cell, i) => {
     cell.textContent = numbers[i] ?? '-';
-    cell.classList.remove('highlight'); // 入力反映前にリセット
+    cell.classList.remove('highlight'); // 抽選中はハイライトリセット
   });
 });
 
-// 入力済み番号を反映
+// 入力済み番号のハイライト
 markedNumbersRef.on('value', snapshot => {
   const markedNumbers = snapshot.val() || [];
   const cells = bingoCard.querySelectorAll('.bingo-cell');
@@ -151,7 +143,7 @@ markedNumbersRef.on('value', snapshot => {
   drawLines();
 });
 
-// 抽選後のタイムスタンプ
+// タイムスタンプは抽選後のみ
 timestampRef.on('value', snapshot => {
   const t = snapshot.val() || '';
   cardTimestamp.textContent = t;
