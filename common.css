@@ -1034,7 +1034,6 @@ h1 {
 #playerName {
     display: block;        /* ブロック要素にする */
     margin: 10px auto;     /* 上下10px、左右自動で中央 */
-    text-align: center;    /* 入力中の文字も中央 */
     padding: 5px 10px;     /* 好みで内側余白 */
     font-size: 16px;       /* フォントサイズ調整 */
     width: 80%;            /* 横幅を画面サイズに応じて調整 */
