@@ -5,238 +5,148 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>きゃたんのAPEXビンゴ</title>
 <link rel="stylesheet" href="common.css">
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-  /* 追加CSS */
-  .highlight {
-    background-color: #ffb347; /* 明るいオレンジ */
-    transition: background-color 0.3s;
+  body {
+    background-color: #97eadb;
+    text-align: center;
+    font-family: sans-serif;
   }
-
+  .bingo-card-section {
+    position: relative;
+    display: inline-block;
+    margin-top: 20px;
+  }
+  .bingo-card {
+    display: grid;
+    grid-template-columns: repeat(3, 80px);
+    grid-template-rows: repeat(3, 80px);
+    gap: 5px;
+    position: relative;
+    margin: 0 auto;
+  }
+  .bingo-card div {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    background: white;
+    transition: background 0.3s;
+  }
+  .bingo-card .highlight {
+    background-color: #ffb84d !important;
+  }
   .bingo-line {
     position: absolute;
-    background-color: #ff69b4; /* ピンク色 */
-    height: 8px;
-    border-radius: 5px;
-    transform-origin: center;
+    background-color: #ff66b2;
+    height: 6px;
+    border-radius: 3px;
+    transform-origin: center center;
+    z-index: 10;
   }
-
-  .bingo-card {
-    position: relative;
-  }
-
   #numberInput {
     display: block;
     margin: 20px auto;
-    text-align: center;
-    width: 60%;
-    max-width: 300px;
     font-size: 18px;
-    padding: 10px;
-    border: 2px solid #1b656f;
-    border-radius: 8px;
-    background: #ffffffcc;
+    padding: 8px;
+    width: 200px;
+    text-align: center;
   }
 </style>
 </head>
 <body>
-  <div id="header-placeholder"></div>
-
   <main>
     <section class="bingo-card-section">
       <h1 class="page-title">APEXビンゴ 🎯</h1>
-      <h2 id="cardTitle">ビンゴカード</h2>
-
-      <div id="bingoCard" class="bingo-card">
-        <!-- 3×3の数字セルをJSで生成 -->
-      </div>
-
-      <div class="timestamp" id="cardTimestamp"></div>
+      <div id="bingoCard" class="bingo-card"></div>
     </section>
-    
-    <input type="text" id="numberInput" placeholder="番号を入力（例：123）">
 
-    <div class="buttons">
-      <button id="startStopBtn">抽選開始</button>
-      <button id="shareBtn">ビンゴカードを共有</button>
-    </div>
-
+    <input type="text" id="numberInput" placeholder="番号を入力 (例: 123)">
   </main>
 
-  <div id="footer-placeholder"></div>
-
-  <script src="common.js"></script>
   <script>
-    setupHeader('header-user.html');
-
-    // Firebase 初期化
-    const firebaseConfig = {
-      apiKey: "AIzaSyBWaCw2nAEh6FbYbteNk_fBSqPBTZ_UhC8",
-      authDomain: "catiffanygame.firebaseapp.com",
-      databaseURL: "https://catiffanygame-default-rtdb.firebaseio.com",
-      projectId: "catiffanygame",
-      storageBucket: "catiffanygame.firebasestorage.app",
-      messagingSenderId: "166871605809",
-      appId: "1:166871605809:web:1fe6e874fa06005ec46b10",
-      measurementId: "G-ZNGEZZWMTP"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const bingoCardRef = db.ref('bingoCard');
-
     const bingoCard = document.getElementById('bingoCard');
-    const startStopBtn = document.getElementById('startStopBtn');
-    const shareBtn = document.getElementById('shareBtn');
     const numberInput = document.getElementById('numberInput');
-    const cardTitle = document.getElementById('cardTitle');
-    const cardTimestamp = document.getElementById('cardTimestamp');
 
-    let intervalId = null;
-    let currentNumbers = [];
-    let lineElements = [];
+    // ランダム配置
+    const numbers = [...Array(9)].map((_, i) => i + 1).sort(() => Math.random() - 0.5);
+    numbers.forEach(num => {
+      const cell = document.createElement('div');
+      cell.textContent = num;
+      bingoCard.appendChild(cell);
+    });
 
-    // 3x3のセルを生成
-    function createCells() {
-      bingoCard.innerHTML = '';
-      for (let i = 0; i < 9; i++) {
-        const cell = document.createElement('div');
-        cell.textContent = '';
-        bingoCard.appendChild(cell);
-      }
+    function clearHighlights() {
+      document.querySelectorAll('.bingo-card div').forEach(c => c.classList.remove('highlight'));
+      document.querySelectorAll('.bingo-line').forEach(l => l.remove());
     }
 
-    // ランダム数字を入れる
-    function shuffleNumbers() {
-      const numbers = [...Array(9)].map((_, i) => i + 1);
-      return numbers.sort(() => Math.random() - 0.5);
-    }
-
-    // 高速で入れ替える
-    function startShuffle() {
-      intervalId = setInterval(() => {
-        currentNumbers = shuffleNumbers();
-        bingoCard.querySelectorAll('div').forEach((cell, i) => {
-          cell.textContent = currentNumbers[i];
-          cell.classList.remove('highlight');
-        });
-        clearLines();
-      }, 50);
-    }
-
-    // 停止
-    function stopShuffle() {
-      clearInterval(intervalId);
-      intervalId = null;
-
-      const now = new Date();
-      const formatted = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-      cardTimestamp.textContent = formatted;
-
-      bingoCardRef.set({
-        numbers: currentNumbers,
-        timestamp: formatted
-      });
-    }
-
-    // ビンゴ判定
-    function checkBingo(highlighted) {
-      const lines = [
-        [0,1,2],[3,4,5],[6,7,8], // 横
-        [0,3,6],[1,4,7],[2,5,8], // 縦
-        [0,4,8],[2,4,6]          // 斜め
-      ];
-      clearLines();
-
-      lines.forEach(line => {
-        if (line.every(i => highlighted.includes(i))) {
-          drawBingoLine(line);
+    function highlightNumbers(nums) {
+      document.querySelectorAll('.bingo-card div').forEach(cell => {
+        if (nums.includes(parseInt(cell.textContent))) {
+          cell.classList.add('highlight');
         }
       });
     }
 
-    // ビンゴライン描画
-    function drawBingoLine(indices) {
-      const first = bingoCard.children[indices[0]];
-      const last = bingoCard.children[indices[2]];
-      const rect1 = first.getBoundingClientRect();
-      const rect2 = last.getBoundingClientRect();
-      const parentRect = bingoCard.getBoundingClientRect();
+    function checkBingo() {
+      const cells = Array.from(document.querySelectorAll('.bingo-card div'));
+      const matrix = Array.from({length: 3}, (_, r) => cells.slice(r * 3, r * 3 + 3));
+      const highlights = cells.map(c => c.classList.contains('highlight'));
 
+      const lines = [
+        [0,1,2], [3,4,5], [6,7,8], // 横
+        [0,3,6], [1,4,7], [2,5,8], // 縦
+        [0,4,8], [2,4,6]           // 斜め
+      ];
+
+      lines.forEach((line, idx) => {
+        if (line.every(i => highlights[i])) {
+          drawBingoLine(idx);
+        }
+      });
+    }
+
+    function drawBingoLine(index) {
       const line = document.createElement('div');
       line.classList.add('bingo-line');
-      const x1 = rect1.left + rect1.width / 2 - parentRect.left;
-      const y1 = rect1.top + rect1.height / 2 - parentRect.top;
-      const x2 = rect2.left + rect2.width / 2 - parentRect.left;
-      const y2 = rect2.top + rect2.height / 2 - parentRect.top;
-      const length = Math.hypot(x2 - x1, y2 - y1) * 1.1; // 少し長く
-      const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+      const cardRect = bingoCard.getBoundingClientRect();
+      const size = 80 * 3 + 5 * 2; // 全体のサイズ
+      const offset = 40; // 中心を通すため
 
-      line.style.width = `${length}px`;
-      line.style.left = `${(x1 + x2) / 2 - length / 2}px`;
-      line.style.top = `${(y1 + y2) / 2 - 4}px`;
-      line.style.transform = `rotate(${angle}deg)`;
-      bingoCard.appendChild(line);
-      lineElements.push(line);
-    }
-
-    function clearLines() {
-      lineElements.forEach(line => line.remove());
-      lineElements = [];
-    }
-
-    // 番号入力で光らせる
-    numberInput.addEventListener('input', () => {
-      const value = numberInput.value.replace(/[^0-9]/g, '');
-      const highlightCells = [];
-      bingoCard.querySelectorAll('div').forEach((cell, i) => {
-        const num = parseInt(cell.textContent);
-        if (value.includes(num)) {
-          cell.classList.add('highlight');
-          highlightCells.push(i);
-        } else {
-          cell.classList.remove('highlight');
-        }
-      });
-      checkBingo(highlightCells);
-    });
-
-    // 開始/停止ボタン
-    startStopBtn.addEventListener('click', () => {
-      if (intervalId) {
-        stopShuffle();
-        startStopBtn.textContent = '抽選開始';
-      } else {
-        startShuffle();
-        startStopBtn.textContent = '停止';
+      if (index <= 2) { // 横
+        line.style.width = size + 30 + 'px';
+        line.style.left = '-15px';
+        line.style.top = (index * 85 + offset - 3) + 'px';
+      } else if (index <= 5) { // 縦
+        line.style.width = size + 30 + 'px';
+        line.style.left = '50%';
+        line.style.top = '-15px';
+        line.style.transform = `translateX(-50%) rotate(90deg) translateY(${(index - 3) * 85 - 127}px)`;
+      } else if (index === 6) { // 斜め左上→右下
+        line.style.width = size * 1.4 + 'px';
+        line.style.left = '-15px';
+        line.style.top = '50%';
+        line.style.transform = 'translateY(-50%) rotate(45deg)';
+      } else if (index === 7) { // 斜め右上→左下
+        line.style.width = size * 1.4 + 'px';
+        line.style.left = '-15px';
+        line.style.top = '50%';
+        line.style.transform = 'translateY(-50%) rotate(-45deg)';
       }
-    });
 
-    // 共有ボタン
-    shareBtn.addEventListener('click', async () => {
-      const element = document.querySelector('.bingo-card-section');
-      html2canvas(element).then(canvas => {
-        canvas.toBlob(async (blob) => {
-          const filesArray = [new File([blob], "bingo-card.png", {type: blob.type})];
-          if (navigator.canShare && navigator.canShare({ files: filesArray })) {
-            try {
-              await navigator.share({
-                files: filesArray,
-                title: 'ビンゴカード',
-                text: 'ビンゴカードを共有します'
-              });
-            } catch (err) {
-              alert('共有に失敗しました: ' + err);
-            }
-          }
-        });
-      });
-    });
+      bingoCard.appendChild(line);
+    }
 
-    // 初期化
-    createCells();
+    numberInput.addEventListener('input', () => {
+      clearHighlights();
+      const inputVal = numberInput.value.replace(/[^0-9]/g, '');
+      const nums = inputVal.split('').map(n => parseInt(n));
+      highlightNumbers(nums);
+      checkBingo();
+    });
   </script>
 </body>
 </html>
