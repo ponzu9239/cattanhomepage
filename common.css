@@ -1031,7 +1031,7 @@ h1 {
 }
 
 /* 名前入力欄の上下に余白 */
-#playerName {
+#numberInput {
     display: block;        /* ブロック要素にする */
     margin: 10px auto;     /* 上下10px、左右自動で中央 */
     padding: 5px 10px;     /* 好みで内側余白 */
