@@ -149,11 +149,13 @@ header h1 {
 /* ★ 2. フッターのスタイル ★ */
 /* ------------------------------------------------ */
 footer {
-    background: var(--color-primary); 
-    text-align: center;
-    color: white;
-    padding: var(--spacing-md); 
-    margin-top: var(--spacing-lg); 
+  background-color: #f8f8f8; /* 背景色はお好みで */
+  padding: 10px 20px; /* 上下10px、左右20pxに調整 */
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+  box-sizing: border-box;
+  line-height: 1.4; /* 行間を少し詰める */
 }
 
 /* ------------------------------------------------ */
