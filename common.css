@@ -955,3 +955,113 @@ h1 {
 #shareButtonUrl:hover {
     background-color: #4a8a92;
 }
+
+/* =====================================
+   🌐 共通CSS（元のcommon.cssの中身）
+   ※中身は一切削除せずそのまま
+===================================== */
+
+/* ← ここに common.css の全内容をそのままペースト */
+
+
+/* =====================================
+   🎯 bingo.html 専用スタイル
+===================================== */
+
+/* 抽選中の数字の大きな表示 */
+#currentNumber {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #1b656f;
+  margin-top: 0.5rem;
+}
+
+#currentNumber.stop-highlight {
+  color: #ff6b6b;
+}
+
+.bingo-buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+#numberBoard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 1rem;
+}
+
+.bingo-cell {
+  width: 35px;
+  height: 35px;
+  line-height: 35px;
+  background-color: #e4f3f3;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.bingo-cell.drawn {
+  background-color: #5aa2aa;
+  color: white;
+}
+
+
+/* =====================================
+   🧩 bingo_card.html 専用スタイル
+===================================== */
+#bingoCard {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-template-rows: repeat(3, 80px);
+  gap: 8px;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.card-cell {
+  background-color: white;
+  border: 2px solid #5aa2aa;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1b656f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-cell.marked {
+  background-color: #5aa2aa;
+  color: white;
+  transition: 0.2s;
+}
+
+#generateButton {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+#saveLink {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #5aa2aa;
+}
+
+
+/* =====================================
+   📱 レスポンシブ対応
+===================================== */
+@media (max-width: 480px) {
+  #bingoCard {
+    grid-template-columns: repeat(3, 65px);
+    grid-template-rows: repeat(3, 65px);
+  }
+  .card-cell {
+    font-size: 1.2rem;
+  }
+}
