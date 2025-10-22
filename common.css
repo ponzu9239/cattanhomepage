@@ -997,19 +997,27 @@ h1 {
 .page-title {
   text-align: center;
   margin-bottom: 15px;
-  color: #1b656f; /* 文字の中心色 */
+  color: #1b656f; /* 中の文字色 */
   font-weight: bold;
   text-shadow:
-    /* 内側の白い縁 */
-    -1px -1px 0 white,
-     1px -1px 0 white,
-    -1px  1px 0 white,
-     1px  1px 0 white,
-    /* 外側の黒い縁 */
-    -2px -2px 0 black,
-     2px -2px 0 black,
-    -2px  2px 0 black,
-     2px  2px 0 black;
+    /* 白い縁（内側） */
+    -2px -2px 0 white,
+     2px -2px 0 white,
+    -2px  2px 0 white,
+     2px  2px 0 white,
+     0px  2px 0 white,
+     0px -2px 0 white,
+     2px  0px 0 white,
+    -2px  0px 0 white,
+    /* 黒い縁（外側） */
+    -4px -4px 0 black,
+     4px -4px 0 black,
+    -4px  4px 0 black,
+     4px  4px 0 black,
+     0px  4px 0 black,
+     0px -4px 0 black,
+     4px  0px 0 black,
+    -4px  0px 0 black;
 }
   
   /* 画面幅に応じてフォントサイズを変化させる */
