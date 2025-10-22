@@ -1097,6 +1097,6 @@ h1 {
 }
 
 .bingo-cell.highlight {
-  background-color: #FFA500; /* 明るいオレンジ */
+  background-color: #FFCC99; /* 明るいオレンジ */
   transition: background 0.2s; /* 光るアニメーション */
 }
